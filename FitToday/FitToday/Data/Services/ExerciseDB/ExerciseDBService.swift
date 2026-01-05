@@ -106,7 +106,9 @@ actor ExerciseDBService: ExerciseDBServicing {
     }
 
     // Endpoint: GET https://exercisedb.p.rapidapi.com/exercises/exercise/{id}
-    let url = configuration.baseURL.appendingPathComponent("/exercises/exercise/\(id)")
+    guard let url = URL(string: "\(configuration.baseURL.absoluteString)/exercises/exercise/\(id)") else {
+      throw ExerciseDBError.invalidConfiguration
+    }
     var request = URLRequest(url: url)
     request.httpMethod = "GET"
     // Timeout adequado para busca individual (10s)
@@ -148,13 +150,12 @@ actor ExerciseDBService: ExerciseDBServicing {
 
   func searchExercises(query: String, limit: Int = 20) async throws -> [ExerciseDBExercise] {
     // Endpoint: GET https://exercisedb.p.rapidapi.com/exercises/name/{name}
-    guard let encodedQuery = query.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) else {
+    guard let encodedQuery = query.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed),
+          let url = URL(string: "\(configuration.baseURL.absoluteString)/exercises/name/\(encodedQuery)") else {
       return []
     }
 
-    let finalURL = configuration.baseURL.appendingPathComponent("/exercises/name/\(encodedQuery)")
-
-    var request = URLRequest(url: finalURL)
+    var request = URLRequest(url: url)
     request.httpMethod = "GET"
     // Timeout maior para busca por nome (pode retornar muitos resultados)
     request.timeoutInterval = 12.0
@@ -208,7 +209,10 @@ actor ExerciseDBService: ExerciseDBServicing {
       return cached
     }
     
-    let url = configuration.baseURL.appendingPathComponent("/exercises/targetList")
+    // Fonte de verdade: https://exercisedb.p.rapidapi.com/exercises/targetList
+    guard let url = URL(string: "\(configuration.baseURL.absoluteString)/exercises/targetList") else {
+      throw ExerciseDBError.invalidConfiguration
+    }
     var request = URLRequest(url: url)
     request.httpMethod = "GET"
     // Timeout adequado para targetList (uma vez por TTL, pode ser maior)
@@ -257,11 +261,11 @@ actor ExerciseDBService: ExerciseDBServicing {
   /// Busca exercícios por target (músculo-alvo) específico.
   /// Endpoint: GET https://exercisedb.p.rapidapi.com/exercises/target/{target}
   func fetchExercises(target: String, limit: Int = 20) async throws -> [ExerciseDBExercise] {
-    guard let encodedTarget = target.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) else {
+    guard let encodedTarget = target.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed),
+          let url = URL(string: "\(configuration.baseURL.absoluteString)/exercises/target/\(encodedTarget)") else {
       return []
     }
     
-    let url = configuration.baseURL.appendingPathComponent("/exercises/target/\(encodedTarget)")
     var request = URLRequest(url: url)
     request.httpMethod = "GET"
     // Timeout adequado para busca por target (pode retornar muitos resultados)
@@ -307,6 +311,7 @@ actor ExerciseDBService: ExerciseDBServicing {
   
   /// Busca a URL da imagem do exercício via endpoint /image da RapidAPI.
   /// Parâmetros obrigatórios: resolution e exerciseId.
+  /// Fonte de verdade: https://exercisedb.p.rapidapi.com/image?resolution={resolution}&exerciseId={exerciseId}
   func fetchImageURL(exerciseId: String, resolution: ExerciseImageResolution) async throws -> URL? {
     let cacheKey = "\(exerciseId)_\(resolution.rawValue)"
     
@@ -315,19 +320,19 @@ actor ExerciseDBService: ExerciseDBServicing {
       return cached
     }
     
-    // Constrói URL com query parameters obrigatórios
-    // Endpoint: GET https://exercisedb.p.rapidapi.com/image?resolution={resolution}&exerciseId={exerciseId}
-    var components = URLComponents(url: configuration.baseURL.appendingPathComponent("/image"), resolvingAgainstBaseURL: true)!
-    components.queryItems = [
+    // Constrói URL com query parameters obrigatórios usando URLComponents
+    // Fonte de verdade: https://exercisedb.p.rapidapi.com/image?resolution={resolution}&exerciseId={exerciseId}
+    var components = URLComponents(string: "\(configuration.baseURL.absoluteString)/image")
+    components?.queryItems = [
       URLQueryItem(name: "resolution", value: resolution.rawValue),
       URLQueryItem(name: "exerciseId", value: exerciseId)
     ]
     
-    guard let url = components.url else {
+    guard let url = components?.url else {
       #if DEBUG
       print("[ExerciseDB] URL inválida para imagem do exercício \(exerciseId)")
       #endif
-      return nil
+      throw ExerciseDBError.invalidConfiguration
     }
     
     #if DEBUG
@@ -406,13 +411,14 @@ actor ExerciseDBService: ExerciseDBServicing {
       return cached
     }
 
-    var components = URLComponents(url: configuration.baseURL.appendingPathComponent("/image"), resolvingAgainstBaseURL: true)!
-    components.queryItems = [
+    // Fonte de verdade: https://exercisedb.p.rapidapi.com/image?resolution={resolution}&exerciseId={exerciseId}
+    var components = URLComponents(string: "\(configuration.baseURL.absoluteString)/image")
+    components?.queryItems = [
       URLQueryItem(name: "resolution", value: resolution.rawValue),
       URLQueryItem(name: "exerciseId", value: exerciseId)
     ]
 
-    guard let url = components.url else {
+    guard let url = components?.url else {
       #if DEBUG
       print("[ExerciseDB] URL inválida para mídia do exercício \(exerciseId)")
       #endif
@@ -425,9 +431,20 @@ actor ExerciseDBService: ExerciseDBServicing {
     request.timeoutInterval = 15.0
     request.addValue(configuration.apiKey, forHTTPHeaderField: "x-rapidapi-key")
     request.addValue(configuration.host, forHTTPHeaderField: "x-rapidapi-host")
+    
+    #if DEBUG
+    print("[ExerciseDB] 📡 Iniciando requisição fetchImageData para exercício \(exerciseId)")
+    print("[ExerciseDB]   URL: \(url.absoluteString)")
+    print("[ExerciseDB]   Resolution: \(resolution.rawValue)")
+    print("[ExerciseDB]   Timeout: \(request.timeoutInterval)s")
+    #endif
 
     do {
       let (data, response) = try await session.data(for: request)
+      
+      #if DEBUG
+      print("[ExerciseDB] ✅ Resposta recebida para exercício \(exerciseId): \(data.count) bytes")
+      #endif
       guard let httpResponse = response as? HTTPURLResponse else {
         throw ExerciseDBError.invalidResponse
       }
@@ -500,9 +517,25 @@ actor ExerciseDBService: ExerciseDBServicing {
       return nil
     } catch let error as ExerciseDBError {
       throw error
+    } catch let urlError as URLError {
+      // Tratamento específico para URLError
+      #if DEBUG
+      switch urlError.code {
+      case .cancelled:
+        print("[ExerciseDB] ⏸️ Requisição cancelada para exercício \(exerciseId) (pode ser esperado se view saiu da tela)")
+      case .timedOut:
+        print("[ExerciseDB] ⏱️ Timeout ao buscar mídia \(exerciseId) (timeout: \(request.timeoutInterval)s)")
+      case .notConnectedToInternet, .networkConnectionLost:
+        print("[ExerciseDB] 📡 Sem conexão ao buscar mídia \(exerciseId)")
+      default:
+        print("[ExerciseDB] 🌐 Erro de rede ao buscar mídia \(exerciseId): \(urlError.localizedDescription) (code: \(urlError.code.rawValue))")
+      }
+      #endif
+      throw ExerciseDBError.networkError(urlError)
     } catch {
       #if DEBUG
-      print("[ExerciseDB] Erro ao buscar mídia \(exerciseId): \(error.localizedDescription)")
+      print("[ExerciseDB] ❌ Erro inesperado ao buscar mídia \(exerciseId): \(error.localizedDescription)")
+      print("[ExerciseDB]   Tipo: \(type(of: error))")
       #endif
       throw ExerciseDBError.networkError(error)
     }

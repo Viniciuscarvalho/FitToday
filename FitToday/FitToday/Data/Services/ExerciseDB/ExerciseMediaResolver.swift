@@ -103,8 +103,7 @@ actor ExerciseMediaResolver: ExerciseMediaResolving {
   ) {
     self.service = service
     self.targetCatalog = targetCatalog
-    // Se o serviço for ExerciseDBService, podemos obter o baseURL dele
-    // Por enquanto, usamos o baseURL padrão
+    // Fonte de verdade: https://exercisedb.p.rapidapi.com
     self.baseURL = baseURL ?? URL(string: "https://exercisedb.p.rapidapi.com")
   }
 

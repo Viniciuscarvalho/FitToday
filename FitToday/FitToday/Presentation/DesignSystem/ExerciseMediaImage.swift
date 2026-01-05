@@ -13,6 +13,7 @@ import Swinject
 
 /// Componente reutilizável para exibir mídia de exercícios com placeholder e fallback.
 /// Aceita URL diretamente para máxima flexibilidade.
+/// Converte automaticamente URLs antigas (v2.exercisedb.io) para RapidAPI com resolution.
 struct ExerciseMediaImageURL: View {
   @Environment(\.dependencyResolver) private var resolver
 
@@ -20,6 +21,7 @@ struct ExerciseMediaImageURL: View {
   let size: CGSize
   var contentMode: ContentMode = .fill
   var cornerRadius: CGFloat = FitTodayRadius.md
+  var context: MediaDisplayContext = .thumbnail  // Contexto para determinar resolution
 
   @StateObject private var loader = ExerciseMediaLoader()
 
@@ -91,7 +93,7 @@ struct ExerciseMediaImageURL: View {
     }
     
     let service = resolver.resolve(ExerciseDBServicing.self)
-    await loader.load(url: url, service: service)
+    await loader.load(url: url, service: service, context: context)
   }
 }
 
@@ -127,39 +129,98 @@ final class ExerciseMediaLoader: ObservableObject {
   }
 
   @Published private(set) var phase: Phase = .idle
+  
+  // Rastreia tasks em andamento para evitar requisições duplicadas
+  private var currentTask: Task<Void, Never>?
 
   // Cache simples em memória (evita re-download em listas)
   private static let cache = NSCache<NSString, MediaCacheEntry>()
 
-  func load(url: URL, service: ExerciseDBServicing?) async {
-    #if DEBUG
-    print("[MediaLoader] 📥 Recebendo URL para carregar: \(url.absoluteString)")
-    print("[MediaLoader]   host=\(url.host ?? "nil"), path=\(url.path), query=\(url.query ?? "nil")")
-    #endif
+  func load(url: URL, service: ExerciseDBServicing?, context: MediaDisplayContext = .thumbnail) async {
+    // Cancela task anterior se existir
+    currentTask?.cancel()
     
-    let cacheKey = url.absoluteString as NSString
+    // Cria nova task
+    currentTask = Task {
+      await performLoad(url: url, service: service, context: context)
+    }
+    
+    await currentTask?.value
+  }
+  
+  private func performLoad(url: URL, service: ExerciseDBServicing?, context: MediaDisplayContext) async {
+    // 1. PRIMEIRO: Detecta e converte URLs antigas (v2.exercisedb.io) para RapidAPI
+    // Isso deve acontecer ANTES de qualquer verificação ou log
+    let finalURL: URL
+    let isLegacyURL = url.host?.contains("exercisedb.io") == true && 
+                      url.pathComponents.count >= 2 && 
+                      url.pathComponents[1] == "image"
+    
+    if isLegacyURL {
+      #if DEBUG
+      print("[MediaLoader] 🔍 Detectada URL antiga: \(url.absoluteString)")
+      print("[MediaLoader]   host=\(url.host ?? "nil"), path=\(url.path)")
+      #endif
+      
+      if let convertedURL = await convertLegacyURLIfNeeded(url: url, service: service, context: context) {
+        finalURL = convertedURL
+        #if DEBUG
+        print("[MediaLoader] ✅ URL convertida para RapidAPI: \(finalURL.absoluteString)")
+        print("[MediaLoader]   host=\(finalURL.host ?? "nil"), path=\(finalURL.path), query=\(finalURL.query ?? "nil")")
+        #endif
+      } else {
+        #if DEBUG
+        print("[MediaLoader] ⚠️ Falha ao converter URL antiga, usando original (pode falhar)")
+        #endif
+        finalURL = url
+      }
+    } else {
+      finalURL = url
+      #if DEBUG
+      print("[MediaLoader] 📥 Recebendo URL para carregar: \(url.absoluteString)")
+      print("[MediaLoader]   host=\(url.host ?? "nil"), path=\(url.path), query=\(url.query ?? "nil")")
+      #endif
+    }
+    
+    let cacheKey = finalURL.absoluteString as NSString
+    
+    // Verifica se a task foi cancelada antes de continuar
+    guard !Task.isCancelled else {
+      #if DEBUG
+      print("[MediaLoader] ⏸️ Task cancelada antes de verificar cache")
+      #endif
+      return
+    }
     
     // Verifica cache primeiro
     if let cached = Self.cache.object(forKey: cacheKey) {
       #if DEBUG
-      print("[MediaLoader] 💾 Cache hit para \(url.absoluteString)")
+      print("[MediaLoader] 💾 Cache hit para \(finalURL.absoluteString)")
       #endif
       phase = .success(data: cached.data, mimeType: cached.mimeType)
       return
     }
 
+    // Verifica se a task foi cancelada antes de iniciar requisição
+    guard !Task.isCancelled else {
+      #if DEBUG
+      print("[MediaLoader] ⏸️ Task cancelada antes de iniciar requisição")
+      #endif
+      return
+    }
+    
     // Reset para loading antes de iniciar nova requisição
     phase = .loading
     #if DEBUG
     PerformanceLogger.logMediaLoadStart(
-      exerciseId: Self.exerciseIdForLogging(from: url),
+      exerciseId: Self.exerciseIdForLogging(from: finalURL),
       source: "ExerciseMediaLoader"
     )
     #endif
 
     do {
       // 1) Se for RapidAPI (/image), precisamos de headers -> usa ExerciseDBServicing
-      if let payload = Self.parseRapidAPIImageURL(url) {
+      if let payload = Self.parseRapidAPIImageURL(finalURL) {
         #if DEBUG
         print("[MediaLoader] ✅ Parse RapidAPI bem-sucedido: exerciseId=\(payload.exerciseId), resolution=\(payload.resolution.rawValue)")
         #endif
@@ -172,6 +233,10 @@ final class ExerciseMediaLoader: ObservableObject {
         }
 
         do {
+          #if DEBUG
+          print("[MediaLoader] 📡 Chamando fetchImageData para exercício \(payload.exerciseId) com resolution \(payload.resolution.rawValue)")
+          #endif
+          
           if let result = try await service.fetchImageData(
             exerciseId: payload.exerciseId,
             resolution: payload.resolution
@@ -203,20 +268,43 @@ final class ExerciseMediaLoader: ObservableObject {
             phase = .failure(error: ExerciseMediaLoaderError.mediaUnavailable)
             return
           }
+        } catch let error as URLError where error.code == .cancelled {
+          // Cancelamentos são esperados (ex: view saiu da tela)
+          #if DEBUG
+          print("[MediaLoader] ⏸️ Requisição cancelada para exercício \(payload.exerciseId) (esperado - view pode ter saído da tela)")
+          print("[MediaLoader]   URLError code: \(error.code.rawValue), description: \(error.localizedDescription)")
+          #endif
+          return // Não trata como erro
+        } catch let error as ExerciseDBError {
+          // Erros específicos do ExerciseDB
+          #if DEBUG
+          print("[MediaLoader] ❌ ExerciseDBError ao buscar mídia para exercício \(payload.exerciseId): \(error.localizedDescription)")
+          #endif
+          throw error // Re-lança para ser capturado pelo catch externo
         } catch {
           #if DEBUG
-          print("[MediaLoader] ❌ Erro ao chamar fetchImageData para exercício \(payload.exerciseId): \(error.localizedDescription)")
+          print("[MediaLoader] ❌ Erro ao chamar fetchImageData para exercício \(payload.exerciseId)")
+          print("[MediaLoader]   Tipo: \(type(of: error))")
+          print("[MediaLoader]   Descrição: \(error.localizedDescription)")
+          if let urlError = error as? URLError {
+            print("[MediaLoader]   URLError code: \(urlError.code.rawValue)")
+          }
           #endif
           throw error // Re-lança para ser capturado pelo catch externo
         }
       }
 
-      // 2) URL pública: baixa direto (sem headers)
+      // 2) URL pública ou não-RapidAPI: baixa direto (sem headers)
+      // Nota: Se chegou aqui, a URL não é RapidAPI /image (pode ser URL pública ou outro formato)
       #if DEBUG
-      print("[MediaLoader] 🌐 URL não é RapidAPI, tentando baixar diretamente: \(url.absoluteString)")
+      if finalURL.host?.contains("exercisedb.io") == true {
+        print("[MediaLoader] ⚠️ URL ainda é antiga após conversão, tentando baixar diretamente (pode falhar): \(finalURL.absoluteString)")
+      } else {
+        print("[MediaLoader] 🌐 URL pública, baixando diretamente: \(finalURL.absoluteString)")
+      }
       #endif
       
-      var request = URLRequest(url: url)
+      var request = URLRequest(url: finalURL)
       request.timeoutInterval = 15.0
       request.cachePolicy = .returnCacheDataElseLoad
 
@@ -226,7 +314,7 @@ final class ExerciseMediaLoader: ObservableObject {
       Self.cache.setObject(MediaCacheEntry(data: data, mimeType: mimeType), forKey: cacheKey)
       phase = .success(data: data, mimeType: mimeType)
       #if DEBUG
-      PerformanceLogger.logMediaLoadSuccess(exerciseId: Self.exerciseIdForLogging(from: url), source: "URLSession")
+      PerformanceLogger.logMediaLoadSuccess(exerciseId: Self.exerciseIdForLogging(from: finalURL), source: "URLSession")
       #endif
     } catch is CancellationError {
       // Cancelamentos são esperados quando a view sai da tela; não tratar como erro.
@@ -243,14 +331,92 @@ final class ExerciseMediaLoader: ObservableObject {
     if let payload = parseRapidAPIImageURL(url) {
       return payload.exerciseId
     }
+    // Tenta extrair exerciseId de URLs antigas (v2.exercisedb.io/image/{id})
+    if url.host?.contains("exercisedb.io") == true, url.pathComponents.count >= 2, url.pathComponents[1] == "image" {
+      return url.lastPathComponent
+    }
     return url.lastPathComponent.isEmpty ? url.absoluteString : url.lastPathComponent
+  }
+  
+  /// Converte URLs antigas (v2.exercisedb.io) para RapidAPI com resolution e exerciseId.
+  private func convertLegacyURLIfNeeded(url: URL, service: ExerciseDBServicing?, context: MediaDisplayContext) async -> URL? {
+    // Detecta URLs do formato antigo: v2.exercisedb.io/image/{exerciseId}
+    guard url.host?.contains("exercisedb.io") == true,
+          url.pathComponents.count >= 2,
+          url.pathComponents[1] == "image" else {
+      // Não é URL antiga
+      return nil
+    }
+    
+    // Extrai exerciseId da URL antiga (último componente do path)
+    let exerciseId = url.lastPathComponent
+    guard !exerciseId.isEmpty else {
+      #if DEBUG
+      print("[MediaLoader] ⚠️ Não foi possível extrair exerciseId da URL antiga: \(url.absoluteString)")
+      #endif
+      return nil
+    }
+    
+    #if DEBUG
+    print("[MediaLoader] 🔄 Detectada URL antiga, convertendo para RapidAPI: exerciseId=\(exerciseId), resolution=\(context.resolution.rawValue)")
+    #endif
+    
+    // Se temos service, usa fetchImageURL para construir a URL correta
+    guard let service = service else {
+      #if DEBUG
+      print("[MediaLoader] ⚠️ Service não disponível para converter URL antiga")
+      #endif
+      // Fallback: constrói URL RapidAPI manualmente
+      return buildRapidAPIURL(exerciseId: exerciseId, resolution: context.resolution)
+    }
+    
+    do {
+      if let rapidAPIURL = try await service.fetchImageURL(
+        exerciseId: exerciseId,
+        resolution: context.resolution
+      ) {
+        #if DEBUG
+        print("[MediaLoader] ✅ URL convertida via service: \(rapidAPIURL.absoluteString)")
+        #endif
+        return rapidAPIURL
+      } else {
+        #if DEBUG
+        print("[MediaLoader] ⚠️ fetchImageURL retornou nil, usando fallback manual")
+        #endif
+        // Fallback: constrói URL RapidAPI manualmente
+        return buildRapidAPIURL(exerciseId: exerciseId, resolution: context.resolution)
+      }
+    } catch let error as URLError where error.code == .cancelled {
+      #if DEBUG
+      print("[MediaLoader] ⏸️ Conversão cancelada (esperado), usando fallback manual")
+      #endif
+      // Fallback: constrói URL RapidAPI manualmente mesmo se cancelado
+      return buildRapidAPIURL(exerciseId: exerciseId, resolution: context.resolution)
+    } catch {
+      #if DEBUG
+      print("[MediaLoader] ❌ Erro ao converter URL antiga via service: \(error.localizedDescription), usando fallback manual")
+      #endif
+      // Fallback: constrói URL RapidAPI manualmente
+      return buildRapidAPIURL(exerciseId: exerciseId, resolution: context.resolution)
+    }
+    
+    return nil
+  }
+  
+  /// Constrói URL RapidAPI manualmente (fallback quando service não está disponível).
+  private func buildRapidAPIURL(exerciseId: String, resolution: ExerciseImageResolution) -> URL? {
+    var components = URLComponents(string: "https://exercisedb.p.rapidapi.com/image")
+    components?.queryItems = [
+      URLQueryItem(name: "resolution", value: resolution.rawValue),
+      URLQueryItem(name: "exerciseId", value: exerciseId)
+    ]
+    return components?.url
   }
 
   private static func parseRapidAPIImageURL(_ url: URL) -> (exerciseId: String, resolution: ExerciseImageResolution)? {
     guard url.host == "exercisedb.p.rapidapi.com", url.path == "/image" else {
-      #if DEBUG
-      print("[MediaLoader] URL não é RapidAPI /image: host=\(url.host ?? "nil"), path=\(url.path)")
-      #endif
+      // Não loga aqui para evitar logs confusos - a URL pode não ser RapidAPI por design
+      // (ex: URLs públicas que devem ser baixadas diretamente)
       return nil
     }
     guard let components = URLComponents(url: url, resolvingAgainstBaseURL: true),
@@ -424,7 +590,8 @@ struct ExerciseHeroImage: View {
         url: highResURL,
         size: CGSize(width: geometry.size.width, height: height),
         contentMode: .fit,
-        cornerRadius: FitTodayRadius.md
+        cornerRadius: FitTodayRadius.md,
+        context: .detail  // Hero image sempre usa resolução alta
       )
     }
     .frame(height: height)
