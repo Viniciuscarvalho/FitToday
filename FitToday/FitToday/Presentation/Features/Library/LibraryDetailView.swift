@@ -104,11 +104,11 @@ struct LibraryDetailView: View {
         VStack(alignment: .leading, spacing: FitTodaySpacing.md) {
             SectionHeader(title: "Exercícios", actionTitle: nil)
 
-            ForEach(workout.exercises.indices, id: \.self) { index in
+            ForEach(Array(workout.exercises.enumerated()), id: \.element.exercise.id) { index, prescription in
                 Button {
-                    router.push(.libraryExerciseDetail(workout.exercises[index]), on: .library)
+                    router.push(.libraryExerciseDetail(prescription), on: .library)
                 } label: {
-                    ExerciseRow(index: index + 1, prescription: workout.exercises[index])
+                    ExerciseRow(index: index + 1, prescription: prescription)
                 }
                 .buttonStyle(.plain)
             }

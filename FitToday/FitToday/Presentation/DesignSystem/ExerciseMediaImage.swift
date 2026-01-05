@@ -31,7 +31,12 @@ struct ExerciseMediaImageURL: View {
             placeholderView
               .onAppear {
                 #if DEBUG
-                print("[ExerciseMedia] Falha ao carregar: \(url)")
+                // Extrai exerciseId da URL se possível, senão usa a URL completa
+                let exerciseId = url.lastPathComponent.isEmpty ? url.absoluteString : url.lastPathComponent
+                PerformanceLogger.logMediaLoadFailure(
+                  exerciseId: exerciseId,
+                  source: "AsyncImage"
+                )
                 #endif
               }
           @unknown default:

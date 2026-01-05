@@ -46,6 +46,7 @@ enum AppRoute: Hashable {
     case paywall
     case libraryDetail(String)
     case libraryExerciseDetail(ExercisePrescription)  // Detalhe de exercício na biblioteca
+    case apiKeySettings  // Configuração de chave de API do usuário
 }
 
 struct DeepLink {

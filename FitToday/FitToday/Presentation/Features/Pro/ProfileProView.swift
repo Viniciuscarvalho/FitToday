@@ -176,6 +176,13 @@ struct ProfileProView: View {
                 Divider()
                     .padding(.leading, 56)
                 
+                SettingsRow(icon: "brain", title: "Configurar IA", badge: aiSettingsBadge) {
+                    router.push(.apiKeySettings, on: .profile)
+                }
+                
+                Divider()
+                    .padding(.leading, 56)
+                
                 SettingsRow(icon: "arrow.counterclockwise", title: "Restaurar Compras") {
                     Task {
                         await restorePurchases()
@@ -199,6 +206,10 @@ struct ProfileProView: View {
             .background(FitTodayColor.surface)
             .cornerRadius(FitTodayRadius.md)
         }
+    }
+    
+    private var aiSettingsBadge: String? {
+        OpenAIConfiguration.isUserKeyConfigured ? nil : "Configurar"
     }
     
     // MARK: - Debug Section (only in DEBUG builds)
@@ -369,6 +380,7 @@ struct ProfileProView: View {
 private struct SettingsRow: View {
     let icon: String
     let title: String
+    var badge: String? = nil
     let action: () -> Void
     
     var body: some View {
@@ -384,6 +396,16 @@ private struct SettingsRow: View {
                     .foregroundStyle(FitTodayColor.textPrimary)
                 
                 Spacer()
+                
+                if let badge = badge {
+                    Text(badge)
+                        .font(.system(.caption, weight: .medium))
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, FitTodaySpacing.sm)
+                        .padding(.vertical, FitTodaySpacing.xs)
+                        .background(FitTodayColor.warning)
+                        .cornerRadius(FitTodayRadius.pill)
+                }
                 
                 Image(systemName: "chevron.right")
                     .font(.system(.caption))

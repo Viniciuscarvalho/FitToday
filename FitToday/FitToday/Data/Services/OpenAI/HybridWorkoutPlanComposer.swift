@@ -101,32 +101,103 @@ struct OpenAIWorkoutPlanComposer: WorkoutPlanComposing {
         let limitedBlocks = Array(blocks.prefix(8))
         let blockSummaries = limitedBlocks.map {
             """
-            {
-                "id": "\($0.id)",
-                "group": "\($0.group)",
-                "level": "\($0.level)",
-                "equip": "\( $0.equipmentOptions.first?.rawValue ?? "unknown")",
-                "sets": \($0.suggestedSets.lowerBound)-\($0.suggestedSets.upperBound),
-                "reps": \($0.suggestedReps.lowerBound)-\($0.suggestedReps.upperBound)
-            }
+            {"id":"\($0.id)","group":"\($0.group.rawValue)","level":"\($0.level.rawValue)","equip":"\($0.equipmentOptions.first?.rawValue ?? "bodyweight")","sets":"\($0.suggestedSets.lowerBound)-\($0.suggestedSets.upperBound)","reps":"\($0.suggestedReps.lowerBound)-\($0.suggestedReps.upperBound)"}
             """
-        }.joined(separator: ",\n")
+        }.joined(separator: ",")
+
+        let goalRules = goalSpecificRules(for: profile.mainGoal)
+        let domsRules = domsSpecificRules(for: checkIn.sorenessLevel)
 
         return """
-        Você é um planejador de treino. Escolha blocos do catálogo abaixo usando apenas os IDs fornecidos. Ajuste séries/reps e descanso, mas mantenha valores seguros.
+        Você é um personal trainer especialista. Selecione e ajuste blocos de treino do catálogo.
 
-        Perfil: objetivo=\(profile.mainGoal), nível=\(profile.level), estrutura=\(profile.availableStructure)
-        Check-in: foco=\(checkIn.focus), dor=\(checkIn.sorenessLevel), áreas=\(checkIn.sorenessAreas)
+        PERFIL: objetivo=\(profile.mainGoal.rawValue), nível=\(profile.level.rawValue), estrutura=\(profile.availableStructure.rawValue)
+        CHECK-IN: foco=\(checkIn.focus.rawValue), DOMS=\(checkIn.sorenessLevel.rawValue), áreas=[\(checkIn.sorenessAreas.map(\.rawValue).joined(separator: ","))]
 
-        Regras:
-        - Retorne somente JSON.
-        - Campo selected_blocks: lista de objetos { "block_id", "sets_multiplier", "reps_multiplier", "rest_adjustment_seconds" }.
-        - Mínimo 1 bloco, máximo 3.
-        - Não invente blocos/exercícios.
+        REGRAS POR OBJETIVO (\(profile.mainGoal.rawValue)):
+        \(goalRules)
 
-        Catálogo:
+        REGRAS POR DOMS (\(checkIn.sorenessLevel.rawValue)):
+        \(domsRules)
+
+        FORMATO DE RESPOSTA (JSON OBRIGATÓRIO):
+        {"selected_blocks":[{"block_id":"ID","sets_multiplier":1.0,"reps_multiplier":1.0,"rest_adjustment_seconds":0}]}
+
+        REGRAS CRÍTICAS:
+        - Retorne APENAS JSON válido, sem texto adicional.
+        - Use APENAS IDs do catálogo abaixo.
+        - sets_multiplier: 0.7-1.3 (0.7=redução, 1.3=aumento)
+        - reps_multiplier: 0.8-1.2
+        - rest_adjustment_seconds: -30 a +60
+        - Selecione 2-3 blocos compatíveis com o foco do dia.
+
+        CATÁLOGO:
         [\(blockSummaries)]
         """
+    }
+    
+    private func goalSpecificRules(for goal: FitnessGoal) -> String {
+        switch goal {
+        case .hypertrophy:
+            return """
+            - Priorize exercícios multiarticulares pesados
+            - Sets: 3-5, Reps: 1-6, Descanso longo (2-5min)
+            - Evite falha muscular frequente
+            - RPE alvo: 7-9
+            """
+        case .performance:
+            return """
+            - Movimentos rápidos e explosivos
+            - Sets: 3-4, Reps: 3-8, Descanso adequado
+            - Alternância de estímulos
+            - Qualidade > quantidade
+            """
+        case .weightLoss:
+            return """
+            - Circuitos metabólicos, intervalos curtos
+            - Sets: 3-4, Reps: 10-15, Descanso: 30-60s
+            - Alta densidade, baixo impacto
+            - RPE: 6-8
+            """
+        case .conditioning:
+            return """
+            - Força + resistência equilibrados
+            - Sets: 3-4, Reps: 10-15, Descanso: 45-90s
+            - Full body preferencial
+            - RPE: 6-7
+            """
+        case .endurance:
+            return """
+            - Volume alto, descanso curto
+            - Sets: 2-4, Reps: 15-25, Descanso: 20-45s
+            - Ritmo constante
+            - RPE: 5-7
+            """
+        }
+    }
+    
+    private func domsSpecificRules(for soreness: MuscleSorenessLevel) -> String {
+        switch soreness {
+        case .none, .light:
+            return """
+            - Sem restrições
+            - Progressão normal permitida
+            """
+        case .moderate:
+            return """
+            - Reduzir volume em 10%: sets_multiplier=0.9
+            - Evitar falha muscular
+            - Aumentar descanso em 15s
+            """
+        case .strong:
+            return """
+            - Reduzir volume em 25-35%: sets_multiplier=0.65-0.75
+            - PROIBIDO: falha muscular, pliometria, saltos
+            - Aumentar descanso em 30-45s
+            - Priorizar técnica e controle
+            - Evitar áreas com dor severa
+            """
+        }
     }
 
     private func goalBias(for goal: FitnessGoal) -> Double {
@@ -245,6 +316,65 @@ struct HybridWorkoutPlanComposer: WorkoutPlanComposing {
             }
         }
         return try await localComposer.composePlan(blocks: blocks, profile: profile, checkIn: checkIn)
+    }
+}
+
+/// Compositor que verifica dinamicamente se o usuário tem chave de API configurada
+/// Cria o cliente OpenAI sob demanda quando necessário
+struct DynamicHybridWorkoutPlanComposer: WorkoutPlanComposing {
+    private let localComposer: LocalWorkoutPlanComposer
+    private let usageLimiter: OpenAIUsageLimiting?
+    private let clock: () -> Date
+    private let logger: (String) -> Void
+
+    init(
+        localComposer: LocalWorkoutPlanComposer,
+        usageLimiter: OpenAIUsageLimiting?,
+        clock: @escaping () -> Date = { Date() },
+        logger: @escaping (String) -> Void = { print("[DynamicHybrid]", $0) }
+    ) {
+        self.localComposer = localComposer
+        self.usageLimiter = usageLimiter
+        self.clock = clock
+        self.logger = logger
+    }
+
+    func composePlan(
+        blocks: [WorkoutBlock],
+        profile: UserProfile,
+        checkIn: DailyCheckIn
+    ) async throws -> WorkoutPlan {
+        let now = clock()
+        
+        // Verificar se o usuário tem chave de API configurada
+        guard let configuration = OpenAIConfiguration.loadFromUserKey() else {
+            logger("Sem chave de API do usuário - usando compositor local")
+            return try await localComposer.composePlan(blocks: blocks, profile: profile, checkIn: checkIn)
+        }
+        
+        // Verificar limite de uso
+        guard await usageLimiter?.canUseAI(userId: profile.id, on: now) ?? true else {
+            logger("Limite de uso atingido - usando compositor local")
+            return try await localComposer.composePlan(blocks: blocks, profile: profile, checkIn: checkIn)
+        }
+        
+        // Criar cliente sob demanda
+        let client = OpenAIClient(configuration: configuration)
+        let remoteComposer = OpenAIWorkoutPlanComposer(
+            client: client,
+            localComposer: localComposer,
+            logger: logger
+        )
+        
+        do {
+            logger("Usando OpenAI para refinar plano")
+            let plan = try await remoteComposer.composePlan(blocks: blocks, profile: profile, checkIn: checkIn)
+            await usageLimiter?.registerUsage(userId: profile.id, on: now)
+            return plan
+        } catch {
+            logger("Erro no OpenAI: \(error.localizedDescription) - fallback para local")
+            return try await localComposer.composePlan(blocks: blocks, profile: profile, checkIn: checkIn)
+        }
     }
 }
 

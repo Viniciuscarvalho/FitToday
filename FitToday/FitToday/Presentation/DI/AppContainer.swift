@@ -55,7 +55,8 @@ struct AppContainer {
             .inObjectScope(.container)
 
         // ExerciseDB Service e Media Resolver
-        let exerciseDBConfig = ExerciseDBConfiguration.loadFromBundle()
+        // Usa chave do usuário (Keychain) se disponível, fallback para plist (legado)
+        let exerciseDBConfig = ExerciseDBConfiguration.loadFromUserKey() ?? ExerciseDBConfiguration.loadFromBundle()
         container.register(ExerciseDBConfiguration?.self) { _ in exerciseDBConfig }
             .inObjectScope(.container)
 
@@ -85,20 +86,8 @@ struct AppContainer {
                 .inObjectScope(.container)
         }
 
-        // OpenAI
-        let openAIConfig = OpenAIConfiguration.loadFromBundle()
-        container.register(OpenAIConfiguration?.self) { _ in openAIConfig }
-            .inObjectScope(.container)
-
-        if let configuration = openAIConfig {
-            let client = OpenAIClient(configuration: configuration)
-            container.register(OpenAIClienting?.self) { _ in client }
-                .inObjectScope(.container)
-        } else {
-            container.register(OpenAIClienting?.self) { _ in nil }
-                .inObjectScope(.container)
-        }
-
+        // OpenAI - Usa chave do usuário (armazenada no Keychain)
+        // O cliente é criado sob demanda quando a chave estiver configurada
         let localComposer = LocalWorkoutPlanComposer()
         container.register(LocalWorkoutPlanComposer.self) { _ in localComposer }
             .inObjectScope(.container)
@@ -107,15 +96,11 @@ struct AppContainer {
         container.register(OpenAIUsageLimiting.self) { _ in usageLimiter }
             .inObjectScope(.container)
 
-        container.register(WorkoutPlanComposing.self) { resolver in
-            let client = resolver.resolve(OpenAIClienting?.self) ?? nil
-            let remote = client.map { OpenAIWorkoutPlanComposer(client: $0, localComposer: localComposer) }
-            let limiter = resolver.resolve(OpenAIUsageLimiting.self)
-            return HybridWorkoutPlanComposer(
-                remoteComposer: remote,
+        // WorkoutPlanComposing verifica em tempo de execução se há chave do usuário
+        container.register(WorkoutPlanComposing.self) { _ in
+            DynamicHybridWorkoutPlanComposer(
                 localComposer: localComposer,
-                usageLimiter: limiter,
-                clock: { Date() }
+                usageLimiter: usageLimiter
             )
         }
         .inObjectScope(.container)

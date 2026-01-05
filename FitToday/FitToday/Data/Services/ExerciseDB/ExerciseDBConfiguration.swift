@@ -22,28 +22,46 @@ struct ExerciseDBConfiguration: Sendable {
     self.baseURL = baseURL
   }
 
-  /// Carrega configuração do bundle (Info.plist ou arquivo dedicado).
+  /// Carrega configuração da chave do usuário (Keychain) - método preferido
+  /// Retorna nil se o usuário não tiver configurado uma chave
+  static func loadFromUserKey() -> ExerciseDBConfiguration? {
+    guard let apiKey = UserAPIKeyManager.shared.getAPIKey(for: .exerciseDB),
+          !apiKey.isEmpty else {
+      return nil
+    }
+    
+    return ExerciseDBConfiguration(apiKey: apiKey, host: defaultHost, baseURL: defaultBaseURL)
+  }
+  
+  /// Carrega configuração do bundle (Info.plist ou arquivo dedicado) - DEPRECATED
+  /// Use loadFromUserKey() para usar chave do usuário
   static func loadFromBundle() -> ExerciseDBConfiguration? {
-    // Primeiro tenta carregar de ExerciseDBConfig.plist
+    // Primeiro tenta carregar da chave do usuário (preferido)
+    if let config = loadFromUserKey() {
+      return config
+    }
+    
+    // Fallback para plist (legado - apenas para desenvolvimento)
     if let plistPath = Bundle.main.path(forResource: "ExerciseDBConfig", ofType: "plist"),
        let plistData = FileManager.default.contents(atPath: plistPath),
        let plist = try? PropertyListSerialization.propertyList(from: plistData, format: nil) as? [String: Any],
        let apiKey = plist["EXERCISEDB_API_KEY"] as? String,
        !apiKey.isEmpty {
+      #if DEBUG
+      print("[ExerciseDB] ⚠️ Usando chave do plist - considere migrar para Keychain")
+      #endif
       let host = (plist["EXERCISEDB_HOST"] as? String) ?? defaultHost
       let baseURLString = (plist["EXERCISEDB_BASE_URL"] as? String) ?? "https://\(host)"
       let baseURL = URL(string: baseURLString) ?? defaultBaseURL
       return ExerciseDBConfiguration(apiKey: apiKey, host: host, baseURL: baseURL)
     }
 
-    // Fallback para Info.plist
-    if let apiKey = Bundle.main.object(forInfoDictionaryKey: "EXERCISEDB_API_KEY") as? String,
-       !apiKey.isEmpty {
-      let host = (Bundle.main.object(forInfoDictionaryKey: "EXERCISEDB_HOST") as? String) ?? defaultHost
-      return ExerciseDBConfiguration(apiKey: apiKey, host: host)
-    }
-
     return nil
+  }
+  
+  /// Verifica se o usuário tem uma chave de API configurada
+  static var isUserKeyConfigured: Bool {
+    return UserAPIKeyManager.shared.hasAPIKey(for: .exerciseDB)
   }
 
   /// Headers necessários para autenticação na API RapidAPI.

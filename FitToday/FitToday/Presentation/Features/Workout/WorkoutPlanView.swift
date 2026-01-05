@@ -184,7 +184,7 @@ struct WorkoutPlanView: View {
                 .padding(.horizontal, -FitTodaySpacing.md)
 
             LazyVStack(spacing: FitTodaySpacing.sm) {
-                ForEach(Array(plan.exercises.enumerated()), id: \.offset) { index, prescription in
+                ForEach(Array(plan.exercises.enumerated()), id: \.element.exercise.id) { index, prescription in
                     WorkoutExerciseRow(
                         index: index + 1,
                         prescription: prescription,

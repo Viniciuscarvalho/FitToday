@@ -117,6 +117,8 @@ struct TabRootView: View {
             LibraryDetailView(workoutId: workoutId, resolver: resolver)
         case .libraryExerciseDetail(let prescription):
             LibraryExerciseDetailView(prescription: prescription)
+        case .apiKeySettings:
+            APIKeySettingsView()
         }
     }
 }
