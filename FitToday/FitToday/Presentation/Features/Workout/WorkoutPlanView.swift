@@ -190,10 +190,12 @@ struct WorkoutPlanView: View {
                         prescription: prescription,
                         isCurrent: index == sessionStore.currentExerciseIndex
                     )
+                    .contentShape(Rectangle())
                     .onTapGesture {
-                        sessionStore.selectExercise(at: index)
-                        router.push(.exerciseDetail, on: .home)
+                        // Navega para preview sem alterar o índice atual do treino
+                        router.push(.workoutExercisePreview(prescription), on: .home)
                     }
+                    .accessibilityHint("Toque para ver detalhes do exercício")
                 }
             }
         }

@@ -41,6 +41,7 @@ enum AppRoute: Hashable {
     case dailyQuestionnaire
     case workoutPlan(UUID)
     case exerciseDetail
+    case workoutExercisePreview(ExercisePrescription)  // Preview de exercício (não altera índice)
     case workoutSummary
     case paywall
     case libraryDetail(String)

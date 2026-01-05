@@ -158,24 +158,6 @@ private struct PrescriptionCard: View {
   }
 }
 
-// MARK: - Extensions
-
-private extension EquipmentType {
-  var displayName: String {
-    switch self {
-    case .barbell: return "Barra"
-    case .dumbbell: return "Halteres"
-    case .machine: return "Máquina"
-    case .kettlebell: return "Kettlebell"
-    case .bodyweight: return "Peso corporal"
-    case .resistanceBand: return "Elástico"
-    case .cardioMachine: return "Cardio"
-    case .cable: return "Cabo"
-    case .pullupBar: return "Barra fixa"
-    }
-  }
-}
-
 #Preview {
   NavigationStack {
     LibraryExerciseDetailView(

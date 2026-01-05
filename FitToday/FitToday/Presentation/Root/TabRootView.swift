@@ -90,6 +90,8 @@ struct TabRootView: View {
             WorkoutPlanView()
         case .exerciseDetail:
             WorkoutExerciseDetailView()
+        case .workoutExercisePreview(let prescription):
+            WorkoutExercisePreviewView(prescription: prescription)
         case .workoutSummary:
             WorkoutCompletionView()
         case .paywall:
