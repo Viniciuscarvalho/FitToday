@@ -6,10 +6,15 @@
 //
 
 import SwiftUI
+import Swinject
 
 struct WorkoutCompletionView: View {
     @EnvironmentObject private var router: AppRouter
     @EnvironmentObject private var sessionStore: WorkoutSessionStore
+    @Environment(\.dependencyResolver) private var resolver
+    
+    @State private var isGeneratingNewPlan = false
+    @State private var errorMessage: String?
 
     var body: some View {
         VStack(spacing: FitTodaySpacing.lg) {
@@ -30,15 +35,32 @@ struct WorkoutCompletionView: View {
             .padding(.horizontal)
 
             VStack(spacing: FitTodaySpacing.sm) {
+                // Se foi pulado, oferece opção de gerar novo treino
+                if status == .skipped {
+                    Button("Gerar Novo Treino") {
+                        generateNewWorkout()
+                    }
+                    .fitPrimaryStyle()
+                    .disabled(isGeneratingNewPlan)
+                    
+                    if isGeneratingNewPlan {
+                        ProgressView()
+                            .padding()
+                    }
+                }
+                
                 Button(primaryCTATitle) {
                     finalizeFlow(goToHistory: false)
                 }
                 .fitPrimaryStyle()
+                .disabled(isGeneratingNewPlan)
 
-                Button("Ver histórico") {
-                    finalizeFlow(goToHistory: true)
+                if status == .completed {
+                    Button("Ver histórico") {
+                        finalizeFlow(goToHistory: true)
+                    }
+                    .fitSecondaryStyle()
                 }
-                .fitSecondaryStyle()
             }
 
             Spacer()
@@ -46,6 +68,68 @@ struct WorkoutCompletionView: View {
         .padding()
         .navigationTitle("Resumo")
         .navigationBarBackButtonHidden(true)
+        .alert("Erro", isPresented: Binding(
+            get: { errorMessage != nil },
+            set: { _ in errorMessage = nil }
+        )) {
+            Button("Ok", role: .cancel) {}
+        } message: {
+            Text(errorMessage ?? "Ocorreu um erro ao gerar novo treino.")
+        }
+    }
+
+    private func generateNewWorkout() {
+        guard let profileRepo = resolver.resolve(UserProfileRepository.self),
+              let blocksRepo = resolver.resolve(WorkoutBlocksRepository.self),
+              let composer = resolver.resolve(WorkoutPlanComposing.self) else {
+            errorMessage = "Não foi possível carregar as configurações necessárias."
+            return
+        }
+        
+        isGeneratingNewPlan = true
+        
+        Task {
+            do {
+                // Busca o último checkIn usado (pode ser armazenado em UserDefaults ou no sessionStore)
+                // Por enquanto, vamos usar o checkIn padrão baseado no perfil
+                let profileUseCase = GetUserProfileUseCase(repository: profileRepo)
+                guard let profile = try await profileUseCase.execute() else {
+                    errorMessage = "Perfil não encontrado. Configure seu perfil primeiro."
+                    isGeneratingNewPlan = false
+                    return
+                }
+                
+                // Gera um novo checkIn baseado no último foco usado (ou padrão)
+                // Para simplificar, vamos usar o mesmo foco do plano atual
+                let currentFocus = sessionStore.plan?.focus ?? .fullBody
+                let checkIn = DailyCheckIn(
+                    focus: currentFocus,
+                    sorenessLevel: .none, // Novo treino sem considerar dor anterior
+                    sorenessAreas: []
+                )
+                
+                let generator = GenerateWorkoutPlanUseCase(
+                    blocksRepository: blocksRepo,
+                    composer: composer
+                )
+                let newPlan = try await generator.execute(profile: profile, checkIn: checkIn)
+                
+                await MainActor.run {
+                    sessionStore.reset()
+                    sessionStore.start(with: newPlan)
+                    isGeneratingNewPlan = false
+                    
+                    // Navega para o novo treino
+                    router.pop(on: .home) // summary
+                    router.push(.workoutPlan(newPlan.id), on: .home)
+                }
+            } catch {
+                await MainActor.run {
+                    errorMessage = error.localizedDescription
+                    isGeneratingNewPlan = false
+                }
+            }
+        }
     }
 
     private func finalizeFlow(goToHistory: Bool) {
@@ -85,7 +169,7 @@ struct WorkoutCompletionView: View {
         case .completed:
             return "Registramos sua sessão de hoje no histórico. Mantenha a consistência!"
         case .skipped:
-            return "Tudo bem! Registramos como pulado — amanhã terá outro treino esperando."
+            return "Tudo bem! Você pode gerar um novo treino agora mesmo ou tentar novamente depois."
         }
     }
 
@@ -97,4 +181,3 @@ struct WorkoutCompletionView: View {
         sessionStore.lastCompletionStatus ?? .completed
     }
 }
-

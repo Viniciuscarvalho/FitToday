@@ -11,22 +11,42 @@ import Foundation
 struct ExerciseDBExercise: Codable, Sendable {
   let id: String
   let name: String
-  let gifUrl: String?
+  let imageUrl: String?  // Nome do arquivo (ex: "Barbell-Bench-Press_Chest.png")
+  let videoUrl: String?
   let bodyPart: String?
   let equipment: String?
   let target: String?
   let secondaryMuscles: [String]?
   let instructions: [String]?
+  let exerciseId: String?  // Campo alternativo do ID
 
   enum CodingKeys: String, CodingKey {
     case id
+    case exerciseId
     case name
-    case gifUrl
+    case imageUrl
+    case videoUrl
     case bodyPart
     case equipment
     case target
     case secondaryMuscles
     case instructions
+  }
+  
+  /// Retorna o ID do exercício (prioriza exerciseId, fallback para id)
+  var effectiveId: String {
+    exerciseId ?? id
+  }
+  
+  /// Constrói a URL completa da imagem usando o base URL da API
+  func fullImageURL(baseURL: URL) -> URL? {
+    guard let imageUrl = imageUrl, !imageUrl.isEmpty else { return nil }
+    // Se já é uma URL completa, retorna como está
+    if imageUrl.hasPrefix("http://") || imageUrl.hasPrefix("https://") {
+      return URL(string: imageUrl)
+    }
+    // Caso contrário, constrói a URL completa
+    return baseURL.appendingPathComponent("/images/\(imageUrl)")
   }
 }
 
@@ -112,7 +132,7 @@ actor ExerciseDBService: ExerciseDBServicing {
 
       let decoder = JSONDecoder()
       let exercise = try decoder.decode(ExerciseDBExercise.self, from: data)
-      cache[id] = exercise
+      cache[exercise.effectiveId] = exercise
       return exercise
     } catch let error as ExerciseDBError {
       throw error
@@ -160,7 +180,7 @@ actor ExerciseDBService: ExerciseDBServicing {
          let exercises = paginatedResponse.data?.exercises {
         // Cache os exercícios
         for exercise in exercises {
-          cache[exercise.id] = exercise
+          cache[exercise.effectiveId] = exercise
         }
         return exercises
       }
@@ -168,7 +188,7 @@ actor ExerciseDBService: ExerciseDBServicing {
       // Fallback: tenta decodificar como array direto
       if let exercises = try? decoder.decode([ExerciseDBExercise].self, from: data) {
         for exercise in exercises {
-          cache[exercise.id] = exercise
+          cache[exercise.effectiveId] = exercise
         }
         return exercises
       }
@@ -189,5 +209,4 @@ actor ExerciseDBService: ExerciseDBServicing {
     cache.removeAll()
   }
 }
-
 

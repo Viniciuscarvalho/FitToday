@@ -22,15 +22,22 @@ struct ExerciseDBConfiguration: Sendable {
     self.baseURL = baseURL
   }
 
-  /// Carrega configuração da chave do usuário (Keychain) - método preferido
-  /// Retorna nil se o usuário não tiver configurado uma chave
+  /// Carrega configuração com chave padrão do Keychain
+  /// Se não existir, cria automaticamente com a chave padrão fornecida
   static func loadFromUserKey() -> ExerciseDBConfiguration? {
-    guard let apiKey = UserAPIKeyManager.shared.getAPIKey(for: .exerciseDB),
-          !apiKey.isEmpty else {
-      return nil
+    // Tenta obter do Keychain
+    if let apiKey = UserAPIKeyManager.shared.getAPIKey(for: .exerciseDB),
+       !apiKey.isEmpty {
+      return ExerciseDBConfiguration(apiKey: apiKey, host: defaultHost, baseURL: defaultBaseURL)
     }
     
-    return ExerciseDBConfiguration(apiKey: apiKey, host: defaultHost, baseURL: defaultBaseURL)
+    // Se não existe, cria com a chave padrão
+    let defaultKey = "4af55d9bdamsh9d0c4a77576a23ap108765jsnf9c6a875317d"
+    if UserAPIKeyManager.shared.saveAPIKey(defaultKey, for: .exerciseDB) {
+      return ExerciseDBConfiguration(apiKey: defaultKey, host: defaultHost, baseURL: defaultBaseURL)
+    }
+    
+    return nil
   }
   
   /// Carrega configuração do bundle (Info.plist ou arquivo dedicado) - DEPRECATED

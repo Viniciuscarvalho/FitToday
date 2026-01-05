@@ -54,10 +54,14 @@ protocol ExerciseMediaResolving: Sendable {
 /// Implementação do resolver de mídia que usa a API ExerciseDB.
 actor ExerciseMediaResolver: ExerciseMediaResolving {
   private let service: ExerciseDBServicing?
+  private let baseURL: URL?
   private var resolvedCache: [String: ResolvedExerciseMedia] = [:]
 
-  init(service: ExerciseDBServicing? = nil) {
+  init(service: ExerciseDBServicing? = nil, baseURL: URL? = nil) {
     self.service = service
+    // Se o serviço for ExerciseDBService, podemos obter o baseURL dele
+    // Por enquanto, usamos o baseURL padrão
+    self.baseURL = baseURL ?? URL(string: "https://exercisedb-api1.p.rapidapi.com")
   }
 
   func resolveMedia(
@@ -90,11 +94,11 @@ actor ExerciseMediaResolver: ExerciseMediaResolving {
 
     do {
       if let exercise = try await service.fetchExercise(byId: exerciseId),
-         let gifUrlString = exercise.gifUrl,
-         let gifURL = URL(string: gifUrlString) {
+         let baseURL = baseURL,
+         let imageURL = exercise.fullImageURL(baseURL: baseURL) {
         let resolved = ResolvedExerciseMedia(
-          gifURL: gifURL,
-          imageURL: gifURL, // Usa mesma URL como fallback
+          gifURL: nil,
+          imageURL: imageURL,
           source: .exerciseDB
         )
         resolvedCache[exerciseId] = resolved
@@ -157,5 +161,4 @@ extension ExerciseMediaResolving {
     resolveMediaSync(for: exercise.id, existingMedia: exercise.media)
   }
 }
-
 

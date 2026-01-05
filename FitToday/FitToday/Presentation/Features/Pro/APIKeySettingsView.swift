@@ -7,13 +7,13 @@
 
 import SwiftUI
 
-/// View para configuração da chave de API do usuário
+/// View para configuração da chave de API do usuário (OpenAI)
+/// A chave do ExerciseDB é gerenciada automaticamente pelo sistema
 struct APIKeySettingsView: View {
     @StateObject private var keyStore = UserAPIKeyStore()
     @State private var apiKeyInput: String = ""
     @State private var showingKeyInput: Bool = false
     @State private var showingDeleteConfirmation: Bool = false
-    @State private var currentService: UserAPIKeyManager.APIService = .openAI
     @Environment(\.dismiss) private var dismiss
     
     var body: some View {
@@ -290,4 +290,3 @@ struct APIKeySettingsView: View {
         APIKeySettingsView()
     }
 }
-
