@@ -106,7 +106,7 @@ struct LibraryDetailView: View {
 
             ForEach(Array(workout.exercises.enumerated()), id: \.element.exercise.id) { index, prescription in
                 Button {
-                    router.push(.libraryExerciseDetail(prescription), on: .library)
+                    router.push(.programExerciseDetail(prescription), on: .programs)
                 } label: {
                     ExerciseRow(index: index + 1, prescription: prescription)
                 }
@@ -145,7 +145,7 @@ struct LibraryDetailView: View {
     private func startWorkout(_ workout: LibraryWorkout) {
         let plan = workout.toWorkoutPlan()
         sessionStore.start(with: plan)
-        router.push(.workoutPlan(plan.id), on: .library)
+        router.push(.workoutPlan(plan.id), on: .programs)
     }
 }
 

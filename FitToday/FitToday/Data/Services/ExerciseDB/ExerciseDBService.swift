@@ -9,45 +9,16 @@ import Foundation
 
 /// Modelo de exercício retornado pela API ExerciseDB.
 struct ExerciseDBExercise: Codable, Sendable {
-  let id: String
-  let name: String
-  let imageUrl: String?  // Nome do arquivo (ex: "Barbell-Bench-Press_Chest.png")
-  let videoUrl: String?
   let bodyPart: String?
   let equipment: String?
+  let id: String
+  let name: String
   let target: String?
   let secondaryMuscles: [String]?
   let instructions: [String]?
-  let exerciseId: String?  // Campo alternativo do ID
-
-  enum CodingKeys: String, CodingKey {
-    case id
-    case exerciseId
-    case name
-    case imageUrl
-    case videoUrl
-    case bodyPart
-    case equipment
-    case target
-    case secondaryMuscles
-    case instructions
-  }
-  
-  /// Retorna o ID do exercício (prioriza exerciseId, fallback para id)
-  var effectiveId: String {
-    exerciseId ?? id
-  }
-  
-  /// Constrói a URL completa da imagem usando o base URL da API
-  func fullImageURL(baseURL: URL) -> URL? {
-    guard let imageUrl = imageUrl, !imageUrl.isEmpty else { return nil }
-    // Se já é uma URL completa, retorna como está
-    if imageUrl.hasPrefix("http://") || imageUrl.hasPrefix("https://") {
-      return URL(string: imageUrl)
-    }
-    // Caso contrário, constrói a URL completa
-    return baseURL.appendingPathComponent("/images/\(imageUrl)")
-  }
+  let description: String?
+  let difficulty: String?
+  let category: String?
 }
 
 /// Resposta paginada da API ExerciseDB.
@@ -62,10 +33,23 @@ struct ExerciseDBData: Codable, Sendable {
   let currentPage: Int?
 }
 
+/// Resolução de imagem para o endpoint /image
+enum ExerciseImageResolution: String, Sendable {
+  /// Thumbnail para listas/cards
+  case r180 = "180"
+  /// Card/preview maior
+  case r360 = "360"
+  /// Detail
+  case r720 = "720"
+}
+
 /// Protocolo para o serviço de exercícios.
 protocol ExerciseDBServicing: Sendable {
   func fetchExercise(byId id: String) async throws -> ExerciseDBExercise?
   func searchExercises(query: String, limit: Int) async throws -> [ExerciseDBExercise]
+  
+  /// Busca URL da imagem do exercício via endpoint /image
+  func fetchImageURL(exerciseId: String, resolution: ExerciseImageResolution) async throws -> URL?
 }
 
 /// Erros do serviço ExerciseDB.
@@ -106,11 +90,13 @@ actor ExerciseDBService: ExerciseDBServicing {
       return cached
     }
 
-    let url = configuration.baseURL.appendingPathComponent("/api/v1/exercises/\(id)")
+    // Endpoint: GET https://exercisedb.p.rapidapi.com/exercises/exercise/{id}
+    let url = configuration.baseURL.appendingPathComponent("/exercises/exercise/\(id)")
     var request = URLRequest(url: url)
     request.httpMethod = "GET"
     request.timeoutInterval = 10.0
-    request.allHTTPHeaderFields = configuration.authHeaders
+    request.addValue(configuration.apiKey, forHTTPHeaderField: "x-rapidapi-key")
+    request.addValue(configuration.host, forHTTPHeaderField: "x-rapidapi-host")
 
     do {
       let (data, response) = try await session.data(for: request)
@@ -132,7 +118,7 @@ actor ExerciseDBService: ExerciseDBServicing {
 
       let decoder = JSONDecoder()
       let exercise = try decoder.decode(ExerciseDBExercise.self, from: data)
-      cache[exercise.effectiveId] = exercise
+      cache[exercise.id] = exercise
       return exercise
     } catch let error as ExerciseDBError {
       throw error
@@ -145,25 +131,18 @@ actor ExerciseDBService: ExerciseDBServicing {
   }
 
   func searchExercises(query: String, limit: Int = 20) async throws -> [ExerciseDBExercise] {
-    guard let encodedQuery = query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) else {
+    // Endpoint: GET https://exercisedb.p.rapidapi.com/exercises/name/{name}
+    guard let encodedQuery = query.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) else {
       return []
     }
 
-    let url = configuration.baseURL.appendingPathComponent("/api/v1/exercises/search")
-    var components = URLComponents(url: url, resolvingAgainstBaseURL: true)!
-    components.queryItems = [
-      URLQueryItem(name: "search", value: encodedQuery),
-      URLQueryItem(name: "limit", value: String(limit))
-    ]
-
-    guard let finalURL = components.url else {
-      return []
-    }
+    let finalURL = configuration.baseURL.appendingPathComponent("/exercises/name/\(encodedQuery)")
 
     var request = URLRequest(url: finalURL)
     request.httpMethod = "GET"
     request.timeoutInterval = 15.0
-    request.allHTTPHeaderFields = configuration.authHeaders
+    request.addValue(configuration.apiKey, forHTTPHeaderField: "x-rapidapi-key")
+    request.addValue(configuration.host, forHTTPHeaderField: "x-rapidapi-host")
 
     do {
       let (data, response) = try await session.data(for: request)
@@ -174,26 +153,11 @@ actor ExerciseDBService: ExerciseDBServicing {
       }
 
       let decoder = JSONDecoder()
-
-      // Tenta decodificar como resposta paginada primeiro
-      if let paginatedResponse = try? decoder.decode(ExerciseDBResponse.self, from: data),
-         let exercises = paginatedResponse.data?.exercises {
-        // Cache os exercícios
-        for exercise in exercises {
-          cache[exercise.effectiveId] = exercise
-        }
-        return exercises
+      let exercises = (try? decoder.decode([ExerciseDBExercise].self, from: data)) ?? []
+      for exercise in exercises.prefix(max(1, limit)) {
+        cache[exercise.id] = exercise
       }
-
-      // Fallback: tenta decodificar como array direto
-      if let exercises = try? decoder.decode([ExerciseDBExercise].self, from: data) {
-        for exercise in exercises {
-          cache[exercise.effectiveId] = exercise
-        }
-        return exercises
-      }
-
-      return []
+      return Array(exercises.prefix(max(1, limit)))
     } catch let error as ExerciseDBError {
       throw error
     } catch {
@@ -207,6 +171,81 @@ actor ExerciseDBService: ExerciseDBServicing {
   /// Limpa o cache de exercícios.
   func clearCache() {
     cache.removeAll()
+    imageURLCache.removeAll()
+  }
+  
+  // MARK: - Image Endpoint
+  
+  private var imageURLCache: [String: URL] = [:]
+  
+  /// Busca a URL da imagem do exercício via endpoint /image da RapidAPI.
+  /// Parâmetros obrigatórios: resolution e exerciseId.
+  func fetchImageURL(exerciseId: String, resolution: ExerciseImageResolution) async throws -> URL? {
+    let cacheKey = "\(exerciseId)_\(resolution.rawValue)"
+    
+    // Verifica cache primeiro
+    if let cached = imageURLCache[cacheKey] {
+      return cached
+    }
+    
+    // Constrói URL com query parameters obrigatórios
+    // Endpoint: GET https://exercisedb.p.rapidapi.com/image?resolution={resolution}&exerciseId={exerciseId}
+    var components = URLComponents(url: configuration.baseURL.appendingPathComponent("/image"), resolvingAgainstBaseURL: true)!
+    components.queryItems = [
+      URLQueryItem(name: "resolution", value: resolution.rawValue),
+      URLQueryItem(name: "exerciseId", value: exerciseId)
+    ]
+    
+    guard let url = components.url else {
+      #if DEBUG
+      print("[ExerciseDB] URL inválida para imagem do exercício \(exerciseId)")
+      #endif
+      return nil
+    }
+    
+    var request = URLRequest(url: url)
+    request.httpMethod = "GET"
+    request.timeoutInterval = 10.0
+    // Headers obrigatórios para RapidAPI
+    request.addValue(configuration.apiKey, forHTTPHeaderField: "x-rapidapi-key")
+    request.addValue(configuration.host, forHTTPHeaderField: "x-rapidapi-host")
+    
+    do {
+      let (data, response) = try await session.data(for: request)
+      
+      guard let httpResponse = response as? HTTPURLResponse else {
+        throw ExerciseDBError.invalidResponse
+      }
+      
+      guard (200...299).contains(httpResponse.statusCode) else {
+        #if DEBUG
+        print("[ExerciseDB] HTTP \(httpResponse.statusCode) para imagem \(exerciseId)")
+        #endif
+        return nil
+      }
+      
+      // A resposta pode ser JSON com URL ou a imagem diretamente
+      // Primeiro tenta parsear como JSON
+      if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+         let imageURLString = json["url"] as? String ?? json["imageUrl"] as? String,
+         let imageURL = URL(string: imageURLString) {
+        imageURLCache[cacheKey] = imageURL
+        return imageURL
+      }
+      
+      // Se não for JSON, pode ser que a própria URL seja a imagem
+      // Nesse caso, retornamos a URL original da requisição
+      imageURLCache[cacheKey] = url
+      return url
+      
+    } catch let error as ExerciseDBError {
+      throw error
+    } catch {
+      #if DEBUG
+      print("[ExerciseDB] Erro ao buscar imagem \(exerciseId): \(error.localizedDescription)")
+      #endif
+      throw ExerciseDBError.networkError(error)
+    }
   }
 }
 

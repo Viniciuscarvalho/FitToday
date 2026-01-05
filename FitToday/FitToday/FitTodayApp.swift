@@ -14,6 +14,9 @@ struct FitTodayApp: App {
     @StateObject private var sessionStore: WorkoutSessionStore
 
     init() {
+        // Bootstrap de segredos (apenas Debug) - popula Keychain a partir de Secrets.plist
+        KeychainBootstrap.runIfNeeded()
+        
         let container = AppContainer.build()
         self.appContainer = container
         _sessionStore = StateObject(wrappedValue: WorkoutSessionStore(resolver: container.container))

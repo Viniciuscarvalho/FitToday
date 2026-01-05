@@ -220,6 +220,9 @@ struct DailyQuestionnaireFlowView: View {
         Task {
             do {
                 let plan = try await viewModel.generatePlan(for: checkIn)
+                persistCheckIn(checkIn)
+                UserDefaults.standard.set(Date(), forKey: AppStorageKeys.lastDailyCheckInDate)
+                DailyWorkoutStateManager.shared.markSuggested(planId: plan.id)
                 sessionStore.start(with: plan)
                 onResult(.planReady)
             } catch {
@@ -228,6 +231,12 @@ struct DailyQuestionnaireFlowView: View {
             }
             isGeneratingPlan = false
         }
+    }
+}
+
+private func persistCheckIn(_ checkIn: DailyCheckIn) {
+    if let data = try? JSONEncoder().encode(checkIn) {
+        UserDefaults.standard.set(data, forKey: AppStorageKeys.lastDailyCheckInData)
     }
 }
 

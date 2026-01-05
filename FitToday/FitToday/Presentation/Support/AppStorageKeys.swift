@@ -9,6 +9,7 @@ import Foundation
 
 enum AppStorageKeys {
     static let lastDailyCheckInDate = "lastDailyCheckInDate"
+    static let lastDailyCheckInData = "lastDailyCheckInData"
 }
 
 

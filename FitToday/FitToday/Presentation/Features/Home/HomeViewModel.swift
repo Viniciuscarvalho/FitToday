@@ -20,6 +20,8 @@ enum HomeJourneyState: Equatable {
     case needsDailyCheckIn(profile: UserProfile)
     /// Questionário respondido, treino gerado disponível.
     case workoutReady(profile: UserProfile)
+    /// Treino concluído/pulado hoje - aguardar próximo dia.
+    case workoutCompleted(profile: UserProfile)
     /// Erro ao carregar dados.
     case error(message: String)
 }
@@ -28,18 +30,27 @@ enum HomeJourneyState: Equatable {
 final class HomeViewModel: ObservableObject {
     @Published private(set) var journeyState: HomeJourneyState = .loading
     @Published private(set) var entitlement: ProEntitlement = .free
+    @Published private(set) var topPrograms: [Program] = []
+    @Published private(set) var weekWorkouts: [LibraryWorkout] = []
+    @Published private(set) var dailyWorkoutState: DailyWorkoutState = DailyWorkoutState()
 
     private let resolver: Resolver
+    private let dailyStateManager = DailyWorkoutStateManager.shared
 
     init(resolver: Resolver) {
         self.resolver = resolver
+    }
+    
+    /// Indica se o usuário pode trocar a sugestão do treino
+    var canSwapSuggestion: Bool {
+        dailyWorkoutState.canSwap
     }
 
     // MARK: - Computed Properties
 
     var userProfile: UserProfile? {
         switch journeyState {
-        case .needsDailyCheckIn(let profile), .workoutReady(let profile):
+        case .needsDailyCheckIn(let profile), .workoutReady(let profile), .workoutCompleted(let profile):
             return profile
         default:
             return nil
@@ -86,6 +97,8 @@ final class HomeViewModel: ObservableObject {
             return "Responder Questionário"
         case .workoutReady:
             return "Ver Treino de Hoje"
+        case .workoutCompleted:
+            return "Próximo treino em breve"
         case .error:
             return "Tentar Novamente"
         }
@@ -96,7 +109,12 @@ final class HomeViewModel: ObservableObject {
         case .needsDailyCheckIn:
             return "2 perguntas rápidas antes de começar"
         case .workoutReady:
+            if canSwapSuggestion {
+                return "Não gostou? Toque em trocar para nova sugestão"
+            }
             return "Treino personalizado pronto para você"
+        case .workoutCompleted:
+            return "Você já treinou hoje! Descanse e volte amanhã"
         default:
             return nil
         }
@@ -139,6 +157,18 @@ final class HomeViewModel: ObservableObject {
 
             guard let profile = loadedProfile else {
                 journeyState = .noProfile
+                // Carregar programas mesmo sem perfil
+                await loadProgramsAndWorkouts(profile: nil)
+                return
+            }
+
+            // Atualizar estado do treino diário
+            dailyWorkoutState = dailyStateManager.loadTodayState()
+            
+            // Verificar se já concluiu/pulou o treino hoje
+            if dailyWorkoutState.isFinished {
+                journeyState = .workoutCompleted(profile: profile)
+                await loadProgramsAndWorkouts(profile: profile)
                 return
             }
 
@@ -151,8 +181,61 @@ final class HomeViewModel: ObservableObject {
                 journeyState = .needsDailyCheckIn(profile: profile)
             }
 
+            // Carregar programas e treinos recomendados
+            await loadProgramsAndWorkouts(profile: profile)
+
         } catch {
             journeyState = .error(message: error.localizedDescription)
+        }
+    }
+
+    private func loadProgramsAndWorkouts(profile: UserProfile?) async {
+        let recommender = ProgramRecommender()
+        var history: [WorkoutHistoryEntry] = []
+        
+        // Carregar histórico para recomendação
+        if let historyRepo = resolver.resolve(WorkoutHistoryRepository.self) {
+            do {
+                history = try await historyRepo.listEntries()
+            } catch {
+                #if DEBUG
+                print("[Home] Erro ao carregar histórico: \(error)")
+                #endif
+            }
+        }
+        
+        // Carregar programas "Top for You" (até 4) usando o recomendador
+        if let programRepo = resolver.resolve(ProgramRepository.self) {
+            do {
+                let allPrograms = try await programRepo.listPrograms()
+                topPrograms = recommender.recommend(
+                    programs: allPrograms,
+                    profile: profile,
+                    history: history,
+                    limit: 4
+                )
+            } catch {
+                #if DEBUG
+                print("[Home] Erro ao carregar programas: \(error)")
+                #endif
+            }
+        }
+
+        // Carregar treinos da semana (até 3) usando o recomendador
+        if let workoutRepo = resolver.resolve(LibraryWorkoutsRepository.self) {
+            do {
+                let allWorkouts = try await workoutRepo.loadWorkouts()
+                weekWorkouts = recommender.recommendWorkouts(
+                    workouts: allWorkouts,
+                    profile: profile,
+                    history: history,
+                    limit: 3
+                )
+            } catch {
+                #if DEBUG
+                print("[Home] Erro ao carregar treinos: \(error)")
+                #endif
+            }
         }
     }
 
@@ -171,6 +254,76 @@ final class HomeViewModel: ObservableObject {
         Task {
             await loadUserData()
         }
+    }
+    
+    /// Tenta trocar a sugestão do treino diário (1x por dia)
+    func swapDailySuggestion() {
+        guard dailyStateManager.trySwap() else {
+            #if DEBUG
+            print("[Home] Não foi possível trocar - limite atingido")
+            #endif
+            return
+        }
+        
+        // Atualizar estado local
+        dailyWorkoutState = dailyStateManager.loadTodayState()
+        
+        // Recarregar para gerar nova sugestão
+        Task {
+            await loadUserData()
+        }
+    }
+    
+    /// Marca que o treino foi concluído
+    func markWorkoutCompleted() {
+        dailyStateManager.markCompleted()
+        dailyWorkoutState = dailyStateManager.loadTodayState()
+        
+        Task {
+            await loadUserData()
+        }
+    }
+    
+    /// Marca que o treino foi pulado
+    func markWorkoutSkipped() {
+        dailyStateManager.markSkipped()
+        dailyWorkoutState = dailyStateManager.loadTodayState()
+        
+        Task {
+            await loadUserData()
+        }
+    }
+    
+    /// Regera o plano diário baseado no último questionário salvo.
+    func regenerateDailyWorkoutPlan() async throws -> WorkoutPlan {
+        guard
+            let profileRepo = resolver.resolve(UserProfileRepository.self),
+            let blocksRepo = resolver.resolve(WorkoutBlocksRepository.self),
+            let composer = resolver.resolve(WorkoutPlanComposing.self)
+        else {
+            throw DomainError.repositoryFailure(reason: "Dependências para gerar o treino não estão configuradas.")
+        }
+        
+        guard let profile = try await profileRepo.loadProfile() else {
+            throw DomainError.profileNotFound
+        }
+        
+        guard let checkIn = loadStoredCheckIn() else {
+            throw DomainError.invalidInput(reason: "Precisamos que você responda o questionário de hoje novamente.")
+        }
+        
+        let generator = GenerateWorkoutPlanUseCase(
+            blocksRepository: blocksRepo,
+            composer: composer
+        )
+        return try await generator.execute(profile: profile, checkIn: checkIn)
+    }
+    
+    private func loadStoredCheckIn() -> DailyCheckIn? {
+        guard let data = UserDefaults.standard.data(forKey: AppStorageKeys.lastDailyCheckInData) else {
+            return nil
+        }
+        return try? JSONDecoder().decode(DailyCheckIn.self, from: data)
     }
 
     /// Observar mudanças no entitlement em background.

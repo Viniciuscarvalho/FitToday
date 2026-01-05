@@ -31,7 +31,7 @@ struct LibraryView: View {
             .padding()
         }
         .background(FitTodayColor.background.ignoresSafeArea())
-        .navigationTitle("Biblioteca")
+        .toolbar(.hidden, for: .navigationBar)
         .task {
             viewModel.loadWorkouts()
         }
@@ -111,7 +111,7 @@ struct LibraryView: View {
             LazyVStack(spacing: FitTodaySpacing.md) {
                 ForEach(viewModel.filteredWorkouts) { workout in
                     LibraryWorkoutCard(workout: workout) {
-                        router.push(.libraryDetail(workout.id), on: .library)
+                        router.push(.programWorkoutDetail(workout.id), on: .programs)
                     }
                     .accessibilityLabel("\(workout.title), \(workout.estimatedDurationMinutes) minutos, \(workout.exerciseCount) exercícios")
                     .accessibilityHint("Toque para ver detalhes e iniciar o treino")

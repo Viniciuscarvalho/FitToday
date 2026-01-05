@@ -11,12 +11,12 @@ struct WorkoutBlocksLoader: Sendable {
     private let fileName: String
     private let bundle: Bundle
 
-    init(fileName: String = "WorkoutBlocksSeed", bundle: Bundle = .main) {
+    nonisolated init(fileName: String = "WorkoutBlocksSeed", bundle: Bundle = .main) {
         self.fileName = fileName
         self.bundle = bundle
     }
 
-    func loadBlocks() throws -> [WorkoutBlock] {
+    nonisolated func loadBlocks() throws -> [WorkoutBlock] {
         guard let url = bundle.url(forResource: fileName, withExtension: "json") else {
             throw DomainError.repositoryFailure(reason: "seed \(fileName).json não encontrado no bundle.")
         }

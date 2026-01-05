@@ -101,6 +101,103 @@ struct ExercisePrescription: Codable, Hashable, Sendable {
     var tip: String?
 }
 
+// MARK: - Phased Workout Plan (Session Structure)
+
+/// Item de um plano de treino, podendo ser um exercício do catálogo ou uma atividade guiada (ex.: Aeróbio Z2).
+enum WorkoutPlanItem: Codable, Hashable, Sendable {
+    case exercise(ExercisePrescription)
+    case activity(ActivityPrescription)
+
+    private enum CodingKeys: String, CodingKey { case type, exercise, activity }
+    private enum ItemType: String, Codable { case exercise, activity }
+
+    init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        let type = try container.decode(ItemType.self, forKey: .type)
+        switch type {
+        case .exercise:
+            self = .exercise(try container.decode(ExercisePrescription.self, forKey: .exercise))
+        case .activity:
+            self = .activity(try container.decode(ActivityPrescription.self, forKey: .activity))
+        }
+    }
+
+    func encode(to encoder: any Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        switch self {
+        case .exercise(let exercise):
+            try container.encode(ItemType.exercise, forKey: .type)
+            try container.encode(exercise, forKey: .exercise)
+        case .activity(let activity):
+            try container.encode(ItemType.activity, forKey: .type)
+            try container.encode(activity, forKey: .activity)
+        }
+    }
+}
+
+/// Atividade guiada (sem lista de exercícios), como Aeróbio Zona 2, mobilidade guiada, intervalado leve, etc.
+struct ActivityPrescription: Codable, Hashable, Sendable {
+    enum Kind: String, Codable, CaseIterable, Sendable {
+        case mobility
+        case aerobicZone2
+        case aerobicIntervals
+        case breathing
+        case cooldown
+    }
+
+    var kind: Kind
+    var title: String
+    var durationMinutes: Int
+    var notes: String?
+
+    init(kind: Kind, title: String, durationMinutes: Int, notes: String? = nil) {
+        self.kind = kind
+        self.title = title
+        self.durationMinutes = durationMinutes
+        self.notes = notes
+    }
+}
+
+/// Fase de uma sessão (aquecimento, força, acessórios, aeróbio, etc).
+struct WorkoutPlanPhase: Identifiable, Codable, Hashable, Sendable {
+    enum Kind: String, Codable, CaseIterable, Sendable {
+        case warmup
+        case strength
+        case accessory
+        case conditioning
+        case aerobic
+        case finisher
+        case cooldown
+    }
+
+    var id: UUID
+    var kind: Kind
+    var title: String
+    var rpeTarget: Int?
+    var items: [WorkoutPlanItem]
+
+    init(
+        id: UUID = .init(),
+        kind: Kind,
+        title: String,
+        rpeTarget: Int? = nil,
+        items: [WorkoutPlanItem]
+    ) {
+        self.id = id
+        self.kind = kind
+        self.title = title
+        self.rpeTarget = rpeTarget
+        self.items = items
+    }
+
+    var exercises: [ExercisePrescription] {
+        items.compactMap {
+            if case .exercise(let prescription) = $0 { return prescription }
+            return nil
+        }
+    }
+}
+
 enum WorkoutIntensity: String, Codable, CaseIterable, Sendable {
     case low
     case moderate
@@ -113,7 +210,7 @@ struct WorkoutPlan: Codable, Hashable, Sendable {
     var focus: DailyFocus
     var estimatedDurationMinutes: Int
     var intensity: WorkoutIntensity
-    var exercises: [ExercisePrescription]
+    var phases: [WorkoutPlanPhase]
     var createdAt: Date
 
     init(
@@ -130,8 +227,40 @@ struct WorkoutPlan: Codable, Hashable, Sendable {
         self.focus = focus
         self.estimatedDurationMinutes = estimatedDurationMinutes
         self.intensity = intensity
-        self.exercises = exercises
+        // Compatibilidade: versões anteriores geram lista plana de exercícios.
+        // A evolução do app passará a produzir fases reais (warmup/strength/aerobic etc).
+        self.phases = [
+            WorkoutPlanPhase(
+                kind: .strength,
+                title: "Treino",
+                rpeTarget: nil,
+                items: exercises.map { .exercise($0) }
+            )
+        ]
         self.createdAt = createdAt
+    }
+
+    init(
+        id: UUID = .init(),
+        title: String,
+        focus: DailyFocus,
+        estimatedDurationMinutes: Int,
+        intensity: WorkoutIntensity,
+        phases: [WorkoutPlanPhase],
+        createdAt: Date = .init()
+    ) {
+        self.id = id
+        self.title = title
+        self.focus = focus
+        self.estimatedDurationMinutes = estimatedDurationMinutes
+        self.intensity = intensity
+        self.phases = phases
+        self.createdAt = createdAt
+    }
+
+    /// Lista plana de exercícios (compatibilidade com telas/fluxos antigos).
+    var exercises: [ExercisePrescription] {
+        phases.flatMap(\.exercises)
     }
 }
 

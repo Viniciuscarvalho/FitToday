@@ -126,24 +126,67 @@ struct LocalWorkoutPlanComposer: WorkoutPlanComposing, Sendable {
         let mainPrescription = SpecialistSessionRules.mainPrescription(for: sessionType)
         let accessoryPrescription = SpecialistSessionRules.accessoryPrescription(for: sessionType)
         
-        var allPrescriptions: [ExercisePrescription] = []
-        
-        for (index, block) in blocks.enumerated() {
-            let isMainBlock = index < 2
-            let basePrescription = isMainBlock ? mainPrescription : accessoryPrescription
-            
-            let blockPrescriptions = prescriptions(
-                from: block,
-                basePrescription: basePrescription,
-                profile: profile,
-                checkIn: checkIn,
-                domsAdjustment: domsAdjustment
-            )
-            
-            allPrescriptions.append(contentsOf: blockPrescriptions)
-        }
-        
-        let duration = estimatedDuration(for: allPrescriptions)
+        // 1) Aquecimento: mescla atividade guiada + alguns exercícios leves (opcional)
+        let warmupPhase = buildWarmupPhase(
+            from: blocks,
+            profile: profile,
+            checkIn: checkIn,
+            domsAdjustment: domsAdjustment
+        )
+
+        // 2) Fase de força/principal: primeiros blocos
+        let mainBlocks = Array(blocks.prefix(2))
+        let mainItems: [WorkoutPlanItem] = mainBlocks
+            .flatMap { block in
+                prescriptions(
+                    from: block,
+                    basePrescription: mainPrescription,
+                    profile: profile,
+                    checkIn: checkIn,
+                    domsAdjustment: domsAdjustment
+                )
+            }
+            .map { .exercise($0) }
+
+        let strengthPhase = WorkoutPlanPhase(
+            kind: .strength,
+            title: "Força",
+            rpeTarget: mainPrescription.rpeTarget,
+            items: mainItems
+        )
+
+        // 3) Acessórios: blocos restantes
+        let accessoryBlocks = Array(blocks.dropFirst(min(2, blocks.count)))
+        let accessoryItems: [WorkoutPlanItem] = accessoryBlocks
+            .flatMap { block in
+                prescriptions(
+                    from: block,
+                    basePrescription: accessoryPrescription,
+                    profile: profile,
+                    checkIn: checkIn,
+                    domsAdjustment: domsAdjustment
+                )
+            }
+            .map { .exercise($0) }
+
+        let accessoryPhase = WorkoutPlanPhase(
+            kind: .accessory,
+            title: "Acessórios",
+            rpeTarget: accessoryPrescription.rpeTarget,
+            items: accessoryItems
+        )
+
+        // 4) Aeróbio guiado (sempre disponível como opção)
+        let aerobicPhase = buildAerobicPhase(
+            sessionType: sessionType,
+            estimatedSessionMinutes: defaultSessionMinutes(profile: profile),
+            soreness: checkIn.sorenessLevel
+        )
+
+        let phases: [WorkoutPlanPhase] = [warmupPhase, strengthPhase, accessoryPhase, aerobicPhase]
+            .filter { !$0.items.isEmpty }
+
+        let duration = estimatedDuration(for: phases)
         let intensity = SpecialistSessionRules.intensity(
             for: profile.level,
             soreness: checkIn.sorenessLevel,
@@ -161,7 +204,7 @@ struct LocalWorkoutPlanComposer: WorkoutPlanComposing, Sendable {
             focus: appliedFocus,
             estimatedDurationMinutes: duration,
             intensity: intensity,
-            exercises: allPrescriptions
+            phases: phases
         )
     }
     
@@ -275,15 +318,138 @@ struct LocalWorkoutPlanComposer: WorkoutPlanComposing, Sendable {
         }
     }
     
-    private func estimatedDuration(for exercises: [ExercisePrescription]) -> Int {
+    private func estimatedDuration(for phases: [WorkoutPlanPhase]) -> Int {
+        let exercises = phases.flatMap(\.exercises)
         let seconds = exercises.reduce(0) { acc, prescription in
             let workTime = Double(prescription.reps.average) * 3.0 * Double(prescription.sets)
             let restTime = Double(prescription.restInterval) * Double(max(0, prescription.sets - 1))
             return acc + Int(workTime + restTime)
         }
-        // Adicionar tempo de aquecimento (~5min) e transições (~2min)
-        let warmupAndTransitions = 7 * 60
-        return max(20, Int(ceil(Double(seconds + warmupAndTransitions) / 60.0)))
+        let activityMinutes = phases
+            .flatMap(\.items)
+            .compactMap { item -> Int? in
+                if case .activity(let activity) = item { return activity.durationMinutes }
+                return nil
+            }
+            .reduce(0, +)
+
+        // Adicionar transições (~2min). Aquecimento guiado já entra via activityMinutes quando presente.
+        let transitionsMinutes = 2
+        let totalMinutes = Int(ceil(Double(seconds) / 60.0)) + activityMinutes + transitionsMinutes
+        return max(20, totalMinutes)
+    }
+
+    // MARK: - Phase Builders
+
+    private func buildWarmupPhase(
+        from blocks: [WorkoutBlock],
+        profile: UserProfile,
+        checkIn: DailyCheckIn,
+        domsAdjustment: SpecialistSessionRules.DOMSAdjustment
+    ) -> WorkoutPlanPhase {
+        let activity = ActivityPrescription(
+            kind: .mobility,
+            title: "Mobilidade + ativação",
+            durationMinutes: domsAdjustment.intensityReduction ? 8 : 6,
+            notes: "Movimentos controlados, sem falhar. Prepare articulações e padrão motor."
+        )
+
+        // Seleciona 1-2 exercícios leves do catálogo já presente (sem inventar exercício).
+        // Heurística: pegar exercícios únicos do início dos blocos selecionados.
+        var seen = Set<String>()
+        let warmupExercises: [WorkoutExercise] = blocks
+            .flatMap(\.exercises)
+            .filter { ex in
+                if seen.contains(ex.id) { return false }
+                seen.insert(ex.id)
+                return true
+            }
+            .prefix(2)
+            .map { $0 }
+
+        let warmupItems: [WorkoutPlanItem] = warmupExercises.map { ex in
+            let prescription = ExercisePrescription(
+                exercise: ex,
+                sets: 1,
+                reps: IntRange(8, 12),
+                restInterval: domsAdjustment.intensityReduction ? 40 : 25,
+                tip: "Aquecimento: ritmo leve, foco em amplitude e controle."
+            )
+            return .exercise(prescription)
+        }
+
+        return WorkoutPlanPhase(
+            kind: .warmup,
+            title: "Aquecimento",
+            rpeTarget: domsAdjustment.intensityReduction ? 5 : 6,
+            items: [.activity(activity)] + warmupItems
+        )
+    }
+
+    private func buildAerobicPhase(
+        sessionType: SpecialistSessionRules.SessionType,
+        estimatedSessionMinutes: Int,
+        soreness: MuscleSorenessLevel
+    ) -> WorkoutPlanPhase {
+        // Duração base ajustada ao tempo disponível do usuário.
+        let base = min(15, max(8, Int(Double(estimatedSessionMinutes) * 0.25)))
+        let minutes = soreness == .strong ? max(8, base - 3) : base
+
+        let activity: ActivityPrescription
+        switch sessionType {
+        case .weightLoss:
+            activity = ActivityPrescription(
+                kind: .aerobicIntervals,
+                title: "Aeróbio intervalado (leve)",
+                durationMinutes: minutes,
+                notes: "Intervalos moderados, sem sprint. Mantenha técnica e respiração."
+            )
+        case .conditioning, .endurance:
+            activity = ActivityPrescription(
+                kind: .aerobicZone2,
+                title: "Aeróbio Zona 2",
+                durationMinutes: minutes,
+                notes: "Ritmo confortável e constante. Deve ser possível conversar."
+            )
+        case .performance:
+            activity = ActivityPrescription(
+                kind: .aerobicIntervals,
+                title: "Condicionamento (intervalos curtos)",
+                durationMinutes: minutes,
+                notes: "Qualidade > quantidade. Recuperação adequada entre esforços."
+            )
+        case .strength:
+            activity = ActivityPrescription(
+                kind: .breathing,
+                title: "Desaceleração + respiração",
+                durationMinutes: min(8, minutes),
+                notes: "Reduza a frequência cardíaca e finalize com controle."
+            )
+        }
+
+        return WorkoutPlanPhase(
+            kind: .aerobic,
+            title: "Aeróbio",
+            rpeTarget: 6,
+            items: [.activity(activity)]
+        )
+    }
+
+    private func defaultSessionMinutes(profile: UserProfile) -> Int {
+        // Heurística simples: estrutura/equipamento + nível determinam o “tamanho típico” de sessão.
+        let base: Int
+        switch profile.availableStructure {
+        case .bodyweight: base = 30
+        case .homeDumbbells: base = 35
+        case .basicGym: base = 45
+        case .fullGym: base = 55
+        }
+
+        switch profile.level {
+        case .beginner: return max(25, base - 5)
+        case .intermediate: return base
+        case .advanced: return base + 5
+        }
     }
     
     private func compatibilityScore(

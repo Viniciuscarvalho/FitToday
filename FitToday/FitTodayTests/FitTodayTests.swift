@@ -34,7 +34,10 @@ final class FitTodayTests: XCTestCase {
             checkIn: DailyCheckIn(focus: .upper, sorenessLevel: .strong, sorenessAreas: [.glutes, .hamstrings])
         )
 
-        guard let prescription = plan.exercises.first else {
+        guard
+            let strengthPhase = plan.phases.first(where: { $0.kind == .strength }),
+            let prescription = strengthPhase.exercises.first
+        else {
             return XCTFail("Esperava exercícios no plano")
         }
 
@@ -74,7 +77,7 @@ final class FitTodayTests: XCTestCase {
         let repo = StubBlocksRepository(blocks: [block])
         let localComposer = LocalWorkoutPlanComposer()
         let remoteClient = MockOpenAIClient(payload: """
-        {"selected_blocks":[{"block_id":"upper_basic","sets_multiplier":1.2,"reps_multiplier":1.1,"rest_adjustment_seconds":5}]}
+        {"phases":[{"kind":"strength","selected_blocks":[{"block_id":"upper_basic","sets_multiplier":1.2,"reps_multiplier":1.1,"rest_adjustment_seconds":5}]},{"kind":"accessory","selected_blocks":[{"block_id":"upper_basic","sets_multiplier":0.9,"reps_multiplier":1.0,"rest_adjustment_seconds":10}]}]}
         """)
         let remoteComposer = OpenAIWorkoutPlanComposer(client: remoteClient, localComposer: localComposer)
         let limiter = MockUsageLimiter(canUse: true)
@@ -88,7 +91,8 @@ final class FitTodayTests: XCTestCase {
         let plan = try await useCase.execute(profile: sampleProfile, checkIn: DailyCheckIn(focus: .upper, sorenessLevel: .none))
 
         XCTAssertTrue(limiter.registerUsageCalled)
-        XCTAssertGreaterThan(plan.exercises.first?.sets ?? 0, block.suggestedSets.average)
+        let strengthSets = plan.phases.first(where: { $0.kind == .strength })?.exercises.first?.sets ?? 0
+        XCTAssertGreaterThan(strengthSets, block.suggestedSets.average)
     }
 
     func testHybridComposerFallsBackWhenLimitReached() async throws {
@@ -96,7 +100,7 @@ final class FitTodayTests: XCTestCase {
         let repo = StubBlocksRepository(blocks: [block])
         let localComposer = LocalWorkoutPlanComposer()
         let remoteClient = MockOpenAIClient(payload: """
-        {"selected_blocks":[{"block_id":"upper_basic"}]}
+        {"phases":[{"kind":"strength","selected_blocks":[{"block_id":"upper_basic"}]},{"kind":"accessory","selected_blocks":[{"block_id":"upper_basic"}]}]}
         """)
         let remoteComposer = OpenAIWorkoutPlanComposer(client: remoteClient, localComposer: localComposer)
         let limiter = MockUsageLimiter(canUse: false)

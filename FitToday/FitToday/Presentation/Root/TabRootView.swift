@@ -19,8 +19,8 @@ struct TabRootView: View {
                 HomeView(resolver: resolver)
             }
 
-            tabView(for: .library) {
-                LibraryView(resolver: resolver)
+            tabView(for: .programs) {
+                ProgramsView(resolver: resolver)
             }
 
             tabView(for: .history) {
@@ -36,7 +36,6 @@ struct TabRootView: View {
     private func tabView(for tab: AppTab, @ViewBuilder content: () -> some View) -> some View {
         NavigationStack(path: pathBinding(for: tab)) {
             content()
-                .navigationTitle(tab.title)
                 .navigationDestination(for: AppRoute.self) { route in
                     routeDestination(for: route)
                 }
@@ -113,9 +112,11 @@ struct TabRootView: View {
                     message: "Erro ao carregar paywall."
                 )
             }
-        case .libraryDetail(let workoutId):
+        case .programDetail(let programId):
+            ProgramDetailView(programId: programId, resolver: resolver)
+        case .programWorkoutDetail(let workoutId):
             LibraryDetailView(workoutId: workoutId, resolver: resolver)
-        case .libraryExerciseDetail(let prescription):
+        case .programExerciseDetail(let prescription):
             LibraryExerciseDetailView(prescription: prescription)
         case .apiKeySettings:
             APIKeySettingsView()

@@ -1,0 +1,184 @@
+[
+  {
+    "id": "prog_push_pull_legs",
+    "name": "Push Pull Legs",
+    "subtitle": "Programa clássico de hipertrofia dividido em 3 treinos complementares",
+    "goal_tag": "strength",
+    "level": "intermediate",
+    "duration_weeks": 8,
+    "hero_image_name": "program_strength_01",
+    "workout_template_ids": [
+      "lib_push_hypertrophy_gym",
+      "lib_pull_hypertrophy_gym",
+      "lib_legs_hypertrophy_gym"
+    ],
+    "estimated_minutes_per_session": 55,
+    "sessions_per_week": 3
+  },
+  {
+    "id": "prog_hiit_fat_burn",
+    "name": "HIIT Queima Total",
+    "subtitle": "4 semanas de alta intensidade para acelerar o metabolismo",
+    "goal_tag": "metabolic",
+    "level": "intermediate",
+    "duration_weeks": 4,
+    "hero_image_name": "program_fullbody_01",
+    "workout_template_ids": [
+      "lib_hiit_weightloss_home",
+      "lib_fullbody_conditioning_home"
+    ],
+    "estimated_minutes_per_session": 30,
+    "sessions_per_week": 4
+  },
+  {
+    "id": "prog_home_full_body",
+    "name": "Full Body em Casa",
+    "subtitle": "Treino completo com halteres para fazer em qualquer lugar",
+    "goal_tag": "strength",
+    "level": "beginner",
+    "duration_weeks": 6,
+    "hero_image_name": "program_fullbody_02",
+    "workout_template_ids": [
+      "lib_upper_dumbbells_home",
+      "lib_lower_dumbbells_home",
+      "lib_core_strength_home"
+    ],
+    "estimated_minutes_per_session": 40,
+    "sessions_per_week": 3
+  },
+  {
+    "id": "prog_conditioning_circuit",
+    "name": "Circuito Funcional",
+    "subtitle": "Condicionamento e resistência com peso corporal",
+    "goal_tag": "conditioning",
+    "level": "beginner",
+    "duration_weeks": 4,
+    "hero_image_name": "program_recovery_01",
+    "workout_template_ids": [
+      "lib_fullbody_conditioning_home",
+      "lib_core_strength_home"
+    ],
+    "estimated_minutes_per_session": 35,
+    "sessions_per_week": 3
+  },
+  {
+    "id": "prog_strength_foundation",
+    "name": "Força Fundamental",
+    "subtitle": "Base sólida com foco nos movimentos compostos essenciais",
+    "goal_tag": "strength",
+    "level": "beginner",
+    "duration_weeks": 6,
+    "hero_image_name": "program_strength_02",
+    "workout_template_ids": [
+      "lib_push_hypertrophy_gym",
+      "lib_pull_hypertrophy_gym",
+      "lib_legs_hypertrophy_gym"
+    ],
+    "estimated_minutes_per_session": 45,
+    "sessions_per_week": 3
+  },
+  {
+    "id": "prog_advanced_strength",
+    "name": "Força Avançada",
+    "subtitle": "Programa intenso para ganhos máximos de força",
+    "goal_tag": "strength",
+    "level": "advanced",
+    "duration_weeks": 12,
+    "hero_image_name": "program_strength_03",
+    "workout_template_ids": [
+      "lib_push_hypertrophy_gym",
+      "lib_pull_hypertrophy_gym",
+      "lib_legs_hypertrophy_gym"
+    ],
+    "estimated_minutes_per_session": 60,
+    "sessions_per_week": 4
+  },
+  {
+    "id": "prog_powerlifting_intro",
+    "name": "Introdução ao Powerlifting",
+    "subtitle": "Domine supino, agachamento e levantamento terra",
+    "goal_tag": "strength",
+    "level": "intermediate",
+    "duration_weeks": 10,
+    "hero_image_name": "program_strength_04",
+    "workout_template_ids": [
+      "lib_push_hypertrophy_gym",
+      "lib_legs_hypertrophy_gym"
+    ],
+    "estimated_minutes_per_session": 65,
+    "sessions_per_week": 3
+  },
+  {
+    "id": "prog_fullbody_express",
+    "name": "Full Body Express",
+    "subtitle": "Treinos rápidos e eficientes para quem tem pouco tempo",
+    "goal_tag": "metabolic",
+    "level": "beginner",
+    "duration_weeks": 4,
+    "hero_image_name": "program_fullbody_03",
+    "workout_template_ids": [
+      "lib_fullbody_conditioning_home",
+      "lib_core_strength_home"
+    ],
+    "estimated_minutes_per_session": 25,
+    "sessions_per_week": 4
+  },
+  {
+    "id": "prog_athletic_performance",
+    "name": "Performance Atlética",
+    "subtitle": "Melhore velocidade, agilidade e potência",
+    "goal_tag": "conditioning",
+    "level": "advanced",
+    "duration_weeks": 8,
+    "hero_image_name": "program_fullbody_04",
+    "workout_template_ids": [
+      "lib_fullbody_conditioning_home",
+      "lib_hiit_weightloss_home"
+    ],
+    "estimated_minutes_per_session": 50,
+    "sessions_per_week": 4
+  },
+  {
+    "id": "prog_mobility_recovery",
+    "name": "Mobilidade & Recuperação",
+    "subtitle": "Alongamentos e exercícios para recuperação ativa",
+    "goal_tag": "conditioning",
+    "level": "beginner",
+    "duration_weeks": 4,
+    "hero_image_name": "program_recovery_02",
+    "workout_template_ids": [
+      "lib_core_strength_home"
+    ],
+    "estimated_minutes_per_session": 20,
+    "sessions_per_week": 5
+  },
+  {
+    "id": "prog_yoga_flexibility",
+    "name": "Yoga & Flexibilidade",
+    "subtitle": "Aumente sua flexibilidade e equilíbrio mental",
+    "goal_tag": "conditioning",
+    "level": "beginner",
+    "duration_weeks": 6,
+    "hero_image_name": "program_recovery_03",
+    "workout_template_ids": [
+      "lib_core_strength_home"
+    ],
+    "estimated_minutes_per_session": 30,
+    "sessions_per_week": 4
+  },
+  {
+    "id": "prog_active_rest",
+    "name": "Descanso Ativo",
+    "subtitle": "Semana leve para recuperação entre programas intensos",
+    "goal_tag": "conditioning",
+    "level": "beginner",
+    "duration_weeks": 1,
+    "hero_image_name": "program_recovery_04",
+    "workout_template_ids": [
+      "lib_core_strength_home"
+    ],
+    "estimated_minutes_per_session": 15,
+    "sessions_per_week": 3
+  }
+]
+

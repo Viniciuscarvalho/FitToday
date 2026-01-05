@@ -39,6 +39,7 @@ struct HistoryView: View {
             }
         }
         .navigationTitle("Histórico")
+        .navigationBarTitleDisplayMode(.large)
         .task {
             viewModel.loadHistory()
         }
@@ -95,16 +96,45 @@ private struct HistoryRow: View {
     }
 
     var body: some View {
-        HStack(spacing: FitTodaySpacing.md) {
-            VStack(alignment: .leading, spacing: FitTodaySpacing.xs) {
-                Text(entry.title)
-                    .font(.headline)
-                Text("\(entry.focusTitle) • \(hourString)")
-                    .font(.subheadline)
-                    .foregroundStyle(FitTodayColor.textSecondary)
+        VStack(alignment: .leading, spacing: FitTodaySpacing.sm) {
+            // Título e status
+            HStack(spacing: FitTodaySpacing.md) {
+                VStack(alignment: .leading, spacing: FitTodaySpacing.xs) {
+                    Text(entry.title)
+                        .font(.headline)
+                    Text("\(entry.focusTitle) • \(hourString)")
+                        .font(.subheadline)
+                        .foregroundStyle(FitTodayColor.textSecondary)
+                }
+                Spacer()
+                FitBadge(text: statusText, style: statusStyle)
             }
-            Spacer()
-            FitBadge(text: statusText, style: statusStyle)
+            
+            // Vínculo com programa (se houver)
+            if let programName = entry.programName {
+                HStack(spacing: FitTodaySpacing.xs) {
+                    Image(systemName: "rectangle.stack.fill")
+                        .font(.system(.caption))
+                        .foregroundStyle(FitTodayColor.brandPrimary)
+                    Text(programName)
+                        .font(.system(.caption, weight: .medium))
+                        .foregroundStyle(FitTodayColor.brandPrimary)
+                }
+            }
+            
+            // Métricas de evolução (se houver)
+            if entry.status == .completed && (entry.durationMinutes != nil || entry.caloriesBurned != nil) {
+                HStack(spacing: FitTodaySpacing.md) {
+                    if let duration = entry.durationMinutes {
+                        Label("\(duration) min", systemImage: "clock")
+                    }
+                    if let calories = entry.caloriesBurned {
+                        Label("\(calories) kcal", systemImage: "flame")
+                    }
+                }
+                .font(.system(.caption))
+                .foregroundStyle(FitTodayColor.textSecondary)
+            }
         }
         .padding(.vertical, FitTodaySpacing.sm)
     }

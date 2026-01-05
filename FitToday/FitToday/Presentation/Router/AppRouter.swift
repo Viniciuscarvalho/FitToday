@@ -11,14 +11,14 @@ import SwiftUI
 
 enum AppTab: Hashable, CaseIterable {
     case home
-    case library
+    case programs  // Renomeado de library
     case history
     case profile
 
     var title: String {
         switch self {
         case .home: return "Home"
-        case .library: return "Biblioteca"
+        case .programs: return "Programas"
         case .history: return "Histórico"
         case .profile: return "Perfil"
         }
@@ -27,7 +27,7 @@ enum AppTab: Hashable, CaseIterable {
     var systemImage: String {
         switch self {
         case .home: return "house"
-        case .library: return "books.vertical"
+        case .programs: return "rectangle.stack.fill"
         case .history: return "clock.fill"
         case .profile: return "person.crop.circle"
         }
@@ -44,8 +44,9 @@ enum AppRoute: Hashable {
     case workoutExercisePreview(ExercisePrescription)  // Preview de exercício (não altera índice)
     case workoutSummary
     case paywall
-    case libraryDetail(String)
-    case libraryExerciseDetail(ExercisePrescription)  // Detalhe de exercício na biblioteca
+    case programDetail(String)  // Detalhe do programa
+    case programWorkoutDetail(String)  // Detalhe de um treino dentro do programa
+    case programExerciseDetail(ExercisePrescription)  // Detalhe de exercício na biblioteca/programa
     case apiKeySettings  // Configuração de chave de API do usuário
 }
 

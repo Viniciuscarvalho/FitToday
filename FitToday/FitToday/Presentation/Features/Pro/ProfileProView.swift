@@ -45,6 +45,7 @@ struct ProfileProView: View {
         }
         .background(FitTodayColor.background.ignoresSafeArea())
         .navigationTitle("Perfil")
+        .navigationBarTitleDisplayMode(.large)
         .task {
             await loadEntitlement()
         }
@@ -176,8 +177,9 @@ struct ProfileProView: View {
                 Divider()
                     .padding(.leading, 56)
                 
-                SettingsRow(icon: "brain", title: "Configurar IA", badge: aiSettingsBadge) {
-                    router.push(.apiKeySettings, on: .profile)
+                SettingsRow(icon: "flame", title: "Refazer Questionário Diário") {
+                    resetDailyCheckIn()
+                    router.push(.dailyQuestionnaire, on: .profile)
                 }
                 
                 Divider()
@@ -192,13 +194,6 @@ struct ProfileProView: View {
                 Divider()
                     .padding(.leading, 56)
                 
-                SettingsRow(icon: "bell", title: "Notificações") {
-                    openNotificationSettings()
-                }
-                
-                Divider()
-                    .padding(.leading, 56)
-                
                 SettingsRow(icon: "questionmark.circle", title: "Ajuda e Suporte") {
                     openSupportURL()
                 }
@@ -208,8 +203,11 @@ struct ProfileProView: View {
         }
     }
     
-    private var aiSettingsBadge: String? {
-        OpenAIConfiguration.isUserKeyConfigured ? nil : "Configurar"
+    private func resetDailyCheckIn() {
+        // Limpa o questionário do dia para permitir responder novamente
+        UserDefaults.standard.removeObject(forKey: AppStorageKeys.lastDailyCheckInDate)
+        UserDefaults.standard.removeObject(forKey: AppStorageKeys.lastDailyCheckInData)
+        DailyWorkoutStateManager.shared.resetForNewDay()
     }
     
     // MARK: - Debug Section (only in DEBUG builds)

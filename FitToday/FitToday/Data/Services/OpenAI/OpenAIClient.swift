@@ -62,12 +62,24 @@ actor OpenAIClient: OpenAIClienting {
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
         request.addValue("Bearer \(configuration.apiKey)", forHTTPHeaderField: "Authorization")
 
+        // Formato correto para Chat Completions API (/v1/chat/completions)
+        let messages: [[String: String]] = [
+            [
+                "role": "system",
+                "content": "Você é um personal trainer experiente que monta treinos personalizados. Sempre responda em JSON válido seguindo o schema solicitado."
+            ],
+            [
+                "role": "user",
+                "content": prompt
+            ]
+        ]
+        
         let payload: [String: Any] = [
             "model": configuration.model,
-            "input": prompt,
-            "max_output_tokens": configuration.maxTokens,
+            "messages": messages,
+            "max_tokens": configuration.maxTokens,
             "temperature": configuration.temperature,
-            "response_format": ["type": "json_schema", "json_schema": ["name": "WorkoutPlanResponse", "schema": ["type": "object"]]]
+            "response_format": ["type": "json_object"]
         ]
         request.httpBody = try JSONSerialization.data(withJSONObject: payload, options: [])
 

@@ -20,7 +20,11 @@ struct WorkoutHistoryMapper {
             planId: model.planId,
             title: model.title,
             focus: focus,
-            status: status
+            status: status,
+            programId: model.programId,
+            programName: model.programName,
+            durationMinutes: model.durationMinutes,
+            caloriesBurned: model.caloriesBurned
         )
     }
 
@@ -31,7 +35,11 @@ struct WorkoutHistoryMapper {
             planId: entry.planId,
             title: entry.title,
             focusRaw: entry.focus.rawValue,
-            statusRaw: entry.status.rawValue
+            statusRaw: entry.status.rawValue,
+            programId: entry.programId,
+            programName: entry.programName,
+            durationMinutes: entry.durationMinutes,
+            caloriesBurned: entry.caloriesBurned
         )
     }
 }

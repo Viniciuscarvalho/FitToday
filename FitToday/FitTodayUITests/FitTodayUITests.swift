@@ -28,7 +28,7 @@ final class FitTodayUITests: XCTestCase {
         app.launch()
 
         XCTAssertTrue(app.tabBars.buttons["Home"].waitForExistence(timeout: 5))
-        XCTAssertTrue(app.tabBars.buttons["Biblioteca"].exists)
+        XCTAssertTrue(app.tabBars.buttons["Programas"].exists)
         XCTAssertTrue(app.tabBars.buttons["Histórico"].exists)
         XCTAssertTrue(app.tabBars.buttons["Perfil"].exists)
     }

@@ -40,9 +40,7 @@ struct AppContainer {
             SwiftDataWorkoutHistoryRepository(modelContainer: modelContainer)
         }.inObjectScope(.container)
 
-        let blocksRepository = BundleWorkoutBlocksRepository()
-        container.register(WorkoutBlocksRepository.self) { _ in blocksRepository }
-            .inObjectScope(.container)
+        // WorkoutBlocksRepository é registrado após configurar ExerciseDB (para permitir enriquecimento de mídia/instruções).
 
         // StoreKit Service e EntitlementRepository
         // Nota: StoreKitService é @MainActor, então precisa ser criado no main thread
@@ -69,22 +67,35 @@ struct AppContainer {
             container.register(ExerciseMediaResolving.self) { _ in mediaResolver }
                 .inObjectScope(.container)
 
+            let blocksRepository = BundleWorkoutBlocksRepository(mediaResolver: mediaResolver, exerciseService: exerciseDBService)
+            container.register(WorkoutBlocksRepository.self) { _ in blocksRepository }
+                .inObjectScope(.container)
+
             let libraryRepository = BundleLibraryWorkoutsRepository(mediaResolver: mediaResolver)
             container.register(LibraryWorkoutsRepository.self) { _ in libraryRepository }
                 .inObjectScope(.container)
         } else {
             // Sem configuração, usa resolver sem serviço (apenas fallback/placeholder)
-            let mediaResolver = ExerciseMediaResolver(service: nil)
+            let mediaResolver = ExerciseMediaResolver(service: nil as (any ExerciseDBServicing)?)
             container.register(ExerciseMediaResolving.self) { _ in mediaResolver }
                 .inObjectScope(.container)
             #if DEBUG
             print("[AppContainer] ExerciseDB não configurado - usando apenas fallback local")
             #endif
 
+            let blocksRepository = BundleWorkoutBlocksRepository()
+            container.register(WorkoutBlocksRepository.self) { _ in blocksRepository }
+                .inObjectScope(.container)
+
             let libraryRepository = BundleLibraryWorkoutsRepository(mediaResolver: mediaResolver)
             container.register(LibraryWorkoutsRepository.self) { _ in libraryRepository }
                 .inObjectScope(.container)
         }
+
+        // ProgramRepository - carrega programas do bundle
+        let programRepository = BundleProgramRepository()
+        container.register(ProgramRepository.self) { _ in programRepository }
+            .inObjectScope(.container)
 
         // OpenAI - Usa chave do usuário (armazenada no Keychain)
         // O cliente é criado sob demanda quando a chave estiver configurada

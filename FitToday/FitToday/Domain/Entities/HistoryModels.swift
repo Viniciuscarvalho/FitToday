@@ -19,6 +19,12 @@ struct WorkoutHistoryEntry: Codable, Hashable, Sendable, Identifiable {
     var title: String
     var focus: DailyFocus
     var status: WorkoutStatus
+    
+    // Novos campos para evolução e vínculo com programa
+    var programId: String?        // ID do programa (se atrelado a um)
+    var programName: String?      // Nome do programa para exibição
+    var durationMinutes: Int?     // Duração real do treino em minutos
+    var caloriesBurned: Int?      // Calorias estimadas queimadas
 
     init(
         id: UUID = .init(),
@@ -26,7 +32,11 @@ struct WorkoutHistoryEntry: Codable, Hashable, Sendable, Identifiable {
         planId: UUID,
         title: String,
         focus: DailyFocus,
-        status: WorkoutStatus
+        status: WorkoutStatus,
+        programId: String? = nil,
+        programName: String? = nil,
+        durationMinutes: Int? = nil,
+        caloriesBurned: Int? = nil
     ) {
         self.id = id
         self.date = date
@@ -34,6 +44,10 @@ struct WorkoutHistoryEntry: Codable, Hashable, Sendable, Identifiable {
         self.title = title
         self.focus = focus
         self.status = status
+        self.programId = programId
+        self.programName = programName
+        self.durationMinutes = durationMinutes
+        self.caloriesBurned = caloriesBurned
     }
 }
 

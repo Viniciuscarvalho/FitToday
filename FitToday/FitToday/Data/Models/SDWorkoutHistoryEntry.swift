@@ -16,6 +16,12 @@ final class SDWorkoutHistoryEntry {
     var title: String
     var focusRaw: String
     var statusRaw: String
+    
+    // Novos campos para evolução e vínculo com programa
+    var programId: String?
+    var programName: String?
+    var durationMinutes: Int?
+    var caloriesBurned: Int?
 
     init(
         id: UUID,
@@ -23,7 +29,11 @@ final class SDWorkoutHistoryEntry {
         planId: UUID,
         title: String,
         focusRaw: String,
-        statusRaw: String
+        statusRaw: String,
+        programId: String? = nil,
+        programName: String? = nil,
+        durationMinutes: Int? = nil,
+        caloriesBurned: Int? = nil
     ) {
         self.id = id
         self.date = date
@@ -31,6 +41,10 @@ final class SDWorkoutHistoryEntry {
         self.title = title
         self.focusRaw = focusRaw
         self.statusRaw = statusRaw
+        self.programId = programId
+        self.programName = programName
+        self.durationMinutes = durationMinutes
+        self.caloriesBurned = caloriesBurned
     }
 }
 

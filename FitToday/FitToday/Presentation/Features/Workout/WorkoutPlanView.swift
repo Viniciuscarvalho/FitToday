@@ -180,23 +180,111 @@ struct WorkoutPlanView: View {
 
     private func exerciseList(for plan: WorkoutPlan) -> some View {
         VStack(alignment: .leading, spacing: FitTodaySpacing.md) {
-            SectionHeader(title: "Exercícios", actionTitle: nil, action: nil)
+            ForEach(plan.phases) { phase in
+                PhaseSection(phase: phase)
+            }
+        }
+    }
+
+    private struct PhaseSection: View {
+        @EnvironmentObject private var router: AppRouter
+        @EnvironmentObject private var sessionStore: WorkoutSessionStore
+
+        let phase: WorkoutPlanPhase
+
+        var body: some View {
+            VStack(alignment: .leading, spacing: FitTodaySpacing.sm) {
+                SectionHeader(
+                    title: phaseHeaderTitle,
+                    actionTitle: nil,
+                    action: nil
+                )
                 .padding(.horizontal, -FitTodaySpacing.md)
 
-            LazyVStack(spacing: FitTodaySpacing.sm) {
-                ForEach(Array(plan.exercises.enumerated()), id: \.element.exercise.id) { index, prescription in
-                    WorkoutExerciseRow(
-                        index: index + 1,
-                        prescription: prescription,
-                        isCurrent: index == sessionStore.currentExerciseIndex
-                    )
-                    .contentShape(Rectangle())
-                    .onTapGesture {
-                        // Navega para preview sem alterar o índice atual do treino
-                        router.push(.workoutExercisePreview(prescription), on: .home)
+                LazyVStack(spacing: FitTodaySpacing.sm) {
+                    ForEach(phase.items.indices, id: \.self) { idx in
+                        let item = phase.items[idx]
+                        switch item {
+                        case .activity(let activity):
+                            ActivityRow(activity: activity)
+                        case .exercise(let prescription):
+                            let globalIndex = flattenedExerciseIndex(for: prescription.exercise.id)
+                            WorkoutExerciseRow(
+                                index: globalIndex + 1,
+                                prescription: prescription,
+                                isCurrent: globalIndex == sessionStore.currentExerciseIndex
+                            )
+                            .contentShape(Rectangle())
+                            .onTapGesture {
+                                router.push(.workoutExercisePreview(prescription), on: .home)
+                            }
+                            .accessibilityHint("Toque para ver detalhes do exercício")
+                        }
                     }
-                    .accessibilityHint("Toque para ver detalhes do exercício")
                 }
+            }
+            .padding(.top, FitTodaySpacing.md)
+        }
+
+        private var phaseHeaderTitle: String {
+            if let rpe = phase.rpeTarget {
+                return "\(phase.title) · RPE \(rpe)"
+            }
+            return phase.title
+        }
+
+        /// Mapeia o exercício atual para o índice global (plano “flat”) para compatibilidade com o fluxo da sessão.
+        private func flattenedExerciseIndex(for exerciseId: String) -> Int {
+            sessionStore.exercises.firstIndex(where: { $0.exercise.id == exerciseId }) ?? 0
+        }
+    }
+
+    private struct ActivityRow: View {
+        let activity: ActivityPrescription
+
+        var body: some View {
+            HStack(alignment: .top, spacing: FitTodaySpacing.md) {
+                Image(systemName: iconName)
+                    .font(.system(.title3, weight: .semibold))
+                    .foregroundStyle(FitTodayColor.brandPrimary)
+                    .frame(width: 28)
+
+                VStack(alignment: .leading, spacing: FitTodaySpacing.xs) {
+                    Text(activity.title)
+                        .font(.system(.body, weight: .semibold))
+                        .foregroundStyle(FitTodayColor.textPrimary)
+
+                    Text("\(activity.durationMinutes) min")
+                        .font(.system(.footnote))
+                        .foregroundStyle(FitTodayColor.textSecondary)
+
+                    if let notes = activity.notes {
+                        Text(notes)
+                            .font(.system(.caption))
+                            .foregroundStyle(FitTodayColor.textTertiary)
+                            .lineLimit(2)
+                    }
+                }
+
+                Spacer()
+
+                FitBadge(text: "GUIADO", style: .info)
+            }
+            .padding()
+            .background(FitTodayColor.surface)
+            .cornerRadius(FitTodayRadius.md)
+            .fitCardShadow()
+            .accessibilityElement(children: .combine)
+            .accessibilityLabel("\(activity.title), \(activity.durationMinutes) minutos")
+        }
+
+        private var iconName: String {
+            switch activity.kind {
+            case .mobility: return "figure.cooldown"
+            case .aerobicZone2: return "heart"
+            case .aerobicIntervals: return "waveform.path.ecg"
+            case .breathing: return "lungs"
+            case .cooldown: return "leaf"
             }
         }
     }

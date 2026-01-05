@@ -30,3 +30,8 @@ protocol LibraryWorkoutsRepository: Sendable {
     func loadWorkouts() async throws -> [LibraryWorkout]
 }
 
+protocol ProgramRepository: Sendable {
+    func listPrograms() async throws -> [Program]
+    func getProgram(id: String) async throws -> Program?
+}
+

@@ -23,52 +23,101 @@ struct OpenAIWorkoutPlanComposer: WorkoutPlanComposing {
         profile: UserProfile,
         checkIn: DailyCheckIn
     ) async throws -> WorkoutPlan {
+        // Base local (fallback e também fonte de fases guiadas/aquecimento/aeróbio)
+        let localPlan = try await localComposer.composePlan(blocks: blocks, profile: profile, checkIn: checkIn)
+
         let prompt = promptText(blocks: blocks, profile: profile, checkIn: checkIn)
         let cacheKey = Hashing.sha256(prompt)
         let data = try await client.sendJSONPrompt(prompt: prompt, cachedKey: cacheKey)
-        let response = try JSONDecoder().decode(OpenAIPlanResponse.self, from: data)
-        let plan = try await assemblePlan(response: response, blocks: blocks, profile: profile, checkIn: checkIn)
-        return plan
+        
+        // 1. Decodificar resposta do Chat Completions
+        let chatResponse = try JSONDecoder().decode(ChatCompletionResponse.self, from: data)
+        
+        // 2. Extrair o conteúdo JSON da mensagem do assistente
+        guard let content = chatResponse.choices.first?.message.content,
+              let contentData = content.data(using: .utf8) else {
+            logger("Resposta vazia do OpenAI - fallback para local")
+            return localPlan
+        }
+        
+        // 3. Decodificar o JSON do plano de treino
+        let response = try JSONDecoder().decode(OpenAIPlanResponse.self, from: contentData)
+        return assemblePlan(response: response, blocks: blocks, profile: profile, checkIn: checkIn, fallback: localPlan)
     }
 
     private func assemblePlan(
         response: OpenAIPlanResponse,
         blocks: [WorkoutBlock],
         profile: UserProfile,
-        checkIn: DailyCheckIn
-    ) async throws -> WorkoutPlan {
+        checkIn: DailyCheckIn,
+        fallback: WorkoutPlan
+    ) -> WorkoutPlan {
         let blockMap = Dictionary(uniqueKeysWithValues: blocks.map { ($0.id, $0) })
-        let orderedBlocks = response.selectedBlocks.compactMap { blockMap[$0.blockId] }
-        guard !orderedBlocks.isEmpty else {
-            return try await awaitFallback(blocks: blocks, profile: profile, checkIn: checkIn)
+
+        // Monta fases a partir do retorno do OpenAI (apenas strength/accessory).
+        let soreness = checkIn.sorenessLevel
+        let mainPrescription = SpecialistSessionRules.mainPrescription(for: SpecialistSessionRules.sessionType(for: profile.mainGoal))
+        let accessoryPrescription = SpecialistSessionRules.accessoryPrescription(for: SpecialistSessionRules.sessionType(for: profile.mainGoal))
+
+        let aiPhases: [WorkoutPlanPhase] = response.phases.compactMap { phase in
+            let kind = WorkoutPlanPhase.Kind(rawValue: phase.kind) ?? .strength
+            let title: String
+            let rpe: Int?
+            let basePrescription: SpecialistSessionRules.PhasePrescription
+
+            switch kind {
+            case .strength:
+                title = "Força"
+                rpe = mainPrescription.rpeTarget
+                basePrescription = mainPrescription
+            case .accessory:
+                title = "Acessórios"
+                rpe = accessoryPrescription.rpeTarget
+                basePrescription = accessoryPrescription
+            default:
+                // Para manter escopo controlado, ignoramos outros kinds retornados
+                return nil
+            }
+
+            let items: [WorkoutPlanItem] = phase.selectedBlocks.flatMap { selected -> [WorkoutPlanItem] in
+                guard let block = blockMap[selected.blockId] else { return [] }
+                let adjusted = applyAdjustments(
+                    selected,
+                    block: block,
+                    profile: profile,
+                    soreness: soreness,
+                    basePrescription: basePrescription
+                )
+                return adjusted.map { WorkoutPlanItem.exercise($0) }
+            }
+
+            return WorkoutPlanPhase(kind: kind, title: title, rpeTarget: rpe, items: items)
         }
 
-        var exercisePrescriptions: [ExercisePrescription] = []
-        for selected in response.selectedBlocks {
-            guard let block = blockMap[selected.blockId] else { continue }
-            exercisePrescriptions.append(contentsOf: applyAdjustments(selected, block: block, profile: profile, soreness: checkIn.sorenessLevel))
+        // Se IA não retornou nada útil, fallback total.
+        guard !aiPhases.isEmpty, aiPhases.contains(where: { !$0.exercises.isEmpty }) else {
+            return fallback
         }
 
-        if exercisePrescriptions.isEmpty {
-            return try await awaitFallback(blocks: blocks, profile: profile, checkIn: checkIn)
-        }
+        // Preserva aquecimento/aeróbio do plano local para UX consistente.
+        let warmup = fallback.phases.first(where: { $0.kind == .warmup })
+        let aerobic = fallback.phases.first(where: { $0.kind == .aerobic })
+        let finisher = fallback.phases.first(where: { $0.kind == .finisher })
 
-        let appliedFocus = checkIn.focus == .surprise ? (orderedBlocks.first?.group ?? .fullBody) : checkIn.focus
-        let totalSeconds: Int = exercisePrescriptions.reduce(0) { partial, prescription in
-            let avgReps = prescription.reps.average
-            let work = Double(avgReps) * 3.0 * Double(prescription.sets)
-            let rest = Double(prescription.restInterval) * Double(max(0, prescription.sets - 1))
-            return partial + Int(work + rest)
-        }
-        let duration = max(20, totalSeconds / 60)
-        let intensity = localComposerIntensity(for: profile.level, soreness: checkIn.sorenessLevel, goal: profile.mainGoal)
+        let phases = [warmup] + aiPhases + [finisher, aerobic]
+        let finalPhases = phases.compactMap { $0 }.filter { !$0.items.isEmpty }
+
+        let duration = estimateDurationMinutes(phases: finalPhases)
+        let intensity = SpecialistSessionRules.intensity(for: profile.level, soreness: checkIn.sorenessLevel, goal: profile.mainGoal)
+        let appliedFocus = checkIn.focus == .surprise ? (blocks.first?.group ?? .fullBody) : checkIn.focus
 
         return WorkoutPlan(
-            title: localComposerTitle(for: appliedFocus, goal: profile.mainGoal),
+            title: fallback.title,
             focus: appliedFocus,
             estimatedDurationMinutes: duration,
             intensity: intensity,
-            exercises: exercisePrescriptions
+            phases: finalPhases,
+            createdAt: fallback.createdAt
         )
     }
 
@@ -76,22 +125,24 @@ struct OpenAIWorkoutPlanComposer: WorkoutPlanComposing {
         _ adjustment: OpenAIPlanResponse.SelectedBlock,
         block: WorkoutBlock,
         profile: UserProfile,
-        soreness: MuscleSorenessLevel
+        soreness: MuscleSorenessLevel,
+        basePrescription: SpecialistSessionRules.PhasePrescription
     ) -> [ExercisePrescription] {
-        let baseSets = block.suggestedSets.average
+        // Base: usa prescrição da fase (mais coerente com personal-active) como baseline.
+        let baseSets = (basePrescription.setsRange.lowerBound + basePrescription.setsRange.upperBound) / 2
         let setMultiplier = adjustment.setsMultiplier ?? 1.0
         let repsMultiplier = adjustment.repsMultiplier ?? goalBias(for: profile.mainGoal)
         let restDelta = adjustment.restAdjustmentSeconds ?? restDelta(for: soreness)
 
         return block.exercises.map { exercise in
             let setsValue = max(1, Int(Double(baseSets) * setMultiplier))
-            let lower = max(5, Int(Double(block.suggestedReps.lowerBound) * repsMultiplier))
-            let upper = max(lower, Int(Double(block.suggestedReps.upperBound) * repsMultiplier))
+            let lower = max(1, Int(Double(basePrescription.repsRange.lowerBound) * repsMultiplier))
+            let upper = max(lower, Int(Double(basePrescription.repsRange.upperBound) * repsMultiplier))
             return ExercisePrescription(
                 exercise: exercise,
                 sets: setsValue,
                 reps: IntRange(lower, upper),
-                restInterval: max(10, block.restInterval + restDelta),
+                restInterval: max(10, TimeInterval(basePrescription.restSeconds) + restDelta),
                 tip: exercise.instructions.first
             )
         }
@@ -107,9 +158,13 @@ struct OpenAIWorkoutPlanComposer: WorkoutPlanComposing {
 
         let goalRules = goalSpecificRules(for: profile.mainGoal)
         let domsRules = domsSpecificRules(for: checkIn.sorenessLevel)
+        let guidelines = loadPersonalActiveGuidelines(for: profile.mainGoal)
 
         return """
         Você é um personal trainer especialista. Selecione e ajuste blocos de treino do catálogo.
+
+        GUIDELINES (personal-active, siga como regras):
+        \(guidelines)
 
         PERFIL: objetivo=\(profile.mainGoal.rawValue), nível=\(profile.level.rawValue), estrutura=\(profile.availableStructure.rawValue)
         CHECK-IN: foco=\(checkIn.focus.rawValue), DOMS=\(checkIn.sorenessLevel.rawValue), áreas=[\(checkIn.sorenessAreas.map(\.rawValue).joined(separator: ","))]
@@ -121,7 +176,7 @@ struct OpenAIWorkoutPlanComposer: WorkoutPlanComposing {
         \(domsRules)
 
         FORMATO DE RESPOSTA (JSON OBRIGATÓRIO):
-        {"selected_blocks":[{"block_id":"ID","sets_multiplier":1.0,"reps_multiplier":1.0,"rest_adjustment_seconds":0}]}
+        {"phases":[{"kind":"strength","selected_blocks":[{"block_id":"ID","sets_multiplier":1.0,"reps_multiplier":1.0,"rest_adjustment_seconds":0}]},{"kind":"accessory","selected_blocks":[{"block_id":"ID","sets_multiplier":1.0,"reps_multiplier":1.0,"rest_adjustment_seconds":0}]}]}
 
         REGRAS CRÍTICAS:
         - Retorne APENAS JSON válido, sem texto adicional.
@@ -129,7 +184,7 @@ struct OpenAIWorkoutPlanComposer: WorkoutPlanComposing {
         - sets_multiplier: 0.7-1.3 (0.7=redução, 1.3=aumento)
         - reps_multiplier: 0.8-1.2
         - rest_adjustment_seconds: -30 a +60
-        - Selecione 2-3 blocos compatíveis com o foco do dia.
+        - Selecione 2 blocos para strength e 1-2 blocos para accessory (avançado tende a 2 acessórios).
 
         CATÁLOGO:
         [\(blockSummaries)]
@@ -219,13 +274,47 @@ struct OpenAIWorkoutPlanComposer: WorkoutPlanComposing {
         }
     }
 
-    private func awaitFallback(
-        blocks: [WorkoutBlock],
-        profile: UserProfile,
-        checkIn: DailyCheckIn
-    ) async throws -> WorkoutPlan {
-        logger("Fallback para motor local")
-        return try await localComposer.composePlan(blocks: blocks, profile: profile, checkIn: checkIn)
+    private func loadPersonalActiveGuidelines(for goal: FitnessGoal) -> String {
+        let resourceName: String
+        switch goal {
+        case .weightLoss:
+            resourceName = "personal_active_emagrecimento"
+        case .hypertrophy:
+            resourceName = "personal_active_forca_pura"
+        case .performance:
+            resourceName = "personal_active_performance"
+        case .conditioning, .endurance:
+            resourceName = "personal_active_condicionamento"
+        }
+
+        guard let url = Bundle.main.url(forResource: resourceName, withExtension: "md"),
+              let data = try? Data(contentsOf: url),
+              let text = String(data: data, encoding: .utf8)
+        else {
+            return ""
+        }
+
+        // Evita prompt muito grande.
+        return String(text.prefix(2500))
+    }
+
+    private func estimateDurationMinutes(phases: [WorkoutPlanPhase]) -> Int {
+        let exercises = phases.flatMap(\.exercises)
+        let seconds = exercises.reduce(0) { acc, prescription in
+            let workTime = Double(prescription.reps.average) * 3.0 * Double(prescription.sets)
+            let restTime = Double(prescription.restInterval) * Double(max(0, prescription.sets - 1))
+            return acc + Int(workTime + restTime)
+        }
+
+        let activityMinutes = phases
+            .flatMap(\.items)
+            .compactMap { item -> Int? in
+                if case .activity(let activity) = item { return activity.durationMinutes }
+                return nil
+            }
+            .reduce(0, +)
+
+        return max(20, Int(ceil(Double(seconds) / 60.0)) + activityMinutes + 2)
     }
 
     private func localComposerTitle(for focus: DailyFocus, goal: FitnessGoal) -> String {
@@ -257,7 +346,33 @@ struct OpenAIWorkoutPlanComposer: WorkoutPlanComposing {
     }
 }
 
+// MARK: - Chat Completions Response Models
+
+/// Resposta completa da API Chat Completions
+private struct ChatCompletionResponse: Decodable {
+    let choices: [Choice]
+    
+    struct Choice: Decodable {
+        let message: Message
+    }
+    
+    struct Message: Decodable {
+        let content: String?
+    }
+}
+
+/// Estrutura do JSON retornado pelo modelo (dentro do content)
 private struct OpenAIPlanResponse: Decodable {
+    struct Phase: Decodable {
+        let kind: String
+        let selectedBlocks: [SelectedBlock]
+
+        private enum CodingKeys: String, CodingKey {
+            case kind
+            case selectedBlocks = "selected_blocks"
+        }
+    }
+
     struct SelectedBlock: Decodable {
         let blockId: String
         let setsMultiplier: Double?
@@ -272,11 +387,7 @@ private struct OpenAIPlanResponse: Decodable {
         }
     }
 
-    let selectedBlocks: [SelectedBlock]
-
-    private enum CodingKeys: String, CodingKey {
-        case selectedBlocks = "selected_blocks"
-    }
+    let phases: [Phase]
 }
 
 struct HybridWorkoutPlanComposer: WorkoutPlanComposing {
@@ -319,22 +430,37 @@ struct HybridWorkoutPlanComposer: WorkoutPlanComposing {
     }
 }
 
-/// Compositor que verifica dinamicamente se o usuário tem chave de API configurada
-/// Cria o cliente OpenAI sob demanda quando necessário
+/// Capacidades de IA disponíveis apenas para usuários Pro
+enum AICapability: String, CaseIterable {
+    case fineTuning = "ajuste_fino"           // Ajuste fino de volume/intensidade
+    case dailyPersonalization = "personalizacao_diaria"  // Personalização baseada no check-in
+    case blockReordering = "reordenacao"      // Reordenação inteligente de blocos
+    case explanations = "explicacoes"         // Linguagem/explicações personalizadas
+}
+
+/// Compositor que verifica dinamicamente:
+/// 1. Se o usuário é PRO
+/// 2. Se tem chave de API configurada
+/// 3. Cria o cliente OpenAI sob demanda quando necessário
+///
+/// Usuários FREE sempre usam o compositor local.
 struct DynamicHybridWorkoutPlanComposer: WorkoutPlanComposing {
     private let localComposer: LocalWorkoutPlanComposer
     private let usageLimiter: OpenAIUsageLimiting?
+    private let entitlementProvider: (() async -> ProEntitlement)?
     private let clock: () -> Date
     private let logger: (String) -> Void
 
     init(
         localComposer: LocalWorkoutPlanComposer,
         usageLimiter: OpenAIUsageLimiting?,
+        entitlementProvider: (() async -> ProEntitlement)? = nil,
         clock: @escaping () -> Date = { Date() },
         logger: @escaping (String) -> Void = { print("[DynamicHybrid]", $0) }
     ) {
         self.localComposer = localComposer
         self.usageLimiter = usageLimiter
+        self.entitlementProvider = entitlementProvider
         self.clock = clock
         self.logger = logger
     }
@@ -346,9 +472,16 @@ struct DynamicHybridWorkoutPlanComposer: WorkoutPlanComposing {
     ) async throws -> WorkoutPlan {
         let now = clock()
         
+        // GATING PRO: Verificar se usuário é Pro
+        let entitlement = await resolveEntitlement()
+        guard entitlement.isPro else {
+            logger("Usuário FREE - usando compositor local (IA requer PRO)")
+            return try await localComposer.composePlan(blocks: blocks, profile: profile, checkIn: checkIn)
+        }
+        
         // Verificar se o usuário tem chave de API configurada
         guard let configuration = OpenAIConfiguration.loadFromUserKey() else {
-            logger("Sem chave de API do usuário - usando compositor local")
+            logger("PRO sem chave de API configurada - usando compositor local")
             return try await localComposer.composePlan(blocks: blocks, profile: profile, checkIn: checkIn)
         }
         
@@ -367,7 +500,7 @@ struct DynamicHybridWorkoutPlanComposer: WorkoutPlanComposing {
         )
         
         do {
-            logger("Usando OpenAI para refinar plano")
+            logger("PRO: Usando OpenAI para refinar plano (capacidades: ajuste fino, personalização, reordenação, explicações)")
             let plan = try await remoteComposer.composePlan(blocks: blocks, profile: profile, checkIn: checkIn)
             await usageLimiter?.registerUsage(userId: profile.id, on: now)
             return plan
@@ -375,6 +508,23 @@ struct DynamicHybridWorkoutPlanComposer: WorkoutPlanComposing {
             logger("Erro no OpenAI: \(error.localizedDescription) - fallback para local")
             return try await localComposer.composePlan(blocks: blocks, profile: profile, checkIn: checkIn)
         }
+    }
+    
+    private func resolveEntitlement() async -> ProEntitlement {
+        // Usar provider se disponível
+        if let provider = entitlementProvider {
+            return await provider()
+        }
+        
+        // Verificar debug override
+        #if DEBUG
+        if DebugEntitlementOverride.shared.isEnabled {
+            return DebugEntitlementOverride.shared.entitlement
+        }
+        #endif
+        
+        // Default: Free
+        return .free
     }
 }
 

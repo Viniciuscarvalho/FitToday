@@ -49,12 +49,12 @@ struct LibraryWorkoutsLoader: Sendable {
     private let fileName: String
     private let bundle: Bundle
 
-    init(fileName: String = "LibraryWorkoutsSeed", bundle: Bundle = .main) {
+    nonisolated init(fileName: String = "LibraryWorkoutsSeed", bundle: Bundle = .main) {
         self.fileName = fileName
         self.bundle = bundle
     }
 
-    fileprivate func loadDTOs() throws -> [LibraryWorkoutDTO] {
+    nonisolated fileprivate func loadDTOs() throws -> [LibraryWorkoutDTO] {
         guard let url = bundle.url(forResource: fileName, withExtension: "json") else {
             throw DomainError.repositoryFailure(reason: "seed \(fileName).json não encontrado no bundle.")
         }
@@ -150,7 +150,14 @@ private struct LibraryExerciseDTO: Codable {
         else { return nil }
 
         let normalizedId = normalizer(id)
-        let resolvedMedia = await resolveMedia(using: mediaResolver, normalizedId: normalizedId)
+        let resolvedMedia = await resolveMedia(
+            using: mediaResolver,
+            normalizedId: normalizedId,
+            name: name,
+            muscle: muscle,
+            equipment: equipmentEnum,
+            instructions: instructions
+        )
 
         return WorkoutExercise(
             id: normalizedId,
@@ -164,7 +171,11 @@ private struct LibraryExerciseDTO: Codable {
 
     private func resolveMedia(
         using mediaResolver: ExerciseMediaResolving?,
-        normalizedId: String
+        normalizedId: String,
+        name: String,
+        muscle: MuscleGroup,
+        equipment: EquipmentType,
+        instructions: [String]
     ) async -> ExerciseMedia? {
         let domainMedia = media?.toDomain()
 
@@ -175,7 +186,15 @@ private struct LibraryExerciseDTO: Codable {
 
         // Tenta resolver via serviço (prioriza GIF)
         if let resolver = mediaResolver {
-            let resolved = await resolver.resolveMedia(for: normalizedId, existingMedia: domainMedia)
+            let lookupExercise = WorkoutExercise(
+                id: normalizedId,
+                name: name,
+                mainMuscle: muscle,
+                equipment: equipment,
+                instructions: instructions,
+                media: domainMedia
+            )
+            let resolved = await resolver.resolveMedia(for: lookupExercise, context: .thumbnail)
             if resolved.hasMedia {
                 return ExerciseMedia(
                     imageURL: resolved.imageURL ?? resolved.gifURL,
@@ -183,15 +202,6 @@ private struct LibraryExerciseDTO: Codable {
                     source: resolved.source.rawValue
                 )
             }
-        }
-
-        // Fallback para URL estática do ExerciseDB (sem auth)
-        if let fallbackURL = URL(string: "https://v2.exercisedb.io/image/\(normalizedId)") {
-            return ExerciseMedia(
-                imageURL: fallbackURL,
-                gifURL: fallbackURL,
-                source: "ExerciseDB"
-            )
         }
 
         return domainMedia

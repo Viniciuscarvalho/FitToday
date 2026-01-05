@@ -65,6 +65,7 @@ fastlane/test_output
 # Never commit files containing real API keys
 **/OpenAIConfig.plist
 **/ExerciseDBConfig.plist
+**/Secrets.plist
 *.xcconfig
 
 # Keep .example files for documentation

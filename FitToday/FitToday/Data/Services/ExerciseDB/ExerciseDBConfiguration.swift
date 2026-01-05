@@ -13,8 +13,8 @@ struct ExerciseDBConfiguration: Sendable {
   let host: String
   let baseURL: URL
 
-  static let defaultHost = "exercisedb-api1.p.rapidapi.com"
-  static let defaultBaseURL = URL(string: "https://exercisedb-api1.p.rapidapi.com")!
+  static let defaultHost = "exercisedb.p.rapidapi.com"
+  static let defaultBaseURL = URL(string: "https://exercisedb.p.rapidapi.com")!
 
   init(apiKey: String, host: String = defaultHost, baseURL: URL = defaultBaseURL) {
     self.apiKey = apiKey
@@ -22,22 +22,19 @@ struct ExerciseDBConfiguration: Sendable {
     self.baseURL = baseURL
   }
 
-  /// Carrega configuração com chave padrão do Keychain
-  /// Se não existir, cria automaticamente com a chave padrão fornecida
+  /// Carrega configuração com chave do Keychain
+  /// Retorna nil se não houver chave configurada (deve ser populada via KeychainBootstrap ou UI)
   static func loadFromUserKey() -> ExerciseDBConfiguration? {
-    // Tenta obter do Keychain
-    if let apiKey = UserAPIKeyManager.shared.getAPIKey(for: .exerciseDB),
-       !apiKey.isEmpty {
-      return ExerciseDBConfiguration(apiKey: apiKey, host: defaultHost, baseURL: defaultBaseURL)
+    // Tenta obter do Keychain (populado por KeychainBootstrap em Debug ou manualmente pelo usuário)
+    guard let apiKey = UserAPIKeyManager.shared.getAPIKey(for: .exerciseDB),
+          !apiKey.isEmpty else {
+      #if DEBUG
+      print("[ExerciseDB] ⚠️ Chave não encontrada no Keychain. Execute KeychainBootstrap ou configure manualmente.")
+      #endif
+      return nil
     }
     
-    // Se não existe, cria com a chave padrão
-    let defaultKey = "4af55d9bdamsh9d0c4a77576a23ap108765jsnf9c6a875317d"
-    if UserAPIKeyManager.shared.saveAPIKey(defaultKey, for: .exerciseDB) {
-      return ExerciseDBConfiguration(apiKey: defaultKey, host: defaultHost, baseURL: defaultBaseURL)
-    }
-    
-    return nil
+    return ExerciseDBConfiguration(apiKey: apiKey, host: defaultHost, baseURL: defaultBaseURL)
   }
   
   /// Carrega configuração do bundle (Info.plist ou arquivo dedicado) - DEPRECATED
