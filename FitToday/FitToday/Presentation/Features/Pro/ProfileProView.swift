@@ -263,6 +263,60 @@ struct ProfileProView: View {
                     .onChange(of: debugIsPro) { _, isPro in
                         handleDebugProChange(isPro)
                     }
+                    
+                    Divider()
+                        .padding(.leading, 56)
+                    
+                    Button {
+                        resetAIUsageCounter()
+                    } label: {
+                        HStack(spacing: FitTodaySpacing.md) {
+                            Image(systemName: "sparkles")
+                                .foregroundStyle(.purple)
+                                .frame(width: 24)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Resetar contador de IA")
+                                    .font(.system(.body))
+                                    .foregroundStyle(FitTodayColor.textPrimary)
+                                Text("Limpa o limite diário de uso da OpenAI")
+                                    .font(.system(.caption))
+                                    .foregroundStyle(FitTodayColor.textSecondary)
+                            }
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .font(.system(.caption, weight: .semibold))
+                                .foregroundStyle(FitTodayColor.textTertiary)
+                        }
+                        .padding()
+                    }
+                    .buttonStyle(.plain)
+                    
+                    Divider()
+                        .padding(.leading, 56)
+                    
+                    Button {
+                        clearExerciseDBCache()
+                    } label: {
+                        HStack(spacing: FitTodaySpacing.md) {
+                            Image(systemName: "photo.stack")
+                                .foregroundStyle(.blue)
+                                .frame(width: 24)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Limpar cache de mídias")
+                                    .font(.system(.body))
+                                    .foregroundStyle(FitTodayColor.textPrimary)
+                                Text("Força nova busca de imagens do ExerciseDB")
+                                    .font(.system(.caption))
+                                    .foregroundStyle(FitTodayColor.textSecondary)
+                            }
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .font(.system(.caption, weight: .semibold))
+                                .foregroundStyle(FitTodayColor.textTertiary)
+                        }
+                        .padding()
+                    }
+                    .buttonStyle(.plain)
                 }
             }
             .background(FitTodayColor.surface)
@@ -295,6 +349,24 @@ struct ProfileProView: View {
     private func handleDebugProChange(_ isPro: Bool) {
         DebugEntitlementOverride.shared.isPro = isPro
         entitlement = DebugEntitlementOverride.shared.entitlement
+    }
+    
+    private func resetAIUsageCounter() {
+        // Limpa o registro de uso diário da OpenAI
+        UserDefaults.standard.removeObject(forKey: "openai_usage_records")
+        
+        // Feedback visual
+        restoreMessage = "Contador de IA resetado! Você pode gerar novos treinos com IA."
+        showingRestoreAlert = true
+    }
+    
+    private func clearExerciseDBCache() {
+        // Limpa o mapeamento de IDs do ExerciseDB
+        UserDefaults.standard.removeObject(forKey: "exercisedb_id_mapping_v1")
+        
+        // Feedback visual
+        restoreMessage = "Cache de mídias limpo! As imagens serão buscadas novamente."
+        showingRestoreAlert = true
     }
     #endif
     

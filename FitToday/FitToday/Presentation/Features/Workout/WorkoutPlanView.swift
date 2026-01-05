@@ -6,13 +6,77 @@
 //
 
 import SwiftUI
+import Swinject
+
+// MARK: - Phase Display Mode
+
+/// Modo de exibição para fases de aquecimento e aeróbio
+enum PhaseDisplayMode: String, CaseIterable, Identifiable {
+    case auto = "auto"
+    case exercises = "exercises"
+    case guided = "guided"
+    
+    var id: String { rawValue }
+    
+    var displayName: String {
+        switch self {
+        case .auto: return "Auto"
+        case .exercises: return "Exercícios"
+        case .guided: return "Guiado"
+        }
+    }
+    
+    var iconName: String {
+        switch self {
+        case .auto: return "wand.and.stars"
+        case .exercises: return "dumbbell.fill"
+        case .guided: return "figure.run"
+        }
+    }
+    
+    var description: String {
+        switch self {
+        case .auto: return "Combina exercícios e atividades guiadas"
+        case .exercises: return "Apenas exercícios de aquecimento/cardio"
+        case .guided: return "Apenas atividades guiadas (ex: Aeróbio Z2)"
+        }
+    }
+}
 
 struct WorkoutPlanView: View {
     @EnvironmentObject private var router: AppRouter
     @EnvironmentObject private var sessionStore: WorkoutSessionStore
+    @Environment(\.dependencyResolver) private var resolver
     @StateObject private var timerStore = WorkoutTimerStore()
     @State private var errorMessage: String?
     @State private var isFinishing = false
+    @State private var isRegenerating = false
+    @State private var entitlement: ProEntitlement = .free
+    @State private var animationTrigger = false
+    
+    /// Modo de exibição persistido
+    @AppStorage(AppStorageKeys.workoutPhaseDisplayMode) private var displayModeRaw: String = PhaseDisplayMode.auto.rawValue
+    
+    private var displayMode: PhaseDisplayMode {
+        get { PhaseDisplayMode(rawValue: displayModeRaw) ?? .auto }
+    }
+    
+    private func setDisplayMode(_ mode: PhaseDisplayMode) {
+        withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+            displayModeRaw = mode.rawValue
+            animationTrigger.toggle()
+        }
+    }
+    
+    /// Verifica se o usuário é PRO (considerando debug override)
+    private var isPro: Bool {
+        #if DEBUG
+        if DebugEntitlementOverride.shared.isEnabled {
+            return DebugEntitlementOverride.shared.isPro
+        }
+        #endif
+        return entitlement.isPro
+    }
 
     var body: some View {
         Group {
@@ -21,6 +85,7 @@ struct WorkoutPlanView: View {
                     ScrollView {
                         VStack(spacing: FitTodaySpacing.lg) {
                             header(for: plan)
+                            phaseModePicker
                             exerciseList(for: plan)
                             footerActions
                         }
@@ -53,8 +118,24 @@ struct WorkoutPlanView: View {
         } message: {
             Text(errorMessage ?? "Algo inesperado aconteceu.")
         }
+        .onAppear {
+            loadEntitlement()
+        }
         .onDisappear {
             // Não reseta o timer ao sair, mantém em background
+        }
+    }
+    
+    // MARK: - Entitlement
+    
+    private func loadEntitlement() {
+        Task {
+            guard let repo = resolver.resolve(EntitlementRepository.self) else { return }
+            do {
+                entitlement = try await repo.currentEntitlement()
+            } catch {
+                entitlement = .free
+            }
         }
     }
     
@@ -178,12 +259,185 @@ struct WorkoutPlanView: View {
         }
     }
 
+    // MARK: - Phase Mode Picker
+    
+    private var phaseModePicker: some View {
+        VStack(alignment: .leading, spacing: FitTodaySpacing.sm) {
+            HStack {
+                Text("Modo de treino")
+                    .font(.system(.subheadline, weight: .semibold))
+                    .foregroundStyle(FitTodayColor.textSecondary)
+                
+                Spacer()
+                
+                // Badge PRO/Free
+                FitBadge(
+                    text: isPro ? "PRO" : "Free",
+                    style: isPro ? .pro : .info
+                )
+                
+                Button {
+                    showModeInfo()
+                } label: {
+                    Image(systemName: "info.circle")
+                        .font(.system(.body))
+                        .foregroundStyle(FitTodayColor.textTertiary)
+                }
+                .accessibilityLabel("Informações sobre os modos")
+            }
+            
+            Picker("Modo", selection: Binding(
+                get: { displayMode },
+                set: { setDisplayMode($0) }
+            )) {
+                ForEach(PhaseDisplayMode.allCases) { mode in
+                    Label(mode.displayName, systemImage: mode.iconName)
+                        .tag(mode)
+                }
+            }
+            .pickerStyle(.segmented)
+            .accessibilityHint("Escolha como exibir aquecimento e aeróbio")
+            
+            // Botão de regenerar treino
+            regenerateButton
+        }
+        .padding()
+        .background(FitTodayColor.surface)
+        .cornerRadius(FitTodayRadius.md)
+        .fitCardShadow()
+    }
+    
+    @ViewBuilder
+    private var regenerateButton: some View {
+        Button {
+            regenerateWorkoutPlan()
+        } label: {
+            HStack(spacing: FitTodaySpacing.sm) {
+                if isRegenerating {
+                    ProgressView()
+                        .progressViewStyle(CircularProgressViewStyle())
+                        .scaleEffect(0.8)
+                } else {
+                    Image(systemName: isPro ? "sparkles" : "arrow.clockwise")
+                        .font(.system(.body, weight: .semibold))
+                }
+                
+                Text(regenerateButtonTitle)
+                    .font(.system(.subheadline, weight: .semibold))
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, FitTodaySpacing.sm)
+            .foregroundStyle(isPro ? FitTodayColor.textInverse : FitTodayColor.brandPrimary)
+            .background(isPro ? FitTodayColor.brandPrimary : FitTodayColor.surface)
+            .overlay(
+                RoundedRectangle(cornerRadius: FitTodayRadius.sm)
+                    .stroke(FitTodayColor.brandPrimary, lineWidth: isPro ? 0 : 1.5)
+            )
+            .cornerRadius(FitTodayRadius.sm)
+        }
+        .disabled(isRegenerating || timerStore.hasStarted)
+        .opacity(timerStore.hasStarted ? 0.5 : 1)
+        .padding(.top, FitTodaySpacing.xs)
+        .accessibilityHint(isPro ? "Regenera o treino usando IA" : "Regenera o treino localmente")
+    }
+    
+    private var regenerateButtonTitle: String {
+        if isRegenerating {
+            return "Regenerando..."
+        }
+        return isPro ? "Regenerar com IA ✨" : "Regenerar treino"
+    }
+    
+    private func showModeInfo() {
+        // Mostra um alert com informações sobre os modos
+        let proInfo = isPro ? "\n\n✨ PRO: Seu treino é otimizado com IA!" : "\n\n💡 Dica: Assine PRO para treinos personalizados com IA!"
+        errorMessage = """
+        Auto: Combina exercícios e atividades guiadas conforme seu perfil.
+        
+        Exercícios: Mostra apenas exercícios de aquecimento e cardio.
+        
+        Guiado: Mostra apenas atividades guiadas (ex: "Aeróbio Z2 12 min").\(proInfo)
+        """
+    }
+    
+    // MARK: - Regenerate Workout
+    
+    private func regenerateWorkoutPlan() {
+        guard !isRegenerating else { return }
+        
+        isRegenerating = true
+        
+        Task {
+            do {
+                let newPlan = try await generateNewPlan()
+                
+                await MainActor.run {
+                    withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
+                        sessionStore.start(with: newPlan)
+                        animationTrigger.toggle()
+                    }
+                }
+            } catch {
+                await MainActor.run {
+                    errorMessage = "Não foi possível regenerar o treino: \(error.localizedDescription)"
+                }
+            }
+            
+            await MainActor.run {
+                isRegenerating = false
+            }
+        }
+    }
+    
+    private func generateNewPlan() async throws -> WorkoutPlan {
+        // Carrega perfil e check-in
+        guard let profileRepo = resolver.resolve(UserProfileRepository.self) else {
+            throw DomainError.repositoryFailure(reason: "Repositório de perfil não disponível.")
+        }
+        
+        guard let profile = try await profileRepo.loadProfile() else {
+            throw DomainError.profileNotFound
+        }
+        
+        // Carrega o último check-in
+        guard let checkInData = UserDefaults.standard.data(forKey: AppStorageKeys.lastDailyCheckInData),
+              let checkIn = try? JSONDecoder().decode(DailyCheckIn.self, from: checkInData) else {
+            throw DomainError.invalidInput(reason: "Responda o questionário diário primeiro.")
+        }
+        
+        // Carrega blocos
+        guard let blocksRepo = resolver.resolve(WorkoutBlocksRepository.self) else {
+            throw DomainError.repositoryFailure(reason: "Repositório de blocos não disponível.")
+        }
+        
+        let blocks = try await blocksRepo.loadBlocks()
+        
+        // Escolhe o compositor baseado no entitlement
+        if isPro {
+            // PRO: usa o compositor híbrido (OpenAI + fallback local)
+            guard let composer = resolver.resolve(WorkoutPlanComposing.self) else {
+                throw DomainError.repositoryFailure(reason: "Compositor não disponível.")
+            }
+            return try await composer.composePlan(blocks: blocks, profile: profile, checkIn: checkIn)
+        } else {
+            // Free: usa apenas o compositor local
+            let localComposer = LocalWorkoutPlanComposer()
+            return try await localComposer.composePlan(blocks: blocks, profile: profile, checkIn: checkIn)
+        }
+    }
+    
     private func exerciseList(for plan: WorkoutPlan) -> some View {
         VStack(alignment: .leading, spacing: FitTodaySpacing.md) {
             ForEach(plan.phases) { phase in
-                PhaseSection(phase: phase)
+                PhaseSection(phase: phase, displayMode: displayMode)
+                    .transition(.asymmetric(
+                        insertion: .opacity.combined(with: .move(edge: .trailing)),
+                        removal: .opacity.combined(with: .move(edge: .leading))
+                    ))
             }
         }
+        .animation(.spring(response: 0.4, dampingFraction: 0.8), value: displayMode)
+        .animation(.spring(response: 0.5, dampingFraction: 0.8), value: animationTrigger)
     }
 
     private struct PhaseSection: View {
@@ -191,49 +445,92 @@ struct WorkoutPlanView: View {
         @EnvironmentObject private var sessionStore: WorkoutSessionStore
 
         let phase: WorkoutPlanPhase
+        let displayMode: PhaseDisplayMode
+        
+        /// Fases que são afetadas pelo modo de exibição
+        private var isFilterablePhase: Bool {
+            phase.kind == .warmup || phase.kind == .aerobic || phase.kind == .finisher
+        }
+        
+        /// Itens filtrados conforme o modo de exibição
+        private var filteredItems: [WorkoutPlanItem] {
+            guard isFilterablePhase else {
+                // Força, Acessórios, etc. sempre mostram todos os itens
+                return phase.items
+            }
+            
+            switch displayMode {
+            case .auto:
+                // Mostra tudo (mesclado)
+                return phase.items
+            case .exercises:
+                // Apenas exercícios
+                return phase.items.filter { item in
+                    if case .exercise = item { return true }
+                    return false
+                }
+            case .guided:
+                // Apenas atividades guiadas
+                return phase.items.filter { item in
+                    if case .activity = item { return true }
+                    return false
+                }
+            }
+        }
 
         var body: some View {
-            VStack(alignment: .leading, spacing: FitTodaySpacing.sm) {
-                SectionHeader(
-                    title: phaseHeaderTitle,
-                    actionTitle: nil,
-                    action: nil
-                )
-                .padding(.horizontal, -FitTodaySpacing.md)
+            // Não exibe a fase se não tiver itens após filtragem
+            if !filteredItems.isEmpty {
+                VStack(alignment: .leading, spacing: FitTodaySpacing.sm) {
+                    SectionHeader(
+                        title: phaseHeaderTitle,
+                        actionTitle: nil,
+                        action: nil
+                    )
+                    .padding(.horizontal, -FitTodaySpacing.md)
 
-                LazyVStack(spacing: FitTodaySpacing.sm) {
-                    ForEach(phase.items.indices, id: \.self) { idx in
-                        let item = phase.items[idx]
-                        switch item {
-                        case .activity(let activity):
-                            ActivityRow(activity: activity)
-                        case .exercise(let prescription):
-                            let globalIndex = flattenedExerciseIndex(for: prescription.exercise.id)
-                            WorkoutExerciseRow(
-                                index: globalIndex + 1,
-                                prescription: prescription,
-                                isCurrent: globalIndex == sessionStore.currentExerciseIndex
-                            )
-                            .contentShape(Rectangle())
-                            .onTapGesture {
-                                router.push(.workoutExercisePreview(prescription), on: .home)
+                    LazyVStack(spacing: FitTodaySpacing.sm) {
+                        ForEach(filteredItems.indices, id: \.self) { idx in
+                            let item = filteredItems[idx]
+                            switch item {
+                            case .activity(let activity):
+                                ActivityRow(activity: activity)
+                            case .exercise(let prescription):
+                                let globalIndex = flattenedExerciseIndex(for: prescription.exercise.id)
+                                WorkoutExerciseRow(
+                                    index: globalIndex + 1,
+                                    prescription: prescription,
+                                    isCurrent: globalIndex == sessionStore.currentExerciseIndex
+                                )
+                                .contentShape(Rectangle())
+                                .onTapGesture {
+                                    router.push(.workoutExercisePreview(prescription), on: .home)
+                                }
+                                .accessibilityHint("Toque para ver detalhes do exercício")
                             }
-                            .accessibilityHint("Toque para ver detalhes do exercício")
                         }
                     }
                 }
+                .padding(.top, FitTodaySpacing.md)
             }
-            .padding(.top, FitTodaySpacing.md)
         }
 
         private var phaseHeaderTitle: String {
-            if let rpe = phase.rpeTarget {
-                return "\(phase.title) · RPE \(rpe)"
+            var title = phase.title
+            
+            // Adiciona indicador do modo quando aplicável
+            if isFilterablePhase && displayMode != .auto {
+                let modeIndicator = displayMode == .exercises ? "🏋️" : "🎯"
+                title = "\(title) \(modeIndicator)"
             }
-            return phase.title
+            
+            if let rpe = phase.rpeTarget {
+                return "\(title) · RPE \(rpe)"
+            }
+            return title
         }
 
-        /// Mapeia o exercício atual para o índice global (plano “flat”) para compatibilidade com o fluxo da sessão.
+        /// Mapeia o exercício atual para o índice global (plano "flat") para compatibilidade com o fluxo da sessão.
         private func flattenedExerciseIndex(for exerciseId: String) -> Int {
             sessionStore.exercises.firstIndex(where: { $0.exercise.id == exerciseId }) ?? 0
         }

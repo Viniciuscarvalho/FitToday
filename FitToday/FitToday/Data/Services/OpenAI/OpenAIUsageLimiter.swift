@@ -22,9 +22,23 @@ actor OpenAIUsageLimiter: OpenAIUsageLimiting {
     private let dailyLimit: Int
     private var records: [UUID: Record] = [:]
 
-    init(dailyLimit: Int = 1) {
+    /// Limite diário padrão: 10 gerações via IA para usuários PRO.
+    /// O limite é generoso para permitir experimentação, já que a API tem fallback local.
+    init(dailyLimit: Int = 10) {
         self.dailyLimit = dailyLimit
         load()
+    }
+    
+    /// Reseta o contador de uso para um usuário específico (útil para debug/testes)
+    func resetUsage(for userId: UUID) async {
+        records.removeValue(forKey: userId)
+        persist()
+    }
+    
+    /// Limpa todos os registros de uso (útil para debug/testes)
+    func resetAllUsage() async {
+        records.removeAll()
+        persist()
     }
 
     func canUseAI(userId: UUID, on date: Date) async -> Bool {

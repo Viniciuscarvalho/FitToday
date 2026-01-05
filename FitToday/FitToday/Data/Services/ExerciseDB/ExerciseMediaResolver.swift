@@ -243,32 +243,133 @@ actor ExerciseMediaResolver: ExerciseMediaResolving {
       return exercise.id
     }
 
-    // Busca por nome e escolhe melhor match.
-    let results = try await service.searchExercises(query: exercise.name, limit: 10)
-    if let best = bestMatch(for: exercise.name, candidates: results) {
-      setCachedExerciseDBId(best.id, forLocalExerciseId: exercise.id)
-      return best.id
+    // Estratégia de busca progressiva:
+    // 1. Nome completo
+    // 2. Palavras principais (removendo prefixos como "lever", "cable", etc.)
+    // 3. Apenas o nome do movimento principal
+    
+    let searchQueries = generateSearchQueries(from: exercise.name)
+    
+    for query in searchQueries {
+      do {
+        let results = try await service.searchExercises(query: query, limit: 10)
+        
+        if let best = bestMatch(for: exercise.name, candidates: results) {
+          #if DEBUG
+          print("[MediaResolver] Match encontrado para '\(exercise.name)' via query '\(query)': \(best.name) (id: \(best.id))")
+          #endif
+          setCachedExerciseDBId(best.id, forLocalExerciseId: exercise.id)
+          return best.id
+        }
+        
+        // Fallback: primeiro resultado se a query for específica o suficiente
+        if let first = results.first, query.count >= 5 {
+          #if DEBUG
+          print("[MediaResolver] Usando primeiro resultado para '\(exercise.name)' via query '\(query)': \(first.name) (id: \(first.id))")
+          #endif
+          setCachedExerciseDBId(first.id, forLocalExerciseId: exercise.id)
+          return first.id
+        }
+      } catch {
+        #if DEBUG
+        print("[MediaResolver] Erro na busca '\(query)': \(error.localizedDescription)")
+        #endif
+        continue
+      }
     }
 
-    // Fallback: primeiro resultado (se houver)
-    if let first = results.first {
-      setCachedExerciseDBId(first.id, forLocalExerciseId: exercise.id)
-      return first.id
-    }
-
+    #if DEBUG
+    print("[MediaResolver] Nenhum resultado encontrado para '\(exercise.name)' após \(searchQueries.count) tentativas")
+    #endif
     throw ExerciseDBError.notFound
+  }
+  
+  /// Gera múltiplas queries de busca para aumentar as chances de encontrar o exercício
+  private func generateSearchQueries(from name: String) -> [String] {
+    var queries: [String] = []
+    
+    // 1. Nome completo em minúsculas
+    let lowercased = name.lowercased()
+    queries.append(lowercased)
+    
+    // 2. Remove prefixos de equipamento comuns
+    let equipmentPrefixes = ["lever", "cable", "machine", "dumbbell", "barbell", "ez bar", "smith", "seated", "standing", "incline", "decline", "flat"]
+    var simplified = lowercased
+    for prefix in equipmentPrefixes {
+      if simplified.hasPrefix(prefix + " ") {
+        simplified = String(simplified.dropFirst(prefix.count + 1))
+        break
+      }
+    }
+    if simplified != lowercased {
+      queries.append(simplified)
+    }
+    
+    // 3. Extrai palavras-chave principais (2+ palavras mais longas)
+    let words = name.lowercased()
+      .components(separatedBy: CharacterSet.alphanumerics.inverted)
+      .filter { $0.count >= 3 }
+    
+    // Termos principais do movimento
+    let movementKeywords = ["fly", "press", "curl", "row", "squat", "deadlift", "lunge", "extension", "raise", "pull", "push", "crunch", "plank", "dip", "kickback", "pulldown", "pullover"]
+    
+    if let mainMovement = words.first(where: { movementKeywords.contains($0) }) {
+      // Combina com a parte do corpo se identificável
+      let bodyParts = ["chest", "back", "shoulder", "arm", "bicep", "tricep", "leg", "quad", "hamstring", "glute", "calf", "ab", "core", "pec", "lat", "delt"]
+      if let bodyPart = words.first(where: { bodyParts.contains($0) || $0.hasPrefix("pec") || $0.hasPrefix("lat") || $0.hasPrefix("delt") }) {
+        queries.append("\(bodyPart) \(mainMovement)")
+      }
+      queries.append(mainMovement)
+    }
+    
+    // 4. Duas primeiras palavras significativas
+    let significantWords = words.filter { !["the", "a", "an", "of", "on", "with", "for"].contains($0) }
+    if significantWords.count >= 2 {
+      queries.append("\(significantWords[0]) \(significantWords[1])")
+    }
+    
+    // Remove duplicatas mantendo a ordem
+    return queries.reduce(into: [String]()) { result, query in
+      if !result.contains(query) && !query.isEmpty {
+        result.append(query)
+      }
+    }
   }
 
   private func bestMatch(for name: String, candidates: [ExerciseDBExercise]) -> ExerciseDBExercise? {
     let normalizedTarget = normalizeName(name)
+    let targetWords = Set(name.lowercased().components(separatedBy: CharacterSet.alphanumerics.inverted).filter { $0.count >= 3 })
+    
     // 1) Igualdade exata normalizada
     if let exact = candidates.first(where: { normalizeName($0.name) == normalizedTarget }) {
       return exact
     }
-    // 2) Contém (evita ficar sem match por pequenas variações)
+    
+    // 2) Match por palavras-chave (maior número de palavras em comum)
+    var bestCandidate: ExerciseDBExercise?
+    var bestScore = 0
+    
+    for candidate in candidates {
+      let candidateWords = Set(candidate.name.lowercased().components(separatedBy: CharacterSet.alphanumerics.inverted).filter { $0.count >= 3 })
+      let commonWords = targetWords.intersection(candidateWords)
+      let score = commonWords.count
+      
+      if score > bestScore {
+        bestScore = score
+        bestCandidate = candidate
+      }
+    }
+    
+    // Aceita se tiver pelo menos 2 palavras em comum
+    if bestScore >= 2 {
+      return bestCandidate
+    }
+    
+    // 3) Contém (evita ficar sem match por pequenas variações)
     if let contains = candidates.first(where: { normalizeName($0.name).contains(normalizedTarget) || normalizedTarget.contains(normalizeName($0.name)) }) {
       return contains
     }
+    
     return nil
   }
 
