@@ -1,0 +1,1171 @@
+[
+  {
+    "id": "lib_push_hypertrophy_gym",
+    "title": "Push Day - Hipertrofia",
+    "subtitle": "Peito, Ombros e Tríceps para ganho de massa",
+    "goal": "hypertrophy",
+    "structure": "fullGym",
+    "estimated_duration_minutes": 55,
+    "intensity": "high",
+    "exercises": [
+      {
+        "exercise": {
+          "id": "barbell_bench_press",
+          "name": "Supino Reto com Barra",
+          "main_muscle": "chest",
+          "equipment": "barbell",
+          "instructions": [
+            "Deite no banco com os pés firmemente apoiados no chão",
+            "Pegada um pouco mais larga que a largura dos ombros",
+            "Desça a barra controladamente até tocar o peito",
+            "Empurre explosivamente mantendo as escápulas retraídas"
+          ],
+          "media": {
+            "image_url": "https://v2.exercisedb.io/image/0025",
+            "gif_url": "https://v2.exercisedb.io/image/0025"
+          }
+        },
+        "sets": 4,
+        "reps_lower": 6,
+        "reps_upper": 8,
+        "rest_interval": 120,
+        "tip": "Mantenha as escápulas retraídas e o peito projetado durante todo movimento"
+      },
+      {
+        "exercise": {
+          "id": "incline_dumbbell_press",
+          "name": "Supino Inclinado com Halteres",
+          "main_muscle": "chest",
+          "equipment": "dumbbell",
+          "instructions": [
+            "Ajuste o banco em 30-45 graus de inclinação",
+            "Inicie com os halteres na altura dos ombros",
+            "Empurre para cima unindo os halteres no topo",
+            "Desça controladamente sentindo o alongamento"
+          ],
+          "media": {
+            "image_url": "https://v2.exercisedb.io/image/0314",
+            "gif_url": "https://v2.exercisedb.io/image/0314"
+          }
+        },
+        "sets": 4,
+        "reps_lower": 8,
+        "reps_upper": 10,
+        "rest_interval": 90,
+        "tip": "Não deixe os cotovelos abrirem demais para proteger os ombros"
+      },
+      {
+        "exercise": {
+          "id": "cable_crossover",
+          "name": "Crossover no Cabo",
+          "main_muscle": "chest",
+          "equipment": "cable",
+          "instructions": [
+            "Posicione as polias na altura mais alta",
+            "Dê um passo à frente para criar tensão",
+            "Una as mãos à frente do corpo contraindo o peitoral",
+            "Retorne controladamente mantendo a tensão"
+          ],
+          "media": {
+            "image_url": "https://v2.exercisedb.io/image/0160",
+            "gif_url": "https://v2.exercisedb.io/image/0160"
+          }
+        },
+        "sets": 3,
+        "reps_lower": 12,
+        "reps_upper": 15,
+        "rest_interval": 60,
+        "tip": "Foque na contração do peitoral no pico do movimento"
+      },
+      {
+        "exercise": {
+          "id": "seated_dumbbell_shoulder_press",
+          "name": "Desenvolvimento com Halteres Sentado",
+          "main_muscle": "shoulders",
+          "equipment": "dumbbell",
+          "instructions": [
+            "Sente com as costas apoiadas no banco reto",
+            "Inicie com os halteres na altura dos ombros",
+            "Empurre para cima até quase estender os braços",
+            "Desça controladamente até a posição inicial"
+          ],
+          "media": {
+            "image_url": "https://v2.exercisedb.io/image/0405",
+            "gif_url": "https://v2.exercisedb.io/image/0405"
+          }
+        },
+        "sets": 4,
+        "reps_lower": 8,
+        "reps_upper": 10,
+        "rest_interval": 90,
+        "tip": "Mantenha o core ativado para estabilizar a coluna"
+      },
+      {
+        "exercise": {
+          "id": "lateral_raise",
+          "name": "Elevação Lateral",
+          "main_muscle": "shoulders",
+          "equipment": "dumbbell",
+          "instructions": [
+            "Fique em pé com halteres ao lado do corpo",
+            "Levante os braços lateralmente até a altura dos ombros",
+            "Mantenha leve flexão dos cotovelos",
+            "Desça controladamente sem balançar"
+          ],
+          "media": {
+            "image_url": "https://v2.exercisedb.io/image/0334",
+            "gif_url": "https://v2.exercisedb.io/image/0334"
+          }
+        },
+        "sets": 3,
+        "reps_lower": 12,
+        "reps_upper": 15,
+        "rest_interval": 60,
+        "tip": "Use pesos moderados para manter a técnica perfeita"
+      },
+      {
+        "exercise": {
+          "id": "tricep_rope_pushdown",
+          "name": "Tríceps na Polia com Corda",
+          "main_muscle": "triceps",
+          "equipment": "cable",
+          "instructions": [
+            "Segure a corda com pegada neutra",
+            "Mantenha os cotovelos fixos ao lado do corpo",
+            "Estenda os braços separando as pontas da corda",
+            "Retorne controladamente mantendo a tensão"
+          ],
+          "media": {
+            "image_url": "https://v2.exercisedb.io/image/0860",
+            "gif_url": "https://v2.exercisedb.io/image/0860"
+          }
+        },
+        "sets": 3,
+        "reps_lower": 12,
+        "reps_upper": 15,
+        "rest_interval": 60,
+        "tip": "Separe as pontas da corda ao final para maior contração"
+      }
+    ]
+  },
+  {
+    "id": "lib_pull_hypertrophy_gym",
+    "title": "Pull Day - Hipertrofia",
+    "subtitle": "Costas e Bíceps para um dorsal definido",
+    "goal": "hypertrophy",
+    "structure": "fullGym",
+    "estimated_duration_minutes": 55,
+    "intensity": "high",
+    "exercises": [
+      {
+        "exercise": {
+          "id": "lat_pulldown",
+          "name": "Puxada Alta na Polia",
+          "main_muscle": "back",
+          "equipment": "cable",
+          "instructions": [
+            "Sente-se com as coxas travadas sob o apoio",
+            "Segure a barra com pegada pronada mais larga que os ombros",
+            "Puxe a barra até o peito, contraindo as escápulas",
+            "Retorne controladamente à posição inicial"
+          ],
+          "media": {
+            "image_url": "https://v2.exercisedb.io/image/0579",
+            "gif_url": "https://v2.exercisedb.io/image/0579"
+          }
+        },
+        "sets": 4,
+        "reps_lower": 8,
+        "reps_upper": 12,
+        "rest_interval": 90,
+        "tip": "Inicie o movimento puxando com as costas, não com os braços"
+      },
+      {
+        "exercise": {
+          "id": "barbell_row",
+          "name": "Remada Curvada com Barra",
+          "main_muscle": "back",
+          "equipment": "barbell",
+          "instructions": [
+            "Incline o tronco cerca de 45 graus, coluna neutra",
+            "Segure a barra com pegada pronada na largura dos ombros",
+            "Puxe a barra em direção ao abdômen baixo",
+            "Desça controladamente mantendo a postura"
+          ],
+          "media": {
+            "image_url": "https://v2.exercisedb.io/image/0027",
+            "gif_url": "https://v2.exercisedb.io/image/0027"
+          }
+        },
+        "sets": 4,
+        "reps_lower": 8,
+        "reps_upper": 10,
+        "rest_interval": 90,
+        "tip": "Mantenha o core contraído para proteger a lombar"
+      },
+      {
+        "exercise": {
+          "id": "seated_cable_row",
+          "name": "Remada Sentada na Polia",
+          "main_muscle": "back",
+          "equipment": "cable",
+          "instructions": [
+            "Sente com os pés apoiados e joelhos levemente flexionados",
+            "Segure o triângulo ou barra com braços estendidos",
+            "Puxe em direção ao abdômen, abrindo o peito",
+            "Retorne controladamente sem perder a postura"
+          ],
+          "media": {
+            "image_url": "https://v2.exercisedb.io/image/0861",
+            "gif_url": "https://v2.exercisedb.io/image/0861"
+          }
+        },
+        "sets": 3,
+        "reps_lower": 10,
+        "reps_upper": 12,
+        "rest_interval": 75,
+        "tip": "Foque em apertar as escápulas no final do movimento"
+      },
+      {
+        "exercise": {
+          "id": "face_pull",
+          "name": "Face Pull",
+          "main_muscle": "shoulders",
+          "equipment": "cable",
+          "instructions": [
+            "Ajuste a polia na altura do rosto",
+            "Segure a corda com pegada neutra",
+            "Puxe em direção ao rosto separando as mãos",
+            "Foque na rotação externa dos ombros"
+          ],
+          "media": {
+            "image_url": "https://v2.exercisedb.io/image/0310",
+            "gif_url": "https://v2.exercisedb.io/image/0310"
+          }
+        },
+        "sets": 3,
+        "reps_lower": 15,
+        "reps_upper": 20,
+        "rest_interval": 60,
+        "tip": "Excelente para saúde dos ombros e postura"
+      },
+      {
+        "exercise": {
+          "id": "barbell_curl",
+          "name": "Rosca Direta com Barra",
+          "main_muscle": "biceps",
+          "equipment": "barbell",
+          "instructions": [
+            "Fique em pé com a barra e pegada supinada",
+            "Mantenha os cotovelos fixos ao lado do corpo",
+            "Flexione os braços trazendo a barra aos ombros",
+            "Desça controladamente sem balançar"
+          ],
+          "media": {
+            "image_url": "https://v2.exercisedb.io/image/0023",
+            "gif_url": "https://v2.exercisedb.io/image/0023"
+          }
+        },
+        "sets": 3,
+        "reps_lower": 10,
+        "reps_upper": 12,
+        "rest_interval": 60,
+        "tip": "Controle a fase negativa para maior hipertrofia"
+      },
+      {
+        "exercise": {
+          "id": "hammer_curl",
+          "name": "Rosca Martelo",
+          "main_muscle": "biceps",
+          "equipment": "dumbbell",
+          "instructions": [
+            "Segure os halteres com pegada neutra (palmas voltadas)",
+            "Mantenha os cotovelos junto ao corpo",
+            "Flexione alternadamente ou simultaneamente",
+            "Desça controladamente"
+          ],
+          "media": {
+            "image_url": "https://v2.exercisedb.io/image/0303",
+            "gif_url": "https://v2.exercisedb.io/image/0303"
+          }
+        },
+        "sets": 3,
+        "reps_lower": 10,
+        "reps_upper": 12,
+        "rest_interval": 60,
+        "tip": "Trabalha braquial e braquiorradial além do bíceps"
+      }
+    ]
+  },
+  {
+    "id": "lib_legs_hypertrophy_gym",
+    "title": "Leg Day - Hipertrofia",
+    "subtitle": "Quadríceps, Glúteos e Posteriores",
+    "goal": "hypertrophy",
+    "structure": "fullGym",
+    "estimated_duration_minutes": 60,
+    "intensity": "high",
+    "exercises": [
+      {
+        "exercise": {
+          "id": "barbell_squat",
+          "name": "Agachamento Livre",
+          "main_muscle": "quads",
+          "equipment": "barbell",
+          "instructions": [
+            "Posicione a barra no trapézio alto",
+            "Pés na largura dos ombros, pontas levemente para fora",
+            "Desça até as coxas ficarem paralelas ao chão",
+            "Suba explosivamente mantendo os joelhos alinhados"
+          ],
+          "media": {
+            "image_url": "https://v2.exercisedb.io/image/0043",
+            "gif_url": "https://v2.exercisedb.io/image/0043"
+          }
+        },
+        "sets": 4,
+        "reps_lower": 6,
+        "reps_upper": 8,
+        "rest_interval": 150,
+        "tip": "Rei dos exercícios - mantenha a técnica perfeita"
+      },
+      {
+        "exercise": {
+          "id": "leg_press",
+          "name": "Leg Press 45°",
+          "main_muscle": "quads",
+          "equipment": "machine",
+          "instructions": [
+            "Ajuste o banco e posicione os pés na plataforma",
+            "Destrave o peso e desça controladamente",
+            "Desça até 90 graus de flexão nos joelhos",
+            "Empurre sem travar completamente os joelhos"
+          ],
+          "media": {
+            "image_url": "https://v2.exercisedb.io/image/0738",
+            "gif_url": "https://v2.exercisedb.io/image/0738"
+          }
+        },
+        "sets": 4,
+        "reps_lower": 10,
+        "reps_upper": 12,
+        "rest_interval": 90,
+        "tip": "Varie a posição dos pés para diferentes estímulos"
+      },
+      {
+        "exercise": {
+          "id": "romanian_deadlift",
+          "name": "Stiff com Barra",
+          "main_muscle": "hamstrings",
+          "equipment": "barbell",
+          "instructions": [
+            "Segure a barra com pegada pronada",
+            "Mantenha os joelhos levemente flexionados",
+            "Incline o tronco empurrando o quadril para trás",
+            "Desça até sentir alongamento nos posteriores"
+          ],
+          "media": {
+            "image_url": "https://v2.exercisedb.io/image/0116",
+            "gif_url": "https://v2.exercisedb.io/image/0116"
+          }
+        },
+        "sets": 3,
+        "reps_lower": 10,
+        "reps_upper": 12,
+        "rest_interval": 90,
+        "tip": "Mantenha a barra próxima às pernas durante todo o movimento"
+      },
+      {
+        "exercise": {
+          "id": "leg_curl_lying",
+          "name": "Mesa Flexora",
+          "main_muscle": "hamstrings",
+          "equipment": "machine",
+          "instructions": [
+            "Deite de bruços com os calcanhares sob o rolo",
+            "Flexione os joelhos trazendo o rolo em direção aos glúteos",
+            "Segure por 1 segundo no pico da contração",
+            "Retorne controladamente"
+          ],
+          "media": {
+            "image_url": "https://v2.exercisedb.io/image/0586",
+            "gif_url": "https://v2.exercisedb.io/image/0586"
+          }
+        },
+        "sets": 3,
+        "reps_lower": 12,
+        "reps_upper": 15,
+        "rest_interval": 60,
+        "tip": "Evite levantar o quadril durante o movimento"
+      },
+      {
+        "exercise": {
+          "id": "leg_extension",
+          "name": "Cadeira Extensora",
+          "main_muscle": "quads",
+          "equipment": "machine",
+          "instructions": [
+            "Ajuste o encosto e o rolo na altura dos tornozelos",
+            "Estenda os joelhos elevando o rolo",
+            "Segure por 1 segundo no topo",
+            "Desça controladamente"
+          ],
+          "media": {
+            "image_url": "https://v2.exercisedb.io/image/0585",
+            "gif_url": "https://v2.exercisedb.io/image/0585"
+          }
+        },
+        "sets": 3,
+        "reps_lower": 12,
+        "reps_upper": 15,
+        "rest_interval": 60,
+        "tip": "Excelente para finalizar o treino de quadríceps"
+      },
+      {
+        "exercise": {
+          "id": "standing_calf_raise",
+          "name": "Panturrilha em Pé",
+          "main_muscle": "calves",
+          "equipment": "machine",
+          "instructions": [
+            "Posicione os ombros sob os apoios",
+            "Fique na ponta dos pés no step",
+            "Desça os calcanhares abaixo do step",
+            "Suba até a máxima extensão dos tornozelos"
+          ],
+          "media": {
+            "image_url": "https://v2.exercisedb.io/image/0556",
+            "gif_url": "https://v2.exercisedb.io/image/0556"
+          }
+        },
+        "sets": 4,
+        "reps_lower": 15,
+        "reps_upper": 20,
+        "rest_interval": 45,
+        "tip": "Faça a amplitude completa do movimento"
+      }
+    ]
+  },
+  {
+    "id": "lib_fullbody_conditioning_home",
+    "title": "Full Body Funcional",
+    "subtitle": "Circuito de peso corporal para condicionamento",
+    "goal": "conditioning",
+    "structure": "bodyweight",
+    "estimated_duration_minutes": 35,
+    "intensity": "moderate",
+    "exercises": [
+      {
+        "exercise": {
+          "id": "burpee",
+          "name": "Burpee",
+          "main_muscle": "fullBody",
+          "equipment": "bodyweight",
+          "instructions": [
+            "Comece em pé, agache e coloque as mãos no chão",
+            "Salte os pés para trás entrando em prancha",
+            "Faça uma flexão (opcional)",
+            "Salte os pés de volta e pule verticalmente"
+          ],
+          "media": {
+            "image_url": "https://v2.exercisedb.io/image/1160",
+            "gif_url": "https://v2.exercisedb.io/image/1160"
+          }
+        },
+        "sets": 4,
+        "reps_lower": 8,
+        "reps_upper": 12,
+        "rest_interval": 45,
+        "tip": "Mantenha um ritmo constante, qualidade sobre velocidade"
+      },
+      {
+        "exercise": {
+          "id": "push_up",
+          "name": "Flexão de Braços",
+          "main_muscle": "chest",
+          "equipment": "bodyweight",
+          "instructions": [
+            "Posicione as mãos na largura dos ombros",
+            "Mantenha o corpo em linha reta",
+            "Desça o peito até quase tocar o chão",
+            "Empurre de volta à posição inicial"
+          ],
+          "media": {
+            "image_url": "https://v2.exercisedb.io/image/0662",
+            "gif_url": "https://v2.exercisedb.io/image/0662"
+          }
+        },
+        "sets": 3,
+        "reps_lower": 12,
+        "reps_upper": 20,
+        "rest_interval": 45,
+        "tip": "Mantenha o core contraído durante todo o movimento"
+      },
+      {
+        "exercise": {
+          "id": "bodyweight_squat",
+          "name": "Agachamento Livre",
+          "main_muscle": "quads",
+          "equipment": "bodyweight",
+          "instructions": [
+            "Pés na largura dos ombros",
+            "Desça como se fosse sentar em uma cadeira",
+            "Mantenha o peito aberto e joelhos alinhados",
+            "Suba contraindo glúteos"
+          ],
+          "media": {
+            "image_url": "https://v2.exercisedb.io/image/0044",
+            "gif_url": "https://v2.exercisedb.io/image/0044"
+          }
+        },
+        "sets": 3,
+        "reps_lower": 15,
+        "reps_upper": 20,
+        "rest_interval": 45,
+        "tip": "Distribua o peso nos calcanhares"
+      },
+      {
+        "exercise": {
+          "id": "mountain_climber",
+          "name": "Escalador",
+          "main_muscle": "core",
+          "equipment": "bodyweight",
+          "instructions": [
+            "Comece em posição de prancha alta",
+            "Traga um joelho em direção ao peito",
+            "Alterne as pernas rapidamente",
+            "Mantenha o quadril baixo e alinhado"
+          ],
+          "media": {
+            "image_url": "https://v2.exercisedb.io/image/0658",
+            "gif_url": "https://v2.exercisedb.io/image/0658"
+          }
+        },
+        "sets": 3,
+        "reps_lower": 20,
+        "reps_upper": 30,
+        "rest_interval": 45,
+        "tip": "Controle o movimento, não deixe o quadril subir"
+      },
+      {
+        "exercise": {
+          "id": "plank",
+          "name": "Prancha",
+          "main_muscle": "core",
+          "equipment": "bodyweight",
+          "instructions": [
+            "Apoie os antebraços e pontas dos pés no chão",
+            "Mantenha o corpo em linha reta",
+            "Contraia o abdômen e glúteos",
+            "Segure a posição pelo tempo indicado"
+          ],
+          "media": {
+            "image_url": "https://v2.exercisedb.io/image/0652",
+            "gif_url": "https://v2.exercisedb.io/image/0652"
+          }
+        },
+        "sets": 3,
+        "reps_lower": 30,
+        "reps_upper": 60,
+        "rest_interval": 30,
+        "tip": "Respire normalmente, não prenda a respiração"
+      },
+      {
+        "exercise": {
+          "id": "jumping_jacks",
+          "name": "Polichinelo",
+          "main_muscle": "fullBody",
+          "equipment": "bodyweight",
+          "instructions": [
+            "Comece em pé com braços ao lado do corpo",
+            "Salte abrindo pernas e levantando braços",
+            "Retorne à posição inicial com outro salto",
+            "Mantenha ritmo constante"
+          ],
+          "media": {
+            "image_url": "https://v2.exercisedb.io/image/0546",
+            "gif_url": "https://v2.exercisedb.io/image/0546"
+          }
+        },
+        "sets": 3,
+        "reps_lower": 30,
+        "reps_upper": 50,
+        "rest_interval": 30,
+        "tip": "Ótimo para aquecimento e cardio"
+      }
+    ]
+  },
+  {
+    "id": "lib_hiit_weightloss_home",
+    "title": "HIIT Queima Gordura",
+    "subtitle": "Alta intensidade para máxima queima calórica",
+    "goal": "weightLoss",
+    "structure": "bodyweight",
+    "estimated_duration_minutes": 25,
+    "intensity": "high",
+    "exercises": [
+      {
+        "exercise": {
+          "id": "high_knees",
+          "name": "Elevação de Joelhos",
+          "main_muscle": "cardioSystem",
+          "equipment": "bodyweight",
+          "instructions": [
+            "Corra no lugar elevando os joelhos até a altura do quadril",
+            "Balance os braços de forma oposta às pernas",
+            "Mantenha o tronco ereto",
+            "Realize em velocidade máxima"
+          ],
+          "media": {
+            "image_url": "https://v2.exercisedb.io/image/0471",
+            "gif_url": "https://v2.exercisedb.io/image/0471"
+          }
+        },
+        "sets": 4,
+        "reps_lower": 30,
+        "reps_upper": 45,
+        "rest_interval": 20,
+        "tip": "30 segundos de trabalho, 20 segundos de descanso"
+      },
+      {
+        "exercise": {
+          "id": "squat_jump",
+          "name": "Agachamento com Salto",
+          "main_muscle": "quads",
+          "equipment": "bodyweight",
+          "instructions": [
+            "Faça um agachamento profundo",
+            "Suba explosivamente saltando o mais alto possível",
+            "Aterrisse suavemente absorvendo o impacto",
+            "Imediatamente desça para o próximo agachamento"
+          ],
+          "media": {
+            "image_url": "https://v2.exercisedb.io/image/0859",
+            "gif_url": "https://v2.exercisedb.io/image/0859"
+          }
+        },
+        "sets": 4,
+        "reps_lower": 10,
+        "reps_upper": 15,
+        "rest_interval": 20,
+        "tip": "Aterrisse com os joelhos levemente flexionados"
+      },
+      {
+        "exercise": {
+          "id": "burpee_no_pushup",
+          "name": "Burpee (sem flexão)",
+          "main_muscle": "fullBody",
+          "equipment": "bodyweight",
+          "instructions": [
+            "Agache e coloque as mãos no chão",
+            "Salte os pés para trás em prancha",
+            "Salte os pés de volta às mãos",
+            "Pule verticalmente com os braços para cima"
+          ],
+          "media": {
+            "image_url": "https://v2.exercisedb.io/image/1160",
+            "gif_url": "https://v2.exercisedb.io/image/1160"
+          }
+        },
+        "sets": 4,
+        "reps_lower": 8,
+        "reps_upper": 12,
+        "rest_interval": 20,
+        "tip": "Versão mais rápida para manter a intensidade alta"
+      },
+      {
+        "exercise": {
+          "id": "skaters",
+          "name": "Skaters",
+          "main_muscle": "glutes",
+          "equipment": "bodyweight",
+          "instructions": [
+            "Salte lateralmente de uma perna para outra",
+            "Cruze a perna de trás por detrás do corpo",
+            "Balance os braços de forma oposta",
+            "Mantenha o movimento fluido e contínuo"
+          ],
+          "media": {
+            "image_url": "https://v2.exercisedb.io/image/0811",
+            "gif_url": "https://v2.exercisedb.io/image/0811"
+          }
+        },
+        "sets": 4,
+        "reps_lower": 20,
+        "reps_upper": 30,
+        "rest_interval": 20,
+        "tip": "Simula o movimento de patinação no gelo"
+      },
+      {
+        "exercise": {
+          "id": "bicycle_crunch",
+          "name": "Abdominal Bicicleta",
+          "main_muscle": "core",
+          "equipment": "bodyweight",
+          "instructions": [
+            "Deite com as mãos atrás da cabeça",
+            "Eleve as pernas flexionadas do chão",
+            "Traga cotovelo ao joelho oposto alternadamente",
+            "Mantenha a lombar pressionada ao chão"
+          ],
+          "media": {
+            "image_url": "https://v2.exercisedb.io/image/0140",
+            "gif_url": "https://v2.exercisedb.io/image/0140"
+          }
+        },
+        "sets": 3,
+        "reps_lower": 20,
+        "reps_upper": 30,
+        "rest_interval": 20,
+        "tip": "Foque na rotação do tronco, não na velocidade"
+      }
+    ]
+  },
+  {
+    "id": "lib_upper_dumbbells_home",
+    "title": "Upper Body com Halteres",
+    "subtitle": "Peito, costas, ombros e braços em casa",
+    "goal": "hypertrophy",
+    "structure": "homeDumbbells",
+    "estimated_duration_minutes": 40,
+    "intensity": "moderate",
+    "exercises": [
+      {
+        "exercise": {
+          "id": "dumbbell_bench_press_floor",
+          "name": "Supino com Halteres no Chão",
+          "main_muscle": "chest",
+          "equipment": "dumbbell",
+          "instructions": [
+            "Deite no chão com os joelhos flexionados",
+            "Segure os halteres acima do peito",
+            "Desça os cotovelos até tocarem o chão",
+            "Empurre de volta ao topo"
+          ],
+          "media": {
+            "image_url": "https://v2.exercisedb.io/image/0289",
+            "gif_url": "https://v2.exercisedb.io/image/0289"
+          }
+        },
+        "sets": 4,
+        "reps_lower": 10,
+        "reps_upper": 15,
+        "rest_interval": 75,
+        "tip": "O chão limita a amplitude protegendo os ombros"
+      },
+      {
+        "exercise": {
+          "id": "dumbbell_row_single_arm",
+          "name": "Remada Unilateral com Halter",
+          "main_muscle": "back",
+          "equipment": "dumbbell",
+          "instructions": [
+            "Apoie mão e joelho em uma superfície estável",
+            "Segure o halter com o braço livre",
+            "Puxe o halter em direção ao quadril",
+            "Desça controladamente"
+          ],
+          "media": {
+            "image_url": "https://v2.exercisedb.io/image/0297",
+            "gif_url": "https://v2.exercisedb.io/image/0297"
+          }
+        },
+        "sets": 3,
+        "reps_lower": 10,
+        "reps_upper": 12,
+        "rest_interval": 60,
+        "tip": "Mantenha as costas paralelas ao chão"
+      },
+      {
+        "exercise": {
+          "id": "dumbbell_shoulder_press_standing",
+          "name": "Desenvolvimento em Pé",
+          "main_muscle": "shoulders",
+          "equipment": "dumbbell",
+          "instructions": [
+            "Fique em pé com halteres na altura dos ombros",
+            "Empurre os halteres para cima",
+            "Una os halteres no topo do movimento",
+            "Desça controladamente"
+          ],
+          "media": {
+            "image_url": "https://v2.exercisedb.io/image/0405",
+            "gif_url": "https://v2.exercisedb.io/image/0405"
+          }
+        },
+        "sets": 3,
+        "reps_lower": 10,
+        "reps_upper": 12,
+        "rest_interval": 60,
+        "tip": "Mantenha o core contraído para estabilizar"
+      },
+      {
+        "exercise": {
+          "id": "dumbbell_curl",
+          "name": "Rosca Alternada com Halteres",
+          "main_muscle": "biceps",
+          "equipment": "dumbbell",
+          "instructions": [
+            "Fique em pé segurando os halteres",
+            "Flexione um braço de cada vez",
+            "Gire o punho durante o movimento (supinação)",
+            "Desça controladamente antes de alternar"
+          ],
+          "media": {
+            "image_url": "https://v2.exercisedb.io/image/0294",
+            "gif_url": "https://v2.exercisedb.io/image/0294"
+          }
+        },
+        "sets": 3,
+        "reps_lower": 10,
+        "reps_upper": 12,
+        "rest_interval": 60,
+        "tip": "Não balance o corpo para ajudar no movimento"
+      },
+      {
+        "exercise": {
+          "id": "dumbbell_tricep_kickback",
+          "name": "Tríceps Coice",
+          "main_muscle": "triceps",
+          "equipment": "dumbbell",
+          "instructions": [
+            "Incline o tronco com o braço paralelo ao corpo",
+            "Mantenha o cotovelo fixo ao lado do corpo",
+            "Estenda o braço para trás",
+            "Retorne controladamente"
+          ],
+          "media": {
+            "image_url": "https://v2.exercisedb.io/image/0286",
+            "gif_url": "https://v2.exercisedb.io/image/0286"
+          }
+        },
+        "sets": 3,
+        "reps_lower": 12,
+        "reps_upper": 15,
+        "rest_interval": 45,
+        "tip": "Isole o movimento apenas no antebraço"
+      },
+      {
+        "exercise": {
+          "id": "dumbbell_lateral_raise",
+          "name": "Elevação Lateral com Halteres",
+          "main_muscle": "shoulders",
+          "equipment": "dumbbell",
+          "instructions": [
+            "Fique em pé com halteres ao lado do corpo",
+            "Levante os braços lateralmente",
+            "Pare na altura dos ombros",
+            "Desça controladamente"
+          ],
+          "media": {
+            "image_url": "https://v2.exercisedb.io/image/0334",
+            "gif_url": "https://v2.exercisedb.io/image/0334"
+          }
+        },
+        "sets": 3,
+        "reps_lower": 12,
+        "reps_upper": 15,
+        "rest_interval": 45,
+        "tip": "Use pesos leves e foque na técnica"
+      }
+    ]
+  },
+  {
+    "id": "lib_lower_dumbbells_home",
+    "title": "Lower Body com Halteres",
+    "subtitle": "Pernas e glúteos em casa com halteres",
+    "goal": "hypertrophy",
+    "structure": "homeDumbbells",
+    "estimated_duration_minutes": 40,
+    "intensity": "moderate",
+    "exercises": [
+      {
+        "exercise": {
+          "id": "goblet_squat",
+          "name": "Agachamento Cálice",
+          "main_muscle": "quads",
+          "equipment": "dumbbell",
+          "instructions": [
+            "Segure um halter verticalmente contra o peito",
+            "Pés na largura dos ombros ou um pouco mais",
+            "Agache mantendo o tronco ereto",
+            "Suba contraindo quadríceps e glúteos"
+          ],
+          "media": {
+            "image_url": "https://v2.exercisedb.io/image/0291",
+            "gif_url": "https://v2.exercisedb.io/image/0291"
+          }
+        },
+        "sets": 4,
+        "reps_lower": 12,
+        "reps_upper": 15,
+        "rest_interval": 75,
+        "tip": "Mantenha os cotovelos entre os joelhos"
+      },
+      {
+        "exercise": {
+          "id": "dumbbell_lunge",
+          "name": "Afundo com Halteres",
+          "main_muscle": "quads",
+          "equipment": "dumbbell",
+          "instructions": [
+            "Segure um halter em cada mão",
+            "Dê um passo à frente descendo o joelho de trás",
+            "O joelho da frente não deve passar da ponta do pé",
+            "Empurre de volta à posição inicial"
+          ],
+          "media": {
+            "image_url": "https://v2.exercisedb.io/image/0291",
+            "gif_url": "https://v2.exercisedb.io/image/0291"
+          }
+        },
+        "sets": 3,
+        "reps_lower": 10,
+        "reps_upper": 12,
+        "rest_interval": 60,
+        "tip": "Mantenha o tronco ereto durante todo o movimento"
+      },
+      {
+        "exercise": {
+          "id": "dumbbell_romanian_deadlift",
+          "name": "Stiff com Halteres",
+          "main_muscle": "hamstrings",
+          "equipment": "dumbbell",
+          "instructions": [
+            "Segure os halteres à frente das coxas",
+            "Incline o tronco empurrando o quadril para trás",
+            "Mantenha as pernas quase estendidas",
+            "Suba contraindo glúteos e posteriores"
+          ],
+          "media": {
+            "image_url": "https://v2.exercisedb.io/image/0292",
+            "gif_url": "https://v2.exercisedb.io/image/0292"
+          }
+        },
+        "sets": 3,
+        "reps_lower": 10,
+        "reps_upper": 12,
+        "rest_interval": 75,
+        "tip": "Sinta o alongamento nos posteriores da coxa"
+      },
+      {
+        "exercise": {
+          "id": "dumbbell_hip_thrust",
+          "name": "Elevação Pélvica com Halter",
+          "main_muscle": "glutes",
+          "equipment": "dumbbell",
+          "instructions": [
+            "Deite com as costas no chão, joelhos flexionados",
+            "Coloque um halter sobre o quadril",
+            "Eleve o quadril contraindo os glúteos",
+            "Desça controladamente"
+          ],
+          "media": {
+            "image_url": "https://v2.exercisedb.io/image/0288",
+            "gif_url": "https://v2.exercisedb.io/image/0288"
+          }
+        },
+        "sets": 3,
+        "reps_lower": 15,
+        "reps_upper": 20,
+        "rest_interval": 60,
+        "tip": "Aperte os glúteos no topo do movimento"
+      },
+      {
+        "exercise": {
+          "id": "dumbbell_sumo_squat",
+          "name": "Agachamento Sumô com Halter",
+          "main_muscle": "glutes",
+          "equipment": "dumbbell",
+          "instructions": [
+            "Posição ampla com pés apontados para fora",
+            "Segure um halter entre as pernas",
+            "Agache mantendo os joelhos alinhados aos pés",
+            "Suba contraindo adutores e glúteos"
+          ],
+          "media": {
+            "image_url": "https://v2.exercisedb.io/image/0293",
+            "gif_url": "https://v2.exercisedb.io/image/0293"
+          }
+        },
+        "sets": 3,
+        "reps_lower": 12,
+        "reps_upper": 15,
+        "rest_interval": 60,
+        "tip": "Ótimo para trabalhar a parte interna das coxas"
+      },
+      {
+        "exercise": {
+          "id": "dumbbell_calf_raise",
+          "name": "Panturrilha com Halter",
+          "main_muscle": "calves",
+          "equipment": "dumbbell",
+          "instructions": [
+            "Segure um halter em uma mão, apoie a outra na parede",
+            "Fique na ponta de um pé em um step ou degrau",
+            "Desça o calcanhar abaixo do nível do step",
+            "Suba na ponta do pé ao máximo"
+          ],
+          "media": {
+            "image_url": "https://v2.exercisedb.io/image/0284",
+            "gif_url": "https://v2.exercisedb.io/image/0284"
+          }
+        },
+        "sets": 3,
+        "reps_lower": 15,
+        "reps_upper": 20,
+        "rest_interval": 45,
+        "tip": "Faça unilateral para melhor ativação"
+      }
+    ]
+  },
+  {
+    "id": "lib_core_strength_home",
+    "title": "Core & Estabilidade",
+    "subtitle": "Fortalecimento do abdômen e lombar",
+    "goal": "endurance",
+    "structure": "bodyweight",
+    "estimated_duration_minutes": 25,
+    "intensity": "low",
+    "exercises": [
+      {
+        "exercise": {
+          "id": "plank_forearm",
+          "name": "Prancha",
+          "main_muscle": "core",
+          "equipment": "bodyweight",
+          "instructions": [
+            "Apoie os antebraços e ponta dos pés no chão",
+            "Mantenha o corpo em linha reta",
+            "Contraia abdômen e glúteos",
+            "Segure sem deixar o quadril cair ou subir"
+          ],
+          "media": {
+            "image_url": "https://v2.exercisedb.io/image/0652",
+            "gif_url": "https://v2.exercisedb.io/image/0652"
+          }
+        },
+        "sets": 3,
+        "reps_lower": 30,
+        "reps_upper": 60,
+        "rest_interval": 30,
+        "tip": "Respire normalmente durante a execução"
+      },
+      {
+        "exercise": {
+          "id": "dead_bug",
+          "name": "Dead Bug",
+          "main_muscle": "core",
+          "equipment": "bodyweight",
+          "instructions": [
+            "Deite de costas com braços e pernas elevados",
+            "Estenda braço e perna opostos simultaneamente",
+            "Mantenha a lombar pressionada ao chão",
+            "Alterne os lados de forma controlada"
+          ],
+          "media": {
+            "image_url": "https://v2.exercisedb.io/image/1470",
+            "gif_url": "https://v2.exercisedb.io/image/1470"
+          }
+        },
+        "sets": 3,
+        "reps_lower": 10,
+        "reps_upper": 15,
+        "rest_interval": 30,
+        "tip": "Excelente para ativação e estabilidade"
+      },
+      {
+        "exercise": {
+          "id": "bird_dog",
+          "name": "Bird Dog",
+          "main_muscle": "core",
+          "equipment": "bodyweight",
+          "instructions": [
+            "Posição de quatro apoios",
+            "Estenda o braço direito e perna esquerda",
+            "Mantenha a coluna neutra",
+            "Alterne os lados de forma controlada"
+          ],
+          "media": {
+            "image_url": "https://v2.exercisedb.io/image/0143",
+            "gif_url": "https://v2.exercisedb.io/image/0143"
+          }
+        },
+        "sets": 3,
+        "reps_lower": 10,
+        "reps_upper": 12,
+        "rest_interval": 30,
+        "tip": "Imagine equilibrar um copo de água nas costas"
+      },
+      {
+        "exercise": {
+          "id": "side_plank",
+          "name": "Prancha Lateral",
+          "main_muscle": "core",
+          "equipment": "bodyweight",
+          "instructions": [
+            "Apoie o antebraço e lateral do pé no chão",
+            "Eleve o quadril formando linha reta",
+            "Segure a posição pelo tempo indicado",
+            "Troque de lado"
+          ],
+          "media": {
+            "image_url": "https://v2.exercisedb.io/image/0783",
+            "gif_url": "https://v2.exercisedb.io/image/0783"
+          }
+        },
+        "sets": 3,
+        "reps_lower": 20,
+        "reps_upper": 30,
+        "rest_interval": 30,
+        "tip": "Mantenha o alinhamento da cabeça aos pés"
+      },
+      {
+        "exercise": {
+          "id": "reverse_crunch",
+          "name": "Abdominal Reverso",
+          "main_muscle": "core",
+          "equipment": "bodyweight",
+          "instructions": [
+            "Deite de costas com as mãos ao lado do corpo",
+            "Eleve as pernas flexionadas a 90 graus",
+            "Levante o quadril do chão usando o abdômen",
+            "Desça controladamente"
+          ],
+          "media": {
+            "image_url": "https://v2.exercisedb.io/image/0749",
+            "gif_url": "https://v2.exercisedb.io/image/0749"
+          }
+        },
+        "sets": 3,
+        "reps_lower": 12,
+        "reps_upper": 15,
+        "rest_interval": 30,
+        "tip": "Use o abdômen para levantar, não impulso"
+      },
+      {
+        "exercise": {
+          "id": "glute_bridge",
+          "name": "Elevação Pélvica",
+          "main_muscle": "glutes",
+          "equipment": "bodyweight",
+          "instructions": [
+            "Deite de costas com joelhos flexionados",
+            "Pés apoiados no chão na largura do quadril",
+            "Eleve o quadril contraindo os glúteos",
+            "Segure no topo e desça controladamente"
+          ],
+          "media": {
+            "image_url": "https://v2.exercisedb.io/image/0459",
+            "gif_url": "https://v2.exercisedb.io/image/0459"
+          }
+        },
+        "sets": 3,
+        "reps_lower": 15,
+        "reps_upper": 20,
+        "rest_interval": 30,
+        "tip": "Aperte os glúteos no topo por 2 segundos"
+      }
+    ]
+  }
+]

@@ -60,3 +60,14 @@ fastlane/report.xml
 fastlane/Preview.html
 fastlane/screenshots/**/*.png
 fastlane/test_output
+
+# API Keys & Sensitive Configuration
+# Never commit files containing real API keys
+**/OpenAIConfig.plist
+**/ExerciseDBConfig.plist
+*.xcconfig
+
+# Keep .example files for documentation
+!**/OpenAIConfig.plist.example
+!**/ExerciseDBConfig.plist.example
+.DS_Store

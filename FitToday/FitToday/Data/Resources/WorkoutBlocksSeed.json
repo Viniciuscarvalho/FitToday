@@ -1,0 +1,136 @@
+[
+  {
+    "id": "upper_push_basic",
+    "group": "upper",
+    "level": "beginner",
+    "compatibleStructures": ["fullGym", "basicGym"],
+    "equipmentOptions": ["machine", "dumbbell"],
+    "suggestedSets": [3, 4],
+    "suggestedReps": [10, 12],
+    "restInterval": 60,
+    "exercises": [
+      {
+        "id": "exr_41n2hZZdH9uyYFGZ",
+        "name": "Lever Pec Deck Fly",
+        "mainMuscle": "chest",
+        "equipment": "machine",
+        "instructions": [
+          "Sente-se com as costas apoiadas e antebraços nas almofadas.",
+          "Una os braços controlando o movimento e contraindo o peito.",
+          "Retorne lentamente à posição inicial."
+        ],
+        "media": {
+          "imageURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/images/Lever-Pec-Deck-Fly-Chest.png",
+          "gifURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/gifs/Lever-Pec-Deck-Fly-Chest.gif",
+          "source": "ExerciseDB"
+        }
+      },
+      {
+        "id": "exr_dumbbell_shoulder_press",
+        "name": "Dumbbell Shoulder Press",
+        "mainMuscle": "shoulders",
+        "equipment": "dumbbell",
+        "instructions": [
+          "Pressione os halteres acima da cabeça mantendo o tronco estável.",
+          "Desça controlando até formar 90° nos cotovelos.",
+          "Evite estender completamente os braços para preservar as articulações."
+        ],
+        "media": {
+          "imageURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/images/Dumbbell-Shoulder-Press.png",
+          "gifURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/gifs/Dumbbell-Shoulder-Press.gif",
+          "source": "ExerciseDB"
+        }
+      }
+    ]
+  },
+  {
+    "id": "lower_strength_bodyweight",
+    "group": "lower",
+    "level": "beginner",
+    "compatibleStructures": ["bodyweight", "homeDumbbells"],
+    "equipmentOptions": ["bodyweight", "dumbbell"],
+    "suggestedSets": [3, 3],
+    "suggestedReps": [12, 15],
+    "restInterval": 45,
+    "exercises": [
+      {
+        "id": "exr_bodyweight_squat",
+        "name": "Bodyweight Squat",
+        "mainMuscle": "quads",
+        "equipment": "bodyweight",
+        "instructions": [
+          "Afaste os pés na largura dos ombros.",
+          "Desça levando o quadril para trás mantendo peito aberto.",
+          "Suba empurrando o chão e contraindo glúteos."
+        ],
+        "media": {
+          "imageURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/images/Squat.png",
+          "gifURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/gifs/Squat.gif",
+          "source": "ExerciseDB"
+        }
+      },
+      {
+        "id": "exr_reverse_lunge",
+        "name": "Reverse Lunge",
+        "mainMuscle": "hamstrings",
+        "equipment": "bodyweight",
+        "instructions": [
+          "Dê um passo para trás controlando o joelho.",
+          "Desça até formar ângulo de 90° e retorne.",
+          "Alterne as pernas mantendo o tronco ereto."
+        ],
+        "media": {
+          "imageURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/images/Reverse-Lunge.png",
+          "gifURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/gifs/Reverse-Lunge.gif",
+          "source": "ExerciseDB"
+        }
+      }
+    ]
+  },
+  {
+    "id": "cardio_express",
+    "group": "cardio",
+    "level": "intermediate",
+    "compatibleStructures": ["fullGym", "basicGym", "homeDumbbells"],
+    "equipmentOptions": ["bodyweight", "cardioMachine"],
+    "suggestedSets": [4, 4],
+    "suggestedReps": [30, 40],
+    "restInterval": 30,
+    "exercises": [
+      {
+        "id": "exr_burpee",
+        "name": "Burpee",
+        "mainMuscle": "cardioSystem",
+        "equipment": "bodyweight",
+        "instructions": [
+          "Apoie as mãos no chão e lance os pés para trás.",
+          "Retorne com um salto explosivo.",
+          "Mantenha o core ativo para proteger a lombar."
+        ],
+        "media": {
+          "imageURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/images/Burpee.png",
+          "gifURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/gifs/Burpee.gif",
+          "source": "ExerciseDB"
+        }
+      },
+      {
+        "id": "exr_mountain_climber",
+        "name": "Mountain Climber",
+        "mainMuscle": "core",
+        "equipment": "bodyweight",
+        "instructions": [
+          "Apoie as mãos alinhadas aos ombros.",
+          "Traga os joelhos alternados em direção ao peito.",
+          "Evite balançar os quadris para manter o core ativo."
+        ],
+        "media": {
+          "imageURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/images/Mountain-Climber.png",
+          "gifURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/gifs/Mountain-Climber.gif",
+          "source": "ExerciseDB"
+        }
+      }
+    ]
+  }
+]
+
+

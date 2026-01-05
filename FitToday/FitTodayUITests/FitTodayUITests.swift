@@ -23,19 +23,23 @@ final class FitTodayUITests: XCTestCase {
     }
 
     @MainActor
-    func testExample() throws {
-        // UI tests must launch the application that they test.
+    func testTabNavigationExists() throws {
         let app = XCUIApplication()
         app.launch()
 
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
+        XCTAssertTrue(app.tabBars.buttons["Home"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.tabBars.buttons["Biblioteca"].exists)
+        XCTAssertTrue(app.tabBars.buttons["Histórico"].exists)
+        XCTAssertTrue(app.tabBars.buttons["Perfil"].exists)
     }
 
     @MainActor
-    func testLaunchPerformance() throws {
-        // This measures how long it takes to launch your application.
-        measure(metrics: [XCTApplicationLaunchMetric()]) {
-            XCUIApplication().launch()
+    func testLaunchWithStoreKitConfiguration() throws {
+        let app = XCUIApplication()
+        if let path = Bundle.main.path(forResource: "Configuration", ofType: "storekit") {
+            app.launchEnvironment["SKStoreKitConfigurationFile"] = path
         }
+        app.launch()
+        XCTAssertTrue(app.state == .runningForeground || app.state == .runningBackground)
     }
 }

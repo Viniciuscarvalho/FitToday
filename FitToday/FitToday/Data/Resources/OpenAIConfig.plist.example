@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  OpenAI Configuration Template
+  
+  INSTRUÇÕES:
+  1. Copie este arquivo para "OpenAIConfig.plist" (remova .example)
+  2. Substitua YOUR_OPENAI_API_KEY_HERE pela sua chave real
+  3. Obtenha sua chave em: https://platform.openai.com/api-keys
+  
+  IMPORTANTE: Nunca commite o arquivo OpenAIConfig.plist com sua chave real!
+-->
+<plist version="1.0">
+<dict>
+	<key>OPENAI_API_KEY</key>
+	<string>YOUR_OPENAI_API_KEY_HERE</string>
+	<key>OPENAI_MODEL</key>
+	<string>gpt-4o-mini</string>
+	<key>OPENAI_BASE_URL</key>
+	<string>https://api.openai.com/v1/chat/completions</string>
+	<key>OPENAI_TIMEOUT_SECONDS</key>
+	<integer>20</integer>
+	<key>OPENAI_MAX_TOKENS</key>
+	<integer>800</integer>
+	<key>OPENAI_TEMPERATURE</key>
+	<real>0.2</real>
+	<key>OPENAI_CACHE_TTL_SECONDS</key>
+	<integer>300</integer>
+</dict>
+</plist>
+
