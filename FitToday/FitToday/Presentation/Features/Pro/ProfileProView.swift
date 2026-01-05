@@ -44,20 +44,28 @@ struct ProfileProView: View {
             .padding()
         }
         .background(FitTodayColor.background.ignoresSafeArea())
-        .navigationTitle("Perfil")
-        .navigationBarTitleDisplayMode(.large)
+        .toolbar(.hidden, for: .navigationBar)
+        .safeAreaInset(edge: .top) {
+            profileHeaderInset
+        }
         .task {
             await loadEntitlement()
         }
-        .sheet(isPresented: $showingPaywall) {
+        .sheet(isPresented: $showingPaywall, onDismiss: {
+            showingPaywall = false
+        }, content: {
             if let repo = storeKitRepository {
-                PaywallView(storeService: repo.service) {
-                    Task {
-                        await loadEntitlement()
-                    }
-                }
+                PaywallView(
+                    storeService: repo.service,
+                    onPurchaseSuccess: {
+                        Task {
+                            await loadEntitlement()
+                        }
+                    },
+                    onDismiss: {}
+                )
             }
-        }
+        })
         .alert("Restaurar Compras", isPresented: $showingRestoreAlert) {
             Button("Ok", role: .cancel) {}
         } message: {
@@ -99,6 +107,26 @@ struct ProfileProView: View {
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, FitTodaySpacing.lg)
+    }
+    
+    private var profileHeaderInset: some View {
+        VStack(alignment: .leading, spacing: FitTodaySpacing.xs) {
+            Text("Perfil")
+                .font(.system(size: 34, weight: .bold))
+                .foregroundStyle(FitTodayColor.textPrimary)
+            Text("Gerencie assinatura Pro, IA e preferências de treino.")
+                .font(.system(.body))
+                .foregroundStyle(FitTodayColor.textSecondary)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, FitTodaySpacing.lg)
+        .padding(.top, FitTodaySpacing.md)
+        .padding(.bottom, FitTodaySpacing.sm)
+        .background(
+            Rectangle()
+                .fill(FitTodayColor.background)
+                .shadow(color: .black.opacity(0.08), radius: 6, y: 4)
+        )
     }
     
     // MARK: - Subscription Section
@@ -295,17 +323,71 @@ struct ProfileProView: View {
                         .padding(.leading, 56)
                     
                     Button {
-                        clearExerciseDBCache()
+                        clearExerciseDBMapping()
                     } label: {
                         HStack(spacing: FitTodaySpacing.md) {
-                            Image(systemName: "photo.stack")
+                            Image(systemName: "arrow.triangle.2.circlepath")
                                 .foregroundStyle(.blue)
                                 .frame(width: 24)
                             VStack(alignment: .leading, spacing: 2) {
-                                Text("Limpar cache de mídias")
+                                Text("Limpar mapping de exercícios")
                                     .font(.system(.body))
                                     .foregroundStyle(FitTodayColor.textPrimary)
-                                Text("Força nova busca de imagens do ExerciseDB")
+                                Text("Força re-match de exercícios locais → ExerciseDB")
+                                    .font(.system(.caption))
+                                    .foregroundStyle(FitTodayColor.textSecondary)
+                            }
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .font(.system(.caption, weight: .semibold))
+                                .foregroundStyle(FitTodayColor.textTertiary)
+                        }
+                        .padding()
+                    }
+                    .buttonStyle(.plain)
+                    
+                    Divider()
+                        .padding(.leading, 56)
+                    
+                    Button {
+                        clearExerciseDBTargetList()
+                    } label: {
+                        HStack(spacing: FitTodaySpacing.md) {
+                            Image(systemName: "list.bullet.rectangle")
+                                .foregroundStyle(.green)
+                                .frame(width: 24)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Limpar cache de targets")
+                                    .font(.system(.body))
+                                    .foregroundStyle(FitTodayColor.textPrimary)
+                                Text("Força nova busca da lista de músculos-alvo")
+                                    .font(.system(.caption))
+                                    .foregroundStyle(FitTodayColor.textSecondary)
+                            }
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .font(.system(.caption, weight: .semibold))
+                                .foregroundStyle(FitTodayColor.textTertiary)
+                        }
+                        .padding()
+                    }
+                    .buttonStyle(.plain)
+                    
+                    Divider()
+                        .padding(.leading, 56)
+                    
+                    Button {
+                        clearAllExerciseDBCaches()
+                    } label: {
+                        HStack(spacing: FitTodaySpacing.md) {
+                            Image(systemName: "trash.fill")
+                                .foregroundStyle(.red)
+                                .frame(width: 24)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Limpar todos os caches ExerciseDB")
+                                    .font(.system(.body, weight: .semibold))
+                                    .foregroundStyle(FitTodayColor.textPrimary)
+                                Text("Mapping + TargetList + Mídias resolvidas")
                                     .font(.system(.caption))
                                     .foregroundStyle(FitTodayColor.textSecondary)
                             }
@@ -360,12 +442,64 @@ struct ProfileProView: View {
         showingRestoreAlert = true
     }
     
-    private func clearExerciseDBCache() {
-        // Limpa o mapeamento de IDs do ExerciseDB
+    /// Limpa o mapeamento persistido de exercícios locais → ExerciseDB.
+    /// 
+    /// **Checklist de Validação Manual:**
+    /// 1. Abrir um exercício que não tinha mídia antes
+    /// 2. Limpar o mapping usando este botão
+    /// 3. Navegar para o mesmo exercício novamente
+    /// 4. Verificar nos logs DEBUG se o exercício foi re-mapeado
+    /// 5. Confirmar que a mídia aparece (se o match foi bem-sucedido)
+    private func clearExerciseDBMapping() {
+        // Limpa o mapeamento persistido de IDs do ExerciseDB
+        // O cache em memória será limpo naturalmente quando o app recarregar
         UserDefaults.standard.removeObject(forKey: "exercisedb_id_mapping_v1")
         
         // Feedback visual
-        restoreMessage = "Cache de mídias limpo! As imagens serão buscadas novamente."
+        restoreMessage = "Mapping de exercícios limpo! Os exercícios serão re-mapeados na próxima visualização."
+        showingRestoreAlert = true
+    }
+    
+    /// Limpa o cache persistido da lista de targets (músculos-alvo) do ExerciseDB.
+    /// 
+    /// **Checklist de Validação Manual:**
+    /// 1. Verificar nos logs se o targetList foi carregado anteriormente
+    /// 2. Limpar o cache usando este botão
+    /// 3. Navegar para um exercício que usa resolução por target (ex: peito, bíceps)
+    /// 4. Verificar nos logs DEBUG se o targetList foi recarregado da API
+    /// 5. Confirmar que a resolução por target funciona corretamente
+    private func clearExerciseDBTargetList() {
+        // Limpa o cache persistido de targetList
+        // O cache em memória será limpo naturalmente quando o app recarregar
+        UserDefaults.standard.removeObject(forKey: "exercisedb_target_list_v1")
+        UserDefaults.standard.removeObject(forKey: "exercisedb_target_list_timestamp_v1")
+        
+        // Feedback visual
+        restoreMessage = "Cache de targets limpo! A lista será recarregada na próxima busca."
+        showingRestoreAlert = true
+    }
+    
+    /// Limpa todos os caches do ExerciseDB (mapping + targetList).
+    /// 
+    /// **Checklist de Validação Manual:**
+    /// 1. Limpar todos os caches usando este botão
+    /// 2. Navegar para um exercício com nome divergente (ex: "Lever Pec Deck Fly")
+    /// 3. Verificar nos logs DEBUG o caminho completo de resolução:
+    ///    - Target derivado e se foi válido
+    ///    - Candidatos encontrados por target
+    ///    - Scores dos top 3 candidatos
+    ///    - Match escolhido ou fallback por nome
+    /// 4. Confirmar que a mídia aparece após o re-match
+    /// 5. Verificar que o mapping foi persistido para evitar nova busca
+    private func clearAllExerciseDBCaches() {
+        // Limpa todos os caches persistidos do ExerciseDB
+        // Os caches em memória serão limpos naturalmente quando o app recarregar
+        UserDefaults.standard.removeObject(forKey: "exercisedb_id_mapping_v1")
+        UserDefaults.standard.removeObject(forKey: "exercisedb_target_list_v1")
+        UserDefaults.standard.removeObject(forKey: "exercisedb_target_list_timestamp_v1")
+        
+        // Feedback visual
+        restoreMessage = "Todos os caches do ExerciseDB foram limpos! O app fará novas buscas na próxima visualização."
         showingRestoreAlert = true
     }
     #endif

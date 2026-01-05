@@ -50,6 +50,19 @@ protocol ExerciseDBServicing: Sendable {
   
   /// Busca URL da imagem do exercício via endpoint /image
   func fetchImageURL(exerciseId: String, resolution: ExerciseImageResolution) async throws -> URL?
+
+  /// Busca os bytes da mídia (imagem/GIF) via ExerciseDB.
+  /// Importante: necessário para carregar via RapidAPI pois exige headers.
+  func fetchImageData(
+    exerciseId: String,
+    resolution: ExerciseImageResolution
+  ) async throws -> (data: Data, mimeType: String)?
+  
+  /// Busca lista de targets válidos (músculo-alvo) disponíveis na API
+  func fetchTargetList() async throws -> [String]
+  
+  /// Busca exercícios por target (músculo-alvo) específico
+  func fetchExercises(target: String, limit: Int) async throws -> [ExerciseDBExercise]
 }
 
 /// Erros do serviço ExerciseDB.
@@ -78,6 +91,8 @@ actor ExerciseDBService: ExerciseDBServicing {
   private let configuration: ExerciseDBConfiguration
   private let session: URLSession
   private var cache: [String: ExerciseDBExercise] = [:]
+  private var targetListCache: [String]?
+  private var targetListCachedAt: Date?
 
   init(configuration: ExerciseDBConfiguration, session: URLSession = .shared) {
     self.configuration = configuration
@@ -94,6 +109,7 @@ actor ExerciseDBService: ExerciseDBServicing {
     let url = configuration.baseURL.appendingPathComponent("/exercises/exercise/\(id)")
     var request = URLRequest(url: url)
     request.httpMethod = "GET"
+    // Timeout adequado para busca individual (10s)
     request.timeoutInterval = 10.0
     request.addValue(configuration.apiKey, forHTTPHeaderField: "x-rapidapi-key")
     request.addValue(configuration.host, forHTTPHeaderField: "x-rapidapi-host")
@@ -140,7 +156,8 @@ actor ExerciseDBService: ExerciseDBServicing {
 
     var request = URLRequest(url: finalURL)
     request.httpMethod = "GET"
-    request.timeoutInterval = 15.0
+    // Timeout maior para busca por nome (pode retornar muitos resultados)
+    request.timeoutInterval = 12.0
     request.addValue(configuration.apiKey, forHTTPHeaderField: "x-rapidapi-key")
     request.addValue(configuration.host, forHTTPHeaderField: "x-rapidapi-host")
 
@@ -172,11 +189,121 @@ actor ExerciseDBService: ExerciseDBServicing {
   func clearCache() {
     cache.removeAll()
     imageURLCache.removeAll()
+    imageDataCache.removeAll()
+    targetListCache = nil
+    targetListCachedAt = nil
+  }
+  
+  // MARK: - Target List Endpoint
+  
+  /// Busca a lista de targets (músculo-alvo) disponíveis na API.
+  /// Endpoint: GET https://exercisedb.p.rapidapi.com/exercises/targetList
+  /// Cache: em memória (até limpar ou reiniciar app)
+  func fetchTargetList() async throws -> [String] {
+    // Verifica cache (válido por sessão - sem TTL para simplificar primeira iteração)
+    if let cached = targetListCache {
+      #if DEBUG
+      print("[ExerciseDB] targetList cache hit: \(cached.count) targets")
+      #endif
+      return cached
+    }
+    
+    let url = configuration.baseURL.appendingPathComponent("/exercises/targetList")
+    var request = URLRequest(url: url)
+    request.httpMethod = "GET"
+    // Timeout adequado para targetList (uma vez por TTL, pode ser maior)
+    request.timeoutInterval = 12.0
+    request.addValue(configuration.apiKey, forHTTPHeaderField: "x-rapidapi-key")
+    request.addValue(configuration.host, forHTTPHeaderField: "x-rapidapi-host")
+    
+    do {
+      let (data, response) = try await session.data(for: request)
+      
+      guard let httpResponse = response as? HTTPURLResponse else {
+        throw ExerciseDBError.invalidResponse
+      }
+      
+      guard (200...299).contains(httpResponse.statusCode) else {
+        #if DEBUG
+        print("[ExerciseDB] HTTP \(httpResponse.statusCode) para targetList")
+        #endif
+        throw ExerciseDBError.invalidResponse
+      }
+      
+      let decoder = JSONDecoder()
+      let targets = try decoder.decode([String].self, from: data)
+      
+      // Cacheia resultado
+      targetListCache = targets
+      targetListCachedAt = Date()
+      
+      #if DEBUG
+      print("[ExerciseDB] targetList fetched: \(targets.count) targets")
+      #endif
+      
+      return targets
+    } catch let error as ExerciseDBError {
+      throw error
+    } catch {
+      #if DEBUG
+      print("[ExerciseDB] Erro ao buscar targetList: \(error)")
+      #endif
+      throw ExerciseDBError.networkError(error)
+    }
+  }
+  
+  // MARK: - Target Exercises Endpoint
+  
+  /// Busca exercícios por target (músculo-alvo) específico.
+  /// Endpoint: GET https://exercisedb.p.rapidapi.com/exercises/target/{target}
+  func fetchExercises(target: String, limit: Int = 20) async throws -> [ExerciseDBExercise] {
+    guard let encodedTarget = target.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) else {
+      return []
+    }
+    
+    let url = configuration.baseURL.appendingPathComponent("/exercises/target/\(encodedTarget)")
+    var request = URLRequest(url: url)
+    request.httpMethod = "GET"
+    // Timeout adequado para busca por target (pode retornar muitos resultados)
+    request.timeoutInterval = 12.0
+    request.addValue(configuration.apiKey, forHTTPHeaderField: "x-rapidapi-key")
+    request.addValue(configuration.host, forHTTPHeaderField: "x-rapidapi-host")
+    
+    do {
+      let (data, response) = try await session.data(for: request)
+      
+      guard let httpResponse = response as? HTTPURLResponse,
+            (200...299).contains(httpResponse.statusCode) else {
+        throw ExerciseDBError.invalidResponse
+      }
+      
+      let decoder = JSONDecoder()
+      let exercises = (try? decoder.decode([ExerciseDBExercise].self, from: data)) ?? []
+      
+      // Cacheia exercícios retornados
+      for exercise in exercises.prefix(limit) {
+        cache[exercise.id] = exercise
+      }
+      
+      #if DEBUG
+      print("[ExerciseDB] target/\(target) fetched: \(exercises.count) exercícios (limit: \(limit))")
+      #endif
+      
+      return Array(exercises.prefix(limit))
+    } catch let error as ExerciseDBError {
+      throw error
+    } catch {
+      #if DEBUG
+      print("[ExerciseDB] Erro ao buscar exercícios para target '\(target)': \(error)")
+      #endif
+      throw ExerciseDBError.networkError(error)
+    }
   }
   
   // MARK: - Image Endpoint
   
   private var imageURLCache: [String: URL] = [:]
+  private var imageDataCache: [String: (data: Data, mimeType: String)] = [:]
   
   /// Busca a URL da imagem do exercício via endpoint /image da RapidAPI.
   /// Parâmetros obrigatórios: resolution e exerciseId.
@@ -203,9 +330,14 @@ actor ExerciseDBService: ExerciseDBServicing {
       return nil
     }
     
+    #if DEBUG
+    print("[ExerciseDB] 🔗 Construindo URL RapidAPI: \(url.absoluteString)")
+    #endif
+    
     var request = URLRequest(url: url)
     request.httpMethod = "GET"
-    request.timeoutInterval = 10.0
+    // Timeout adequado para busca de imagem (pode ser maior para imagens grandes)
+    request.timeoutInterval = 15.0
     // Headers obrigatórios para RapidAPI
     request.addValue(configuration.apiKey, forHTTPHeaderField: "x-rapidapi-key")
     request.addValue(configuration.host, forHTTPHeaderField: "x-rapidapi-host")
@@ -224,17 +356,32 @@ actor ExerciseDBService: ExerciseDBServicing {
         return nil
       }
       
-      // A resposta pode ser JSON com URL ou a imagem diretamente
-      // Primeiro tenta parsear como JSON
-      if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-         let imageURLString = json["url"] as? String ?? json["imageUrl"] as? String,
-         let imageURL = URL(string: imageURLString) {
-        imageURLCache[cacheKey] = imageURL
-        return imageURL
+      // IMPORTANTE: A API RapidAPI pode retornar JSON com uma URL do formato antigo (v2.exercisedb.io),
+      // mas essa URL não funciona sem headers RapidAPI. Sempre retornamos a URL do RapidAPI
+      // que o loader vai usar com fetchImageData (que inclui os headers).
+      
+      // Verifica se a resposta é uma imagem diretamente (mimeType image/*)
+      let mimeType = httpResponse.mimeType ?? "application/octet-stream"
+      if mimeType.hasPrefix("image/") {
+        // Resposta é imagem direta: retorna a URL do RapidAPI (o loader vai usar fetchImageData)
+        #if DEBUG
+        print("[ExerciseDB] ✅ Resposta é imagem direta (\(mimeType)), retornando URL RapidAPI")
+        #endif
+        imageURLCache[cacheKey] = url
+        return url
       }
       
-      // Se não for JSON, pode ser que a própria URL seja a imagem
-      // Nesse caso, retornamos a URL original da requisição
+      // Se for JSON, ignora a URL que vem no JSON e retorna a URL do RapidAPI
+      // O loader vai usar fetchImageData que baixa os bytes corretamente com headers
+      if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
+        #if DEBUG
+        if let jsonURL = json["url"] as? String ?? json["imageUrl"] as? String {
+          print("[ExerciseDB] ⚠️ API retornou JSON com URL antiga (\(jsonURL)), usando URL RapidAPI ao invés")
+        }
+        #endif
+      }
+      
+      // Sempre retorna a URL do RapidAPI (com resolution e exerciseId)
       imageURLCache[cacheKey] = url
       return url
       
@@ -243,6 +390,119 @@ actor ExerciseDBService: ExerciseDBServicing {
     } catch {
       #if DEBUG
       print("[ExerciseDB] Erro ao buscar imagem \(exerciseId): \(error.localizedDescription)")
+      #endif
+      throw ExerciseDBError.networkError(error)
+    }
+  }
+
+  /// Busca bytes da mídia (imagem/GIF) com headers RapidAPI.
+  /// - Retorna: bytes + mimeType quando disponível.
+  func fetchImageData(
+    exerciseId: String,
+    resolution: ExerciseImageResolution
+  ) async throws -> (data: Data, mimeType: String)? {
+    let cacheKey = "\(exerciseId)_\(resolution.rawValue)"
+    if let cached = imageDataCache[cacheKey] {
+      return cached
+    }
+
+    var components = URLComponents(url: configuration.baseURL.appendingPathComponent("/image"), resolvingAgainstBaseURL: true)!
+    components.queryItems = [
+      URLQueryItem(name: "resolution", value: resolution.rawValue),
+      URLQueryItem(name: "exerciseId", value: exerciseId)
+    ]
+
+    guard let url = components.url else {
+      #if DEBUG
+      print("[ExerciseDB] URL inválida para mídia do exercício \(exerciseId)")
+      #endif
+      return nil
+    }
+
+    var request = URLRequest(url: url)
+    request.httpMethod = "GET"
+    // Timeout adequado para busca de mídia (GIF pode ser maior)
+    request.timeoutInterval = 15.0
+    request.addValue(configuration.apiKey, forHTTPHeaderField: "x-rapidapi-key")
+    request.addValue(configuration.host, forHTTPHeaderField: "x-rapidapi-host")
+
+    do {
+      let (data, response) = try await session.data(for: request)
+      guard let httpResponse = response as? HTTPURLResponse else {
+        throw ExerciseDBError.invalidResponse
+      }
+
+      guard (200...299).contains(httpResponse.statusCode) else {
+        #if DEBUG
+        print("[ExerciseDB] ❌ HTTP \(httpResponse.statusCode) para mídia \(exerciseId)")
+        #endif
+        return nil
+      }
+
+      var detectedMimeType = httpResponse.mimeType ?? "application/octet-stream"
+      
+      // Se mimeType não for confiável, tenta detectar pelo conteúdo (magic bytes)
+      if !detectedMimeType.hasPrefix("image/") && data.count >= 4 {
+        let magicBytes = data.prefix(4)
+        if magicBytes.starts(with: [0x47, 0x49, 0x46, 0x38]) { // GIF89a ou GIF87a
+          detectedMimeType = "image/gif"
+        } else if magicBytes.starts(with: [0xFF, 0xD8, 0xFF]) { // JPEG
+          detectedMimeType = "image/jpeg"
+        } else if magicBytes.starts(with: [0x89, 0x50, 0x4E, 0x47]) { // PNG
+          detectedMimeType = "image/png"
+        } else if magicBytes.starts(with: [0x52, 0x49, 0x46, 0x46]) { // WebP (RIFF)
+          detectedMimeType = "image/webp"
+        }
+      }
+      
+      #if DEBUG
+      print("[ExerciseDB] 📦 Resposta recebida: mimeType=\(detectedMimeType) (original: \(httpResponse.mimeType ?? "nil")), dataSize=\(data.count) bytes para exercício \(exerciseId)")
+      #endif
+
+      // Caso 1: a API já retorna a mídia diretamente (ideal)
+      if detectedMimeType.hasPrefix("image/") {
+        #if DEBUG
+        print("[ExerciseDB] ✅ Mídia recebida diretamente: \(detectedMimeType) (\(data.count) bytes)")
+        #endif
+        let payload = (data: data, mimeType: detectedMimeType)
+        imageDataCache[cacheKey] = payload
+        return payload
+      }
+
+      // Caso 2: a API retorna JSON com uma URL final (ex.: v2.exercisedb.io)
+      if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
+        #if DEBUG
+        print("[ExerciseDB] 📄 Resposta é JSON, tentando extrair URL final...")
+        #endif
+        if let urlString = (json["url"] as? String) ?? (json["imageUrl"] as? String) ?? (json["gifUrl"] as? String),
+           let finalURL = URL(string: urlString) {
+          #if DEBUG
+          print("[ExerciseDB] 🔗 URL final encontrada: \(urlString)")
+          #endif
+          let (finalData, finalResponse) = try await session.data(from: finalURL)
+          let finalMimeType = (finalResponse as? HTTPURLResponse)?.mimeType ?? "application/octet-stream"
+          #if DEBUG
+          print("[ExerciseDB] ✅ Mídia baixada da URL final: \(finalMimeType) (\(finalData.count) bytes)")
+          #endif
+          let payload = (data: finalData, mimeType: finalMimeType)
+          imageDataCache[cacheKey] = payload
+          return payload
+        } else {
+          #if DEBUG
+          print("[ExerciseDB] ⚠️ JSON não contém URL válida. Chaves disponíveis: \(json.keys.joined(separator: ", "))")
+          #endif
+        }
+      }
+
+      #if DEBUG
+      print("[ExerciseDB] ❌ Não foi possível processar a resposta para exercício \(exerciseId) (mimeType: \(detectedMimeType), dataSize: \(data.count))")
+      #endif
+      return nil
+    } catch let error as ExerciseDBError {
+      throw error
+    } catch {
+      #if DEBUG
+      print("[ExerciseDB] Erro ao buscar mídia \(exerciseId): \(error.localizedDescription)")
       #endif
       throw ExerciseDBError.networkError(error)
     }

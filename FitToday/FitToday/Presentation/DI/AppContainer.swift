@@ -63,7 +63,15 @@ struct AppContainer {
             container.register(ExerciseDBServicing.self) { _ in exerciseDBService }
                 .inObjectScope(.container)
 
-            let mediaResolver = ExerciseMediaResolver(service: exerciseDBService, baseURL: config.baseURL)
+            let targetCatalog = ExerciseDBTargetCatalog(service: exerciseDBService)
+            container.register(ExerciseDBTargetCataloging.self) { _ in targetCatalog }
+                .inObjectScope(.container)
+
+            let mediaResolver = ExerciseMediaResolver(
+                service: exerciseDBService,
+                targetCatalog: targetCatalog,
+                baseURL: config.baseURL
+            )
             container.register(ExerciseMediaResolving.self) { _ in mediaResolver }
                 .inObjectScope(.container)
 

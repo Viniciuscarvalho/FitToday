@@ -50,7 +50,8 @@ final class FitTodayTests: XCTestCase {
             id: "advanced_machine",
             group: .fullBody,
             level: .advanced,
-            compatibleStructures: [.bodyweight],
+            // Incompatível com o foco (.upper), mas compatível com a estrutura do usuário para permitir fallback
+            compatibleStructures: TrainingStructure.allCases,
             equipmentOptions: [.machine],
             exercises: [
                 WorkoutExercise(id: "ex1", name: "Complex Move", mainMuscle: .chest, equipment: .machine, instructions: [], media: nil)
@@ -68,7 +69,8 @@ final class FitTodayTests: XCTestCase {
             checkIn: DailyCheckIn(focus: .upper, sorenessLevel: .none)
         )
 
-        XCTAssertEqual(plan.focus, .fullBody)
+        // Mesmo usando um bloco fullBody como fallback, o foco do plano deve respeitar o check-in do usuário.
+        XCTAssertEqual(plan.focus, .upper)
         XCTAssertFalse(plan.exercises.isEmpty)
     }
 
@@ -223,7 +225,18 @@ private final class MockOpenAIClient: OpenAIClienting {
 
     func sendJSONPrompt(prompt: String, cachedKey: String?) async throws -> Data {
         invocationCount += 1
-        return Data(payload.utf8)
+        // O OpenAIWorkoutPlanComposer decodifica primeiro a resposta do Chat Completions e só então
+        // decodifica o JSON real do plano a partir de `choices[0].message.content`.
+        let wrapped: [String: Any] = [
+            "choices": [
+                [
+                    "message": [
+                        "content": payload
+                    ]
+                ]
+            ]
+        ]
+        return try JSONSerialization.data(withJSONObject: wrapped, options: [])
     }
 }
 
