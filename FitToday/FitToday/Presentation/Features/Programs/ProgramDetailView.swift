@@ -148,7 +148,8 @@ struct ProgramDetailView: View {
                             workout: workout,
                             index: index + 1
                         ) {
-                            router.push(.programWorkoutDetail(workout.id), on: .programs)
+                            // Usa a tab atual para manter a navegação na mesma tab (home ou programs)
+                            router.push(.programWorkoutDetail(workout.id), on: router.selectedTab)
                         }
                         .padding(.horizontal)
                     }

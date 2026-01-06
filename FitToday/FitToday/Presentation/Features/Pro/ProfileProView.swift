@@ -44,10 +44,9 @@ struct ProfileProView: View {
             .padding()
         }
         .background(FitTodayColor.background.ignoresSafeArea())
-        .toolbar(.hidden, for: .navigationBar)
-        .safeAreaInset(edge: .top) {
-            profileHeaderInset
-        }
+        .navigationTitle("Perfil")
+        .navigationBarTitleDisplayMode(.large)
+        .toolbarColorScheme(.dark, for: .navigationBar)
         .task {
             await loadEntitlement()
         }
@@ -107,26 +106,6 @@ struct ProfileProView: View {
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, FitTodaySpacing.lg)
-    }
-    
-    private var profileHeaderInset: some View {
-        VStack(alignment: .leading, spacing: FitTodaySpacing.xs) {
-            Text("Perfil")
-                .font(.system(size: 34, weight: .bold))
-                .foregroundStyle(FitTodayColor.textPrimary)
-            Text("Gerencie assinatura Pro, IA e preferências de treino.")
-                .font(.system(.body))
-                .foregroundStyle(FitTodayColor.textSecondary)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.horizontal, FitTodaySpacing.lg)
-        .padding(.top, FitTodaySpacing.md)
-        .padding(.bottom, FitTodaySpacing.sm)
-        .background(
-            Rectangle()
-                .fill(FitTodayColor.background)
-                .shadow(color: .black.opacity(0.08), radius: 6, y: 4)
-        )
     }
     
     // MARK: - Subscription Section

@@ -12,8 +12,8 @@
 	"argv": [
 		"/opt/homebrew/bin/xcode-build-server"
 	],
-	"workspace": "/Users/viniciuscarvalho/Documents/FitToday/FitToday/FitToday.xcodeproj/project.xcworkspace",
-	"build_root": "/Users/viniciuscarvalho/Library/Developer/Xcode/DerivedData/FitToday-fyolufvpuhalumanjwxueaexoyjf",
+	"workspace": "/Users/vinicius.marques/Documents/Projects/pessoal/FitToday/FitToday/FitToday.xcodeproj/project.xcworkspace",
+	"build_root": "/Users/vinicius.marques/Library/Developer/Xcode/DerivedData/FitToday-bzsabsnjleywdiewyiwgerxfqiix",
 	"scheme": "FitToday",
 	"kind": "xcode"
 }

@@ -89,6 +89,86 @@ actor ExerciseMediaResolver: ExerciseMediaResolving {
   /// Limite máximo de queries de busca por nome (evita loops infinitos)
   private static let maxSearchQueries = 5
   
+  // MARK: - Exercise Name Translation (PT → EN)
+  
+  /// Dicionário de tradução de nomes de exercícios do português para inglês.
+  /// Usado para melhorar a busca na API ExerciseDB que está em inglês.
+  nonisolated private static let exerciseNameTranslation: [String: String] = [
+    // Core & Estabilidade
+    "prancha": "plank",
+    "plank": "plank",
+    "dead bug": "dead bug",
+    "bird dog": "bird dog",
+    "prancha lateral": "side plank",
+    "side plank": "side plank",
+    "abdominal reverso": "reverse crunch",
+    "reverse crunch": "reverse crunch",
+    "elevação pélvica": "glute bridge",
+    "glute bridge": "glute bridge",
+    "hip thrust": "glute bridge",
+    "ponte": "glute bridge",
+    "elevação pélvica com halter": "dumbbell hip thrust",
+    
+    // Cardio & Full Body
+    "burpee": "burpee",
+    "mountain climber": "mountain climber",
+    "escalador": "mountain climber",
+    
+    // Upper Body
+    "flexão": "push-up",
+    "push-up": "push-up",
+    "pushup": "push-up",
+    "flexão de braço": "push-up",
+    "barra": "pull-up",
+    "pull-up": "pull-up",
+    "pullup": "pull-up",
+    "barra fixa": "pull-up",
+    "supino reto com barra": "barbell bench press",
+    "supino inclinado com halteres": "incline dumbbell press",
+    "supino": "bench press",
+    "bench press": "bench press",
+    
+    // Lower Body
+    "agachamento": "squat",
+    "squat": "squat",
+    "afundo": "lunge",
+    "lunge": "lunge",
+    "passada": "lunge",
+    "leg press": "leg press",
+    "extensão de perna": "leg extension",
+    "flexão de perna": "leg curl",
+    
+    // Abdominais
+    "abdominal": "crunch",
+    "crunch": "crunch",
+    "abdominal tradicional": "crunch",
+    "abdominal oblíquo": "side crunch",
+    "side crunch": "side crunch",
+    
+    // Ombros
+    "desenvolvimento": "shoulder press",
+    "shoulder press": "shoulder press",
+    "elevação lateral": "lateral raise",
+    "lateral raise": "lateral raise",
+    
+    // Costas
+    "remada": "row",
+    "row": "row",
+    "puxada": "pulldown",
+    "pulldown": "pulldown",
+    
+    // Tríceps
+    "tríceps": "triceps",
+    "triceps extension": "triceps extension",
+    "tríceps testa": "lying triceps extension",
+    
+    // Bíceps
+    "bíceps": "biceps",
+    "biceps curl": "biceps curl",
+    "rosca": "curl",
+    "curl": "curl",
+  ]
+  
   // MARK: - Properties
   
   private let service: ExerciseDBServicing?
@@ -180,20 +260,36 @@ actor ExerciseMediaResolver: ExerciseMediaResolving {
 
     do {
       let exerciseDBId = try await resolveExerciseDBId(for: exercise, using: service)
-      if let imageURL = try await service.fetchImageURL(
-        exerciseId: exerciseDBId,
-        resolution: context.resolution
-      ) {
+      
+      // Valida se o exercício existe na API antes de usar
+      if let _ = try? await service.fetchExercise(byId: exerciseDBId) {
+        if let imageURL = try await service.fetchImageURL(
+          exerciseId: exerciseDBId,
+          resolution: context.resolution
+        ) {
+          #if DEBUG
+          print("[MediaResolver] ✅ URL resolvida e validada para '\(exercise.name)' (id: \(exerciseDBId)): \(imageURL.absoluteString)")
+          #endif
+          let resolved = ResolvedExerciseMedia(
+            gifURL: nil,
+            imageURL: imageURL,
+            source: .exerciseDB
+          )
+          resolvedCache[cacheKey] = resolved
+          return resolved
+        } else {
+          #if DEBUG
+          print("[MediaResolver] ⚠️ Exercício \(exerciseDBId) existe mas não retornou URL de imagem")
+          #endif
+        }
+      } else {
         #if DEBUG
-        print("[MediaResolver] ✅ URL resolvida para '\(exercise.name)': \(imageURL.absoluteString)")
+        print("[MediaResolver] ⚠️ ExerciseId \(exerciseDBId) não encontrado na API, limpando mapping e tentando novamente")
         #endif
-        let resolved = ResolvedExerciseMedia(
-          gifURL: nil,
-          imageURL: imageURL,
-          source: .exerciseDB
-        )
-        resolvedCache[cacheKey] = resolved
-        return resolved
+        // Limpa o mapping incorreto
+        clearMapping(forLocalExerciseId: exercise.id)
+        // Tenta resolver novamente (sem cache)
+        // Mas para evitar loop infinito, retorna placeholder
       }
     } catch let error as URLError {
       // Tratamento específico para erros de rede/timeout
@@ -293,19 +389,30 @@ actor ExerciseMediaResolver: ExerciseMediaResolving {
     }
 
     do {
-      // Usa o novo endpoint /image com resolução baseada no contexto
-      // Aqui assume-se que exerciseId já é o id do ExerciseDB.
-      if let imageURL = try await service.fetchImageURL(exerciseId: exerciseId, resolution: context.resolution) {
+      // Valida se o exercício existe na API antes de usar
+      if let _ = try? await service.fetchExercise(byId: exerciseId) {
+        // Usa o novo endpoint /image com resolução baseada no contexto
+        // Aqui assume-se que exerciseId já é o id do ExerciseDB.
+        if let imageURL = try await service.fetchImageURL(exerciseId: exerciseId, resolution: context.resolution) {
+          #if DEBUG
+          print("[MediaResolver] ✅ URL resolvida e validada para exerciseId '\(exerciseId)': \(imageURL.absoluteString)")
+          #endif
+          let resolved = ResolvedExerciseMedia(
+            gifURL: nil,
+            imageURL: imageURL,
+            source: .exerciseDB
+          )
+          resolvedCache[cacheKey] = resolved
+          return resolved
+        } else {
+          #if DEBUG
+          print("[MediaResolver] ⚠️ Exercício \(exerciseId) existe mas não retornou URL de imagem")
+          #endif
+        }
+      } else {
         #if DEBUG
-        print("[MediaResolver] ✅ URL resolvida para exerciseId '\(exerciseId)': \(imageURL.absoluteString)")
+        print("[MediaResolver] ⚠️ ExerciseId \(exerciseId) não encontrado na API")
         #endif
-        let resolved = ResolvedExerciseMedia(
-          gifURL: nil,
-          imageURL: imageURL,
-          source: .exerciseDB
-        )
-        resolvedCache[cacheKey] = resolved
-        return resolved
       }
     } catch {
       #if DEBUG
@@ -350,6 +457,23 @@ actor ExerciseMediaResolver: ExerciseMediaResolving {
   func clearCache() {
     resolvedCache.removeAll()
   }
+  
+  /// Limpa o mapping de um exercício específico (útil quando mapping está incorreto).
+  func clearMapping(forLocalExerciseId localId: String) {
+    var dict = (UserDefaults.standard.dictionary(forKey: MappingKeys.mapping) as? [String: String]) ?? [:]
+    dict.removeValue(forKey: localId)
+    UserDefaults.standard.set(dict, forKey: MappingKeys.mapping)
+    
+    // Também limpa do cache resolvido
+    let keysToRemove = resolvedCache.keys.filter { $0.hasPrefix("\(localId)_") }
+    for key in keysToRemove {
+      resolvedCache.removeValue(forKey: key)
+    }
+    
+    #if DEBUG
+    print("[MediaResolver] 🗑️ Mapping limpo para exercício '\(localId)'")
+    #endif
+  }
 
   /// Pré-carrega mídia para uma lista de exercícios.
   func prefetchMedia(for exerciseIds: [String]) async {
@@ -360,6 +484,56 @@ actor ExerciseMediaResolver: ExerciseMediaResolving {
         }
       }
     }
+  }
+
+  // MARK: - Exercise Name Translation Helpers
+  
+  /// Traduz o nome do exercício de português para inglês.
+  /// Retorna o nome traduzido se encontrado, senão retorna o nome original.
+  private func translateExerciseName(_ name: String) -> String {
+    let lowercased = name.lowercased().trimmingCharacters(in: .whitespaces)
+    
+    // Busca exata primeiro
+    if let translated = Self.exerciseNameTranslation[lowercased] {
+      #if DEBUG
+      print("[MediaResolver] 🌐 Tradução aplicada: '\(name)' → '\(translated)'")
+      #endif
+      return translated
+    }
+    
+    // Busca parcial (para casos como "Prancha Lateral" → "side plank")
+    for (ptName, enName) in Self.exerciseNameTranslation {
+      if lowercased.contains(ptName) || ptName.contains(lowercased) {
+        #if DEBUG
+        print("[MediaResolver] 🌐 Tradução parcial aplicada: '\(name)' → '\(enName)' (match: '\(ptName)')")
+        #endif
+        return enName
+      }
+    }
+    
+    // Fallback: tenta variações comuns
+    let fallbackTranslations: [String: String] = [
+      "prancha": "plank",
+      "plank": "plank",
+      "abdominal": "crunch",
+      "crunch": "crunch",
+      "flexão": "push-up",
+      "push-up": "push-up",
+      "agachamento": "squat",
+      "squat": "squat",
+    ]
+    
+    for (key, value) in fallbackTranslations {
+      if lowercased.contains(key) {
+        #if DEBUG
+        print("[MediaResolver] 🔄 Fallback de tradução: '\(name)' → '\(value)' (chave: '\(key)')")
+        #endif
+        return value
+      }
+    }
+    
+    // Se não encontrou tradução, retorna o nome original
+    return name
   }
 
   // MARK: - URL Conversion Helpers
@@ -379,6 +553,7 @@ actor ExerciseMediaResolver: ExerciseMediaResolving {
   /// Converte URLs antigas (v2.exercisedb.io) para o formato RapidAPI.
   /// Extrai o exerciseId da URL antiga e constrói a URL RapidAPI correta.
   /// Retorna `nil` se não for URL antiga ou se não conseguir converter.
+  /// IMPORTANTE: Valida se o exerciseId existe na API antes de retornar a URL.
   private func convertLegacyURLToRapidAPI(
     _ url: URL?,
     exerciseId: String?,
@@ -406,7 +581,7 @@ actor ExerciseMediaResolver: ExerciseMediaResolving {
     print("[MediaResolver] 🔄 Convertendo URL antiga '\(url.absoluteString)' para RapidAPI (exerciseId=\(extractedId))")
     #endif
     
-    // Se temos service, usa fetchImageURL para construir a URL correta
+    // Se temos service, valida e usa fetchImageURL para construir a URL correta
     guard let service = service else {
       #if DEBUG
       print("[MediaResolver] ⚠️ Service não disponível para converter URL antiga")
@@ -414,24 +589,33 @@ actor ExerciseMediaResolver: ExerciseMediaResolving {
       return nil
     }
     
+    // PRIMEIRO: Valida se o exercício existe na API
     do {
-      if let rapidAPIURL = try await service.fetchImageURL(
-        exerciseId: extractedId,
-        resolution: context.resolution
-      ) {
-        #if DEBUG
-        print("[MediaResolver] ✅ URL convertida: \(rapidAPIURL.absoluteString)")
-        #endif
-        return rapidAPIURL
+      if let _ = try await service.fetchExercise(byId: extractedId) {
+        // Exercício existe, agora busca a URL
+        if let rapidAPIURL = try await service.fetchImageURL(
+          exerciseId: extractedId,
+          resolution: context.resolution
+        ) {
+          #if DEBUG
+          print("[MediaResolver] ✅ URL convertida e validada: \(rapidAPIURL.absoluteString)")
+          #endif
+          return rapidAPIURL
+        } else {
+          #if DEBUG
+          print("[MediaResolver] ⚠️ Exercício \(extractedId) existe mas fetchImageURL retornou nil")
+          #endif
+          return nil
+        }
       } else {
         #if DEBUG
-        print("[MediaResolver] ⚠️ fetchImageURL retornou nil para exerciseId=\(extractedId)")
+        print("[MediaResolver] ⚠️ ExerciseId \(extractedId) extraído da URL antiga não existe na API - URL inválida")
         #endif
         return nil
       }
     } catch {
       #if DEBUG
-      print("[MediaResolver] ❌ Erro ao converter URL antiga: \(error.localizedDescription)")
+      print("[MediaResolver] ❌ Erro ao validar/converter URL antiga: \(error.localizedDescription)")
       #endif
       return nil
     }
@@ -762,13 +946,27 @@ actor ExerciseMediaResolver: ExerciseMediaResolving {
   
   /// Gera múltiplas queries de busca progressivas para aumentar as chances de encontrar o exercício.
   /// Ordem: mais específica → mais genérica.
+  /// PRIMEIRO traduz de português para inglês.
   private func generateSearchQueries(from name: String) -> [String] {
     var queries: [String] = []
     
-    // 1. Nome completo em minúsculas (mais específico)
-    let lowercased = name.lowercased().trimmingCharacters(in: .whitespaces)
-    if !lowercased.isEmpty {
-      queries.append(lowercased)
+    // 0. PRIMEIRO: Traduz o nome de português para inglês
+    let translatedName = translateExerciseName(name)
+    let lowercased = translatedName.lowercased().trimmingCharacters(in: .whitespaces)
+    
+    // Se houve tradução, adiciona ambas as versões (traduzida priorizada)
+    if translatedName.lowercased() != name.lowercased() {
+      queries.append(lowercased) // Prioriza a tradução
+      // Também tenta o original (caso esteja em inglês ou tenha variação)
+      let originalLowercased = name.lowercased().trimmingCharacters(in: .whitespaces)
+      if originalLowercased != lowercased {
+        queries.append(originalLowercased)
+      }
+    } else {
+      // Se não houve tradução, usa o nome original
+      if !lowercased.isEmpty {
+        queries.append(lowercased)
+      }
     }
     
     // 2. Remove prefixos de equipamento e posição comuns
@@ -848,6 +1046,7 @@ actor ExerciseMediaResolver: ExerciseMediaResolving {
   }
 
   /// Encontra o melhor match entre candidatos considerando nome e equipamento.
+  /// Usa tradução PT → EN para melhor matching.
   private func bestMatch(
     for name: String,
     candidates: [ExerciseDBExercise],
@@ -855,8 +1054,10 @@ actor ExerciseMediaResolver: ExerciseMediaResolving {
   ) -> ExerciseDBExercise? {
     guard !candidates.isEmpty else { return nil }
     
-    let normalizedTarget = normalizeName(name)
-    let targetWords = Set(tokenize(name))
+    // Traduz o nome para inglês antes de comparar
+    let translatedName = translateExerciseName(name)
+    let normalizedTarget = normalizeName(translatedName)
+    let targetWords = Set(tokenize(translatedName))
     let equipmentString = equipment.map { mapEquipmentToString($0).lowercased() }
     
     var scoredCandidates: [(exercise: ExerciseDBExercise, score: Int)] = []
