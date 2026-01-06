@@ -36,13 +36,12 @@ struct HistoryView: View {
                     }
                 }
                 .listStyle(.insetGrouped)
+                .scrollContentBackground(.hidden)
             }
         }
         .background(FitTodayColor.background.ignoresSafeArea())
-        .toolbar(.hidden, for: .navigationBar)
-        .safeAreaInset(edge: .top) {
-            historyHeader
-        }
+        .navigationTitle("Histórico")
+        .navigationBarTitleDisplayMode(.large)
         .task {
             viewModel.loadHistory()
         }
@@ -75,26 +74,6 @@ struct HistoryView: View {
                 .multilineTextAlignment(.center)
         }
         .padding()
-    }
-
-    private var historyHeader: some View {
-        VStack(alignment: .leading, spacing: FitTodaySpacing.xs) {
-            Text("Histórico")
-                .font(.system(size: 34, weight: .bold))
-                .foregroundStyle(FitTodayColor.textPrimary)
-            Text("Acompanhe treinos concluídos e evolução dos programas.")
-                .font(.system(.body))
-                .foregroundStyle(FitTodayColor.textSecondary)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.horizontal, FitTodaySpacing.lg)
-        .padding(.top, FitTodaySpacing.md)
-        .padding(.bottom, FitTodaySpacing.sm)
-        .background(
-            Rectangle()
-                .fill(FitTodayColor.background)
-                .shadow(color: .black.opacity(0.08), radius: 6, y: 4)
-        )
     }
 }
 
