@@ -71,3 +71,4 @@ O problema principal de mídia é a divergência de nomes entre o catálogo loca
 - `FitToday/FitToday/Domain/Entities/DailyCheckIn.swift` (MuscleGroup)
 - `FitToday/FitToday/Domain/Entities/WorkoutModels.swift` (EquipmentType, WorkoutExercise)
 
+

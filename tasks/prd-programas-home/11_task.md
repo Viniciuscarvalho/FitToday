@@ -65,3 +65,4 @@ Melhorar o controle do “treino do dia” para permitir uma troca e alterar o C
 - `FitToday/FitToday/Domain/UseCases/HistoryUseCases.swift`
 
 
+

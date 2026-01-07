@@ -169,3 +169,4 @@ Observabilidade DEBUG:
 - `FitToday/FitToday/Presentation/DesignSystem/ExerciseMediaImage.swift`
 
 
+

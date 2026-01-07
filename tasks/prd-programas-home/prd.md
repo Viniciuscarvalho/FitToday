@@ -134,3 +134,4 @@ Requisitos funcionais:
 - Como definir “treinou ontem”: baseado em histórico concluído vs iniciado?
 
 
+

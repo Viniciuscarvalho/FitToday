@@ -63,3 +63,4 @@ Mesmo com estratégia por target, ainda existirão casos onde o target não é v
 - `FitToday/FitToday/Data/Services/ExerciseDB/ExerciseMediaResolver.swift`
 - `FitToday/FitToday/Data/Services/ExerciseDB/ExerciseDBService.swift`
 
+

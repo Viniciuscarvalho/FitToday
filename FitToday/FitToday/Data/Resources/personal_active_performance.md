@@ -96,3 +96,4 @@ Performance envolve **integração entre força, resistência e técnica**.
 Melhorar capacidade física geral e desempenho funcional.
 
 
+

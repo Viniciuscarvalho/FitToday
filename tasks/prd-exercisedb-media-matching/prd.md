@@ -74,3 +74,4 @@ Acessibilidade:
 - Política de cache: por quanto tempo manter `targetList` e mappings antes de invalidar automaticamente?
 
 
+

@@ -64,3 +64,4 @@ O Histórico deve ser mais útil: mostrar contexto do treino e permitir acompanh
 - `FitToday/FitToday/Domain/Entities/HistoryModels.swift`
 - `FitToday/FitToday/Data/Repositories/SwiftDataWorkoutHistoryRepository.swift`
 
+

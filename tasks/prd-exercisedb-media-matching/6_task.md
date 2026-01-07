@@ -66,3 +66,4 @@ Heurísticas sem testes tendem a regredir. Precisamos validar: (1) normalizaçã
 - `FitToday/FitToday/Data/Services/ExerciseDB/ExerciseDBService.swift`
 - `FitToday/FitTodayTests/FitTodayTests.swift`
 
+
