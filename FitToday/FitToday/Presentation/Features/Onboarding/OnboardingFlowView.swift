@@ -47,7 +47,13 @@ struct OnboardingFlowView: View {
             }
         }
         .padding()
-        .background(FitTodayColor.background.ignoresSafeArea())
+        .background(
+            ZStack {
+                FitTodayColor.background
+                RetroGridPattern(lineColor: FitTodayColor.gridLine.opacity(0.3), spacing: 40)  // Grid background
+            }
+            .ignoresSafeArea()
+        )
         .navigationTitle(isEditing ? "Editar Perfil" : "Configuração")
         .navigationBarTitleDisplayMode(.inline)
         .alert("Ops", isPresented: $showError, actions: {
@@ -263,22 +269,29 @@ private struct OnboardingPage: View {
     var body: some View {
         VStack(spacing: 16) {
             Text(title)
-                .font(.system(.largeTitle, weight: .bold))
+                .font(FitTodayFont.display(size: 32, weight: .extraBold))  // Retro font
+                .tracking(1.5)
                 .multilineTextAlignment(.center)
             VStack(alignment: .leading, spacing: 12) {
                 ForEach(bullets, id: \.self) { bullet in
                     HStack(alignment: .top, spacing: 10) {
                         Image(systemName: "checkmark.seal.fill")
                             .foregroundStyle(FitTodayColor.brandPrimary)
+                            .fitGlowEffect(color: FitTodayColor.brandPrimary.opacity(0.3))  // Neon glow
                         Text(bullet)
-                            .font(.system(.body))
+                            .font(FitTodayFont.ui(size: 17, weight: .medium))  // Retro font
                             .foregroundStyle(FitTodayColor.textPrimary)
                     }
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding()
-            .background(FitTodayColor.surface)
+            .background(
+                RoundedRectangle(cornerRadius: FitTodayRadius.md)
+                    .fill(FitTodayColor.surface)
+                    .retroGridOverlay(spacing: 25)  // Grid overlay
+            )
+            .techCornerBorders(length: 14, thickness: 1.5)  // Tech corners
             .cornerRadius(FitTodayRadius.md)
             .fitCardShadow()
         }

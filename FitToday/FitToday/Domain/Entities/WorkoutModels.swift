@@ -7,6 +7,30 @@
 
 import Foundation
 
+// MARK: - Image URL Extraction
+
+extension WorkoutPlan {
+  /// Extrai todas as URLs de imagens de exercícios do treino
+  var imageURLs: [URL] {
+    var urls: [URL] = []
+    
+    for phase in phases {
+      for item in phase.items {
+        if case .exercise(let prescription) = item {
+          if let imageURL = prescription.exercise.media?.imageURL {
+            urls.append(imageURL)
+          }
+          if let gifURL = prescription.exercise.media?.gifURL {
+            urls.append(gifURL)
+          }
+        }
+      }
+    }
+    
+    return urls
+  }
+}
+
 enum EquipmentType: String, Codable, CaseIterable, Sendable {
     case barbell
     case dumbbell

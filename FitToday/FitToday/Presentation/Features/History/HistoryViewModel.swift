@@ -26,35 +26,81 @@ struct HistorySection: Identifiable, Hashable {
 }
 
 @MainActor
-final class HistoryViewModel: ObservableObject {
+final class HistoryViewModel: ObservableObject, ErrorPresenting {
     @Published private(set) var sections: [HistorySection] = []
     @Published private(set) var isLoading = false
-    @Published var errorMessage: String?
+    @Published private(set) var isLoadingMore = false
+    @Published private(set) var hasMorePages = true
+    @Published var errorMessage: ErrorMessage? // ErrorPresenting protocol
 
-    private let listUseCase: ListWorkoutHistoryUseCase
+    private let repository: WorkoutHistoryRepository
+    private let pageSize = 20 // Carregar 20 itens por vez
+    private var currentOffset = 0
+    private var allLoadedEntries: [WorkoutHistoryEntry] = []
 
     init(repository: WorkoutHistoryRepository) {
-        self.listUseCase = ListWorkoutHistoryUseCase(repository: repository)
+        self.repository = repository
     }
 
     func loadHistory() {
         Task {
-            await fetchHistory()
+            await fetchInitialPage()
         }
     }
 
     func refresh() async {
-        await fetchHistory()
+        // Reset pagination state
+        currentOffset = 0
+        allLoadedEntries = []
+        hasMorePages = true
+        await fetchInitialPage()
+    }
+    
+    func loadMoreIfNeeded() {
+        guard !isLoadingMore && hasMorePages && !isLoading else { return }
+        Task {
+            await fetchNextPage()
+        }
     }
 
-    private func fetchHistory() async {
+    private func fetchInitialPage() async {
         isLoading = true
         defer { isLoading = false }
+        
+        currentOffset = 0
+        allLoadedEntries = []
+        
         do {
-            let entries = try await listUseCase.execute()
+            let entries = try await repository.listEntries(limit: pageSize, offset: currentOffset)
+            allLoadedEntries = entries
             sections = Self.group(entries)
+            
+            // Verificar se há mais páginas
+            hasMorePages = entries.count == pageSize
+            currentOffset = entries.count
         } catch {
-            errorMessage = error.localizedDescription
+            handleError(error) // ErrorPresenting protocol
+        }
+    }
+    
+    private func fetchNextPage() async {
+        guard hasMorePages else { return }
+        
+        isLoadingMore = true
+        defer { isLoadingMore = false }
+        
+        do {
+            let entries = try await repository.listEntries(limit: pageSize, offset: currentOffset)
+            
+            // Append às entradas existentes
+            allLoadedEntries.append(contentsOf: entries)
+            sections = Self.group(allLoadedEntries)
+            
+            // Atualizar estado de paginação
+            hasMorePages = entries.count == pageSize
+            currentOffset += entries.count
+        } catch {
+            handleError(error) // ErrorPresenting protocol
         }
     }
 

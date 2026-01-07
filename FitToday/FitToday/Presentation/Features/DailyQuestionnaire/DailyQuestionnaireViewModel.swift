@@ -9,7 +9,7 @@ import Foundation
 import Combine
 
 @MainActor
-final class DailyQuestionnaireViewModel: ObservableObject {
+final class DailyQuestionnaireViewModel: ObservableObject, ErrorPresenting {
     enum Step: Int, CaseIterable {
         case focus
         case soreness
@@ -28,7 +28,7 @@ final class DailyQuestionnaireViewModel: ObservableObject {
     @Published var selectedAreas: Set<MuscleGroup> = []
     @Published private(set) var entitlement: ProEntitlement = .free
     @Published var isLoading = false
-    @Published var errorMessage: String?
+    @Published var errorMessage: ErrorMessage? // ErrorPresenting protocol
 
     private let entitlementRepository: EntitlementRepository
     private let profileRepository: UserProfileRepository
@@ -134,7 +134,7 @@ final class DailyQuestionnaireViewModel: ObservableObject {
             isLoading = true
             entitlement = try await entitlementRepository.currentEntitlement()
         } catch {
-            errorMessage = "Não foi possível carregar seu status Pro."
+            handleError(error) // ErrorPresenting protocol
         }
         isLoading = false
     }

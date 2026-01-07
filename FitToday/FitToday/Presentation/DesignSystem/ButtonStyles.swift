@@ -14,17 +14,29 @@ struct FitPrimaryButtonStyle: ButtonStyle {
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .font(.system(size: 17, weight: .bold, design: .rounded))
+            .font(FitTodayFont.ui(size: 17, weight: .bold))  // Retro font
+            .textCase(.uppercase)  // Uppercase retro style
+            .tracking(1.0)  // Letter spacing
             .frame(maxWidth: .infinity)
             .padding(.vertical, verticalPadding)
             .background(backgroundColor(configuration: configuration))
-            .foregroundStyle(FitTodayColor.textInverse)  // Texto escuro em fundo lime
+            .foregroundStyle(FitTodayColor.textInverse)
             .clipShape(Capsule())
+            .overlay(  // Diagonal stripes on press
+                Group {
+                    if configuration.isPressed {
+                        Capsule()
+                            .fill(Color.white.opacity(0.1))
+                            .diagonalStripes(color: .white, spacing: 6, opacity: 0.15)
+                    }
+                }
+            )
+            .techCornerBorders(length: 16, thickness: 1.5)  // Tech corners
             .opacity(isEnabled ? 1 : 0.4)
             .scaleEffect(configuration.isPressed ? 0.97 : 1)
             .animation(.spring(response: 0.3, dampingFraction: 0.7), value: configuration.isPressed)
             .contentShape(Capsule())
-            .fitGlowEffect(color: FitTodayColor.brandPrimary.opacity(isEnabled && !configuration.isPressed ? 0.3 : 0))
+            .fitGlowEffect(color: FitTodayColor.neonCyan.opacity(isEnabled && !configuration.isPressed ? 0.3 : 0))  // Neon cyan glow
     }
 
     private func backgroundColor(configuration: Configuration) -> Color {
@@ -38,7 +50,9 @@ struct FitSecondaryButtonStyle: ButtonStyle {
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .font(.system(size: 17, weight: .semibold, design: .rounded))
+            .font(FitTodayFont.ui(size: 17, weight: .semiBold))  // Retro font
+            .textCase(.uppercase)  // Uppercase retro style
+            .tracking(1.0)  // Letter spacing
             .frame(maxWidth: .infinity)
             .padding(.vertical, verticalPadding)
             .background(
@@ -49,11 +63,22 @@ struct FitSecondaryButtonStyle: ButtonStyle {
                             .stroke(FitTodayColor.brandPrimary, lineWidth: 1.5)
                     )
             )
+            .overlay(  // Diagonal accent on press
+                Group {
+                    if configuration.isPressed {
+                        Capsule()
+                            .fill(FitTodayColor.brandPrimary.opacity(0.1))
+                            .diagonalStripes(color: FitTodayColor.brandPrimary, spacing: 8, opacity: 0.15)
+                    }
+                }
+            )
+            .techCornerBorders(color: FitTodayColor.brandPrimary.opacity(0.6), length: 14, thickness: 1.5)  // Tech corners
             .foregroundStyle(FitTodayColor.brandPrimary)
             .opacity(isEnabled ? (configuration.isPressed ? 0.7 : 1) : 0.4)
             .scaleEffect(configuration.isPressed ? 0.98 : 1)
             .animation(.spring(response: 0.3, dampingFraction: 0.7), value: configuration.isPressed)
             .contentShape(Capsule())
+            .fitGlowEffect(color: FitTodayColor.neonCyan.opacity(isEnabled && !configuration.isPressed ? 0.2 : 0))  // Subtle glow
     }
 }
 
@@ -63,18 +88,31 @@ struct FitDestructiveButtonStyle: ButtonStyle {
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .font(.system(size: 17, weight: .semibold, design: .rounded))
+            .font(FitTodayFont.ui(size: 17, weight: .semiBold))  // Retro font
+            .textCase(.uppercase)  // Uppercase retro style
+            .tracking(1.0)  // Letter spacing
             .frame(maxWidth: .infinity)
             .padding(.vertical, verticalPadding)
             .background(
                 Capsule()
                     .fill(configuration.isPressed ? FitTodayColor.error.opacity(0.8) : FitTodayColor.error)
             )
+            .overlay(  // Glitch effect on press
+                Group {
+                    if configuration.isPressed {
+                        Capsule()
+                            .fill(FitTodayColor.glitchRed.opacity(0.2))
+                            .diagonalStripes(color: .white, spacing: 6, opacity: 0.15)
+                    }
+                }
+            )
+            .techCornerBorders(color: FitTodayColor.glitchRed.opacity(0.6), length: 14, thickness: 1.5)  // Tech corners
             .foregroundStyle(Color.white)
             .opacity(isEnabled ? 1 : 0.4)
             .scaleEffect(configuration.isPressed ? 0.98 : 1)
             .animation(.spring(response: 0.3, dampingFraction: 0.7), value: configuration.isPressed)
             .contentShape(Capsule())
+            .fitGlowEffect(color: FitTodayColor.error.opacity(isEnabled && !configuration.isPressed ? 0.2 : 0))  // Error glow
     }
 }
 

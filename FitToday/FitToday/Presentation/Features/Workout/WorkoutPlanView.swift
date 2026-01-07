@@ -47,12 +47,14 @@ struct WorkoutPlanView: View {
     @EnvironmentObject private var router: AppRouter
     @EnvironmentObject private var sessionStore: WorkoutSessionStore
     @Environment(\.dependencyResolver) private var resolver
+    @Environment(\.imageCacheService) private var imageCacheService
     @StateObject private var timerStore = WorkoutTimerStore()
     @State private var errorMessage: String?
     @State private var isFinishing = false
     @State private var isRegenerating = false
     @State private var entitlement: ProEntitlement = .free
     @State private var animationTrigger = false
+    @State private var isPrefetchingImages = false
     
     /// Modo de exibição persistido
     @AppStorage(AppStorageKeys.workoutPhaseDisplayMode) private var displayModeRaw: String = PhaseDisplayMode.auto.rawValue
@@ -110,6 +112,7 @@ struct WorkoutPlanView: View {
             }
         }
         .navigationTitle("Treino gerado")
+        .toolbar(.hidden, for: .tabBar)
         .alert("Ops!", isPresented: Binding(
             get: { errorMessage != nil },
             set: { _ in errorMessage = nil }
@@ -123,6 +126,14 @@ struct WorkoutPlanView: View {
         }
         .onDisappear {
             // Não reseta o timer ao sair, mantém em background
+        }
+        .task(id: sessionStore.plan?.id) {
+            await prefetchWorkoutImages()
+        }
+        .overlay {
+            if isPrefetchingImages {
+                prefetchingOverlay
+            }
         }
     }
     
@@ -139,6 +150,62 @@ struct WorkoutPlanView: View {
         }
     }
     
+    // MARK: - Image Prefetch
+    
+    private func prefetchWorkoutImages() async {
+        guard let plan = sessionStore.plan,
+              let cacheService = imageCacheService else {
+            return
+        }
+        
+        let urls = plan.imageURLs
+        guard !urls.isEmpty else { return }
+        
+        isPrefetchingImages = true
+        
+        await cacheService.prefetchImages(urls)
+        
+        // Pequeno delay para UX (evitar flash do loading)
+        try? await Task.sleep(nanoseconds: 300_000_000) // 0.3s
+        
+        isPrefetchingImages = false
+    }
+    
+    private var prefetchingOverlay: some View {
+        ZStack {
+            FitTodayColor.background.opacity(0.8)
+                .ignoresSafeArea()
+
+            VStack(spacing: FitTodaySpacing.md) {
+                ProgressView()
+                    .controlSize(.large)
+                    .tint(FitTodayColor.brandPrimary)
+
+                VStack(spacing: FitTodaySpacing.xs) {
+                    Text("Preparando treino...")
+                        .font(FitTodayFont.display(size: 17, weight: .bold))  // Retro font
+                        .tracking(0.8)
+                        .foregroundStyle(FitTodayColor.textPrimary)
+
+                    Text("Carregando imagens para uso offline")
+                        .font(FitTodayFont.ui(size: 13, weight: .medium))  // Retro font
+                        .foregroundStyle(FitTodayColor.textSecondary)
+                }
+            }
+            .padding(FitTodaySpacing.xl)
+            .background(
+                RoundedRectangle(cornerRadius: FitTodayRadius.md)
+                    .fill(FitTodayColor.surface)
+                    .retroGridOverlay(spacing: 25)  // Grid overlay
+                    .shadow(color: .black.opacity(0.3), radius: 20, x: 0, y: 10)
+            )
+            .techCornerBorders(length: 16, thickness: 2)  // Tech corners
+            .padding()
+        }
+        .transition(.opacity)
+        .animation(.easeInOut(duration: 0.3), value: isPrefetchingImages)
+    }
+    
     // MARK: - Floating Timer Bar
     
     private var floatingTimerBar: some View {
@@ -147,16 +214,17 @@ struct WorkoutPlanView: View {
             HStack(spacing: FitTodaySpacing.xs) {
                 Image(systemName: "timer")
                     .font(.system(.body, weight: .semibold))
-                    .foregroundStyle(FitTodayColor.brandPrimary)
-                
+                    .foregroundStyle(FitTodayColor.neonCyan)  // Neon cyan
+                    .fitGlowEffect(color: FitTodayColor.neonCyan.opacity(0.5))  // Neon glow
+
                 Text(timerStore.formattedTime)
-                    .font(.system(size: 22, weight: .bold, design: .monospaced))
+                    .font(FitTodayFont.display(size: 22, weight: .black))  // Orbitron retro font
                     .foregroundStyle(FitTodayColor.textPrimary)
                     .contentTransition(.numericText())
             }
-            
+
             Spacer()
-            
+
             // Botão de pausar/retomar
             Button {
                 withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
@@ -171,7 +239,7 @@ struct WorkoutPlanView: View {
                     .clipShape(Circle())
             }
             .accessibilityLabel(timerStore.isRunning ? "Pausar treino" : "Retomar treino")
-            
+
             // Botão de finalizar
             Button {
                 finishSession(as: .completed)
@@ -191,8 +259,11 @@ struct WorkoutPlanView: View {
         .background(
             RoundedRectangle(cornerRadius: FitTodayRadius.lg)
                 .fill(FitTodayColor.surface)
-                .shadow(color: .black.opacity(0.15), radius: 12, x: 0, y: -4)
+                .retroGridOverlay(spacing: 20)  // Grid overlay
+                .shadow(color: FitTodayColor.neonCyan.opacity(0.2), radius: 12, x: 0, y: -4)  // Neon cyan shadow
         )
+        .techCornerBorders(color: FitTodayColor.neonCyan, length: 20, thickness: 2)  // Tech corners
+        .scanlineOverlay()  // VHS scanline effect
         .padding(.horizontal)
         .padding(.bottom, FitTodaySpacing.sm)
     }
@@ -201,11 +272,12 @@ struct WorkoutPlanView: View {
         FitCard {
             VStack(alignment: .leading, spacing: FitTodaySpacing.sm) {
                 Text(plan.title)
-                    .font(.system(.title2, weight: .bold))
+                    .font(FitTodayFont.display(size: 24, weight: .bold))  // Retro font
+                    .tracking(1.0)
                     .foregroundStyle(FitTodayColor.textPrimary)
 
                 Text(plan.focusDescription)
-                    .font(.system(.body))
+                    .font(FitTodayFont.ui(size: 17, weight: .medium))  // Retro font
                     .foregroundStyle(FitTodayColor.textSecondary)
 
                 HStack(spacing: FitTodaySpacing.md) {
@@ -265,7 +337,8 @@ struct WorkoutPlanView: View {
         VStack(alignment: .leading, spacing: FitTodaySpacing.sm) {
             HStack {
                 Text("Modo de treino")
-                    .font(.system(.subheadline, weight: .semibold))
+                    .font(FitTodayFont.ui(size: 15, weight: .semiBold))  // Retro font
+                    .tracking(0.5)
                     .foregroundStyle(FitTodayColor.textSecondary)
                 
                 Spacer()
@@ -321,19 +394,32 @@ struct WorkoutPlanView: View {
                     Image(systemName: isPro ? "sparkles" : "arrow.clockwise")
                         .font(.system(.body, weight: .semibold))
                 }
-                
+
                 Text(regenerateButtonTitle)
-                    .font(.system(.subheadline, weight: .semibold))
+                    .font(FitTodayFont.ui(size: 14, weight: .semiBold))  // Retro font
+                    .textCase(.uppercase)  // Uppercase retro style
+                    .tracking(0.8)
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, FitTodaySpacing.sm)
             .foregroundStyle(isPro ? FitTodayColor.textInverse : FitTodayColor.brandPrimary)
-            .background(isPro ? FitTodayColor.brandPrimary : FitTodayColor.surface)
+            .background(
+                Group {
+                    if isPro {
+                        RoundedRectangle(cornerRadius: FitTodayRadius.sm)
+                            .fill(FitTodayColor.brandPrimary)
+                            .diagonalStripes(color: FitTodayColor.neonCyan, spacing: 8, opacity: 0.2)  // Diagonal stripes for PRO
+                    } else {
+                        RoundedRectangle(cornerRadius: FitTodayRadius.sm)
+                            .fill(FitTodayColor.surface)
+                    }
+                }
+            )
             .overlay(
                 RoundedRectangle(cornerRadius: FitTodayRadius.sm)
                     .stroke(FitTodayColor.brandPrimary, lineWidth: isPro ? 0 : 1.5)
             )
-            .cornerRadius(FitTodayRadius.sm)
+            .techCornerBorders(length: 12, thickness: 1.5)  // Tech corners
         }
         .disabled(isRegenerating || timerStore.hasStarted)
         .opacity(timerStore.hasStarted ? 0.5 : 1)
@@ -548,16 +634,16 @@ struct WorkoutPlanView: View {
 
                 VStack(alignment: .leading, spacing: FitTodaySpacing.xs) {
                     Text(activity.title)
-                        .font(.system(.body, weight: .semibold))
+                        .font(FitTodayFont.ui(size: 17, weight: .semiBold))  // Retro font
                         .foregroundStyle(FitTodayColor.textPrimary)
 
                     Text("\(activity.durationMinutes) min")
-                        .font(.system(.footnote))
+                        .font(FitTodayFont.ui(size: 13, weight: .medium))  // Retro font
                         .foregroundStyle(FitTodayColor.textSecondary)
 
                     if let notes = activity.notes {
                         Text(notes)
-                            .font(.system(.caption))
+                            .font(FitTodayFont.ui(size: 12, weight: .medium))  // Retro font
                             .foregroundStyle(FitTodayColor.textTertiary)
                             .lineLimit(2)
                     }
@@ -638,7 +724,7 @@ private struct WorkoutMetaChip: View {
             Image(systemName: icon)
                 .font(.system(.footnote, weight: .semibold))
             Text(label)
-                .font(.system(.footnote, weight: .medium))
+                .font(FitTodayFont.ui(size: 13, weight: .medium))  // Retro font
         }
         .padding(.horizontal, FitTodaySpacing.sm)
         .padding(.vertical, FitTodaySpacing.xs)
@@ -658,14 +744,14 @@ private struct WorkoutExerciseRow: View {
 
             VStack(alignment: .leading, spacing: FitTodaySpacing.xs) {
                 Text("\(index). \(prescription.exercise.name)")
-                    .font(.system(.body, weight: .semibold))
+                    .font(FitTodayFont.ui(size: 17, weight: .semiBold))  // Retro font
                     .foregroundStyle(FitTodayColor.textPrimary)
                 Text("\(prescription.sets)x · \(prescription.reps.lowerBound)-\(prescription.reps.upperBound) reps")
-                    .font(.system(.footnote))
+                    .font(FitTodayFont.ui(size: 13, weight: .medium))  // Retro font
                     .foregroundStyle(FitTodayColor.textSecondary)
                 if let tip = prescription.tip {
                     Text(tip)
-                        .font(.system(.caption))
+                        .font(FitTodayFont.ui(size: 12, weight: .medium))  // Retro font
                         .foregroundStyle(FitTodayColor.textTertiary)
                         .lineLimit(2)
                 }

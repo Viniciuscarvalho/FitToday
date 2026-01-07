@@ -26,16 +26,47 @@ struct HistoryView: View {
             if viewModel.sections.isEmpty && !viewModel.isLoading {
                 EmptyState
             } else {
-                List {
-                    ForEach(viewModel.sections) { section in
-                        Section(header: Text(section.title)) {
-                            ForEach(section.entries) { entry in
-                                HistoryRow(entry: entry)
+                ScrollView {
+                    LazyVStack(spacing: FitTodaySpacing.md, pinnedViews: [.sectionHeaders]) {
+                        ForEach(viewModel.sections) { section in
+                            Section {
+                                ForEach(section.entries) { entry in
+                                    HistoryRow(entry: entry)
+                                        .onAppear {
+                                            // Trigger load more ao aparecer último item
+                                            if entry.id == viewModel.sections.last?.entries.last?.id {
+                                                viewModel.loadMoreIfNeeded()
+                                            }
+                                        }
+                                }
+                            } header: {
+                                Text(section.title)
+                                    .font(.headline)
+                                    .foregroundStyle(FitTodayColor.textPrimary)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .padding(.horizontal)
+                                    .padding(.vertical, FitTodaySpacing.xs)
+                                    .background(FitTodayColor.background)
                             }
                         }
+                        
+                        // Loading indicator para scroll infinito
+                        if viewModel.isLoadingMore {
+                            HStack {
+                                Spacer()
+                                ProgressView()
+                                    .controlSize(.regular)
+                                    .tint(FitTodayColor.brandPrimary)
+                                Text("Carregando mais...")
+                                    .font(.footnote)
+                                    .foregroundStyle(FitTodayColor.textSecondary)
+                                Spacer()
+                            }
+                            .padding()
+                        }
                     }
+                    .padding(.vertical)
                 }
-                .listStyle(.insetGrouped)
                 .scrollContentBackground(.hidden)
             }
         }
@@ -49,16 +80,11 @@ struct HistoryView: View {
             await viewModel.refresh()
         }
         .onReceive(sessionStore.$lastCompletionStatus.dropFirst()) { _ in
-            viewModel.loadHistory()
+            Task {
+                await viewModel.refresh()
+            }
         }
-        .alert("Ops!", isPresented: Binding(
-            get: { viewModel.errorMessage != nil },
-            set: { _ in viewModel.errorMessage = nil }
-        )) {
-            Button("Ok", role: .cancel) {}
-        } message: {
-            Text(viewModel.errorMessage ?? "Algo inesperado aconteceu.")
-        }
+        .errorToast(errorMessage: $viewModel.errorMessage)
     }
 
     private var EmptyState: some View {

@@ -16,7 +16,6 @@ enum DailyQuestionnaireFlowResult {
 struct DailyQuestionnaireFlowView: View {
     @StateObject private var viewModel: DailyQuestionnaireViewModel
     @EnvironmentObject private var sessionStore: WorkoutSessionStore
-    @State private var showError = false
     @State private var isGeneratingPlan = false
     private let onResult: (DailyQuestionnaireFlowResult) -> Void
 
@@ -64,17 +63,16 @@ struct DailyQuestionnaireFlowView: View {
             }
             .padding()
         }
-        .background(FitTodayColor.background.ignoresSafeArea())
+        .background(
+            ZStack {
+                FitTodayColor.background
+                RetroGridPattern(lineColor: FitTodayColor.gridLine.opacity(0.3), spacing: 40)  // Grid background
+            }
+            .ignoresSafeArea()
+        )
         .navigationTitle("Questionário diário")
         .navigationBarTitleDisplayMode(.inline)
-        .alert("Ops!", isPresented: $showError, actions: {
-            Button("Ok", role: .cancel) { viewModel.errorMessage = nil }
-        }, message: {
-            Text(viewModel.errorMessage ?? "Algo inesperado aconteceu.")
-        })
-        .onChange(of: viewModel.errorMessage) { _, newValue in
-            showError = newValue != nil
-        }
+        .errorToast(errorMessage: $viewModel.errorMessage)
         .task {
             viewModel.start()
         }
@@ -82,10 +80,22 @@ struct DailyQuestionnaireFlowView: View {
             if isGeneratingPlan {
                 ZStack {
                     Color.black.opacity(0.3).ignoresSafeArea()
-                    ProgressView("Gerando treino personalizado...")
-                        .padding()
-                        .background(FitTodayColor.surface)
-                        .cornerRadius(FitTodayRadius.md)
+                    VStack(spacing: FitTodaySpacing.md) {
+                        ProgressView()
+                            .controlSize(.large)
+                            .tint(FitTodayColor.brandPrimary)
+                        Text("Gerando treino personalizado...")
+                            .font(FitTodayFont.display(size: 17, weight: .bold))  // Retro font
+                            .tracking(0.8)
+                            .foregroundStyle(FitTodayColor.textPrimary)
+                    }
+                    .padding(FitTodaySpacing.xl)
+                    .background(
+                        RoundedRectangle(cornerRadius: FitTodayRadius.md)
+                            .fill(FitTodayColor.surface)
+                            .retroGridOverlay(spacing: 25)  // Grid overlay
+                    )
+                    .techCornerBorders(length: 16, thickness: 2)  // Tech corners
                 }
             }
         }
@@ -137,7 +147,7 @@ struct DailyQuestionnaireFlowView: View {
             if viewModel.selectedSoreness == .strong {
                 VStack(alignment: .leading, spacing: FitTodaySpacing.sm) {
                     Text("Onde está doendo?")
-                        .font(.system(.headline))
+                        .font(FitTodayFont.ui(size: 17, weight: .semiBold))  // Retro font
                         .foregroundStyle(FitTodayColor.textPrimary)
 
                     LazyVGrid(columns: Array(repeating: .init(.flexible(), spacing: FitTodaySpacing.sm), count: 3), spacing: FitTodaySpacing.sm) {
@@ -196,8 +206,7 @@ struct DailyQuestionnaireFlowView: View {
                 let checkIn = try viewModel.buildCheckIn()
                 handleSubmission(for: checkIn)
             } catch {
-                viewModel.errorMessage = error.localizedDescription
-                showError = true
+                viewModel.handleError(error)
             }
         }
     }
@@ -226,8 +235,7 @@ struct DailyQuestionnaireFlowView: View {
                 sessionStore.start(with: plan)
                 onResult(.planReady)
             } catch {
-                viewModel.errorMessage = error.localizedDescription
-                showError = true
+                viewModel.handleError(error)
             }
             isGeneratingPlan = false
         }
@@ -253,23 +261,33 @@ private struct FocusCard: View {
             Image(systemName: icon)
                 .font(.title2)
                 .foregroundStyle(isSelected ? FitTodayColor.brandPrimary : FitTodayColor.textSecondary)
+                .fitGlowEffect(color: isSelected ? FitTodayColor.brandPrimary.opacity(0.4) : Color.clear.opacity(0))  // Neon glow
             Text(title)
-                .font(.system(.headline, weight: .semibold))
+                .font(FitTodayFont.ui(size: 17, weight: .semiBold))  // Retro font
                 .foregroundStyle(FitTodayColor.textPrimary)
             Text(subtitle)
-                .font(.system(.footnote))
+                .font(FitTodayFont.ui(size: 13, weight: .medium))  // Retro font
                 .foregroundStyle(FitTodayColor.textSecondary)
         }
         .padding()
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(
-            RoundedRectangle(cornerRadius: FitTodayRadius.md)
-                .fill(isSelected ? FitTodayColor.brandPrimary.opacity(0.12) : FitTodayColor.surface)
-                .overlay(
+            Group {
+                if isSelected {
                     RoundedRectangle(cornerRadius: FitTodayRadius.md)
-                        .stroke(isSelected ? FitTodayColor.brandPrimary : FitTodayColor.outline.opacity(0.3), lineWidth: 1.5)
-                )
+                        .fill(FitTodayColor.brandPrimary.opacity(0.12))
+                        .diagonalStripes(color: FitTodayColor.neonCyan, spacing: 10, opacity: 0.15)  // Diagonal stripes
+                } else {
+                    RoundedRectangle(cornerRadius: FitTodayRadius.md)
+                        .fill(FitTodayColor.surface)
+                }
+            }
         )
+        .overlay(
+            RoundedRectangle(cornerRadius: FitTodayRadius.md)
+                .stroke(isSelected ? FitTodayColor.neonCyan : FitTodayColor.outline.opacity(0.3), lineWidth: 1.5)  // Neon cyan border
+        )
+        .techCornerBorders(color: isSelected ? FitTodayColor.neonCyan : FitTodayColor.techBorder.opacity(0.3), length: 12, thickness: 1.5)  // Tech corners
         .fitCardShadow()
         .contentShape(RoundedRectangle(cornerRadius: FitTodayRadius.md))
     }
@@ -284,9 +302,9 @@ private struct SorenessCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: FitTodaySpacing.xs) {
             Text(title)
-                .font(.system(.headline, weight: .semibold))
+                .font(FitTodayFont.ui(size: 17, weight: .semiBold))  // Retro font
             Text(subtitle)
-                .font(.system(.footnote))
+                .font(FitTodayFont.ui(size: 13, weight: .medium))  // Retro font
         }
         .foregroundStyle(isSelected ? Color.white : FitTodayColor.textPrimary)
         .padding()
@@ -295,6 +313,7 @@ private struct SorenessCard: View {
             RoundedRectangle(cornerRadius: FitTodayRadius.md)
                 .fill(isSelected ? color : color.opacity(0.2))
         )
+        .techCornerBorders(color: isSelected ? Color.white.opacity(0.5) : color.opacity(0.4), length: 12, thickness: 1.5)  // Tech corners
         .fitCardShadow()
         .contentShape(RoundedRectangle(cornerRadius: FitTodayRadius.md))
     }
@@ -306,7 +325,7 @@ private struct MuscleChip: View {
 
     var body: some View {
         Text(title)
-            .font(.system(.caption, weight: .medium))
+            .font(FitTodayFont.ui(size: 12, weight: .medium))  // Retro font
             .padding(.horizontal, FitTodaySpacing.sm)
             .padding(.vertical, FitTodaySpacing.xs)
             .background(

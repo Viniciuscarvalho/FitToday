@@ -172,7 +172,18 @@ private final class InMemoryHistoryRepository: WorkoutHistoryRepository {
     private var entries: [WorkoutHistoryEntry] = []
 
     func listEntries() async throws -> [WorkoutHistoryEntry] {
-        entries
+        entries.sorted { $0.date > $1.date }
+    }
+    
+    func listEntries(limit: Int, offset: Int) async throws -> [WorkoutHistoryEntry] {
+        let sorted = entries.sorted { $0.date > $1.date }
+        let start = min(offset, sorted.count)
+        let end = min(offset + limit, sorted.count)
+        return Array(sorted[start..<end])
+    }
+    
+    func count() async throws -> Int {
+        entries.count
     }
 
     func saveEntry(_ entry: WorkoutHistoryEntry) async throws {

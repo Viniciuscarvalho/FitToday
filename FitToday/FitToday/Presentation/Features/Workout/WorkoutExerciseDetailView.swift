@@ -27,6 +27,7 @@ struct WorkoutExerciseDetailView: View {
         }
         .navigationTitle("Execução")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar(.hidden, for: .tabBar)
         .alert("Ops!", isPresented: Binding(
             get: { errorMessage != nil },
             set: { _ in errorMessage = nil }
@@ -58,14 +59,15 @@ struct WorkoutExerciseDetailView: View {
                 if !prescription.exercise.instructions.isEmpty {
                     VStack(alignment: .leading, spacing: FitTodaySpacing.xs) {
                         Text("Instruções rápidas")
-                            .font(.system(.headline))
+                            .font(FitTodayFont.ui(size: 17, weight: .semiBold))  // Retro font
                         ForEach(prescription.exercise.instructions, id: \.self) { instruction in
                             HStack(alignment: .top, spacing: FitTodaySpacing.xs) {
                                 Image(systemName: "checkmark.circle.fill")
                                     .font(.system(size: 12))
                                     .foregroundStyle(FitTodayColor.brandPrimary)
+                                    .fitGlowEffect(color: FitTodayColor.brandPrimary.opacity(0.3))  // Neon glow
                                 Text(instruction)
-                                    .font(.system(.body))
+                                    .font(FitTodayFont.ui(size: 17, weight: .medium))  // Retro font
                                     .foregroundStyle(FitTodayColor.textSecondary)
                             }
                         }
@@ -76,9 +78,9 @@ struct WorkoutExerciseDetailView: View {
                     FitCard {
                         VStack(alignment: .leading, spacing: FitTodaySpacing.xs) {
                             Text("Dica do coach")
-                                .font(.system(.headline))
+                                .font(FitTodayFont.ui(size: 17, weight: .semiBold))  // Retro font
                             Text(tip)
-                                .font(.system(.body))
+                                .font(FitTodayFont.ui(size: 17, weight: .medium))  // Retro font
                                 .foregroundStyle(FitTodayColor.textSecondary)
                         }
                     }
@@ -88,7 +90,13 @@ struct WorkoutExerciseDetailView: View {
             }
             .padding()
         }
-        .background(FitTodayColor.background.ignoresSafeArea())
+        .background(
+            ZStack {
+                FitTodayColor.background
+                RetroGridPattern(lineColor: FitTodayColor.gridLine.opacity(0.3), spacing: 40)  // Grid background
+            }
+            .ignoresSafeArea()
+        )
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button("Encerrar") {
@@ -149,11 +157,12 @@ struct WorkoutExerciseDetailView: View {
             Image(systemName: icon)
                 .font(.system(.title3))
                 .foregroundStyle(FitTodayColor.brandPrimary)
+                .fitGlowEffect(color: FitTodayColor.brandPrimary.opacity(0.3))  // Neon glow
             VStack(alignment: .leading, spacing: FitTodaySpacing.xs) {
                 Text(title)
-                    .font(.system(.headline))
+                    .font(FitTodayFont.ui(size: 17, weight: .semiBold))  // Retro font
                 Text(subtitle)
-                    .font(.system(.subheadline))
+                    .font(FitTodayFont.ui(size: 15, weight: .medium))  // Retro font
                     .foregroundStyle(FitTodayColor.textSecondary)
             }
         }

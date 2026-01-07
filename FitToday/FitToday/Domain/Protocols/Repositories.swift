@@ -18,6 +18,8 @@ protocol WorkoutBlocksRepository: Sendable {
 
 protocol WorkoutHistoryRepository: Sendable {
     func listEntries() async throws -> [WorkoutHistoryEntry]
+    func listEntries(limit: Int, offset: Int) async throws -> [WorkoutHistoryEntry]
+    func count() async throws -> Int
     func saveEntry(_ entry: WorkoutHistoryEntry) async throws
 }
 

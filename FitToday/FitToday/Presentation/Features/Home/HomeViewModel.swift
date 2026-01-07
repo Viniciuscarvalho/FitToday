@@ -27,12 +27,13 @@ enum HomeJourneyState: Equatable {
 }
 
 @MainActor
-final class HomeViewModel: ObservableObject {
+final class HomeViewModel: ObservableObject, ErrorPresenting {
     @Published private(set) var journeyState: HomeJourneyState = .loading
     @Published private(set) var entitlement: ProEntitlement = .free
     @Published private(set) var topPrograms: [Program] = []
     @Published private(set) var weekWorkouts: [LibraryWorkout] = []
     @Published private(set) var dailyWorkoutState: DailyWorkoutState = DailyWorkoutState()
+    @Published var errorMessage: ErrorMessage? // ErrorPresenting protocol
 
     private let resolver: Resolver
     private let dailyStateManager = DailyWorkoutStateManager.shared
@@ -138,6 +139,7 @@ final class HomeViewModel: ObservableObject {
         guard let profileRepo = resolver.resolve(UserProfileRepository.self),
               let entitlementRepo = resolver.resolve(EntitlementRepository.self) else {
             journeyState = .error(message: "Erro de configuração do app.")
+            handleError(DomainError.repositoryFailure(reason: "Serviços não configurados"))
             return
         }
 
@@ -185,7 +187,8 @@ final class HomeViewModel: ObservableObject {
             await loadProgramsAndWorkouts(profile: profile)
 
         } catch {
-            journeyState = .error(message: error.localizedDescription)
+            journeyState = .error(message: "Não foi possível carregar seus dados.")
+            handleError(error) // ErrorPresenting protocol
         }
     }
 

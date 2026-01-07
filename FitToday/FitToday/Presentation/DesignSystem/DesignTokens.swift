@@ -62,6 +62,43 @@ enum FitTodayColor {
         startPoint: .top,
         endPoint: .bottom
     )
+
+    // MARK: - Retro-Futuristic Colors
+
+    // Neon Accents (80s palette)
+    static let neonCyan = Color(hex: "#00E5FF")
+    static let neonMagenta = Color(hex: "#FF00E5")
+    static let neonYellow = Color(hex: "#FFEA00")
+    static let neonPurple = Color(hex: "#B026FF")
+
+    // Grid & Tech Elements
+    static let gridLine = Color(hex: "#00FFFF").opacity(0.15)
+    static let gridAccent = Color(hex: "#FF00E5").opacity(0.25)
+    static let scanLine = Color.white.opacity(0.03)
+    static let techBorder = Color(hex: "#00E5FF").opacity(0.4)
+
+    // VHS / Glitch Effects
+    static let glitchRed = Color(hex: "#FF0040")
+    static let glitchCyan = Color(hex: "#00FFFF")
+
+    // Enhanced Gradients
+    static let gradientRetroSunset = LinearGradient(
+        colors: [neonPurple, neonMagenta, brandSecondary],
+        startPoint: .topLeading,
+        endPoint: .bottomTrailing
+    )
+
+    static let gradientSynthwave = LinearGradient(
+        colors: [Color(hex: "#2E1F54"), Color(hex: "#1A0633")],
+        startPoint: .top,
+        endPoint: .bottom
+    )
+
+    static let gradientNeonGlow = LinearGradient(
+        colors: [neonCyan, brandPrimary, neonYellow],
+        startPoint: .leading,
+        endPoint: .trailing
+    )
 }
 
 // MARK: - Spacing System (8pt Grid)
@@ -86,49 +123,107 @@ enum FitTodayRadius {
     static let pill: CGFloat = 999
 }
 
-// MARK: - Typography (SF Pro)
+// MARK: - Font System (Retro-Futuristic)
+
+enum FitTodayFont {
+    // Font names
+    static let orbitronBold = "Orbitron-Bold"
+    static let orbitronExtraBold = "Orbitron-ExtraBold"
+    static let orbitronBlack = "Orbitron-Black"
+    static let rajdhaniBold = "Rajdhani-Bold"
+    static let rajdhaniSemiBold = "Rajdhani-SemiBold"
+    static let rajdhaniMedium = "Rajdhani-Medium"
+    static let bungeeRegular = "Bungee-Regular"
+
+    // Display fonts (Orbitron)
+    static func display(size: CGFloat, weight: DisplayWeight = .bold) -> Font {
+        switch weight {
+        case .bold: return .custom(orbitronBold, size: size)
+        case .extraBold: return .custom(orbitronExtraBold, size: size)
+        case .black: return .custom(orbitronBlack, size: size)
+        }
+    }
+
+    // UI fonts (Rajdhani)
+    static func ui(size: CGFloat, weight: UIWeight = .medium) -> Font {
+        switch weight {
+        case .medium: return .custom(rajdhaniMedium, size: size)
+        case .semiBold: return .custom(rajdhaniSemiBold, size: size)
+        case .bold: return .custom(rajdhaniBold, size: size)
+        }
+    }
+
+    // Accent font (Bungee)
+    static func accent(size: CGFloat) -> Font {
+        .custom(bungeeRegular, size: size)
+    }
+
+    enum DisplayWeight {
+        case bold, extraBold, black
+    }
+
+    enum UIWeight {
+        case medium, semiBold, bold
+    }
+}
+
+// MARK: - Typography (Retro-Futuristic)
 
 enum FitTodayTypography {
     static func largeTitle(_ text: String) -> some View {
         Text(text)
-            .font(.system(size: 34, weight: .bold, design: .rounded))
+            .font(FitTodayFont.display(size: 36, weight: .extraBold))
+            .tracking(1.5)
             .foregroundStyle(FitTodayColor.textPrimary)
     }
-    
+
     static func title(_ text: String) -> some View {
         Text(text)
-            .font(.system(size: 28, weight: .bold, design: .rounded))
+            .font(FitTodayFont.display(size: 30, weight: .bold))
+            .tracking(1.2)
             .foregroundStyle(FitTodayColor.textPrimary)
     }
-    
+
     static func title2(_ text: String) -> some View {
         Text(text)
-            .font(.system(size: 22, weight: .bold, design: .rounded))
+            .font(FitTodayFont.display(size: 24, weight: .bold))
+            .tracking(1.0)
             .foregroundStyle(FitTodayColor.textPrimary)
     }
-    
+
     static func heading(_ text: String) -> some View {
         Text(text)
-            .font(.system(size: 20, weight: .semibold, design: .rounded))
+            .font(FitTodayFont.ui(size: 20, weight: .bold))
+            .tracking(0.8)
             .foregroundStyle(FitTodayColor.textPrimary)
     }
 
     static func subheading(_ text: String) -> some View {
         Text(text)
-            .font(.system(size: 15, weight: .medium))
+            .font(FitTodayFont.ui(size: 16, weight: .semiBold))
+            .tracking(0.5)
             .foregroundStyle(FitTodayColor.textSecondary)
     }
-    
+
     static func body(_ text: String) -> some View {
         Text(text)
-            .font(.system(size: 17))
+            .font(FitTodayFont.ui(size: 17, weight: .medium))
+            .tracking(0.3)
             .foregroundStyle(FitTodayColor.textPrimary)
     }
-    
+
     static func caption(_ text: String) -> some View {
         Text(text)
-            .font(.system(size: 12))
+            .font(FitTodayFont.ui(size: 12, weight: .medium))
+            .tracking(0.5)
             .foregroundStyle(FitTodayColor.textTertiary)
+    }
+
+    static func badge(_ text: String) -> some View {
+        Text(text)
+            .font(FitTodayFont.accent(size: 11))
+            .tracking(0.8)
+            .textCase(.uppercase)
     }
 }
 
@@ -157,6 +252,36 @@ extension View {
     func fitGlowEffect(color: Color = FitTodayColor.brandPrimary) -> some View {
         shadow(color: color.opacity(0.4), radius: 12, x: 0, y: 0)
     }
+
+    // MARK: - Retro Visual Effects
+
+    /// Adds retro grid overlay
+    func retroGridOverlay(lineColor: Color = FitTodayColor.gridLine, spacing: CGFloat = 20) -> some View {
+        self.overlay(
+            RetroGridPattern(lineColor: lineColor, spacing: spacing)
+        )
+    }
+
+    /// Adds diagonal stripe pattern
+    func diagonalStripes(color: Color = FitTodayColor.brandPrimary, spacing: CGFloat = 8, opacity: Double = 0.1) -> some View {
+        self.overlay(
+            DiagonalStripesPattern(color: color, spacing: spacing, opacity: opacity)
+        )
+    }
+
+    /// Adds tech corner borders (L-shaped corners)
+    func techCornerBorders(color: Color = FitTodayColor.techBorder, length: CGFloat = 20, thickness: CGFloat = 2) -> some View {
+        self.overlay(
+            TechCornerBordersOverlay(color: color, length: length, thickness: thickness)
+        )
+    }
+
+    /// Adds scanline overlay (VHS effect)
+    func scanlineOverlay(lineSpacing: CGFloat = 4, opacity: Double = 0.03) -> some View {
+        self.overlay(
+            ScanlinePattern(lineSpacing: lineSpacing, opacity: opacity)
+        )
+    }
 }
 
 // MARK: - Color Extension for Hex
@@ -184,5 +309,118 @@ extension Color {
             blue: Double(b) / 255,
             opacity: Double(a) / 255
         )
+    }
+}
+
+// MARK: - Retro Pattern Views
+
+struct RetroGridPattern: View {
+    let lineColor: Color
+    let spacing: CGFloat
+
+    var body: some View {
+        GeometryReader { geometry in
+            Path { path in
+                // Vertical lines
+                let cols = Int(geometry.size.width / spacing)
+                for i in 0...cols {
+                    let x = CGFloat(i) * spacing
+                    path.move(to: CGPoint(x: x, y: 0))
+                    path.addLine(to: CGPoint(x: x, y: geometry.size.height))
+                }
+
+                // Horizontal lines
+                let rows = Int(geometry.size.height / spacing)
+                for i in 0...rows {
+                    let y = CGFloat(i) * spacing
+                    path.move(to: CGPoint(x: 0, y: y))
+                    path.addLine(to: CGPoint(x: geometry.size.width, y: y))
+                }
+            }
+            .stroke(lineColor, lineWidth: 1)
+        }
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
+    }
+}
+
+struct DiagonalStripesPattern: View {
+    let color: Color
+    let spacing: CGFloat
+    let opacity: Double
+
+    var body: some View {
+        GeometryReader { geometry in
+            Path { path in
+                let diagonal = sqrt(pow(geometry.size.width, 2) + pow(geometry.size.height, 2))
+                let stripes = Int(diagonal / spacing)
+
+                for i in 0...stripes {
+                    let offset = CGFloat(i) * spacing
+                    path.move(to: CGPoint(x: -geometry.size.height + offset, y: 0))
+                    path.addLine(to: CGPoint(x: offset, y: geometry.size.height))
+                }
+            }
+            .stroke(color.opacity(opacity), lineWidth: 2)
+        }
+        .rotationEffect(.degrees(45))
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
+    }
+}
+
+struct TechCornerBordersOverlay: View {
+    let color: Color
+    let length: CGFloat
+    let thickness: CGFloat
+
+    var body: some View {
+        GeometryReader { geometry in
+            Path { path in
+                // Top-left
+                path.move(to: CGPoint(x: 0, y: length))
+                path.addLine(to: CGPoint(x: 0, y: 0))
+                path.addLine(to: CGPoint(x: length, y: 0))
+
+                // Top-right
+                path.move(to: CGPoint(x: geometry.size.width - length, y: 0))
+                path.addLine(to: CGPoint(x: geometry.size.width, y: 0))
+                path.addLine(to: CGPoint(x: geometry.size.width, y: length))
+
+                // Bottom-left
+                path.move(to: CGPoint(x: 0, y: geometry.size.height - length))
+                path.addLine(to: CGPoint(x: 0, y: geometry.size.height))
+                path.addLine(to: CGPoint(x: length, y: geometry.size.height))
+
+                // Bottom-right
+                path.move(to: CGPoint(x: geometry.size.width - length, y: geometry.size.height))
+                path.addLine(to: CGPoint(x: geometry.size.width, y: geometry.size.height))
+                path.addLine(to: CGPoint(x: geometry.size.width, y: geometry.size.height - length))
+            }
+            .stroke(color, lineWidth: thickness)
+        }
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
+    }
+}
+
+struct ScanlinePattern: View {
+    let lineSpacing: CGFloat
+    let opacity: Double
+
+    var body: some View {
+        GeometryReader { geometry in
+            Path { path in
+                let lines = Int(geometry.size.height / lineSpacing)
+                for i in 0...lines {
+                    let y = CGFloat(i) * lineSpacing
+                    path.move(to: CGPoint(x: 0, y: y))
+                    path.addLine(to: CGPoint(x: geometry.size.width, y: y))
+                }
+            }
+            .stroke(Color.white.opacity(opacity), lineWidth: 1)
+        }
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
     }
 }
