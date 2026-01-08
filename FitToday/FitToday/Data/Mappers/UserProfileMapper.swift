@@ -26,7 +26,8 @@ struct UserProfileMapper {
             level: level,
             healthConditions: conditions.isEmpty ? [.none] : conditions,
             weeklyFrequency: model.weeklyFrequency,
-            createdAt: model.createdAt
+            createdAt: model.createdAt,
+            isProfileComplete: model.isProfileComplete
         )
     }
 
@@ -39,7 +40,8 @@ struct UserProfileMapper {
             levelRaw: profile.level.rawValue,
             healthConditionsRaw: profile.healthConditions.map(\.rawValue),
             weeklyFrequency: profile.weeklyFrequency,
-            createdAt: profile.createdAt
+            createdAt: profile.createdAt,
+            isProfileComplete: profile.isProfileComplete
         )
     }
 }

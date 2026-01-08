@@ -57,6 +57,18 @@ struct AppContainer {
         let entitlementRepository = StoreKitEntitlementRepository(modelContainer: modelContainer, storeKitService: storeKitService)
         container.register(EntitlementRepository.self) { _ in entitlementRepository }
             .inObjectScope(.container)
+        
+        // Feature Gating Use Case
+        let aiUsageTracker = SimpleAIUsageTracker()
+        container.register(AIUsageTracking.self) { _ in aiUsageTracker }
+            .inObjectScope(.container)
+        
+        container.register(FeatureGating.self) { resolver in
+            FeatureGatingUseCase(
+                entitlementRepository: resolver.resolve(EntitlementRepository.self)!,
+                usageTracker: resolver.resolve(AIUsageTracking.self)
+            )
+        }.inObjectScope(.container)
 
         // ExerciseDB Service e Media Resolver
         // Usa chave do usuário (Keychain) se disponível, fallback para plist (legado)

@@ -325,7 +325,7 @@ Aumentar cobertura de testes unitários para targets específicos por camada da 
 3. Repositories: 60%+ coverage (integrações)
 4. Mocks para: OpenAIClient, ExerciseDBService, StoreKitRepository
 5. Critical paths testados: workout generation, subscription flow, soreness filtering
-6. Async tests com Swift Testing quando possível
+6. Async tests com XCTest quando possível
 7. CI job falha se coverage < targets
 
 ## Experiência do Usuário
