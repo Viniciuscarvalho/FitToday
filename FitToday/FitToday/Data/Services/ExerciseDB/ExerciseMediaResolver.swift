@@ -94,6 +94,56 @@ actor ExerciseMediaResolver: ExerciseMediaResolving {
   /// Dicionário de tradução de nomes de exercícios do português para inglês.
   /// Usado para melhorar a busca na API ExerciseDB que está em inglês.
   nonisolated private static let exerciseNameTranslation: [String: String] = [
+    // ✅ EXERCÍCIOS ESPECÍFICOS PROBLEMÁTICOS (adicionados para 90%+ de assertividade)
+    // Abdominais específicos
+    "abdominal bicicleta": "bicycle crunch",
+    "bicycle crunch": "bicycle crunch",
+    "abdominal canivete": "v-up",
+    "v-up": "v-up",
+    "elevação de joelhos": "knee raise",
+    "knee raise": "knee raise",
+    "elevação de joelhos suspenso": "hanging knee raise",
+    "hanging knee raise": "hanging knee raise",
+    "elevação de pernas": "leg raise",
+    "leg raise": "leg raise",
+
+    // Agachamentos específicos
+    "agachamento com salto": "jump squat",
+    "jump squat": "jump squat",
+    "agachamento búlgaro": "bulgarian split squat",
+    "bulgarian split squat": "bulgarian split squat",
+    "agachamento sumô": "sumo squat",
+    "sumo squat": "sumo squat",
+    "agachamento frontal": "front squat",
+    "front squat": "front squat",
+
+    // Prancha específicas
+    "prancha com elevação de braço": "plank arm raise",
+    "prancha com rotação": "plank rotation",
+    "prancha lateral com rotação": "side plank rotation",
+    "prancha alta": "high plank",
+    "prancha baixa": "forearm plank",
+
+    // Burpees específicos
+    "burpee com salto": "burpee",
+    "burpee com flexão": "burpee with push-up",
+    "burpee com salto lateral": "lateral burpee",
+
+    // Flexões específicas
+    "flexão diamante": "diamond push-up",
+    "diamond push-up": "diamond push-up",
+    "flexão com aplauso": "clap push-up",
+    "flexão archer": "archer push-up",
+    "flexão pike": "pike push-up",
+
+    // Remadas específicas
+    "remada unilateral com halter": "one arm dumbbell row",
+    "one arm dumbbell row": "one arm dumbbell row",
+    "remada curvada": "bent over row",
+    "bent over row": "bent over row",
+    "remada cavalinho": "t-bar row",
+    "t-bar row": "t-bar row",
+
     // Core & Estabilidade
     "prancha": "plank",
     "plank": "plank",
@@ -108,12 +158,12 @@ actor ExerciseMediaResolver: ExerciseMediaResolving {
     "hip thrust": "glute bridge",
     "ponte": "glute bridge",
     "elevação pélvica com halter": "dumbbell hip thrust",
-    
+
     // Cardio & Full Body
     "burpee": "burpee",
     "mountain climber": "mountain climber",
     "escalador": "mountain climber",
-    
+
     // Upper Body
     "flexão": "push-up",
     "push-up": "push-up",
@@ -127,7 +177,7 @@ actor ExerciseMediaResolver: ExerciseMediaResolving {
     "supino inclinado com halteres": "incline dumbbell press",
     "supino": "bench press",
     "bench press": "bench press",
-    
+
     // Lower Body
     "agachamento": "squat",
     "squat": "squat",
@@ -137,31 +187,31 @@ actor ExerciseMediaResolver: ExerciseMediaResolving {
     "leg press": "leg press",
     "extensão de perna": "leg extension",
     "flexão de perna": "leg curl",
-    
-    // Abdominais
+
+    // Abdominais gerais
     "abdominal": "crunch",
     "crunch": "crunch",
     "abdominal tradicional": "crunch",
     "abdominal oblíquo": "side crunch",
     "side crunch": "side crunch",
-    
+
     // Ombros
     "desenvolvimento": "shoulder press",
     "shoulder press": "shoulder press",
     "elevação lateral": "lateral raise",
     "lateral raise": "lateral raise",
-    
+
     // Costas
     "remada": "row",
     "row": "row",
     "puxada": "pulldown",
     "pulldown": "pulldown",
-    
+
     // Tríceps
     "tríceps": "triceps",
     "triceps extension": "triceps extension",
     "tríceps testa": "lying triceps extension",
-    
+
     // Bíceps
     "bíceps": "biceps",
     "biceps curl": "biceps curl",
@@ -463,15 +513,26 @@ actor ExerciseMediaResolver: ExerciseMediaResolving {
     var dict = (UserDefaults.standard.dictionary(forKey: MappingKeys.mapping) as? [String: String]) ?? [:]
     dict.removeValue(forKey: localId)
     UserDefaults.standard.set(dict, forKey: MappingKeys.mapping)
-    
+
     // Também limpa do cache resolvido
     let keysToRemove = resolvedCache.keys.filter { $0.hasPrefix("\(localId)_") }
     for key in keysToRemove {
       resolvedCache.removeValue(forKey: key)
     }
-    
+
     #if DEBUG
     print("[MediaResolver] 🗑️ Mapping limpo para exercício '\(localId)'")
+    #endif
+  }
+
+  /// Limpa TODOS os mappings de exercícios do UserDefaults.
+  /// Útil para invalidar cache após melhorias no algoritmo de matching.
+  func clearAllMappings() {
+    UserDefaults.standard.removeObject(forKey: MappingKeys.mapping)
+    resolvedCache.removeAll()
+
+    #if DEBUG
+    print("[MediaResolver] 🗑️ TODOS os mappings foram limpos (cache invalidado)")
     #endif
   }
 
@@ -629,15 +690,21 @@ actor ExerciseMediaResolver: ExerciseMediaResolving {
   ) async throws -> String {
     #if DEBUG
     print("[MediaResolver] 🔍 Resolvendo exerciseDBId para '\(exercise.name)' (id: \(exercise.id), músculo: \(exercise.mainMuscle.rawValue), equip: \(exercise.equipment.rawValue))")
+    print("[MediaResolver]    Cache version: \(MappingKeys.mapping)")
     #endif
-    
-    // 1. Verifica mapping persistido
+
+    // 1. Verifica mapping persistido (cache v2 após melhorias de 2026-01-08)
     if let cached = cachedExerciseDBId(forLocalExerciseId: exercise.id) {
       #if DEBUG
-      print("[MediaResolver] ✅ Mapping persistido encontrado: \(cached) (caminho: mapping cacheado)")
+      print("[MediaResolver] ✅ Mapping persistido encontrado: \(cached) (caminho: cache v2)")
+      print("[MediaResolver]    ⚠️  Usando cache - algoritmo melhorado NÃO será executado")
       #endif
       return cached
     }
+
+    #if DEBUG
+    print("[MediaResolver] 🆕 Nenhum cache encontrado - executando algoritmo melhorado")
+    #endif
 
     // 2. Se o id já parece um id do ExerciseDB (numérico), usa direto.
     if exercise.id.count >= 3, exercise.id.allSatisfy({ $0.isNumber }) {
@@ -806,61 +873,107 @@ actor ExerciseMediaResolver: ExerciseMediaResolving {
     return nil
   }
   
-  /// Retorna candidatos de target para um MuscleGroup (em ordem de preferência).
+  /// Retorna candidatos de target VÁLIDOS para um MuscleGroup (em ordem de preferência).
+  ///
+  /// IMPORTANTE: Usar APENAS targets que existem na API ExerciseDB.
+  /// Lista completa dos 19 targets oficiais (verificado em 2026-01-08):
+  /// abs, adductors, abductors, biceps, calves, cardiovascular system,
+  /// delts, forearms, glutes, hamstrings, lats, levator scapulae,
+  /// pectorals, quads, serratus anterior, spine, traps, triceps, upper back
+  ///
+  /// - Parameter muscleGroup: Grupo muscular local
+  /// - Returns: Lista de targets do ExerciseDB em ordem de preferência (mais específico primeiro)
   private func targetCandidates(for muscleGroup: MuscleGroup) -> [String] {
     switch muscleGroup {
     case .chest:
-      return ["pectorals", "chest"]
+      // ✅ Corrigido: "chest" NÃO existe no ExerciseDB, apenas "pectorals"
+      return ["pectorals"]
+
     case .back:
-      return ["lats", "back", "middle back", "upper back"]
+      // ✅ Corrigido: "back" e "middle back" NÃO existem
+      // Opções válidas: lats (latíssimo), upper back (trapézio superior), traps
+      return ["lats", "upper back", "traps"]
+
     case .shoulders:
-      return ["delts", "shoulders", "deltoids"]
+      // ✅ Corrigido: "shoulders" e "deltoids" NÃO existem, apenas "delts"
+      return ["delts"]
+
     case .biceps:
       return ["biceps"]
+
     case .triceps:
       return ["triceps"]
+
     case .arms:
-      return ["biceps", "triceps"] // Tenta ambos
+      // Cobre todos os músculos do braço
+      return ["biceps", "triceps", "forearms"]
+
     case .core:
-      return ["abs", "core"]
+      // ✅ Corrigido: "core" NÃO existe
+      // Opções válidas: abs (abdominais), serratus anterior (serrátil)
+      return ["abs", "serratus anterior"]
+
     case .glutes:
       return ["glutes"]
+
     case .quads, .quadriceps:
-      return ["quads", "quadriceps"]
+      // ✅ Corrigido: "quadriceps" NÃO existe, apenas "quads"
+      return ["quads"]
+
     case .hamstrings:
       return ["hamstrings"]
+
     case .calves:
       return ["calves"]
-    case .cardioSystem, .fullBody:
-      return [] // Não mapeia para target específico
+
+    case .cardioSystem:
+      return ["cardiovascular system"]
+
+    case .fullBody:
+      // Corpo inteiro não tem target específico
+      return []
     }
   }
   
   // MARK: - Ranking Determinístico
-  
+
+  /// Threshold mínimo de confiança para aceitar um match.
+  /// Score = equipamento (0-3) + tokens de nome em comum (1+ cada).
+  ///
+  /// IMPORTANTE: Preferimos retornar nil (sem imagem) do que retornar exercício errado!
+  ///
+  /// Threshold de 5 significa (ULTRA-RIGOROSO para 90%+ de assertividade):
+  /// - Match exato de equipamento (3) + pelo menos 2 tokens de nome OU
+  /// - Equipamento similar (1) + pelo menos 4 tokens de nome OU
+  /// - Sem match de equipamento (0) + pelo menos 5 tokens de nome
+  ///
+  /// Isso FORÇA correspondência forte no nome, não aceita matches apenas por equipamento.
+  private static let minimumConfidenceThreshold = 5
+
   /// Rankeia candidatos e retorna o melhor match determinístico.
+  /// Retorna nil se não houver match confiável (score abaixo do threshold).
   private func rankCandidates(
     _ candidates: [ExerciseDBExercise],
     for exercise: WorkoutExercise
   ) -> ExerciseDBExercise? {
     guard !candidates.isEmpty else { return nil }
-    
-    var scoredCandidates: [(exercise: ExerciseDBExercise, score: Int)] = []
-    
+
+    var scoredCandidates: [(exercise: ExerciseDBExercise, score: Int, nameScore: Int)] = []
+
     for candidate in candidates {
       var score = 0
-      
+
       // Score de equipamento (+3 se match exato, +1 se similar, 0 se desconhecido)
       let equipmentScore = scoreEquipment(candidate.equipment, against: exercise.equipment)
       score += equipmentScore
-      
+
       // Score de nome (tokens em comum)
       let nameScore = scoreNameSimilarity(candidate.name, against: exercise.name)
       score += nameScore
-      
-      scoredCandidates.append((candidate, score))
+
+      scoredCandidates.append((candidate, score, nameScore))
     }
-    
+
     // Ordena por score (maior primeiro), depois por nome mais curto (mais "canonical")
     scoredCandidates.sort { lhs, rhs in
       if lhs.score != rhs.score {
@@ -868,7 +981,7 @@ actor ExerciseMediaResolver: ExerciseMediaResolving {
       }
       return lhs.exercise.name.count < rhs.exercise.name.count
     }
-    
+
     // Log top 3 candidatos com scores detalhados
     #if DEBUG
     if !scoredCandidates.isEmpty {
@@ -876,38 +989,112 @@ actor ExerciseMediaResolver: ExerciseMediaResolving {
       print("[MediaResolver]   📊 Top \(min(3, scoredCandidates.count)) candidatos por score:")
       for (i, item) in top3.enumerated() {
         let equipmentInfo = item.exercise.equipment ?? "N/A"
-        print("[MediaResolver]     [\(i+1)] '\(item.exercise.name)' (score: \(item.score), equip: \(equipmentInfo), id: \(item.exercise.id))")
+        print("[MediaResolver]     [\(i+1)] '\(item.exercise.name)' (score: \(item.score), name tokens: \(item.nameScore), equip: \(equipmentInfo), id: \(item.exercise.id))")
       }
     }
     #endif
-    
-    // Retorna o melhor (score > 0)
-    if let best = scoredCandidates.first, best.score > 0 {
+
+    // ✅ MUDANÇA CRÍTICA 1: Aplicar threshold de confiança básico
+    // Primeiro, garantir que temos um candidato
+    guard let best = scoredCandidates.first else {
       #if DEBUG
-      print("[MediaResolver]   🏆 Melhor match escolhido: '\(best.exercise.name)' (score: \(best.score))")
+      print("[MediaResolver]   ℹ️ Nenhum candidato disponível para '\(exercise.name)'")
+      print("[MediaResolver]   💡 Exercício '\(exercise.name)' não terá imagem/gif (não encontrado na API)")
+      #endif
+      return nil
+    }
+
+    // EXCEÇÃO: Para nomes de 1 token único, aceitar score 4 se for match 100%
+    let localTokens = tokenize(exercise.name)
+    let effectiveThreshold: Int
+    if localTokens.count == 1 && best.nameScore == 1 {
+      effectiveThreshold = 4  // Aceita equipamento (3) + 1 token exato (1)
+    } else {
+      effectiveThreshold = Self.minimumConfidenceThreshold  // 5 para todos os outros
+    }
+
+    // Validar score mínimo
+    guard best.score >= effectiveThreshold else {
+      #if DEBUG
+      print("[MediaResolver]   ⚠️ Score muito baixo (\(best.score) < \(effectiveThreshold)) - rejeitando match '\(best.exercise.name)'")
+      print("[MediaResolver]   💡 Exercício '\(exercise.name)' não terá imagem/gif (não encontrado na API)")
+      #endif
+      return nil
+    }
+
+    // ✅ MUDANÇA CRÍTICA 2: Validar cobertura mínima de tokens do nome
+    // Exigir que pelo menos 80% dos tokens principais do nome local estejam no candidato
+    // Isso evita matches ruins tipo "elevação de joelhos" → "leg raise" (falta "knee")
+    // Nota: localTokens já foi declarado acima para calcular effectiveThreshold
+    let candidateTokens = tokenize(best.exercise.name)
+    let commonTokens = Set(localTokens).intersection(Set(candidateTokens))
+
+    let tokenCoverage = localTokens.isEmpty ? 1.0 : Double(commonTokens.count) / Double(localTokens.count)
+
+    // ✅ ULTRA-RIGOROSO: Cobertura mínima de 80% para TODOS os exercícios
+    // Não aceitamos matches parciais - ou é muito similar ou não tem imagem!
+    let minimumTokenCoverage: Double = 0.8  // 80% para todos!
+
+    // ✅ Tokens mínimos absolutos (calculados com 80% de rigor):
+    // - 1 token: mínimo 1 (100% - deve ser exato)
+    // - 2 tokens: mínimo 2 (100% - ambos devem estar presentes)
+    // - 3 tokens: mínimo 3 (100% - todos devem estar presentes)
+    // - 4+ tokens: mínimo 80% arredondado para cima
+    //
+    // Exemplos:
+    // - "Knee Raise" (2) → precisa 2/2 = 100%
+    // - "Jump Squat" (2) → precisa 2/2 = 100%
+    // - "Bicycle Crunch" (2) → precisa 2/2 = 100%
+    // - "Side Plank Rotation" (3) → precisa 3/3 = 100%
+    let minimumTokensRequired = max(1, Int(ceil(Double(localTokens.count) * 0.8)))
+    let hasMinimumTokens = commonTokens.count >= minimumTokensRequired
+
+    if tokenCoverage >= minimumTokenCoverage && hasMinimumTokens {
+      #if DEBUG
+      print("[MediaResolver]   🏆 Melhor match escolhido: '\(best.exercise.name)' (score: \(best.score), threshold: \(Self.minimumConfidenceThreshold))")
+      print("[MediaResolver]   📊 Cobertura de tokens: \(Int(tokenCoverage * 100))% (\(commonTokens.count)/\(localTokens.count) tokens, mín: \(minimumTokensRequired))")
+      print("[MediaResolver]   ✅ Local: '\(exercise.name)' → Candidato: '\(best.exercise.name)'")
       #endif
       return best.exercise
     }
-    
+
+    // ⚠️ Rejeitado por cobertura insuficiente de tokens
+    #if DEBUG
+    let requiredCoverage = Int(minimumTokenCoverage * 100)
+    print("[MediaResolver]   ⚠️ Cobertura de tokens insuficiente (\(Int(tokenCoverage * 100))% < \(requiredCoverage)% ou tokens \(commonTokens.count) < \(minimumTokensRequired)) - rejeitando match '\(best.exercise.name)'")
+    print("[MediaResolver]   📝 Local: '\(exercise.name)' → tokens: \(localTokens)")
+    print("[MediaResolver]   📝 Candidato: '\(best.exercise.name)' → tokens: \(candidateTokens)")
+    print("[MediaResolver]   📝 Comum: \(Array(commonTokens)) (\(commonTokens.count) tokens, cobertura: \(Int(tokenCoverage * 100))%)")
+    print("[MediaResolver]   💡 Exercício '\(exercise.name)' não terá imagem/gif (match não confiável)")
+    #endif
+
     return nil
   }
   
   /// Score de equipamento: +3 se match exato, +1 se similar, 0 caso contrário.
   private func scoreEquipment(_ candidateEquipment: String?, against localEquipment: EquipmentType) -> Int {
     guard let candidate = candidateEquipment?.lowercased() else { return 0 }
-    
+
     let localString = mapEquipmentToString(localEquipment).lowercased()
-    
+
     // Match exato
     if candidate == localString {
       return 3
     }
-    
+
+    // ✅ Casos especiais de bodyweight (comum em HIIT/Circuito/Full Body)
+    if localEquipment == .bodyweight {
+      // Reconhece variações: "body weight", "bodyweight", "body only"
+      if candidate.contains("body") || candidate == "bodyweight" {
+        return 3  // Match exato para bodyweight
+      }
+    }
+
     // Similaridade (ex: "dumbbell" vs "dumbbells", "machine" vs "cable machine")
     if candidate.contains(localString) || localString.contains(candidate) {
       return 1
     }
-    
+
     return 0
   }
   
@@ -1134,7 +1321,11 @@ actor ExerciseMediaResolver: ExerciseMediaResolving {
   // MARK: - Persisted cache (UserDefaults)
 
   private enum MappingKeys {
-    static let mapping = "exercisedb_id_mapping_v1"
+    // ✅ v2: Incrementado para invalidar mappings antigos após melhorias no algoritmo (2026-01-08)
+    // Changelog:
+    // - v1: Versão inicial (tinha mappings incorretos devido a targets inválidos)
+    // - v2: Após correção de targets + threshold=5 + 80% token coverage
+    static let mapping = "exercisedb_id_mapping_v2"
   }
 
   private func cachedExerciseDBId(forLocalExerciseId localId: String) -> String? {

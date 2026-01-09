@@ -1,63 +1,61 @@
-Você é um assistente IA responsável por gerenciar um projeto de desenvolvimento de software. Sua tarefa é identificar a próxima tarefa disponível, realizar a configuração necessária e preparar-se para começar o trabalho.
+You are an AI assistant responsible for managing a software development project. Your task is to identify the next available task, perform the necessary setup, and prepare to start the work.
 
-<critical>Utilize o Context7 para analisar a documentação da linguagem, frameworks e bibliotecas envolvidas na implementação</critical>
+<critical>Use Context7 to analyze the documentation of the language, frameworks, and libraries involved in the implementation</critical>
 
-## Informações Fornecidas
+## Provided Information
 
-## Localização dos Arquivos
+## File Locations
 
-- PRD: `./tasks/prd-[nome-funcionalidade]/prd.md`
-- Tech Spec: `./tasks/prd-[nome-funcionalidade]/techspec.md`
-- Tasks: `./tasks/prd-[nome-funcionalidade]/tasks.md`
-- Regras do Projeto: @.cursor/rules
+- PRD: `./tasks/prd-[feature-name]/prd.md`
+- Tech Spec: `./tasks/prd-[feature-name]/techspec.md`
+- Tasks: `./tasks/prd-[feature-name]/tasks.md`
+- Project Rules: @.cursor/rules
 
-## Etapas para Executar
+## Execution Steps
 
-### 1. Configuração Pré-Tarefa
-- Ler a definição da tarefa
-- Revisar o contexto do PRD
-- Verificar requisitos da spec técnica
-- Entender dependências de tarefas anteriores
+### 1. Pre-Task Setup
+- Read the task definition
+- Review the PRD context
+- Check technical spec requirements
+- Understand dependencies from previous tasks
 
-### 2. Análise da Tarefa
-Analise considerando:
-- Objetivos principais da tarefa
-- Como a tarefa se encaixa no contexto do projeto
-- Alinhamento com regras e padrões do projeto
-- Possíveis soluções ou abordagens
+### 2. Task Analysis
+Analyze considering:
+- Main task objectives
+- How the task fits into the project context
+- Alignment with project rules and standards
+- Possible solutions or approaches
 
-### 3. Resumo da Tarefa
-
-```
-ID da Tarefa: [ID ou número]
-Nome da Tarefa: [Nome ou descrição breve]
-Contexto PRD: [Pontos principais do PRD]
-Requisitos Tech Spec: [Requisitos técnicos principais]
-Dependências: [Lista de dependências]
-Objetivos Principais: [Objetivos primários]
-Riscos/Desafios: [Riscos ou desafios identificados]
-```
-
-### 4. Plano de Abordagem
+### 3. Task Summary
 
 ```
-1. [Primeiro passo]
-2. [Segundo passo]
-3. [Passos adicionais conforme necessário]
+Task ID: [ID or number]
+Task Name: [Brief name or description]
+PRD Context: [Key PRD points]
+Tech Spec Requirements: [Main technical requirements]
+Dependencies: [List of dependencies]
+Main Objectives: [Primary objectives]
+Risks/Challenges: [Identified risks or challenges]
 ```
 
-## Notas Importantes
+### 4. Approach Plan
 
-- Sempre verifique contra PRD, spec técnica e arquivo de tarefa
-- Implemente soluções adequadas **sem usar gambiarras**
-- Siga todos os padrões estabelecidos do projeto
+```
+1. [First step]
+2. [Second step]
+3. [Additional steps as needed]
+```
 
-## Implementação
+## Important Notes
 
-Após fornecer o resumo e abordagem, comece imediatamente a implementar a tarefa:
-- Executar comandos necessários
-- Fazer alterações de código
-- Seguir padrões estabelecidos do projeto
-- Garantir que todos os requisitos sejam atendidos
+- Always validate against PRD, technical spec, and task file
+- Implement appropriate solutions **without hacks**
+- Follow all established project standards
 
-**VOCÊ DEVE** iniciar a implementação logo após o processo acima.
+## Implementation
+
+After providing the summary and approach, immediately start implementing the task:
+- Run necessary commands
+- Make code changes
+- Follow established project standards
+- Ensure all requirements are met

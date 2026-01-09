@@ -1,12 +1,12 @@
-# Resumo de Tarefas de Implementação de [Funcionalidade]
+# Implementation Tasks Summary for [Feature]
 
-## Tarefas
+## Tasks
 
-- [ ] 1.0 Título da Tarefa Principal (S/M/L)
-- [ ] 2.0 Título da Tarefa Principal (S/M/L)
-- [ ] 3.0 Título da Tarefa Principal (S/M/L)
+- [ ] 1.0 Main Task Title (S/M/L)
+- [ ] 2.0 Main Task Title (S/M/L)
+- [ ] 3.0 Main Task Title (S/M/L)
 
-## Notas sobre tamanho
+## Size Notes
 - S - Small
 - M - Medium
 - L - Large
