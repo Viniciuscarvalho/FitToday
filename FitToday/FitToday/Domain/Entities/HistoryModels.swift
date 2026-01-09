@@ -25,6 +25,9 @@ struct WorkoutHistoryEntry: Codable, Hashable, Sendable, Identifiable {
     var programName: String?      // Nome do programa para exibição
     var durationMinutes: Int?     // Duração real do treino em minutos
     var caloriesBurned: Int?      // Calorias estimadas queimadas
+    
+    // WorkoutPlan completo (para histórico de variação)
+    var workoutPlan: WorkoutPlan?
 
     init(
         id: UUID = .init(),
@@ -36,7 +39,8 @@ struct WorkoutHistoryEntry: Codable, Hashable, Sendable, Identifiable {
         programId: String? = nil,
         programName: String? = nil,
         durationMinutes: Int? = nil,
-        caloriesBurned: Int? = nil
+        caloriesBurned: Int? = nil,
+        workoutPlan: WorkoutPlan? = nil
     ) {
         self.id = id
         self.date = date
@@ -48,6 +52,7 @@ struct WorkoutHistoryEntry: Codable, Hashable, Sendable, Identifiable {
         self.programName = programName
         self.durationMinutes = durationMinutes
         self.caloriesBurned = caloriesBurned
+        self.workoutPlan = workoutPlan
     }
 }
 

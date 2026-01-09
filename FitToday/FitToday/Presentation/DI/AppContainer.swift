@@ -45,6 +45,11 @@ struct AppContainer {
         container.register(WorkoutHistoryRepository.self) { _ in
             SwiftDataWorkoutHistoryRepository(modelContainer: modelContainer)
         }.inObjectScope(.container)
+        
+        // Workout Composition Cache (F7)
+        container.register(WorkoutCompositionCacheRepository.self) { _ in
+            SwiftDataWorkoutCompositionCacheRepository(modelContainer: modelContainer)
+        }.inObjectScope(.container)
 
         // WorkoutBlocksRepository é registrado após configurar ExerciseDB (para permitir enriquecimento de mídia/instruções).
 
@@ -149,12 +154,30 @@ struct AppContainer {
         let schema = Schema([
             SDUserProfile.self,
             SDWorkoutHistoryEntry.self,
-            SDProEntitlementSnapshot.self
+            SDProEntitlementSnapshot.self,
+            SDCachedWorkout.self
         ])
-        let configuration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
+        
+        // Configuração com migração automática leve
+        let configuration = ModelConfiguration(
+            schema: schema,
+            isStoredInMemoryOnly: false,
+            allowsSave: true
+        )
+        
         do {
-            return try ModelContainer(for: schema, configurations: [configuration])
+            let container = try ModelContainer(for: schema, configurations: [configuration])
+            #if DEBUG
+            print("[SwiftData] ✅ ModelContainer criado com sucesso")
+            #endif
+            return container
         } catch {
+            // Em caso de erro de migração, logar mas NÃO apagar os dados
+            // O usuário deve limpar manualmente se necessário
+            #if DEBUG
+            print("❌ [SwiftData] Erro ao criar container: \(error.localizedDescription)")
+            print("❌ [SwiftData] Se persistir, limpe os dados do app manualmente")
+            #endif
             fatalError("Could not create ModelContainer: \(error)")
         }
     }
