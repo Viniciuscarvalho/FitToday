@@ -75,14 +75,34 @@ struct TabRootView: View {
             DailyQuestionnaireFlowView(resolver: resolver) { result in
                 switch result {
                 case .planReady:
+                    #if DEBUG
+                    print("[TabRoot] planReady recebido")
+                    print("[TabRoot] sessionStore.plan?.id = \(sessionStore.plan?.id.uuidString ?? "nil")")
+                    #endif
                     UserDefaults.standard.set(Date(), forKey: AppStorageKeys.lastDailyCheckInDate)
                     // Primeiro pop o questionário, depois navega para o workout
                     router.pop(on: .home)
                     if let planId = sessionStore.plan?.id {
+                        #if DEBUG
+                        print("[TabRoot] Navegando para workoutPlan: \(planId)")
+                        #endif
                         router.push(.workoutPlan(planId), on: .home)
+                    } else {
+                        #if DEBUG
+                        print("[TabRoot] ⚠️ sessionStore.plan é nil - não navegou!")
+                        #endif
                     }
                 case .paywallRequired:
-                    router.push(.paywall, on: .home)
+                    #if DEBUG
+                    print("[TabRoot] paywallRequired - mostrando paywall")
+                    #endif
+                    // Pop do questionário antes de mostrar o paywall para evitar
+                    // "Unbalanced calls to begin/end appearance transitions"
+                    router.pop(on: .home)
+                    // Pequeno delay para permitir que a animação de pop complete
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                        router.push(.paywall, on: .home)
+                    }
                 }
             }
         case .workoutPlan:

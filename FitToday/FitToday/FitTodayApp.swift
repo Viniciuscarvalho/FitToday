@@ -24,6 +24,16 @@ struct FitTodayApp: App {
         
         // Configurar aparência global para tema escuro
         configureGlobalAppearance()
+        
+        #if DEBUG
+        // Log de inicialização
+        print("═══════════════════════════════════════════")
+        print("[FitToday] 🚀 App inicializado")
+        print("[FitToday] Debug mode: ativo")
+        print("[FitToday] DebugEntitlementOverride enabled: \(DebugEntitlementOverride.shared.isEnabled)")
+        print("[FitToday] DebugEntitlementOverride isPro: \(DebugEntitlementOverride.shared.isPro)")
+        print("═══════════════════════════════════════════")
+        #endif
     }
 
     var body: some Scene {

@@ -218,9 +218,13 @@ struct DailyQuestionnaireFlowView: View {
         if DebugEntitlementOverride.shared.isEnabled {
             isPro = DebugEntitlementOverride.shared.isPro
         }
+        print("[DailyQ] handleSubmission: isPro=\(isPro) debugEnabled=\(DebugEntitlementOverride.shared.isEnabled)")
         #endif
         
         guard isPro else {
+            #if DEBUG
+            print("[DailyQ] ⚠️ Não é Pro - mostrando paywall")
+            #endif
             onResult(.paywallRequired)
             return
         }
@@ -228,13 +232,23 @@ struct DailyQuestionnaireFlowView: View {
         isGeneratingPlan = true
         Task {
             do {
+                #if DEBUG
+                print("[DailyQ] Gerando plano...")
+                #endif
                 let plan = try await viewModel.generatePlan(for: checkIn)
                 persistCheckIn(checkIn)
                 UserDefaults.standard.set(Date(), forKey: AppStorageKeys.lastDailyCheckInDate)
                 DailyWorkoutStateManager.shared.markSuggested(planId: plan.id)
                 sessionStore.start(with: plan)
+                #if DEBUG
+                print("[DailyQ] ✅ Plano gerado e salvo na sessão: id=\(plan.id)")
+                print("[DailyQ] ✅ sessionStore.plan != nil: \(sessionStore.plan != nil)")
+                #endif
                 onResult(.planReady)
             } catch {
+                #if DEBUG
+                print("[DailyQ] ❌ Erro na geração: \(error)")
+                #endif
                 viewModel.handleError(error)
             }
             isGeneratingPlan = false

@@ -22,10 +22,10 @@ struct OpenAIConfiguration: Sendable {
     struct DefaultSettings {
         let model = "gpt-4o-mini"
         let baseURL = URL(string: "https://api.openai.com/v1/chat/completions")!
-        let timeout: TimeInterval = 20
-        let maxTokens = 800
-        let temperature = 0.2
-        let cacheTTL: TimeInterval = 300
+        let timeout: TimeInterval = 60 // Aumentado para 60s (treino completo)
+        let maxTokens = 2000 // Aumentado para suportar resposta JSON completa
+        let temperature = 0.7 // Aumentado para mais variação nos exercícios
+        let cacheTTL: TimeInterval = 60 // Reduzido para 1 minuto (debug) - em produção use 300
     }
     
     /// Cria configuração usando a chave fornecida pelo usuário (armazenada no Keychain)

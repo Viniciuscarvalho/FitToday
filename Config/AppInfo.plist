@@ -52,13 +52,13 @@
 	</array>
 	<key>UIAppFonts</key>
 	<array>
-		<string>Resources/Fonts/Orbitron-Bold.ttf</string>
-		<string>Resources/Fonts/Orbitron-ExtraBold.ttf</string>
-		<string>Resources/Fonts/Orbitron-Black.ttf</string>
-		<string>Resources/Fonts/Rajdhani-Medium.ttf</string>
-		<string>Resources/Fonts/Rajdhani-SemiBold.ttf</string>
-		<string>Resources/Fonts/Rajdhani-Bold.ttf</string>
-		<string>Resources/Fonts/Bungee-Regular.ttf</string>
+		<string>Orbitron-Bold.ttf</string>
+		<string>Orbitron-ExtraBold.ttf</string>
+		<string>Orbitron-Black.ttf</string>
+		<string>Rajdhani-Medium.ttf</string>
+		<string>Rajdhani-SemiBold.ttf</string>
+		<string>Rajdhani-Bold.ttf</string>
+		<string>Bungee-Regular.ttf</string>
 	</array>
 </dict>
 </plist>

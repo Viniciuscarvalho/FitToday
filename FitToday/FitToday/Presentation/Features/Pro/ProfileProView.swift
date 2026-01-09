@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftData
 import Swinject
 
 struct ProfileProView: View {
@@ -378,6 +379,60 @@ struct ProfileProView: View {
                         .padding()
                     }
                     .buttonStyle(.plain)
+                    
+                    Divider()
+                        .padding(.leading, 56)
+                    
+                    Button {
+                        clearWorkoutCompositionCaches()
+                    } label: {
+                        HStack(spacing: FitTodaySpacing.md) {
+                            Image(systemName: "figure.run.circle.fill")
+                                .foregroundStyle(.cyan)
+                                .frame(width: 24)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Limpar cache de treinos")
+                                    .font(.system(.body, weight: .semibold))
+                                    .foregroundStyle(FitTodayColor.textPrimary)
+                                Text("Força nova geração de treinos via IA")
+                                    .font(.system(.caption))
+                                    .foregroundStyle(FitTodayColor.textSecondary)
+                            }
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .font(.system(.caption, weight: .semibold))
+                                .foregroundStyle(FitTodayColor.textTertiary)
+                        }
+                        .padding()
+                    }
+                    .buttonStyle(.plain)
+                    
+                    Divider()
+                        .padding(.leading, 56)
+                    
+                    Button {
+                        seedTestData()
+                    } label: {
+                        HStack(spacing: FitTodaySpacing.md) {
+                            Image(systemName: "testtube.2")
+                                .foregroundStyle(.purple)
+                                .frame(width: 24)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Criar dados de teste")
+                                    .font(.system(.body, weight: .semibold))
+                                    .foregroundStyle(FitTodayColor.textPrimary)
+                                Text("Perfil + Pro + CheckIn (para debug)")
+                                    .font(.system(.caption))
+                                    .foregroundStyle(FitTodayColor.textSecondary)
+                            }
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .font(.system(.caption, weight: .semibold))
+                                .foregroundStyle(FitTodayColor.textTertiary)
+                        }
+                        .padding()
+                    }
+                    .buttonStyle(.plain)
                 }
             }
             .background(FitTodayColor.surface)
@@ -480,6 +535,66 @@ struct ProfileProView: View {
         // Feedback visual
         restoreMessage = "Todos os caches do ExerciseDB foram limpos! O app fará novas buscas na próxima visualização."
         showingRestoreAlert = true
+    }
+    
+    /// Limpa todos os caches de composição de treino (OpenAI + SwiftData).
+    /// 
+    /// **Checklist de Validação Manual:**
+    /// 1. Limpar os caches usando este botão
+    /// 2. Gerar um novo treino
+    /// 3. Verificar nos logs DEBUG:
+    ///    - [BlueprintInput] cacheKey deve variar
+    ///    - [OpenAICache] deve mostrar MISS (não HIT)
+    ///    - [DynamicHybrid] deve fazer nova chamada à OpenAI
+    /// 4. Confirmar que o treino gerado tem exercícios diferentes
+    private func clearWorkoutCompositionCaches() {
+        Task {
+            // 1. Limpar cache de composição (SwiftData)
+            if let cacheRepo = resolver.resolve(WorkoutCompositionCacheRepository.self) {
+                do {
+                    try await cacheRepo.clearAll()
+                    print("[Debug] ✅ Cache de composição (SwiftData) limpo")
+                } catch {
+                    print("[Debug] ⚠️ Erro ao limpar cache de composição: \(error)")
+                }
+            }
+            
+            // 2. Nota: O OpenAIResponseCache é em memória e será limpo ao reiniciar o app
+            print("[Debug] ℹ️ Cache de respostas OpenAI (memória) será limpo ao reiniciar o app")
+            
+            // Feedback visual
+            await MainActor.run {
+                restoreMessage = "Caches de treino limpos! Reinicie o app para limpar o cache em memória da OpenAI. Novos treinos serão gerados na próxima requisição."
+                showingRestoreAlert = true
+            }
+        }
+    }
+    
+    /// Cria dados de teste para debug (Perfil + Pro + CheckIn)
+    private func seedTestData() {
+        Task {
+            // 1. Criar perfil de teste
+            if let modelContainer = resolver.resolve(ModelContainer.self) {
+                await DebugDataSeeder.seedTestProfileIfNeeded(in: modelContainer.mainContext)
+            }
+            
+            // 2. Ativar modo Pro
+            DebugDataSeeder.enableProMode()
+            debugModeEnabled = true
+            debugIsPro = true
+            
+            // 3. Criar check-in de teste
+            DebugDataSeeder.seedDailyCheckIn()
+            
+            // Feedback visual
+            await MainActor.run {
+                restoreMessage = "Dados de teste criados!\n\n• Perfil: Hipertrofia + Academia\n• Modo Pro: Ativado\n• Check-in: FullBody + Sem dor\n\nVá para Home e toque em 'Ver Treino de Hoje'"
+                showingRestoreAlert = true
+                
+                // Atualizar estado local
+                entitlement = DebugEntitlementOverride.shared.entitlement
+            }
+        }
     }
     #endif
     

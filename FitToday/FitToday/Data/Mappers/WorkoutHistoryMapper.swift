@@ -13,6 +13,12 @@ struct WorkoutHistoryMapper {
             let focus = DailyFocus(rawValue: model.focusRaw),
             let status = WorkoutStatus(rawValue: model.statusRaw)
         else { return nil }
+        
+        // Decodificar WorkoutPlan se houver
+        var workoutPlan: WorkoutPlan? = nil
+        if let jsonData = model.workoutPlanJSON {
+            workoutPlan = try? JSONDecoder().decode(WorkoutPlan.self, from: jsonData)
+        }
 
         return WorkoutHistoryEntry(
             id: model.id,
@@ -24,12 +30,19 @@ struct WorkoutHistoryMapper {
             programId: model.programId,
             programName: model.programName,
             durationMinutes: model.durationMinutes,
-            caloriesBurned: model.caloriesBurned
+            caloriesBurned: model.caloriesBurned,
+            workoutPlan: workoutPlan
         )
     }
 
     static func toModel(_ entry: WorkoutHistoryEntry) -> SDWorkoutHistoryEntry {
-        SDWorkoutHistoryEntry(
+        // Serializar WorkoutPlan se houver
+        var workoutPlanJSON: Data? = nil
+        if let plan = entry.workoutPlan {
+            workoutPlanJSON = try? JSONEncoder().encode(plan)
+        }
+        
+        return SDWorkoutHistoryEntry(
             id: entry.id,
             date: entry.date,
             planId: entry.planId,
@@ -39,7 +52,8 @@ struct WorkoutHistoryMapper {
             programId: entry.programId,
             programName: entry.programName,
             durationMinutes: entry.durationMinutes,
-            caloriesBurned: entry.caloriesBurned
+            caloriesBurned: entry.caloriesBurned,
+            workoutPlanJSON: workoutPlanJSON
         )
     }
 }
