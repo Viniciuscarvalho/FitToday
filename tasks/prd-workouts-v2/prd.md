@@ -135,3 +135,4 @@ Acessibilidade:
 - Regras exatas de “surpreenda-me”: deve seguir objetivo do perfil ou randomizar entre objetivos?  
 
 
+

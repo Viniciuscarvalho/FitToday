@@ -63,3 +63,4 @@ Referências: `tasks/prd-workouts-v2/techspec.md` (seções: “Abordagem de Tes
 - `FitToday/FitTodayUITests/`
 
 
+
