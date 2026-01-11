@@ -52,6 +52,7 @@ struct UserProfile: Codable, Hashable, Sendable {
     var healthConditions: [HealthCondition]
     var weeklyFrequency: Int
     var createdAt: Date
+    var isProfileComplete: Bool // Indica se perfil foi preenchido completamente ou usa defaults
 
     init(
         id: UUID = .init(),
@@ -61,7 +62,8 @@ struct UserProfile: Codable, Hashable, Sendable {
         level: TrainingLevel,
         healthConditions: [HealthCondition],
         weeklyFrequency: Int,
-        createdAt: Date = .init()
+        createdAt: Date = .init(),
+        isProfileComplete: Bool = true
     ) {
         self.id = id
         self.mainGoal = mainGoal
@@ -71,6 +73,7 @@ struct UserProfile: Codable, Hashable, Sendable {
         self.healthConditions = healthConditions
         self.weeklyFrequency = max(1, weeklyFrequency)
         self.createdAt = createdAt
+        self.isProfileComplete = isProfileComplete
     }
 }
 

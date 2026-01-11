@@ -65,3 +65,4 @@ Buscar candidatos por target pode retornar listas grandes e induzir muitas resol
 - `FitToday/FitToday/Data/Services/ExerciseDB/ExerciseDBService.swift`
 - `FitToday/FitToday/Data/Services/ExerciseDB/ExerciseMediaResolver.swift`
 
+

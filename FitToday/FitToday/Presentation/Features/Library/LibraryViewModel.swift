@@ -9,12 +9,12 @@ import Foundation
 import Combine
 
 @MainActor
-final class LibraryViewModel: ObservableObject {
+final class LibraryViewModel: ObservableObject, ErrorPresenting {
     @Published private(set) var allWorkouts: [LibraryWorkout] = []
     @Published private(set) var filteredWorkouts: [LibraryWorkout] = []
     @Published var filter: LibraryFilter = .empty
     @Published private(set) var isLoading = false
-    @Published var errorMessage: String?
+    @Published var errorMessage: ErrorMessage? // ErrorPresenting protocol
 
     private let repository: LibraryWorkoutsRepository
     private var cancellables = Set<AnyCancellable>()
@@ -41,7 +41,7 @@ final class LibraryViewModel: ObservableObject {
                 allWorkouts = workouts
                 applyFilter(filter)
             } catch {
-                errorMessage = "Erro ao carregar biblioteca: \(error.localizedDescription)"
+                handleError(error) // ErrorPresenting protocol
             }
             isLoading = false
         }

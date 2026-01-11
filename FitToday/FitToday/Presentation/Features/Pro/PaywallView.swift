@@ -43,7 +43,13 @@ struct PaywallView: View {
                 }
                 .padding()
             }
-            .background(FitTodayColor.background.ignoresSafeArea())
+            .background(
+                ZStack {
+                    FitTodayColor.background
+                    RetroGridPattern(lineColor: FitTodayColor.gridLine.opacity(0.3), spacing: 40)  // Grid background
+                }
+                .ignoresSafeArea()
+            )
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -84,13 +90,15 @@ struct PaywallView: View {
                         endPoint: .bottomTrailing
                     )
                 )
-            
+                .fitGlowEffect(color: FitTodayColor.brandPrimary.opacity(0.5))  // Neon glow
+
             Text("FitToday Pro")
-                .font(.system(.largeTitle, weight: .bold))
+                .font(FitTodayFont.display(size: 36, weight: .extraBold))  // Retro font
+                .tracking(1.5)
                 .foregroundStyle(FitTodayColor.textPrimary)
-            
+
             Text("Treinos adaptados ao seu dia,\ntodo dia")
-                .font(.system(.title3))
+                .font(FitTodayFont.ui(size: 20, weight: .medium))  // Retro font
                 .foregroundStyle(FitTodayColor.textSecondary)
                 .multilineTextAlignment(.center)
         }
@@ -143,7 +151,12 @@ struct PaywallView: View {
             )
         }
         .padding()
-        .background(FitTodayColor.surface)
+        .background(
+            RoundedRectangle(cornerRadius: FitTodayRadius.lg)
+                .fill(FitTodayColor.surface)
+                .retroGridOverlay(spacing: 30)  // Grid overlay
+        )
+        .techCornerBorders(length: 20, thickness: 2)  // Tech corners
         .cornerRadius(FitTodayRadius.lg)
     }
     
@@ -195,7 +208,7 @@ struct PaywallView: View {
                 }
             } label: {
                 Text("Restaurar compras")
-                    .font(.system(.subheadline, weight: .medium))
+                    .font(FitTodayFont.ui(size: 15, weight: .medium))  // Retro font
                     .foregroundStyle(FitTodayColor.brandPrimary)
             }
             .accessibilityLabel("Restaurar compras anteriores")
@@ -220,7 +233,7 @@ struct PaywallView: View {
             dismiss()
         } label: {
             Text("Ver treinos gratuitos na Biblioteca")
-                .font(.system(.subheadline))
+                .font(FitTodayFont.ui(size: 15, weight: .medium))  // Retro font
                 .foregroundStyle(FitTodayColor.textSecondary)
         }
     }
@@ -230,16 +243,16 @@ struct PaywallView: View {
     private var legalSection: some View {
         VStack(spacing: FitTodaySpacing.xs) {
             Text("Assinatura renovada automaticamente. Cancele a qualquer momento nas configurações do iPhone.")
-                .font(.system(.caption))
+                .font(FitTodayFont.ui(size: 12, weight: .medium))  // Retro font
                 .foregroundStyle(FitTodayColor.textSecondary)
                 .multilineTextAlignment(.center)
-            
+
             HStack(spacing: FitTodaySpacing.md) {
                 Link("Termos de Uso", destination: URL(string: "https://fittoday.app/terms")!)
                 Text("•")
                 Link("Privacidade", destination: URL(string: "https://fittoday.app/privacy")!)
             }
-            .font(.system(.caption))
+            .font(FitTodayFont.ui(size: 12, weight: .medium))  // Retro font
             .foregroundStyle(FitTodayColor.brandPrimary)
         }
         .padding(.top, FitTodaySpacing.md)
@@ -281,20 +294,21 @@ private struct BenefitRow: View {
     let icon: String
     let title: String
     let description: String
-    
+
     var body: some View {
         HStack(alignment: .top, spacing: FitTodaySpacing.md) {
             Image(systemName: icon)
                 .font(.system(.title2))
                 .foregroundStyle(FitTodayColor.brandPrimary)
                 .frame(width: 32)
-            
+                .fitGlowEffect(color: FitTodayColor.brandPrimary.opacity(0.3))  // Neon glow
+
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
-                    .font(.system(.subheadline, weight: .semibold))
+                    .font(FitTodayFont.ui(size: 15, weight: .semiBold))  // Retro font
                     .foregroundStyle(FitTodayColor.textPrimary)
                 Text(description)
-                    .font(.system(.caption))
+                    .font(FitTodayFont.ui(size: 12, weight: .medium))  // Retro font
                     .foregroundStyle(FitTodayColor.textSecondary)
             }
         }
@@ -306,17 +320,18 @@ private struct PlanCard: View {
     let isSelected: Bool
     let isBestValue: Bool
     let onTap: () -> Void
-    
+
     var body: some View {
         Button(action: onTap) {
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
                     HStack {
                         Text(product.displayName)
-                            .font(.system(.headline, weight: .semibold))
+                            .font(FitTodayFont.ui(size: 17, weight: .semiBold))  // Retro font
                         if isBestValue {
                             Text("MELHOR VALOR")
-                                .font(.system(.caption2, weight: .bold))
+                                .font(FitTodayFont.accent(size: 9))  // Bungee retro font
+                                .tracking(0.5)
                                 .padding(.horizontal, 6)
                                 .padding(.vertical, 2)
                                 .background(FitTodayColor.brandPrimary)
@@ -324,42 +339,52 @@ private struct PlanCard: View {
                                 .clipShape(Capsule())
                         }
                     }
-                    
+
                     if let intro = product.introOfferDescription {
                         Text(intro)
-                            .font(.system(.caption))
+                            .font(FitTodayFont.ui(size: 12, weight: .medium))  // Retro font
                             .foregroundStyle(FitTodayColor.brandPrimary)
                     }
-                    
+
                     if product.id == StoreKitProductID.proYearly {
                         Text("\(product.localizedPricePerMonth)/mês")
-                            .font(.system(.caption))
+                            .font(FitTodayFont.ui(size: 12, weight: .medium))  // Retro font
                             .foregroundStyle(FitTodayColor.textSecondary)
                     }
                 }
-                
+
                 Spacer()
-                
+
                 VStack(alignment: .trailing) {
                     Text(product.displayPrice)
-                        .font(.system(.title3, weight: .bold))
+                        .font(FitTodayFont.display(size: 20, weight: .bold))  // Retro font
                     Text(product.periodDescription)
-                        .font(.system(.caption))
+                        .font(FitTodayFont.ui(size: 12, weight: .medium))  // Retro font
                         .foregroundStyle(FitTodayColor.textSecondary)
                 }
             }
             .padding()
             .background(
-                RoundedRectangle(cornerRadius: FitTodayRadius.md)
-                    .fill(isSelected ? FitTodayColor.brandPrimary.opacity(0.1) : FitTodayColor.surface)
+                Group {
+                    if isSelected {
+                        RoundedRectangle(cornerRadius: FitTodayRadius.md)
+                            .fill(FitTodayColor.brandPrimary.opacity(0.1))
+                            .diagonalStripes(color: FitTodayColor.neonCyan, spacing: 10, opacity: 0.15)  // Diagonal stripes
+                    } else {
+                        RoundedRectangle(cornerRadius: FitTodayRadius.md)
+                            .fill(FitTodayColor.surface)
+                    }
+                }
             )
             .overlay(
                 RoundedRectangle(cornerRadius: FitTodayRadius.md)
-                    .stroke(isSelected ? FitTodayColor.brandPrimary : FitTodayColor.outline.opacity(0.3), lineWidth: isSelected ? 2 : 1)
+                    .stroke(isSelected ? FitTodayColor.neonCyan : FitTodayColor.outline.opacity(0.3), lineWidth: isSelected ? 2 : 1)  // Neon cyan border
             )
+            .techCornerBorders(color: isSelected ? FitTodayColor.neonCyan : FitTodayColor.techBorder.opacity(0.3), length: 14, thickness: 1.5)  // Tech corners
         }
         .buttonStyle(.plain)
         .foregroundStyle(FitTodayColor.textPrimary)
+        .fitGlowEffect(color: isSelected ? FitTodayColor.neonCyan.opacity(0.2) : Color.clear.opacity(0))  // Glow when selected
     }
 }
 

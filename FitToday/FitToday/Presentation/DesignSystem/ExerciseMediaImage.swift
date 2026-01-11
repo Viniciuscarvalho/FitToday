@@ -16,6 +16,7 @@ import Swinject
 /// Converte automaticamente URLs antigas (v2.exercisedb.io) para RapidAPI com resolution.
 struct ExerciseMediaImageURL: View {
   @Environment(\.dependencyResolver) private var resolver
+  @Environment(\.imageCacheService) private var imageCacheService
 
   let url: URL?
   let size: CGSize
@@ -93,7 +94,7 @@ struct ExerciseMediaImageURL: View {
     }
     
     let service = resolver.resolve(ExerciseDBServicing.self)
-    await loader.load(url: url, service: service, context: context)
+    await loader.load(url: url, service: service, context: context, cacheService: imageCacheService)
   }
 }
 
@@ -136,19 +137,19 @@ final class ExerciseMediaLoader: ObservableObject {
   // Cache simples em memória (evita re-download em listas)
   private static let cache = NSCache<NSString, MediaCacheEntry>()
 
-  func load(url: URL, service: ExerciseDBServicing?, context: MediaDisplayContext = .thumbnail) async {
+  func load(url: URL, service: ExerciseDBServicing?, context: MediaDisplayContext = .thumbnail, cacheService: ImageCaching?) async {
     // Cancela task anterior se existir
     currentTask?.cancel()
     
     // Cria nova task
     currentTask = Task {
-      await performLoad(url: url, service: service, context: context)
+      await performLoad(url: url, service: service, context: context, cacheService: cacheService)
     }
     
     await currentTask?.value
   }
   
-  private func performLoad(url: URL, service: ExerciseDBServicing?, context: MediaDisplayContext) async {
+  private func performLoad(url: URL, service: ExerciseDBServicing?, context: MediaDisplayContext, cacheService: ImageCaching?) async {
     // 1. PRIMEIRO: Detecta e converte URLs antigas (v2.exercisedb.io) para RapidAPI
     // Isso deve acontecer ANTES de qualquer verificação ou log
     let finalURL: URL
@@ -192,10 +193,22 @@ final class ExerciseMediaLoader: ObservableObject {
       return
     }
     
-    // Verifica cache primeiro
+    // 1. Tentar ImageCacheService primeiro (cache persistente)
+    if let cacheService = cacheService,
+       let cachedImage = await cacheService.cachedImage(for: finalURL) {
+      #if DEBUG
+      print("[MediaLoader] 💾 ImageCacheService hit para \(finalURL.absoluteString)")
+      #endif
+      if let imageData = cachedImage.pngData() {
+        phase = .success(data: imageData, mimeType: "image/png")
+        return
+      }
+    }
+    
+    // 2. Verifica cache NSCache (em memória) como fallback
     if let cached = Self.cache.object(forKey: cacheKey) {
       #if DEBUG
-      print("[MediaLoader] 💾 Cache hit para \(finalURL.absoluteString)")
+      print("[MediaLoader] 💾 NSCache hit para \(finalURL.absoluteString)")
       #endif
       phase = .success(data: cached.data, mimeType: cached.mimeType)
       return

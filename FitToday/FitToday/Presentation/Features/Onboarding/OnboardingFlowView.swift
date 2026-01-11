@@ -15,17 +15,30 @@ struct OnboardingFlowView: View {
     }
 
     @EnvironmentObject private var router: AppRouter
+    @Environment(\.dependencyResolver) private var resolver
     @StateObject private var viewModel: OnboardingFlowViewModel
     @State private var stage: Stage
     @State private var currentPage = 0
     @State private var currentStep = 0
     @State private var isSubmitting = false
     @State private var showError = false
+    @State private var useProgressiveMode = true // Modo progressivo por padrão
+    @State private var showPaywall = false
 
     private let introPages = OnboardingPage.pages
-    private let steps = SetupStep.allCases
     private let onFinished: () -> Void
     private let isEditing: Bool
+    
+    /// Steps para modo progressivo (apenas 2 passos)
+    private var progressiveSteps: [SetupStep] { [.goal, .structure] }
+    
+    /// Steps para modo completo (6 passos)
+    private var fullSteps: [SetupStep] { SetupStep.allCases }
+    
+    /// Steps ativos baseado no modo
+    private var activeSteps: [SetupStep] {
+        isEditing ? fullSteps : (useProgressiveMode ? progressiveSteps : fullSteps)
+    }
 
     init(resolver: Resolver, isEditing: Bool = false, onFinished: @escaping () -> Void) {
         let repository = resolver.resolve(UserProfileRepository.self)!
@@ -47,7 +60,13 @@ struct OnboardingFlowView: View {
             }
         }
         .padding()
-        .background(FitTodayColor.background.ignoresSafeArea())
+        .background(
+            ZStack {
+                FitTodayColor.background
+                RetroGridPattern(lineColor: FitTodayColor.gridLine.opacity(0.3), spacing: 40)  // Grid background
+            }
+            .ignoresSafeArea()
+        )
         .navigationTitle(isEditing ? "Editar Perfil" : "Configuração")
         .navigationBarTitleDisplayMode(.inline)
         .alert("Ops", isPresented: $showError, actions: {
@@ -57,6 +76,19 @@ struct OnboardingFlowView: View {
         })
         .onChange(of: viewModel.errorMessage) { _, newValue in
             showError = newValue != nil
+        }
+        .sheet(isPresented: $showPaywall) {
+            if let storeKitRepo = resolver.resolve(EntitlementRepository.self) as? StoreKitEntitlementRepository {
+                OptimizedPaywallView(
+                    storeService: storeKitRepo.service,
+                    onPurchaseSuccess: {
+                        showPaywall = false
+                    },
+                    onDismiss: {
+                        showPaywall = false
+                    }
+                )
+            }
         }
     }
 
@@ -84,7 +116,7 @@ struct OnboardingFlowView: View {
 
             if currentPage == introPages.count - 1 {
                 Button("Ver diferenças Free x Pro") {
-                    // Placeholder: poderia abrir modal específico futuramente
+                    showPaywall = true
                 }
                 .fitSecondaryStyle()
             }
@@ -95,11 +127,11 @@ struct OnboardingFlowView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 StepperHeader(
-                    title: steps[currentStep].title,
+                    title: activeSteps[currentStep].title,
                     step: currentStep + 1,
-                    totalSteps: steps.count
+                    totalSteps: activeSteps.count
                 )
-                setupOptions(for: steps[currentStep])
+                setupOptions(for: activeSteps[currentStep])
                     .animation(.easeInOut, value: currentStep)
 
                 if viewModel.isSaving || isSubmitting {
@@ -107,37 +139,70 @@ struct OnboardingFlowView: View {
                         .frame(maxWidth: .infinity)
                 }
 
-                HStack(spacing: 12) {
-                    Button("Voltar") {
-                        if currentStep == 0 {
-                            if isEditing {
-                                // Se estiver editando, fecha a tela
-                                onFinished()
+                // Botões de ação
+                VStack(spacing: 12) {
+                    HStack(spacing: 12) {
+                        Button("Voltar") {
+                            if currentStep == 0 {
+                                if isEditing {
+                                    onFinished()
+                                } else {
+                                    stage = .intro
+                                }
                             } else {
-                                stage = .intro
+                                currentStep -= 1
                             }
-                        } else {
-                            currentStep -= 1
                         }
-                    }
-                    .fitSecondaryStyle()
+                        .fitSecondaryStyle()
 
-                    Button(currentStep == steps.count - 1 ? (isEditing ? "Salvar alterações" : "Criar perfil") : "Avançar") {
-                        handleNext()
+                        Button(nextButtonTitle) {
+                            handleNext()
+                        }
+                        .fitPrimaryStyle()
+                        .disabled(!canAdvance(for: activeSteps[currentStep]) || viewModel.isSaving)
                     }
-                    .fitPrimaryStyle()
-                    .disabled(!canAdvance(for: steps[currentStep]) || viewModel.isSaving)
+                    
+                    // Opção de personalizar completamente (apenas no modo progressivo, último passo)
+                    if useProgressiveMode && !isEditing && currentStep == activeSteps.count - 1 {
+                        Button("Quero personalizar mais") {
+                            useProgressiveMode = false
+                            // Não reseta currentStep, apenas muda o modo
+                        }
+                        .font(.footnote)
+                        .foregroundStyle(FitTodayColor.textSecondary)
+                    }
                 }
             }
         }
         .scrollIndicators(.hidden)
     }
+    
+    /// Título do botão de avançar/concluir
+    private var nextButtonTitle: String {
+        let isLastStep = currentStep == activeSteps.count - 1
+        if isEditing {
+            return isLastStep ? "Salvar alterações" : "Avançar"
+        }
+        if useProgressiveMode && isLastStep {
+            return "Gerar meu primeiro treino"
+        }
+        return isLastStep ? "Criar perfil" : "Avançar"
+    }
 
     private func handleNext() {
-        if currentStep == steps.count - 1 {
+        let isLastStep = currentStep == activeSteps.count - 1
+        
+        if isLastStep {
             isSubmitting = true
             Task {
-                let success = await viewModel.submitProfile()
+                let success: Bool
+                if useProgressiveMode && !isEditing {
+                    // Modo progressivo: salva com defaults
+                    success = await viewModel.submitProgressiveProfile()
+                } else {
+                    // Modo completo ou edição: salva perfil completo
+                    success = await viewModel.submitFullProfile()
+                }
                 await MainActor.run {
                     isSubmitting = false
                     if success {
@@ -263,22 +328,29 @@ private struct OnboardingPage: View {
     var body: some View {
         VStack(spacing: 16) {
             Text(title)
-                .font(.system(.largeTitle, weight: .bold))
+                .font(FitTodayFont.display(size: 32, weight: .extraBold))  // Retro font
+                .tracking(1.5)
                 .multilineTextAlignment(.center)
             VStack(alignment: .leading, spacing: 12) {
                 ForEach(bullets, id: \.self) { bullet in
                     HStack(alignment: .top, spacing: 10) {
                         Image(systemName: "checkmark.seal.fill")
                             .foregroundStyle(FitTodayColor.brandPrimary)
+                            .fitGlowEffect(color: FitTodayColor.brandPrimary.opacity(0.3))  // Neon glow
                         Text(bullet)
-                            .font(.system(.body))
+                            .font(FitTodayFont.ui(size: 17, weight: .medium))  // Retro font
                             .foregroundStyle(FitTodayColor.textPrimary)
                     }
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding()
-            .background(FitTodayColor.surface)
+            .background(
+                RoundedRectangle(cornerRadius: FitTodayRadius.md)
+                    .fill(FitTodayColor.surface)
+                    .retroGridOverlay(spacing: 25)  // Grid overlay
+            )
+            .techCornerBorders(length: 14, thickness: 1.5)  // Tech corners
             .cornerRadius(FitTodayRadius.md)
             .fitCardShadow()
         }

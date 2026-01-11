@@ -64,3 +64,4 @@ A IA é um benefício do plano Pro. Precisamos aplicar o gating corretamente e p
 - `FitToday/FitToday/Data/Services/OpenAI/`
 
 
+

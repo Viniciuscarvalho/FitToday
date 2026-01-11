@@ -111,3 +111,4 @@ O foco do macrociclo é o aumento progressivo da **força máxima** por meio de 
 Aumentar força máxima de forma sustentável e segura.
 
 
+

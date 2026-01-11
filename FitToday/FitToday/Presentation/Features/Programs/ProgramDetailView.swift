@@ -47,6 +47,7 @@ struct ProgramDetailView: View {
         .background(FitTodayColor.background.ignoresSafeArea())
         .navigationTitle(viewModel.program?.name ?? "Programa")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar(.hidden, for: .tabBar)
         .task {
             await viewModel.load()
         }

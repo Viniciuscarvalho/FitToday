@@ -68,3 +68,4 @@ O app atualmente resolve mídia via busca por nome e endpoint `/image`, mas falt
 - `FitToday/FitToday/Data/Services/ExerciseDB/ExerciseDBService.swift`
 - `FitToday/FitToday/Data/Services/ExerciseDB/ExerciseDBConfiguration.swift`
 
+

@@ -29,7 +29,13 @@ struct HomeView: View {
             }
             .padding(.bottom, FitTodaySpacing.xl)
         }
-        .background(FitTodayColor.background)
+        .background(
+            ZStack {
+                FitTodayColor.background
+                RetroGridPattern(lineColor: FitTodayColor.gridLine.opacity(0.3), spacing: 40)  // Grid background
+            }
+            .ignoresSafeArea()
+        )
         .toolbar(.hidden, for: .navigationBar)
         .refreshable {
             await viewModel.refresh()
@@ -53,6 +59,7 @@ struct HomeView: View {
                 Text(heroErrorMessage ?? "Algo inesperado aconteceu.")
             }
         )
+        .errorToast(errorMessage: $viewModel.errorMessage)
     }
 
     // MARK: - Header
@@ -63,10 +70,11 @@ struct HomeView: View {
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(viewModel.greeting)
-                        .font(.system(.title, weight: .bold))
+                        .font(FitTodayFont.display(size: 28, weight: .bold))  // Retro font
+                        .tracking(1.0)
                         .foregroundStyle(FitTodayColor.textPrimary)
                     Text(viewModel.currentDateFormatted)
-                        .font(.system(.subheadline))
+                        .font(FitTodayFont.ui(size: 15, weight: .medium))  // Retro font
                         .foregroundStyle(FitTodayColor.textSecondary)
                 }
                 Spacer()
@@ -75,7 +83,7 @@ struct HomeView: View {
                         router.push(.paywall, on: .home)
                     } label: {
                         Label("PRO", systemImage: "crown.fill")
-                            .font(.system(.footnote, weight: .bold))
+                            .font(FitTodayFont.accent(size: 10))  // Bungee font
                     }
                     .buttonStyle(ProBadgeButtonStyle())
                 }
@@ -109,14 +117,18 @@ struct HomeView: View {
                 startPoint: .topTrailing,
                 endPoint: .bottomLeading
             )
-            
+            .retroGridOverlay(lineColor: .white.opacity(0.1), spacing: 30)  // Grid overlay
+
             // Overlay para legibilidade
             LinearGradient(
                 colors: [.clear, .black.opacity(0.6)],
                 startPoint: .top,
                 endPoint: .bottom
             )
-            
+
+            // Scanline effect
+            ScanlinePattern(lineSpacing: 4, opacity: 0.04)
+
             // Conteúdo
             VStack(alignment: .leading, spacing: FitTodaySpacing.md) {
                 // Ícone e título
@@ -124,29 +136,31 @@ struct HomeView: View {
                     Image(systemName: heroIcon)
                         .font(.system(.title2, weight: .bold))
                     Text(heroTitle)
-                        .font(.system(.headline, weight: .semibold))
+                        .font(FitTodayFont.ui(size: 15, weight: .semiBold))  // Retro font
+                        .tracking(0.5)
                 }
                 .padding(.horizontal, FitTodaySpacing.sm)
                 .padding(.vertical, FitTodaySpacing.xs)
                 .background(.white.opacity(0.2))
                 .clipShape(Capsule())
-                
+
                 Spacer()
-                
+
                 Text(heroHeadline)
-                    .font(.system(.title, weight: .bold))
-                
+                    .font(FitTodayFont.display(size: 28, weight: .bold))  // Retro font
+                    .tracking(1.0)
+
                 Text(heroDescription)
-                    .font(.system(.body))
+                    .font(FitTodayFont.ui(size: 17, weight: .medium))  // Retro font
                     .opacity(0.9)
                     .lineLimit(2)
-                
+
                 if let subtitle = viewModel.ctaSubtitle {
                     Text(subtitle)
-                        .font(.system(.caption))
+                        .font(FitTodayFont.ui(size: 12, weight: .medium))  // Retro font
                         .opacity(0.7)
                 }
-                
+
                 // CTA
                 Button(action: handleHeroCTATap) {
                     HStack(spacing: FitTodaySpacing.sm) {
@@ -156,7 +170,9 @@ struct HomeView: View {
                                 .tint(FitTodayColor.textInverse)
                         }
                         Text(isGeneratingPlan ? "Montando treino..." : viewModel.ctaTitle)
-                            .font(.system(.subheadline, weight: .bold))
+                            .font(FitTodayFont.ui(size: 14, weight: .bold))  // Retro font
+                            .textCase(.uppercase)  // Uppercase
+                            .tracking(0.8)
                     }
                     .foregroundStyle(FitTodayColor.textInverse)
                     .frame(maxWidth: .infinity)
@@ -171,6 +187,7 @@ struct HomeView: View {
         }
         .frame(height: 300)
         .clipShape(RoundedRectangle(cornerRadius: FitTodayRadius.lg))
+        .techCornerBorders(color: .white.opacity(0.3), length: 30, thickness: 2)  // Tech corners
         .fitCardShadow()
         .overlay {
             if viewModel.journeyState == .loading {
@@ -188,11 +205,11 @@ struct HomeView: View {
     private var heroGradientColors: [Color] {
         switch viewModel.journeyState {
         case .loading: return [.gray, .gray.opacity(0.7)]
-        case .noProfile: return [.blue, .purple]
-        case .needsDailyCheckIn: return [.orange, .red]
-        case .workoutReady: return [.green, .teal]
-        case .workoutCompleted: return [.purple, .indigo]
-        case .error: return [.red, .orange]
+        case .noProfile: return [FitTodayColor.neonCyan, FitTodayColor.neonPurple]  // Retro colors
+        case .needsDailyCheckIn: return [FitTodayColor.neonYellow, FitTodayColor.brandSecondary]  // Retro colors
+        case .workoutReady: return [FitTodayColor.brandPrimary, Color(hex: "#00FF88")]  // Enhanced green
+        case .workoutCompleted: return [FitTodayColor.neonPurple, FitTodayColor.neonMagenta]  // Retro colors
+        case .error: return [FitTodayColor.glitchRed, FitTodayColor.neonMagenta]  // Glitch colors
         }
     }
 
@@ -359,6 +376,7 @@ private struct ProBadgeButtonStyle: ButtonStyle {
             .foregroundStyle(.white)
             .clipShape(Capsule())
             .opacity(configuration.isPressed ? 0.8 : 1)
+            .fitGlowEffect(color: .orange.opacity(0.4))  // Neon glow
     }
 }
 
@@ -407,12 +425,12 @@ struct ProgramCardSmall: View {
 
                 VStack(alignment: .leading, spacing: 3) {
                     Text(program.name)
-                        .font(.system(size: 14, weight: .semibold))
+                        .font(FitTodayFont.ui(size: 14, weight: .semiBold))  // Retro font
                         .foregroundStyle(FitTodayColor.textPrimary)
                         .lineLimit(1)
 
                     Text(program.durationDescription)
-                        .font(.system(size: 12))
+                        .font(FitTodayFont.ui(size: 12, weight: .medium))  // Retro font
                         .foregroundStyle(FitTodayColor.textSecondary)
                 }
                 .padding(.horizontal, 2)
@@ -450,7 +468,7 @@ struct WorkoutCardCompact: View {
 
                 VStack(alignment: .leading, spacing: FitTodaySpacing.xs) {
                     Text(workout.title)
-                        .font(.system(.subheadline, weight: .semibold))
+                        .font(FitTodayFont.ui(size: 15, weight: .semiBold))  // Retro font
                         .foregroundStyle(FitTodayColor.textPrimary)
                         .lineLimit(1)
 
@@ -459,7 +477,7 @@ struct WorkoutCardCompact: View {
                         Label("\(workout.exerciseCount)", systemImage: "figure.strengthtraining.traditional")
                         intensityBadge
                     }
-                    .font(.system(.caption))
+                    .font(FitTodayFont.ui(size: 12, weight: .medium))  // Retro font
                     .foregroundStyle(FitTodayColor.textSecondary)
                 }
 

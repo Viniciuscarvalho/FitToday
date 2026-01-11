@@ -7,6 +7,7 @@
 
 import SwiftData
 import SwiftUI
+import Swinject
 
 @main
 struct FitTodayApp: App {
@@ -31,6 +32,7 @@ struct FitTodayApp: App {
                 .environmentObject(appContainer.router)
                 .environmentObject(sessionStore)
                 .environment(\.dependencyResolver, appContainer.container)
+                .imageCacheService(appContainer.container.resolve(ImageCaching.self)!)
                 .preferredColorScheme(.dark)  // Forçar tema escuro
                 .onOpenURL { url in
                     appContainer.router.handle(url: url)

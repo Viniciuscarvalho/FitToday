@@ -64,3 +64,4 @@ Adicionar cobertura para garantir que as regras de recomendação, gating Pro e 
 - `FitToday/FitToday/Domain/`
 - `FitToday/FitToday/Data/Services/ExerciseDB/`
 
+

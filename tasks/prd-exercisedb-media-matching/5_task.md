@@ -63,3 +63,4 @@ Como a estratégia depende de cache persistido (mapping e targetList), precisamo
 - `FitToday/FitToday/Presentation/Features/Pro/ProfileProView.swift`
 - `FitToday/FitToday/Data/Services/ExerciseDB/ExerciseMediaResolver.swift`
 
+

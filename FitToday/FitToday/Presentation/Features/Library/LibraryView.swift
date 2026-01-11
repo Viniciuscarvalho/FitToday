@@ -38,14 +38,7 @@ struct LibraryView: View {
         .sheet(isPresented: $showingFilters) {
             FilterSheet(viewModel: viewModel)
         }
-        .alert("Ops!", isPresented: Binding(
-            get: { viewModel.errorMessage != nil },
-            set: { _ in viewModel.errorMessage = nil }
-        )) {
-            Button("Ok", role: .cancel) {}
-        } message: {
-            Text(viewModel.errorMessage ?? "Algo inesperado aconteceu.")
-        }
+        .errorToast(errorMessage: $viewModel.errorMessage)
     }
 
     // MARK: - Header

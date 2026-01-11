@@ -66,3 +66,4 @@ Para maximizar cobertura e reduzir dependência de match por nome, o resolver va
 - `FitToday/FitToday/Data/Services/ExerciseDB/ExerciseDBService.swift`
 - `FitToday/FitToday/Presentation/DI/AppContainer.swift`
 
+

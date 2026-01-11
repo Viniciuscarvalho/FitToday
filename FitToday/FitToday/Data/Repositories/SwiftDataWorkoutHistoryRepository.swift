@@ -27,6 +27,24 @@ final class SwiftDataWorkoutHistoryRepository: WorkoutHistoryRepository, @unchec
         let models = try context().fetch(descriptor)
         return models.compactMap(WorkoutHistoryMapper.toDomain)
     }
+    
+    /// Lista entradas com paginação para performance otimizada
+    func listEntries(limit: Int, offset: Int) async throws -> [WorkoutHistoryEntry] {
+        var descriptor = FetchDescriptor<SDWorkoutHistoryEntry>(
+            sortBy: [SortDescriptor(\.date, order: .reverse)]
+        )
+        descriptor.fetchLimit = limit
+        descriptor.fetchOffset = offset
+        
+        let models = try context().fetch(descriptor)
+        return models.compactMap(WorkoutHistoryMapper.toDomain)
+    }
+    
+    /// Retorna o total de entradas no histórico
+    func count() async throws -> Int {
+        let descriptor = FetchDescriptor<SDWorkoutHistoryEntry>()
+        return try context().fetchCount(descriptor)
+    }
 
     func saveEntry(_ entry: WorkoutHistoryEntry) async throws {
         let ctx = context()

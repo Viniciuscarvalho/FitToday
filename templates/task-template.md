@@ -1,59 +1,59 @@
-# [X.0] Título da Tarefa (S/M/L)
+# [X.0] Task Title (S/M/L)
 
-## Objetivo
-- Descreva claramente o objetivo da tarefa e o resultado esperado.
+## Objective
+- Clearly describe the task objective and the expected outcome.
 
-## Subtarefas
-- [ ] X.1 Descrever primeira subtarefa
-- [ ] X.2 Descrever segunda subtarefa
-- [ ] X.3 Descrever terceira subtarefa
+## Subtasks
+- [ ] X.1 Describe first subtask
+- [ ] X.2 Describe second subtask
+- [ ] X.3 Describe third subtask
 
-## Critérios de Sucesso
-- Aponte critérios objetivos e verificáveis para considerar a tarefa concluída.
+## Success Criteria
+- Define objective and verifiable criteria to consider the task completed.
 
-## Dependências
-- Liste tarefas ou recursos que precisam existir antes desta.
+## Dependencies
+- List tasks or resources that must exist before this one.
 
-## Observações
-- Notas adicionais relevantes para execução/validação.
+## Notes
+- Additional notes relevant for execution/validation.
 
 ## markdown
 
-## status: pending # Opções: pending, in-progress, completed, excluded
+## status: pending # Options: pending, in-progress, completed, excluded
 
 <task_context>
-<domain>engine/infra/[subdomínio]</domain>
+<domain>engine/infra/[subdomain]</domain>
 <type>implementation|integration|testing|documentation</type>
 <scope>core_feature|middleware|configuration|performance</scope>
 <complexity>low|medium|high</complexity>
 <dependencies>external_apis|database|temporal|http_server</dependencies>
 </task_context>
 
-# Tarefa X.0: [Título da Tarefa Principal]
+# Task X.0: [Main Task Title]
 
-<critical>Ler os arquivos de prd.md e techspec.md desta pasta, se você não ler esses arquivos sua tarefa será invalidada</critical>
+<critical>Read the prd.md and techspec.md files in this folder. If you do not read these files, your task will be invalidated.</critical>
 
-## Visão Geral
+## Overview
 
-[Breve descrição da tarefa]
+[Brief task description]
 
 <requirements>
-[Lista de requisitos obrigatórios]
+[List of mandatory requirements]
 </requirements>
 
-## Subtarefas
+## Subtasks
 
-- [ ] X.1 [Descrição da subtarefa]
-- [ ] X.2 [Descrição da subtarefa]
+- [ ] X.1 [Subtask description]
+- [ ] X.2 [Subtask description]
 
-## Detalhes de Implementação
+## Implementation Details
 
-[Seções relevantes da spec técnica **NÃO PRECISA MOSTRAR TODA A IMPLEMENTAÇÃO, APENAS REFERENCIE A techspec.md**]
+[Relevant sections of the technical spec **DO NOT SHOW THE FULL IMPLEMENTATION, ONLY REFERENCE techspec.md**]
 
-## Critérios de Sucesso
+## Success Criteria
 
-- [Resultados mensuráveis]
-- [Requisitos de qualidade]
+- [Measurable outcomes]
+- [Quality requirements]
 
-## Arquivos relevantes
-- [Arquivos relevantes desta tarefa]
+## Relevant Files
+- [Relevant files for this task]

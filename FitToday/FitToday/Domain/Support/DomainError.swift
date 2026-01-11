@@ -12,6 +12,8 @@ enum DomainError: Error, LocalizedError, Sendable {
     case invalidInput(reason: String)
     case noCompatibleBlocks
     case repositoryFailure(reason: String)
+    case networkFailure
+    case subscriptionExpired
 
     var errorDescription: String? {
         switch self {
@@ -23,6 +25,10 @@ enum DomainError: Error, LocalizedError, Sendable {
             return "Não encontramos blocos compatíveis para montar o treino de hoje."
         case .repositoryFailure(let reason):
             return reason
+        case .networkFailure:
+            return "Falha de conexão de rede."
+        case .subscriptionExpired:
+            return "Assinatura expirada."
         }
     }
 }

@@ -18,6 +18,16 @@ final class SDUserProfile {
     var healthConditionsRaw: [String]
     var weeklyFrequency: Int
     var createdAt: Date
+    
+    /// Indica se perfil foi preenchido completamente.
+    /// Usa Optional para permitir migração de dados existentes sem valor.
+    private var _isProfileComplete: Bool?
+    
+    /// Getter/Setter que trata nil como true (dados existentes assumem perfil completo)
+    var isProfileComplete: Bool {
+        get { _isProfileComplete ?? true }
+        set { _isProfileComplete = newValue }
+    }
 
     init(
         id: UUID,
@@ -27,7 +37,8 @@ final class SDUserProfile {
         levelRaw: String,
         healthConditionsRaw: [String],
         weeklyFrequency: Int,
-        createdAt: Date
+        createdAt: Date,
+        isProfileComplete: Bool = true
     ) {
         self.id = id
         self.mainGoalRaw = mainGoalRaw
@@ -37,6 +48,7 @@ final class SDUserProfile {
         self.healthConditionsRaw = healthConditionsRaw
         self.weeklyFrequency = weeklyFrequency
         self.createdAt = createdAt
+        self._isProfileComplete = isProfileComplete
     }
 }
 

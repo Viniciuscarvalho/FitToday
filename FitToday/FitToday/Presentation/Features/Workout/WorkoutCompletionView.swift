@@ -15,6 +15,8 @@ struct WorkoutCompletionView: View {
     
     @State private var isGeneratingNewPlan = false
     @State private var errorMessage: String?
+    @State private var isProfileIncomplete = false
+    @State private var showProfilePrompt = false
 
     var body: some View {
         VStack(spacing: FitTodaySpacing.lg) {
@@ -33,6 +35,11 @@ struct WorkoutCompletionView: View {
                     .multilineTextAlignment(.center)
             }
             .padding(.horizontal)
+            
+            // Prompt para completar perfil (se incompleto)
+            if isProfileIncomplete && status == .completed {
+                profileCompletionPrompt
+            }
 
             VStack(spacing: FitTodaySpacing.sm) {
                 // Se foi pulado, oferece opção de gerar novo treino
@@ -68,6 +75,17 @@ struct WorkoutCompletionView: View {
         .padding()
         .navigationTitle("Resumo")
         .navigationBarBackButtonHidden(true)
+        .task {
+            await checkProfileCompletion()
+        }
+        .sheet(isPresented: $showProfilePrompt) {
+            if let resolver = resolver as? Resolver {
+                OnboardingFlowView(resolver: resolver, isEditing: true) {
+                    showProfilePrompt = false
+                    isProfileIncomplete = false
+                }
+            }
+        }
         .alert("Erro", isPresented: Binding(
             get: { errorMessage != nil },
             set: { _ in errorMessage = nil }
@@ -75,6 +93,53 @@ struct WorkoutCompletionView: View {
             Button("Ok", role: .cancel) {}
         } message: {
             Text(errorMessage ?? "Ocorreu um erro ao gerar novo treino.")
+        }
+    }
+    
+    /// Prompt para completar o perfil após primeiro treino
+    private var profileCompletionPrompt: some View {
+        VStack(spacing: FitTodaySpacing.sm) {
+            HStack(spacing: FitTodaySpacing.sm) {
+                Image(systemName: "sparkles")
+                    .foregroundStyle(FitTodayColor.brandPrimary)
+                Text("Personalize seu perfil")
+                    .font(.headline)
+                    .foregroundStyle(FitTodayColor.textPrimary)
+            }
+            
+            Text("Complete seu perfil para treinos ainda mais personalizados")
+                .font(.footnote)
+                .foregroundStyle(FitTodayColor.textSecondary)
+                .multilineTextAlignment(.center)
+            
+            Button("Completar agora") {
+                showProfilePrompt = true
+            }
+            .font(.subheadline.weight(.semibold))
+            .foregroundStyle(FitTodayColor.brandPrimary)
+            .padding(.top, 4)
+        }
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: FitTodayRadius.md)
+                .fill(FitTodayColor.brandPrimary.opacity(0.1))
+                .overlay(
+                    RoundedRectangle(cornerRadius: FitTodayRadius.md)
+                        .stroke(FitTodayColor.brandPrimary.opacity(0.3), lineWidth: 1)
+                )
+        )
+        .padding(.horizontal)
+    }
+    
+    /// Verifica se o perfil está incompleto
+    private func checkProfileCompletion() async {
+        guard let profileRepo = resolver.resolve(UserProfileRepository.self) else { return }
+        do {
+            if let profile = try await profileRepo.loadProfile() {
+                isProfileIncomplete = !profile.isProfileComplete
+            }
+        } catch {
+            // Silently fail - não é crítico
         }
     }
 

@@ -49,6 +49,7 @@ struct LibraryExerciseDetailView: View {
     .background(FitTodayColor.background.ignoresSafeArea())
     .navigationTitle("Execução")
     .navigationBarTitleDisplayMode(.inline)
+    .toolbar(.hidden, for: .tabBar)
   }
 
   // MARK: - Prescrição

@@ -15,10 +15,13 @@ struct StepperHeader: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             Text("Passo \(step) de \(totalSteps)")
-                .font(.system(.caption, weight: .medium))
+                .font(FitTodayFont.ui(size: 12, weight: .medium))  // Retro font
+                .textCase(.uppercase)  // Uppercase retro style
+                .tracking(0.8)
                 .foregroundStyle(FitTodayColor.textSecondary)
             Text(title)
-                .font(.system(.title2, weight: .bold))
+                .font(FitTodayFont.display(size: 24, weight: .bold))  // Retro font
+                .tracking(1.0)
                 .foregroundStyle(FitTodayColor.textPrimary)
             ProgressView(value: Double(step), total: Double(totalSteps))
                 .tint(FitTodayColor.brandPrimary)
@@ -34,10 +37,10 @@ struct ProgressPill: View {
     var body: some View {
         HStack(spacing: FitTodaySpacing.sm) {
             Text(label)
-                .font(.system(.caption, weight: .medium))
+                .font(FitTodayFont.ui(size: 12, weight: .medium))  // Retro font
                 .foregroundStyle(.secondary)
             Text(value)
-                .font(.system(.headline, weight: .semibold))
+                .font(FitTodayFont.ui(size: 17, weight: .semiBold))  // Retro font
                 .foregroundStyle(FitTodayColor.textPrimary)
         }
         .padding(.horizontal, FitTodaySpacing.md)
@@ -64,12 +67,13 @@ struct PaywallFeatureRow: View {
                 .frame(width: 44, height: 44)
                 .background(FitTodayColor.brandPrimary.opacity(0.12))
                 .clipShape(RoundedRectangle(cornerRadius: FitTodayRadius.sm))
+                .fitGlowEffect(color: FitTodayColor.brandPrimary.opacity(0.3))  // Neon glow
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(title)
-                    .font(.system(.headline, weight: .semibold))
+                    .font(FitTodayFont.ui(size: 17, weight: .semiBold))  // Retro font
                 Text(subtitle)
-                    .font(.system(.subheadline))
+                    .font(FitTodayFont.ui(size: 15, weight: .medium))  // Retro font
                     .foregroundStyle(FitTodayColor.textSecondary)
             }
             Spacer()
