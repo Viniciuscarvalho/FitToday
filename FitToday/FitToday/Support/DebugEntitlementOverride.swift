@@ -64,5 +64,6 @@ final class DebugEntitlementOverride: @unchecked Sendable {
         isPro = false
     }
 }
+#endif
 
 

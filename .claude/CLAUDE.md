@@ -64,3 +64,5 @@ enum AppError: LocalizedError {
 - Create massive monolithic views
 - Use force unwrapping (!) without justification
 - Ignore Swift 6 concurrency warnings
+
+After completing a task that involves tools use, provide a quick summary of the work you've done.

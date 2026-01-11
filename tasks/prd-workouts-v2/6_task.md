@@ -66,3 +66,4 @@ Referências: `tasks/prd-workouts-v2/techspec.md` (seções: “OpenAI”, “Ri
 
 
 
+

@@ -36,7 +36,16 @@ struct WorkoutPrompt: Sendable, Equatable {
   
   /// Hash do prompt para cache
   var cacheKey: String {
-    Hashing.sha256(systemMessage + userMessage + metadata.blueprintVersion.rawValue)
+    // Incluir fatores de variação para garantir que cache respeite mecanismos de diversidade
+    let components = [
+      String(metadata.variationSeed),  // CRÍTICO: incluir seed para variação horária/minuto
+      metadata.goal.rawValue,
+      metadata.structure.rawValue,
+      metadata.level.rawValue,
+      metadata.focus.rawValue,
+      metadata.blueprintVersion.rawValue
+    ]
+    return Hashing.sha256(components.joined(separator: "|"))
   }
 }
 
@@ -188,10 +197,11 @@ struct OpenAIResponseValidator: Sendable {
 struct WorkoutPromptAssembler: WorkoutPromptAssembling, Sendable {
   
   // MARK: - Constants
-  
+
   private static let maxContextLength = 2000 // Aumentado para prompts mais completos
-  private static let maxBlocksInCatalog = 20 // Aumentado para mais variedade
-  private static let maxExercisesPerBlock = 8 // Aumentado para treinos mais robustos
+  private static let maxBlocksInCatalog = 30 // Aumentado para máxima variedade (era 20)
+  private static let maxExercisesPerBlock = 12 // Aumentado para treinos mais robustos (era 8)
+  // = Máximo de 360 exercícios enviados à OpenAI (era 160)
   
   // MARK: - WorkoutPromptAssembling
   
@@ -323,22 +333,21 @@ struct WorkoutPromptAssembler: WorkoutPromptAssembling, Sendable {
     guard !workouts.isEmpty else {
       return ""
     }
-    
-    // Pegar apenas os últimos 2-3 treinos para não estourar contexto
+
+    // Pegar apenas os últimos 3 treinos para não estourar contexto
     let recentWorkouts = Array(workouts.prefix(3))
-    
+
     var lines: [String] = []
-    lines.append("## EXERCÍCIOS USADOS RECENTEMENTE")
+    lines.append("## EXERCÍCIOS PROIBIDOS")
     lines.append("")
-    lines.append("⚠️ IMPORTANTE: Os exercícios abaixo foram usados nos últimos treinos.")
-    lines.append("Evite repetir estes exercícios sempre que possível.")
-    lines.append("Prefira selecionar exercícios DIFERENTES do catálogo.")
+    lines.append("🚫 REGRA CRÍTICA: NÃO repita estes exercícios.")
+    lines.append("Você DEVE selecionar exercícios COMPLETAMENTE DIFERENTES.")
+    lines.append("Repetir exercícios desta lista resultará em treino rejeitado.")
     lines.append("")
-    
-    for (index, workout) in recentWorkouts.enumerated() {
-      lines.append("### Treino \(index + 1) (recente):")
-      
-      // Extrair nomes dos exercícios
+
+    // Coletar todos os exercícios recentes em lista flat
+    var prohibitedExercises: [String] = []
+    for workout in recentWorkouts {
       let exerciseNames = workout.phases
         .flatMap { phase in
           phase.items.compactMap { item in
@@ -348,15 +357,20 @@ struct WorkoutPromptAssembler: WorkoutPromptAssembling, Sendable {
             return nil
           }
         }
-      
-      if !exerciseNames.isEmpty {
-        for name in exerciseNames {
-          lines.append("- \(name)")
-        }
-      }
-      lines.append("")
+      prohibitedExercises.append(contentsOf: exerciseNames)
     }
-    
+
+    // Remover duplicatas e ordenar
+    let uniqueProhibited = Array(Set(prohibitedExercises)).sorted()
+
+    lines.append("EXERCÍCIOS PROIBIDOS (\(uniqueProhibited.count) total):")
+    for name in uniqueProhibited {
+      lines.append("- ❌ \(name)")
+    }
+    lines.append("")
+    lines.append("⚠️ Selecione exercícios que NÃO estão nesta lista!")
+    lines.append("")
+
     return lines.joined(separator: "\n")
   }
   

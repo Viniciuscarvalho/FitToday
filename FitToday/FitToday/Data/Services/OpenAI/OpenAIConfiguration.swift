@@ -25,7 +25,7 @@ struct OpenAIConfiguration: Sendable {
         let timeout: TimeInterval = 60 // Aumentado para 60s (treino completo)
         let maxTokens = 2000 // Aumentado para suportar resposta JSON completa
         let temperature = 0.7 // Aumentado para mais variação nos exercícios
-        let cacheTTL: TimeInterval = 60 // Reduzido para 1 minuto (debug) - em produção use 300
+        let cacheTTL: TimeInterval = 900 // 15 minutos - alinha com variation buckets de 15min
     }
     
     /// Cria configuração usando a chave fornecida pelo usuário (armazenada no Keychain)

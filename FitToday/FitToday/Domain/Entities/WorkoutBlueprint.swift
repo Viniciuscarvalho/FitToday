@@ -266,8 +266,10 @@ struct BlueprintInput: Codable, Hashable, Sendable {
   let dayOfWeek: Int // 1-7 (segunda-domingo)
   let weekOfYear: Int // 1-52
   let hourOfDay: Int // 0-23 (hora do dia para variação mais frequente)
+  let minuteOfHour: Int // 0-59 (minuto para variação a cada 15 min)
   
-  /// Gera hash estável para cache (usado para evitar chamadas duplicadas na mesma hora)
+  /// Gera hash estável para cache (usado para evitar chamadas duplicadas no mesmo bucket)
+  /// Variação a cada 15 minutos: 0-14, 15-29, 30-44, 45-59
   var cacheKey: String {
     let components = [
       BlueprintVersion.current.rawValue,
@@ -278,7 +280,8 @@ struct BlueprintInput: Codable, Hashable, Sendable {
       sorenessLevel.rawValue,
       String(dayOfWeek),
       String(weekOfYear),
-      String(hourOfDay)
+      String(hourOfDay),
+      String(minuteOfHour / 15) // Buckets de 15 min: 0, 1, 2, 3
     ]
     return components.joined(separator: ":")
   }
@@ -305,11 +308,12 @@ struct BlueprintInput: Codable, Hashable, Sendable {
     let dayOfWeek = calendar.component(.weekday, from: date)
     let weekOfYear = calendar.component(.weekOfYear, from: date)
     let hourOfDay = calendar.component(.hour, from: date)
-    
+    let minuteOfHour = calendar.component(.minute, from: date)
+
     #if DEBUG
-    print("[BlueprintInput] Criando input: goal=\(profile.mainGoal.rawValue) focus=\(checkIn.focus.rawValue) day=\(dayOfWeek) week=\(weekOfYear) hour=\(hourOfDay)")
+    print("[BlueprintInput] Criando input: goal=\(profile.mainGoal.rawValue) focus=\(checkIn.focus.rawValue) day=\(dayOfWeek) week=\(weekOfYear) hour=\(hourOfDay) minute=\(minuteOfHour)")
     #endif
-    
+
     return BlueprintInput(
       goal: profile.mainGoal,
       structure: profile.availableStructure,
@@ -319,7 +323,8 @@ struct BlueprintInput: Codable, Hashable, Sendable {
       sorenessAreas: checkIn.sorenessAreas,
       dayOfWeek: dayOfWeek,
       weekOfYear: weekOfYear,
-      hourOfDay: hourOfDay
+      hourOfDay: hourOfDay,
+      minuteOfHour: minuteOfHour
     )
   }
 }

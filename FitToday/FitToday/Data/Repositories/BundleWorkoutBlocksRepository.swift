@@ -11,33 +11,90 @@ actor BundleWorkoutBlocksRepository: WorkoutBlocksRepository {
     private let loader: WorkoutBlocksLoader
     private let mediaResolver: ExerciseMediaResolving?
     private let exerciseService: ExerciseDBServicing?
+    private let blockEnricher: ExerciseDBBlockEnriching?
     private var cachedBlocks: [WorkoutBlock]?
+    private let enableDynamicEnrichment: Bool
 
     init(
         loader: WorkoutBlocksLoader = WorkoutBlocksLoader(),
         mediaResolver: ExerciseMediaResolving? = nil,
-        exerciseService: ExerciseDBServicing? = nil
+        exerciseService: ExerciseDBServicing? = nil,
+        blockEnricher: ExerciseDBBlockEnriching? = nil,
+        enableDynamicEnrichment: Bool = true
     ) {
         self.loader = loader
         self.mediaResolver = mediaResolver
         self.exerciseService = exerciseService
+        self.blockEnricher = blockEnricher
+        self.enableDynamicEnrichment = enableDynamicEnrichment
     }
 
     func loadBlocks() async throws -> [WorkoutBlock] {
         if let cached = cachedBlocks {
             return cached
         }
-        let blocks = try loader.loadBlocks()
+        var blocks = try loader.loadBlocks()
 
-        // Se não houver resolver/serviço, retorna o seed puro.
-        guard let mediaResolver else {
-            cachedBlocks = blocks
-            return blocks
+        // 1. Enriquecimento dinâmico com ExerciseDB API (se habilitado)
+        if enableDynamicEnrichment, let blockEnricher = blockEnricher {
+            #if DEBUG
+            print("[Repository] Enriquecendo blocos com ExerciseDB API...")
+            #endif
+            do {
+                blocks = try await blockEnricher.enrichBlocks(blocks)
+                #if DEBUG
+                let totalExercises = blocks.reduce(0) { $0 + $1.exercises.count }
+                print("[Repository] ✅ Enriquecimento dinâmico completo: \(totalExercises) exercícios")
+                #endif
+            } catch {
+                #if DEBUG
+                print("[Repository] ⚠️ Erro no enriquecimento dinâmico: \(error). Usando blocos originais.")
+                #endif
+            }
         }
 
-        let enriched = await enrich(blocks: blocks, mediaResolver: mediaResolver, exerciseService: exerciseService)
-        cachedBlocks = enriched
-        return enriched
+        // 2. Enriquecimento de mídia e instruções (legacy)
+        if let mediaResolver {
+            blocks = await enrich(blocks: blocks, mediaResolver: mediaResolver, exerciseService: exerciseService)
+        }
+
+        cachedBlocks = blocks
+        return blocks
+    }
+
+    /// Carrega blocos específicos para um objetivo e cria blocos dinâmicos adicionais
+    func loadBlocks(for goal: FitnessGoal, level: TrainingLevel, structure: TrainingStructure) async throws -> [WorkoutBlock] {
+        // Carregar blocos base
+        var allBlocks = try await loadBlocks()
+
+        // Se enriquecimento dinâmico está habilitado, criar blocos adicionais específicos por objetivo
+        if enableDynamicEnrichment, let blockEnricher = blockEnricher {
+            #if DEBUG
+            print("[Repository] Criando blocos dinâmicos para objetivo: \(goal.rawValue)")
+            #endif
+            do {
+                let dynamicBlocks = try await blockEnricher.createDynamicBlocks(
+                    for: goal,
+                    level: level,
+                    structure: structure
+                )
+                #if DEBUG
+                print("[Repository] ✅ \(dynamicBlocks.count) blocos dinâmicos criados")
+                #endif
+                allBlocks.append(contentsOf: dynamicBlocks)
+            } catch {
+                #if DEBUG
+                print("[Repository] ⚠️ Erro ao criar blocos dinâmicos: \(error)")
+                #endif
+            }
+        }
+
+        return allBlocks
+    }
+
+    /// Limpa cache (útil para forçar reload)
+    func clearCache() {
+        cachedBlocks = nil
     }
 
     private func enrich(
