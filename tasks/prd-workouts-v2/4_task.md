@@ -63,3 +63,4 @@ Referências: `tasks/prd-workouts-v2/techspec.md` (seções: “Presentation”,
 - `FitToday/FitToday/Presentation/Features/Workout/WorkoutExerciseDetailView.swift`
 
 
+

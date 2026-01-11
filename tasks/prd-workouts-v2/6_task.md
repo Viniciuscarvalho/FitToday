@@ -65,3 +65,4 @@ Referências: `tasks/prd-workouts-v2/techspec.md` (seções: “OpenAI”, “Ri
 - `FitToday/FitToday/Data/Services/OpenAI/HybridWorkoutPlanComposer.swift`
 
 
+

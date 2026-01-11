@@ -67,3 +67,4 @@ Referências: `tasks/prd-workouts-v2/techspec.md` (seções: “Modelos de Dados
 - `personal-active/condicionamento-fisico.md`
 
 
+

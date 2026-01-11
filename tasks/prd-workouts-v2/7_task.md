@@ -66,3 +66,4 @@ Referências: `tasks/prd-workouts-v2/techspec.md` (seções: “Requisitos Espec
 - `FitToday/FitToday/Presentation/Features/Workout/WorkoutPlanView.swift`
 
 
+
