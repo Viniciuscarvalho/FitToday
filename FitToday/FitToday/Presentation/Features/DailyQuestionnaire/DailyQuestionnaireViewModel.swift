@@ -121,12 +121,37 @@ final class DailyQuestionnaireViewModel: ObservableObject, ErrorPresenting {
     // MARK: - Private
 
     func generatePlan(for checkIn: DailyCheckIn) async throws -> WorkoutPlan {
+        #if DEBUG
+        print("[DailyQ] Iniciando geração de plano...")
+        print("[DailyQ] CheckIn: focus=\(checkIn.focus.rawValue) soreness=\(checkIn.sorenessLevel.rawValue)")
+        #endif
+        
         let profileUseCase = GetUserProfileUseCase(repository: profileRepository)
         guard let profile = try await profileUseCase.execute() else {
+            #if DEBUG
+            print("[DailyQ] ❌ Perfil não encontrado!")
+            #endif
             throw DomainError.profileNotFound
         }
+        
+        #if DEBUG
+        print("[DailyQ] ✅ Perfil carregado: goal=\(profile.mainGoal.rawValue) structure=\(profile.availableStructure.rawValue)")
+        #endif
+        
         let generator = GenerateWorkoutPlanUseCase(blocksRepository: blocksRepository, composer: composer)
-        return try await generator.execute(profile: profile, checkIn: checkIn)
+        
+        do {
+            let plan = try await generator.execute(profile: profile, checkIn: checkIn)
+            #if DEBUG
+            print("[DailyQ] ✅ Plano gerado: id=\(plan.id) phases=\(plan.phases.count)")
+            #endif
+            return plan
+        } catch {
+            #if DEBUG
+            print("[DailyQ] ❌ Erro ao gerar plano: \(error)")
+            #endif
+            throw error
+        }
     }
 
     private func loadEntitlement() async {

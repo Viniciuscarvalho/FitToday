@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import SwiftData
 
 #if DEBUG
 /// Singleton para gerenciar override de entitlement em modo debug.
@@ -63,7 +64,5 @@ final class DebugEntitlementOverride: @unchecked Sendable {
         isPro = false
     }
 }
-#endif
-
 
 

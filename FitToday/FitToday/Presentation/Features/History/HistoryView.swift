@@ -27,26 +27,36 @@ struct HistoryView: View {
                 EmptyState
             } else {
                 ScrollView {
-                    LazyVStack(spacing: FitTodaySpacing.md, pinnedViews: [.sectionHeaders]) {
+                    LazyVStack(spacing: 0, pinnedViews: [.sectionHeaders]) {
                         ForEach(viewModel.sections) { section in
                             Section {
                                 ForEach(section.entries) { entry in
                                     HistoryRow(entry: entry)
+                                        .padding(.horizontal, FitTodaySpacing.md)
+                                        .padding(.vertical, FitTodaySpacing.sm)
                                         .onAppear {
                                             // Trigger load more ao aparecer último item
                                             if entry.id == viewModel.sections.last?.entries.last?.id {
                                                 viewModel.loadMoreIfNeeded()
                                             }
                                         }
+                                    
+                                    // Divider entre items (exceto o último da seção)
+                                    if entry.id != section.entries.last?.id {
+                                        Divider()
+                                            .padding(.leading, FitTodaySpacing.md)
+                                    }
                                 }
                             } header: {
                                 Text(section.title)
-                                    .font(.headline)
-                                    .foregroundStyle(FitTodayColor.textPrimary)
+                                    .font(.system(.subheadline, weight: .semibold))
+                                    .foregroundStyle(FitTodayColor.textSecondary)
                                     .frame(maxWidth: .infinity, alignment: .leading)
-                                    .padding(.horizontal)
-                                    .padding(.vertical, FitTodaySpacing.xs)
+                                    .padding(.horizontal, FitTodaySpacing.md)
+                                    .padding(.top, FitTodaySpacing.lg)
+                                    .padding(.bottom, FitTodaySpacing.sm)
                                     .background(FitTodayColor.background)
+                                    .textCase(nil)
                             }
                         }
                         
@@ -65,7 +75,6 @@ struct HistoryView: View {
                             .padding()
                         }
                     }
-                    .padding(.vertical)
                 }
                 .scrollContentBackground(.hidden)
             }
@@ -127,11 +136,12 @@ private struct HistoryRow: View {
         VStack(alignment: .leading, spacing: FitTodaySpacing.sm) {
             // Título e status
             HStack(spacing: FitTodaySpacing.md) {
-                VStack(alignment: .leading, spacing: FitTodaySpacing.xs) {
+                VStack(alignment: .leading, spacing: 2) {
                     Text(entry.title)
-                        .font(.headline)
+                        .font(.system(.body, weight: .semibold))
+                        .foregroundStyle(FitTodayColor.textPrimary)
                     Text("\(entry.focusTitle) • \(hourString)")
-                        .font(.subheadline)
+                        .font(.system(.subheadline))
                         .foregroundStyle(FitTodayColor.textSecondary)
                 }
                 Spacer()
@@ -148,6 +158,7 @@ private struct HistoryRow: View {
                         .font(.system(.caption, weight: .medium))
                         .foregroundStyle(FitTodayColor.brandPrimary)
                 }
+                .padding(.top, 2)
             }
             
             // Métricas de evolução (se houver)
@@ -162,9 +173,9 @@ private struct HistoryRow: View {
                 }
                 .font(.system(.caption))
                 .foregroundStyle(FitTodayColor.textSecondary)
+                .padding(.top, 2)
             }
         }
-        .padding(.vertical, FitTodaySpacing.sm)
     }
 }
 

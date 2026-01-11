@@ -20,8 +20,24 @@ struct GenerateWorkoutPlanUseCase {
     }
 
     func execute(profile: UserProfile, checkIn: DailyCheckIn) async throws -> WorkoutPlan {
+        #if DEBUG
+        print("[GenerateWorkoutPlan] Carregando blocos...")
+        #endif
+        
         let blocks = try await blocksRepository.loadBlocks()
-        return try await composer.composePlan(blocks: blocks, profile: profile, checkIn: checkIn)
+        
+        #if DEBUG
+        print("[GenerateWorkoutPlan] ✅ Blocos carregados: \(blocks.count)")
+        print("[GenerateWorkoutPlan] Chamando compositor...")
+        #endif
+        
+        let plan = try await composer.composePlan(blocks: blocks, profile: profile, checkIn: checkIn)
+        
+        #if DEBUG
+        print("[GenerateWorkoutPlan] ✅ Plano gerado: \(plan.id)")
+        #endif
+        
+        return plan
     }
     
     /// Gera múltiplos planos alternativos para o mesmo checkIn
@@ -74,7 +90,8 @@ struct CompleteWorkoutSessionUseCase {
             planId: session.plan.id,
             title: session.plan.title,
             focus: session.plan.focus,
-            status: status
+            status: status,
+            workoutPlan: session.plan // ← Salvar o plano completo para histórico de variação
         )
         try await historyRepository.saveEntry(entry)
     }
