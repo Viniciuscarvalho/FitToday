@@ -1,6 +1,6 @@
 ---
 name: swift-concurrency
-description: 'Expert guidance on Swift Concurrency best practices, patterns, and implementation. Use when developers mention: (1) Swift Concurrency, async/await, actors, or tasks, (2) "use Swift Concurrency" or "modern concurrency patterns", (3) migrating to Swift 6, (4) data races or thread safety issues, (5) refactoring closures to async/await, (6) @MainActor, Sendable, or actor isolation, (7) concurrent code architecture or performance optimization.'
+description: 'Expert guidance on Swift Concurrency best practices, patterns, and implementation. Use when developers mention: (1) Swift Concurrency, async/await, actors, or tasks, (2) "use Swift Concurrency" or "modern concurrency patterns", (3) migrating to Swift 6, (4) data races or thread safety issues, (5) refactoring closures to async/await, (6) @MainActor, Sendable, or actor isolation, (7) concurrent code architecture or performance optimization, (8) concurrency-related linter warnings (SwiftLint or similar; e.g. async_without_await, Sendable/actor isolation/MainActor lint).'
 ---
 # Swift Concurrency
 
@@ -76,6 +76,10 @@ When a developer needs concurrency guidance, follow this decision tree:
 
 ## Triage-First Playbook (Common Errors -> Next Best Move)
 
+- SwiftLint concurrency-related warnings
+  - Use `references/linting.md` for rule intent and preferred fixes; avoid dummy awaits as “fixes”.
+- SwiftLint `async_without_await` warning
+  - Remove `async` if not required; if required by protocol/override/@concurrent, prefer narrow suppression over adding fake awaits. See `references/linting.md`.
 - "Sending value of non-Sendable type ... risks causing data races"
   - First: identify where the value crosses an isolation boundary
   - Then: use `references/sendable.md` and `references/threading.md` (especially Swift 6.2 behavior changes)
@@ -197,6 +201,7 @@ Load these files as needed for specific topics:
 - **`memory-management.md`** - Retain cycles in tasks, memory safety patterns
 - **`actors.md`** - Actor isolation, @MainActor, global actors, reentrancy, custom executors, Mutex
 - **`sendable.md`** - Sendable conformance, value/reference types, @unchecked, region isolation
+- **`linting.md`** - Concurrency-focused lint rules and SwiftLint `async_without_await`
 - **`async-sequences.md`** - AsyncSequence, AsyncStream, when to use vs regular async methods
 - **`core-data.md`** - NSManagedObject sendability, custom executors, isolation conflicts
 - **`performance.md`** - Profiling with Instruments, reducing suspension points, execution strategies
