@@ -582,11 +582,12 @@ struct WorkoutPlanView: View {
                             case .activity(let activity):
                                 ActivityRow(activity: activity)
                             case .exercise(let prescription):
-                                let globalIndex = flattenedExerciseIndex(for: prescription.exercise.id)
+                                // Usar índice local dentro da fase (não global)
+                                let localIndex = idx + 1
                                 WorkoutExerciseRow(
-                                    index: globalIndex + 1,
+                                    index: localIndex,
                                     prescription: prescription,
-                                    isCurrent: globalIndex == sessionStore.currentExerciseIndex
+                                    isCurrent: sessionStore.currentExerciseIndex == localIndex
                                 )
                                 .contentShape(Rectangle())
                                 .onTapGesture {
@@ -614,11 +615,6 @@ struct WorkoutPlanView: View {
                 return "\(title) · RPE \(rpe)"
             }
             return title
-        }
-
-        /// Mapeia o exercício atual para o índice global (plano "flat") para compatibilidade com o fluxo da sessão.
-        private func flattenedExerciseIndex(for exerciseId: String) -> Int {
-            sessionStore.exercises.firstIndex(where: { $0.exercise.id == exerciseId }) ?? 0
         }
     }
 

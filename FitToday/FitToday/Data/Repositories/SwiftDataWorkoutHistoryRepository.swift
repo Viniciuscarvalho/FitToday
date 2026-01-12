@@ -58,6 +58,18 @@ final class SwiftDataWorkoutHistoryRepository: WorkoutHistoryRepository, @unchec
             existing.title = entry.title
             existing.focusRaw = entry.focus.rawValue
             existing.statusRaw = entry.status.rawValue
+            existing.programId = entry.programId
+            existing.programName = entry.programName
+            existing.durationMinutes = entry.durationMinutes
+            existing.caloriesBurned = entry.caloriesBurned
+            existing.healthKitWorkoutUUID = entry.healthKitWorkoutUUID
+            
+            // Serializar WorkoutPlan se houver (mantém histórico rico)
+            if let plan = entry.workoutPlan {
+                existing.workoutPlanJSON = try? JSONEncoder().encode(plan)
+            } else {
+                existing.workoutPlanJSON = nil
+            }
         } else {
             ctx.insert(WorkoutHistoryMapper.toModel(entry))
         }

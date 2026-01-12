@@ -193,6 +193,13 @@ struct ProfileProView: View {
                 Divider()
                     .padding(.leading, 56)
                 
+                SettingsRow(icon: "heart.fill", title: "Apple Health (PRO)") {
+                    router.push(.healthKitSettings, on: .profile)
+                }
+                
+                Divider()
+                    .padding(.leading, 56)
+                
                 SettingsRow(icon: "arrow.counterclockwise", title: "Restaurar Compras") {
                     Task {
                         await restorePurchases()

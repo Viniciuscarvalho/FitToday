@@ -8,11 +8,21 @@
 import Foundation
 
 struct BuildDailyCheckInUseCase {
-    func execute(focus: DailyFocus, sorenessLevel: MuscleSorenessLevel, areas: [MuscleGroup]) throws -> DailyCheckIn {
+    func execute(
+        focus: DailyFocus,
+        sorenessLevel: MuscleSorenessLevel,
+        areas: [MuscleGroup],
+        energyLevel: Int = 5
+    ) throws -> DailyCheckIn {
         if sorenessLevel == .strong && areas.isEmpty {
             throw DomainError.invalidInput(reason: "Selecione ao menos uma área dolorida.")
         }
-        return DailyCheckIn(focus: focus, sorenessLevel: sorenessLevel, sorenessAreas: areas)
+        return DailyCheckIn(
+            focus: focus,
+            sorenessLevel: sorenessLevel,
+            sorenessAreas: areas,
+            energyLevel: energyLevel
+        )
     }
 }
 

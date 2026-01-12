@@ -26,6 +26,9 @@ struct WorkoutHistoryEntry: Codable, Hashable, Sendable, Identifiable {
     var durationMinutes: Int?     // Duração real do treino em minutos
     var caloriesBurned: Int?      // Calorias estimadas queimadas
     
+    // Integração HealthKit (iPhone)
+    var healthKitWorkoutUUID: UUID?
+    
     // WorkoutPlan completo (para histórico de variação)
     var workoutPlan: WorkoutPlan?
 
@@ -40,6 +43,7 @@ struct WorkoutHistoryEntry: Codable, Hashable, Sendable, Identifiable {
         programName: String? = nil,
         durationMinutes: Int? = nil,
         caloriesBurned: Int? = nil,
+        healthKitWorkoutUUID: UUID? = nil,
         workoutPlan: WorkoutPlan? = nil
     ) {
         self.id = id
@@ -52,6 +56,7 @@ struct WorkoutHistoryEntry: Codable, Hashable, Sendable, Identifiable {
         self.programName = programName
         self.durationMinutes = durationMinutes
         self.caloriesBurned = caloriesBurned
+        self.healthKitWorkoutUUID = healthKitWorkoutUUID
         self.workoutPlan = workoutPlan
     }
 }

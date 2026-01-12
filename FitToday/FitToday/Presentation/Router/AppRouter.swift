@@ -48,6 +48,7 @@ enum AppRoute: Hashable {
     case programWorkoutDetail(String)  // Detalhe de um treino dentro do programa
     case programExerciseDetail(ExercisePrescription)  // Detalhe de exercício na biblioteca/programa
     case apiKeySettings  // Configuração de chave de API do usuário
+    case healthKitSettings // Integração Apple Health (PRO)
 }
 
 struct DeepLink {

@@ -50,7 +50,7 @@ struct DailyQuestionnaireFlowView: View {
 
                 currentStepView
 
-                if viewModel.currentStep == .soreness {
+                if viewModel.currentStep == .energy {
                     FitBadge(
                         text: viewModel.entitlement.isPro ? "PRO liberado" : "Free: paywall após gerar",
                         style: viewModel.entitlement.isPro ? .success : .warning
@@ -108,6 +108,8 @@ struct DailyQuestionnaireFlowView: View {
             focusStep
         case .soreness:
             sorenessStep
+        case .energy:
+            energyStep
         }
     }
 
@@ -166,6 +168,47 @@ struct DailyQuestionnaireFlowView: View {
         }
         .animation(.easeInOut, value: viewModel.selectedSoreness)
     }
+    
+    private var energyStep: some View {
+        VStack(alignment: .leading, spacing: FitTodaySpacing.md) {
+            Text("De 0 a 10, como está sua energia agora?")
+                .font(FitTodayFont.ui(size: 15, weight: .medium))
+                .foregroundStyle(FitTodayColor.textSecondary)
+            
+            HStack {
+                Text("0")
+                    .font(.system(.caption, weight: .medium))
+                    .foregroundStyle(FitTodayColor.textSecondary)
+                Slider(
+                    value: Binding(
+                        get: { Double(viewModel.energyLevel) },
+                        set: { viewModel.energyLevel = Int($0.rounded()) }
+                    ),
+                    in: 0...10,
+                    step: 1
+                )
+                .tint(FitTodayColor.brandPrimary)
+                Text("10")
+                    .font(.system(.caption, weight: .medium))
+                    .foregroundStyle(FitTodayColor.textSecondary)
+            }
+            
+            HStack(spacing: FitTodaySpacing.sm) {
+                Text("Energia:")
+                    .font(FitTodayFont.ui(size: 17, weight: .semiBold))
+                    .foregroundStyle(FitTodayColor.textPrimary)
+                Text("\(viewModel.energyLevel)")
+                    .font(FitTodayFont.display(size: 20, weight: .bold))
+                    .foregroundStyle(FitTodayColor.brandPrimary)
+            }
+            .padding(.top, FitTodaySpacing.sm)
+        }
+        .padding()
+        .background(FitTodayColor.surface)
+        .cornerRadius(FitTodayRadius.md)
+        .techCornerBorders(length: 12, thickness: 1.5)
+        .fitCardShadow()
+    }
 
     private var actionButtons: some View {
         VStack(spacing: FitTodaySpacing.sm) {
@@ -175,7 +218,7 @@ struct DailyQuestionnaireFlowView: View {
             .fitPrimaryStyle()
             .disabled(!primaryButtonEnabled)
 
-            if viewModel.currentStep == .soreness {
+            if viewModel.currentStep != .focus {
                 Button("Voltar") {
                     viewModel.goToPreviousStep()
                 }
@@ -185,7 +228,11 @@ struct DailyQuestionnaireFlowView: View {
     }
 
     private var primaryButtonTitle: String {
-        viewModel.currentStep == .focus ? "Continuar" : "Gerar treino"
+        switch viewModel.currentStep {
+        case .focus: return "Continuar"
+        case .soreness: return "Continuar"
+        case .energy: return "Gerar treino"
+        }
     }
 
     private var primaryButtonEnabled: Bool {
@@ -193,6 +240,8 @@ struct DailyQuestionnaireFlowView: View {
         case .focus:
             return viewModel.canAdvanceFromFocus
         case .soreness:
+            return viewModel.canAdvanceFromSoreness
+        case .energy:
             return viewModel.canSubmit
         }
     }
@@ -202,6 +251,8 @@ struct DailyQuestionnaireFlowView: View {
         case .focus:
             viewModel.goToNextStep()
         case .soreness:
+            viewModel.goToNextStep()
+        case .energy:
             do {
                 let checkIn = try viewModel.buildCheckIn()
                 handleSubmission(for: checkIn)

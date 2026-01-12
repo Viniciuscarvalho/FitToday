@@ -31,12 +31,14 @@ final class HistoryViewModel: ObservableObject, ErrorPresenting {
     @Published private(set) var isLoading = false
     @Published private(set) var isLoadingMore = false
     @Published private(set) var hasMorePages = true
+    @Published private(set) var insights: HistoryInsights?
     @Published var errorMessage: ErrorMessage? // ErrorPresenting protocol
 
     private let repository: WorkoutHistoryRepository
     private let pageSize = 20 // Carregar 20 itens por vez
     private var currentOffset = 0
     private var allLoadedEntries: [WorkoutHistoryEntry] = []
+    private let insightsUseCase = ComputeHistoryInsightsUseCase()
 
     init(repository: WorkoutHistoryRepository) {
         self.repository = repository
@@ -74,6 +76,7 @@ final class HistoryViewModel: ObservableObject, ErrorPresenting {
             let entries = try await repository.listEntries(limit: pageSize, offset: currentOffset)
             allLoadedEntries = entries
             sections = Self.group(entries)
+            insights = insightsUseCase.execute(entries: allLoadedEntries)
             
             // Verificar se há mais páginas
             hasMorePages = entries.count == pageSize
@@ -95,6 +98,7 @@ final class HistoryViewModel: ObservableObject, ErrorPresenting {
             // Append às entradas existentes
             allLoadedEntries.append(contentsOf: entries)
             sections = Self.group(allLoadedEntries)
+            insights = insightsUseCase.execute(entries: allLoadedEntries)
             
             // Atualizar estado de paginação
             hasMorePages = entries.count == pageSize

@@ -28,6 +28,13 @@ struct HistoryView: View {
             } else {
                 ScrollView {
                     LazyVStack(spacing: 0, pinnedViews: [.sectionHeaders]) {
+                        if let insights = viewModel.insights {
+                            HistoryInsightsHeader(insights: insights)
+                                .padding(.horizontal, FitTodaySpacing.md)
+                                .padding(.top, FitTodaySpacing.md)
+                                .padding(.bottom, FitTodaySpacing.lg)
+                        }
+                        
                         ForEach(viewModel.sections) { section in
                             Section {
                                 ForEach(section.entries) { entry in
@@ -174,6 +181,130 @@ private struct HistoryRow: View {
                 .font(.system(.caption))
                 .foregroundStyle(FitTodayColor.textSecondary)
                 .padding(.top, 2)
+            }
+        }
+    }
+}
+
+private struct HistoryInsightsHeader: View {
+    let insights: HistoryInsights
+    
+    private var monthTitle: String {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "pt_BR")
+        formatter.dateFormat = "MMMM"
+        return formatter.string(from: insights.monthSummary.monthStart).capitalized
+    }
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: FitTodaySpacing.md) {
+            HStack(spacing: FitTodaySpacing.md) {
+                MetricCard(title: "Streak atual", value: "\(insights.currentStreak)", subtitle: "dias")
+                MetricCard(title: "Melhor streak", value: "\(insights.bestStreak)", subtitle: "dias")
+            }
+            
+            VStack(alignment: .leading, spacing: FitTodaySpacing.sm) {
+                Text("Minutos por semana")
+                    .font(.system(.subheadline, weight: .semibold))
+                    .foregroundStyle(FitTodayColor.textPrimary)
+                
+                WeeklyMinutesSparkline(weeks: insights.weekly.map { $0.minutes })
+                    .frame(height: 44)
+                
+                let totalSessions = insights.weekly.reduce(0) { $0 + $1.sessions }
+                let totalMinutes = insights.weekly.reduce(0) { $0 + $1.minutes }
+                Text("Últimas \(insights.weekly.count) semanas • \(totalSessions) sessões • \(totalMinutes) min")
+                    .font(.system(.caption, weight: .medium))
+                    .foregroundStyle(FitTodayColor.textSecondary)
+            }
+            .padding()
+            .background(FitTodayColor.surface)
+            .cornerRadius(FitTodayRadius.md)
+            .techCornerBorders(length: 12, thickness: 1.5)
+            .fitCardShadow()
+            
+            HStack(spacing: FitTodaySpacing.md) {
+                MetricCard(
+                    title: "\(monthTitle) em números",
+                    value: "\(insights.monthSummary.sessions)",
+                    subtitle: "sessões"
+                )
+                MetricCard(
+                    title: "Tempo no mês",
+                    value: "\(insights.monthSummary.minutes)",
+                    subtitle: "min"
+                )
+            }
+        }
+    }
+    
+    private struct MetricCard: View {
+        let title: String
+        let value: String
+        let subtitle: String
+        
+        var body: some View {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(title)
+                    .font(.system(.caption, weight: .semibold))
+                    .foregroundStyle(FitTodayColor.textSecondary)
+                HStack(alignment: .firstTextBaseline, spacing: 6) {
+                    Text(value)
+                        .font(FitTodayFont.display(size: 22, weight: .bold))
+                        .foregroundStyle(FitTodayColor.textPrimary)
+                    Text(subtitle)
+                        .font(.system(.caption, weight: .medium))
+                        .foregroundStyle(FitTodayColor.textSecondary)
+                }
+            }
+            .padding()
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(FitTodayColor.surface)
+            .cornerRadius(FitTodayRadius.md)
+            .techCornerBorders(length: 12, thickness: 1.5)
+            .fitCardShadow()
+        }
+    }
+    
+    private struct WeeklyMinutesSparkline: View {
+        let weeks: [Int]
+        
+        var body: some View {
+            GeometryReader { proxy in
+                let w = proxy.size.width
+                let h = proxy.size.height
+                let maxValue = max(1, weeks.max() ?? 1)
+                let stepX = weeks.count > 1 ? w / CGFloat(weeks.count - 1) : 0
+                
+                Path { path in
+                    for (idx, value) in weeks.enumerated() {
+                        let x = CGFloat(idx) * stepX
+                        let y = h - (CGFloat(value) / CGFloat(maxValue)) * h
+                        if idx == 0 {
+                            path.move(to: CGPoint(x: x, y: y))
+                        } else {
+                            path.addLine(to: CGPoint(x: x, y: y))
+                        }
+                    }
+                }
+                .stroke(FitTodayColor.brandPrimary, style: StrokeStyle(lineWidth: 2, lineCap: .round, lineJoin: .round))
+                .background(
+                    Path { path in
+                        for (idx, value) in weeks.enumerated() {
+                            let x = CGFloat(idx) * stepX
+                            let y = h - (CGFloat(value) / CGFloat(maxValue)) * h
+                            if idx == 0 {
+                                path.move(to: CGPoint(x: x, y: y))
+                            } else {
+                                path.addLine(to: CGPoint(x: x, y: y))
+                            }
+                        }
+                        path.addLine(to: CGPoint(x: w, y: h))
+                        path.addLine(to: CGPoint(x: 0, y: h))
+                        path.closeSubpath()
+                    }
+                    .fill(FitTodayColor.brandPrimary.opacity(0.12))
+                )
             }
         }
     }

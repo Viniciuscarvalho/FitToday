@@ -106,19 +106,61 @@ struct ProgramRecommender: ProgramRecommending {
                 score += 5
             }
             
-            // -5 pontos se treinou ontem com mesmo objetivo (evitar repetir)
+            // -8 pontos se treinou ontem com mesmo objetivo (evitar repetir - aumentado para garantir variedade)
             if trainedYesterday, let yesterdayGoal = yesterdayGoal {
                 let yesterdayGoalConverted = convertFocusToGoal(yesterdayGoal)
                 if workout.goal == yesterdayGoalConverted {
-                    score -= 5
+                    score -= 8
                 }
+            }
+            
+            // -3 pontos se o treino foi já feito recentemente (últimos 3 dias)
+            let threeDaysAgo = Calendar.current.date(byAdding: .day, value: -3, to: Date()) ?? Date()
+            let recentlyDone = history.contains { entry in
+                entry.status == .completed &&
+                entry.date >= threeDaysAgo &&
+                entry.focus == convertGoalToFocus(workout.goal)
+            }
+            if recentlyDone {
+                score -= 3
             }
             
             return (workout, score)
         }
         
         let sorted = scored.sorted { $0.1 > $1.1 }
-        return Array(sorted.prefix(limit).map { $0.0 })
+        
+        // Se retorna menos de `limit` resultados, retorna todos ordenados
+        // Se retorna mais, garante diversidade pegando resultados espalhados por score
+        if sorted.count <= limit {
+            return sorted.map { $0.0 }
+        }
+        
+        // Estratégia de diversidade: pega o melhor, depois salta alguns, depois o próximo melhor, etc.
+        var selected: [LibraryWorkout] = []
+        var selectedIds: Set<String> = []
+        let step = max(1, sorted.count / limit)
+        
+        for i in stride(from: 0, to: sorted.count, by: step) {
+            if selected.count >= limit { break }
+            let candidate = sorted[i].0
+            // Evitar duplicatas
+            if !selectedIds.contains(candidate.id) {
+                selected.append(candidate)
+                selectedIds.insert(candidate.id)
+            }
+        }
+        
+        // Se ainda não tem suficientes (edge case), adicionar os próximos melhores
+        for (workout, _) in sorted {
+            if selected.count >= limit { break }
+            if !selectedIds.contains(workout.id) {
+                selected.append(workout)
+                selectedIds.insert(workout.id)
+            }
+        }
+        
+        return Array(selected.prefix(limit))
     }
     
     // MARK: - Helpers
@@ -172,6 +214,19 @@ struct ProgramRecommender: ProgramRecommending {
             return .endurance
         case .surprise:
             return .performance
+        }
+    }
+    
+    private func convertGoalToFocus(_ goal: FitnessGoal) -> DailyFocus {
+        switch goal {
+        case .hypertrophy:
+            return .fullBody
+        case .conditioning, .weightLoss:
+            return .cardio
+        case .endurance:
+            return .core
+        case .performance:
+            return .surprise
         }
     }
     

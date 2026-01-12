@@ -33,8 +33,10 @@ struct ExerciseDBTargetMapper: Sendable {
       return .chest
 
     // Back
-    case "lats", "upper back", "traps":
+    case "lats":
       return .lats
+    case "upper back", "traps":
+      return .back
     case "lower back":
       return .lowerBack
 
@@ -78,8 +80,10 @@ struct ExerciseDBTargetMapper: Sendable {
     switch muscleGroup {
     case .chest:
       return ["pectorals", "chest"]
+    case .back:
+      return ["upper back", "traps"]
     case .lats:
-      return ["lats", "upper back"]
+      return ["lats"]
     case .lowerBack:
       return ["lower back"]
     case .shoulders:
@@ -90,8 +94,12 @@ struct ExerciseDBTargetMapper: Sendable {
       return ["triceps"]
     case .forearms:
       return ["forearms"]
+    case .arms:
+      return ["biceps", "triceps"]
     case .quads:
       return ["quads"]
+    case .quadriceps:
+      return ["quadriceps"]
     case .hamstrings:
       return ["hamstrings"]
     case .glutes:
@@ -292,9 +300,9 @@ actor ExerciseDBBlockEnricher: ExerciseDBBlockEnriching {
       mainMuscle: targetMuscle,
       equipment: equipment,
       instructions: instructions,
-      media: WorkoutExercise.ExerciseMedia(
-        imageURL: "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/images/\(apiExercise.name.replacingOccurrences(of: " ", with: "-")).png",
-        gifURL: "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/gifs/\(apiExercise.name.replacingOccurrences(of: " ", with: "-")).gif",
+      media: ExerciseMedia(
+        imageURL: URL(string: "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/images/\(apiExercise.name.replacingOccurrences(of: " ", with: "-")).png"),
+        gifURL: URL(string: "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/gifs/\(apiExercise.name.replacingOccurrences(of: " ", with: "-")).gif"),
         source: "ExerciseDB"
       )
     )
@@ -331,7 +339,7 @@ actor ExerciseDBBlockEnricher: ExerciseDBBlockEnriching {
       level: level,
       structures: [structure],
       equipment: equipment,
-      targetMuscle: .lats,
+      targetMuscle: .back,
       sets: 4...5,
       reps: 8...12,
       rest: 90
@@ -511,8 +519,8 @@ actor ExerciseDBBlockEnricher: ExerciseDBBlockEnriching {
       compatibleStructures: structures,
       equipmentOptions: equipment,
       exercises: Array(exercises.prefix(maxExercisesPerBlock)),
-      suggestedSets: sets,
-      suggestedReps: reps,
+      suggestedSets: IntRange(sets.lowerBound, sets.upperBound),
+      suggestedReps: IntRange(reps.lowerBound, reps.upperBound),
       restInterval: TimeInterval(rest)
     )
   }

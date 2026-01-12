@@ -894,6 +894,12 @@ actor ExerciseMediaResolver: ExerciseMediaResolving {
       // Opções válidas: lats (latíssimo), upper back (trapézio superior), traps
       return ["lats", "upper back", "traps"]
 
+    case .lats:
+      return ["lats"]
+
+    case .lowerBack:
+      return ["lower back"]
+
     case .shoulders:
       // ✅ Corrigido: "shoulders" e "deltoids" NÃO existem, apenas "delts"
       return ["delts"]
@@ -903,6 +909,9 @@ actor ExerciseMediaResolver: ExerciseMediaResolving {
 
     case .triceps:
       return ["triceps"]
+
+    case .forearms:
+      return ["forearms"]
 
     case .arms:
       // Cobre todos os músculos do braço

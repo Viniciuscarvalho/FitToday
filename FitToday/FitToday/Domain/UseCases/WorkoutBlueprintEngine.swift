@@ -38,7 +38,7 @@ struct WorkoutBlueprintEngine: BlueprintGenerating, Sendable {
   func generateBlueprint(from input: BlueprintInput) -> WorkoutBlueprint {
     let sessionType = SpecialistSessionRules.sessionType(for: input.goal)
     let domsAdjustment = SpecialistSessionRules.DOMSAdjustment.adjustment(for: input.sorenessLevel)
-    let isRecoveryMode = input.sorenessLevel == .strong
+    let isRecoveryMode = input.sorenessLevel == .strong || input.energyLevel <= 2
     
     // Gerar blocos baseados no objetivo
     let blocks = generateBlocks(
@@ -49,12 +49,17 @@ struct WorkoutBlueprintEngine: BlueprintGenerating, Sendable {
       seed: input.variationSeed
     )
     
-    // Determinar intensidade
-    let intensity = SpecialistSessionRules.intensity(
+    // Determinar intensidade (base) e ajustar por energia
+    var intensity = SpecialistSessionRules.intensity(
       for: input.level,
       soreness: input.sorenessLevel,
       goal: input.goal
     )
+    
+    // Energia baixa: descer um nível de intensidade (segurança e aderência)
+    if input.energyLevel <= 3 {
+      intensity = downgradeIntensity(intensity)
+    }
     
     // Calcular duração estimada
     let duration = estimateDuration(blocks: blocks, level: input.level, structure: input.structure)
@@ -82,6 +87,17 @@ struct WorkoutBlueprintEngine: BlueprintGenerating, Sendable {
       equipmentConstraints: equipmentConstraints,
       isRecoveryMode: isRecoveryMode
     )
+  }
+  
+  private func downgradeIntensity(_ intensity: WorkoutIntensity) -> WorkoutIntensity {
+    switch intensity {
+    case .high:
+      return .moderate
+    case .moderate:
+      return .low
+    case .low:
+      return .low
+    }
   }
   
   // MARK: - Block Generation

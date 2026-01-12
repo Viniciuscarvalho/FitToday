@@ -140,6 +140,8 @@ struct TabRootView: View {
             LibraryExerciseDetailView(prescription: prescription)
         case .apiKeySettings:
             APIKeySettingsView()
+        case .healthKitSettings:
+            HealthKitConnectionView(resolver: resolver)
         }
     }
 }

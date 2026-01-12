@@ -43,6 +43,8 @@ struct WorkoutPrompt: Sendable, Equatable {
       metadata.structure.rawValue,
       metadata.level.rawValue,
       metadata.focus.rawValue,
+      String(metadata.energyLevel),
+      metadata.sorenessLevel.rawValue,
       metadata.blueprintVersion.rawValue
     ]
     return Hashing.sha256(components.joined(separator: "|"))
@@ -55,6 +57,8 @@ struct PromptMetadata: Sendable, Equatable {
   let structure: TrainingStructure
   let level: TrainingLevel
   let focus: DailyFocus
+  let energyLevel: Int
+  let sorenessLevel: MuscleSorenessLevel
   let variationSeed: UInt64
   let blueprintVersion: BlueprintVersion
   let contextSource: String // "personal-active/emagrecimento.md" etc.
@@ -64,6 +68,7 @@ struct PromptMetadata: Sendable, Equatable {
     """
     [PromptMetadata] goal=\(goal.rawValue) structure=\(structure.rawValue) \
     level=\(level.rawValue) focus=\(focus.rawValue) \
+    energy=\(energyLevel) soreness=\(sorenessLevel.rawValue) \
     seed=\(variationSeed) version=\(blueprintVersion.rawValue) \
     context=\(contextSource)
     """
@@ -199,8 +204,8 @@ struct WorkoutPromptAssembler: WorkoutPromptAssembling, Sendable {
   // MARK: - Constants
 
   private static let maxContextLength = 2000 // Aumentado para prompts mais completos
-  private static let maxBlocksInCatalog = 30 // Aumentado para máxima variedade (era 20)
-  private static let maxExercisesPerBlock = 12 // Aumentado para treinos mais robustos (era 8)
+  private static let maxBlocksInCatalog = 20 // Reduzido para conter tamanho do prompt
+  private static let maxExercisesPerBlock = 8 // Reduzido para conter tamanho do prompt
   // = Máximo de 360 exercícios enviados à OpenAI (era 160)
   
   // MARK: - WorkoutPromptAssembling
@@ -234,6 +239,8 @@ struct WorkoutPromptAssembler: WorkoutPromptAssembling, Sendable {
       structure: profile.availableStructure,
       level: profile.level,
       focus: checkIn.focus,
+      energyLevel: checkIn.energyLevel,
+      sorenessLevel: checkIn.sorenessLevel,
       variationSeed: blueprint.variationSeed,
       blueprintVersion: blueprint.version,
       contextSource: contextSource,
@@ -261,23 +268,23 @@ struct WorkoutPromptAssembler: WorkoutPromptAssembling, Sendable {
     blueprint: WorkoutBlueprint
   ) -> String {
     """
-    Você é um personal trainer expert em \(goalDescription(goal)).
+    Você é um personal trainer especialista em \(goalDescription(goal)).
     
-    ## OBJETIVO PRINCIPAL: \(goal.rawValue.uppercased())
+    ## OBJETIVO PRINCIPAL
+    \(goal.rawValue.uppercased())
     \(guidelines)
     
     ## TAREFA
-    Crie um treino COMPLETO e ROBUSTO usando APENAS exercícios do catálogo fornecido.
+    Gerar um treino completo usando APENAS exercícios do catálogo fornecido.
     
     ## REGRAS OBRIGATÓRIAS
-    1. OBJETIVO do usuário é \(goal.rawValue) - adapte intensidade, volume e seleção
-    2. Use APENAS equipamentos: \(blueprint.equipmentConstraints.allowedEquipment.map(\.rawValue).joined(separator: ", "))
-    3. Cada fase DEVE ter o número EXATO de exercícios do blueprint
-    4. Selecione exercícios VARIADOS - evite repetição
-    5. NUNCA use exercícios que não estão no catálogo
+    1. Use SOMENTE exercícios do catálogo (não invente nomes).
+    2. Use SOMENTE equipamentos permitidos: \(blueprint.equipmentConstraints.allowedEquipment.map(\.rawValue).joined(separator: ", ")).
+    3. Respeite o blueprint: cada fase deve ter o número EXATO de exercícios e o kind correto.
+    4. Priorize segurança: evite exercícios que agravem limitações articulares/dor informadas pelo usuário.
+    5. Evite repetição com base no histórico fornecido (quando existir).
     
-    ## FORMATO JSON (retorne APENAS isso):
-    ```json
+    ## FORMATO (responda APENAS com JSON válido)
     {
       "phases": [
         {
@@ -289,7 +296,6 @@ struct WorkoutPromptAssembler: WorkoutPromptAssembling, Sendable {
       "title": "Título do treino",
       "notes": "Notas opcionais"
     }
-    ```
     """
   }
   
@@ -310,9 +316,13 @@ struct WorkoutPromptAssembler: WorkoutPromptAssembling, Sendable {
     ## USUÁRIO
     **OBJETIVO PRINCIPAL: \(profile.mainGoal.rawValue.uppercased())**
     Nível: \(profile.level.rawValue) | Equipamentos: \(profile.availableStructure.rawValue) | Frequência: \(profile.weeklyFrequency)x/sem
+    Condições de saúde: \(formatHealthConditions(profile.healthConditions))\(formatHealthSafetyRules(profile.healthConditions))
     
     ## HOJE
-    Foco: \(checkIn.focus.rawValue) | DOMS: \(checkIn.sorenessLevel.rawValue)\(checkIn.sorenessAreas.isEmpty ? "" : " (áreas: \(checkIn.sorenessAreas.map(\.rawValue).joined(separator: ", ")))")
+    Foco: \(checkIn.focus.rawValue) | DOMS: \(checkIn.sorenessLevel.rawValue)\(checkIn.sorenessAreas.isEmpty ? "" : " (áreas: \(checkIn.sorenessAreas.map(\.rawValue).joined(separator: ", ")))") | Energia: \(checkIn.energyLevel)/10
+    
+    Regras de adaptação:
+    - Se energia <= 3 OU DOMS == strong: mantenha o treino conservador (menos “agressivo”), priorize técnica e segurança.
     
     ## ESTRUTURA DO TREINO (OBRIGATÓRIO)
     Título: \(blueprint.title) | Intensidade: \(blueprint.intensity.rawValue) | Duração: ~\(blueprint.estimatedDurationMinutes)min
@@ -323,7 +333,7 @@ struct WorkoutPromptAssembler: WorkoutPromptAssembling, Sendable {
     ## EXERCÍCIOS DISPONÍVEIS (use APENAS estes)
     \(catalogJSON)
     
-    **MONTE O TREINO COMPLETO AGORA. Retorne APENAS o JSON.**
+    Retorne APENAS o JSON final.
     """
   }
   
@@ -340,9 +350,7 @@ struct WorkoutPromptAssembler: WorkoutPromptAssembling, Sendable {
     var lines: [String] = []
     lines.append("## EXERCÍCIOS PROIBIDOS")
     lines.append("")
-    lines.append("🚫 REGRA CRÍTICA: NÃO repita estes exercícios.")
-    lines.append("Você DEVE selecionar exercícios COMPLETAMENTE DIFERENTES.")
-    lines.append("Repetir exercícios desta lista resultará em treino rejeitado.")
+    lines.append("Regra crítica: NÃO repita estes exercícios. Selecione exercícios diferentes.")
     lines.append("")
 
     // Coletar todos os exercícios recentes em lista flat
@@ -365,10 +373,8 @@ struct WorkoutPromptAssembler: WorkoutPromptAssembling, Sendable {
 
     lines.append("EXERCÍCIOS PROIBIDOS (\(uniqueProhibited.count) total):")
     for name in uniqueProhibited {
-      lines.append("- ❌ \(name)")
+      lines.append("- \(name)")
     }
-    lines.append("")
-    lines.append("⚠️ Selecione exercícios que NÃO estão nesta lista!")
     lines.append("")
 
     return lines.joined(separator: "\n")
@@ -590,6 +596,56 @@ struct WorkoutPromptAssembler: WorkoutPromptAssembling, Sendable {
   }
   
   // MARK: - Helpers
+  
+  private func formatHealthConditions(_ conditions: [HealthCondition]) -> String {
+    guard !conditions.isEmpty else { return "nenhuma" }
+    
+    // Remover ".none" caso venha junto
+    let filtered = conditions.filter { $0 != .none }
+    guard !filtered.isEmpty else { return "nenhuma" }
+    
+    return filtered.map { condition in
+      switch condition {
+      case .none:
+        return "nenhuma"
+      case .lowerBackPain:
+        return "dor lombar"
+      case .knee:
+        return "joelho"
+      case .shoulder:
+        return "ombro"
+      case .other:
+        return "outra"
+      }
+    }
+    .joined(separator: ", ")
+  }
+  
+  private func formatHealthSafetyRules(_ conditions: [HealthCondition]) -> String {
+    let filtered = conditions.filter { $0 != .none }
+    guard !filtered.isEmpty else { return "" }
+    
+    var rules: [String] = []
+    rules.append("")
+    rules.append("Regras de segurança (obrigatórias):")
+    
+    for condition in filtered {
+      switch condition {
+      case .lowerBackPain:
+        rules.append("- Evitar exercícios que sobrecarreguem a lombar; prefira estabilidade e amplitude controlada.")
+      case .knee:
+        rules.append("- Evitar impacto e dor no joelho; prefira controle, amplitude tolerável e variações estáveis.")
+      case .shoulder:
+        rules.append("- Evitar elevação/dor no ombro; prefira pegadas neutras e amplitude confortável.")
+      case .other:
+        rules.append("- Priorizar segurança e selecionar opções de baixo risco quando houver dúvida.")
+      case .none:
+        break
+      }
+    }
+    
+    return rules.joined(separator: "\n")
+  }
   
   private func contextFileName(for goal: FitnessGoal) -> String {
     switch goal {
