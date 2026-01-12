@@ -28,6 +28,7 @@ struct HistoryView: View {
             } else {
                 ScrollView {
                     LazyVStack(spacing: 0, pinnedViews: [.sectionHeaders]) {
+                        // Insights header (scrola junto com o conteúdo)
                         if let insights = viewModel.insights {
                             HistoryInsightsHeader(insights: insights)
                                 .padding(.horizontal, FitTodaySpacing.md)
@@ -89,6 +90,7 @@ struct HistoryView: View {
         .background(FitTodayColor.background.ignoresSafeArea())
         .navigationTitle("Histórico")
         .navigationBarTitleDisplayMode(.large)
+        .toolbarColorScheme(.dark, for: .navigationBar)
         .task {
             viewModel.loadHistory()
         }
