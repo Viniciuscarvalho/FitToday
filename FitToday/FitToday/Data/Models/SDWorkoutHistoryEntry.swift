@@ -22,6 +22,7 @@ final class SDWorkoutHistoryEntry {
     var programName: String?
     var durationMinutes: Int?
     var caloriesBurned: Int?
+    var healthKitWorkoutUUID: UUID?
     
     // WorkoutPlan completo serializado (para histórico de variação)
     var workoutPlanJSON: Data?
@@ -37,6 +38,7 @@ final class SDWorkoutHistoryEntry {
         programName: String? = nil,
         durationMinutes: Int? = nil,
         caloriesBurned: Int? = nil,
+        healthKitWorkoutUUID: UUID? = nil,
         workoutPlanJSON: Data? = nil
     ) {
         self.id = id
@@ -49,6 +51,7 @@ final class SDWorkoutHistoryEntry {
         self.programName = programName
         self.durationMinutes = durationMinutes
         self.caloriesBurned = caloriesBurned
+        self.healthKitWorkoutUUID = healthKitWorkoutUUID
         self.workoutPlanJSON = workoutPlanJSON
     }
 }

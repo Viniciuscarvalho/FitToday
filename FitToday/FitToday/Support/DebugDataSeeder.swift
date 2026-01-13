@@ -66,6 +66,7 @@ final class DebugDataSeeder {
             focus: .fullBody,
             sorenessLevel: .none,
             sorenessAreas: [],
+            energyLevel: 7,
             createdAt: Date()
         )
         

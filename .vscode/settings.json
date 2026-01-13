@@ -1,3 +1,7 @@
 {
-    "sweetpad.build.xcodeWorkspacePath": "FitToday/FitToday.xcodeproj/project.xcworkspace"
+   "sweetpad.build.xcodeProjectPath": "FitToday/FitToday.xcodeproj",
+   "[swift]": {
+      "editor.defaultFormatter": "SwiftFormat.swift-format",
+      "editor.formatOnSave": true
+   }
 }

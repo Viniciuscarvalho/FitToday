@@ -111,6 +111,22 @@ struct OpenAIWorkoutPlanComposer: WorkoutPlanComposing {
                 logger("✅ Quality gate passou: \(gateResult.status)")
                 return gateResult.finalPlan!
             } else {
+                // Retry único guiado por feedback do quality gate antes do fallback local
+                if let feedback = qualityGate.generateRetryFeedback(from: gateResult) {
+                    logger("⚠️ Quality gate falhou: \(gateResult.status) - retry único com feedback")
+                    if let retriedPlan = try await retryOnce(
+                        basePromptText: promptText,
+                        feedback: feedback,
+                        blueprint: blueprint,
+                        profile: profile,
+                        checkIn: checkIn,
+                        blocks: blocks,
+                        previousWorkouts: previousWorkouts
+                    ) {
+                        return retriedPlan
+                    }
+                }
+                
                 logger("⚠️ Quality gate falhou: \(gateResult.status) - usando fallback local")
                 return try await localComposer.composePlan(blocks: blocks, profile: profile, checkIn: checkIn)
             }
@@ -176,6 +192,56 @@ struct OpenAIWorkoutPlanComposer: WorkoutPlanComposing {
         USER:
         \(workoutPrompt.userMessage)
         """
+    }
+    
+    private func retryOnce(
+        basePromptText: String,
+        feedback: String,
+        blueprint: WorkoutBlueprint,
+        profile: UserProfile,
+        checkIn: DailyCheckIn,
+        blocks: [WorkoutBlock],
+        previousWorkouts: [WorkoutPlan]
+    ) async throws -> WorkoutPlan? {
+        let retryPrompt = basePromptText + "\n\n# FEEDBACK DE CORREÇÃO\n" + feedback + "\n\nRetorne APENAS o JSON final."
+        
+        let data = try await client.sendJSONPrompt(prompt: retryPrompt, cachedKey: nil)
+        logger("🔁 Retry: resposta recebida: \(data.count) bytes")
+        
+        let chatResponse = try JSONDecoder().decode(ChatCompletionResponse.self, from: data)
+        guard let content = chatResponse.choices.first?.message.content,
+              let contentData = OpenAIResponseValidator.extractJSON(from: content) else {
+            logger("🔁 Retry: resposta vazia")
+            return nil
+        }
+        
+        let openAIResponse = try OpenAIResponseValidator.validate(
+            jsonData: contentData,
+            expectedBlueprint: blueprint
+        )
+        
+        let plan = convertOpenAIResponseToPlan(
+            response: openAIResponse,
+            blueprint: blueprint,
+            profile: profile,
+            checkIn: checkIn,
+            blocks: blocks
+        )
+        
+        let gateResult = qualityGate.process(
+            plan: plan,
+            blueprint: blueprint,
+            profile: profile,
+            previousPlans: previousWorkouts
+        )
+        
+        if gateResult.succeeded || gateResult.status == .normalizedAndPassed {
+            logger("✅ Retry passou: \(gateResult.status)")
+            return gateResult.finalPlan
+        }
+        
+        logger("🔁 Retry falhou: \(gateResult.status)")
+        return nil
     }
     
     private func convertOpenAIResponseToPlan(
@@ -313,35 +379,6 @@ private struct ChatCompletionResponse: Decodable {
     struct Message: Decodable {
         let content: String?
     }
-}
-
-/// Estrutura do JSON retornado pelo modelo (dentro do content)
-private struct OpenAIPlanResponse: Decodable {
-    struct Phase: Decodable {
-        let kind: String
-        let selectedBlocks: [SelectedBlock]
-
-        private enum CodingKeys: String, CodingKey {
-            case kind
-            case selectedBlocks = "selected_blocks"
-        }
-    }
-
-    struct SelectedBlock: Decodable {
-        let blockId: String
-        let setsMultiplier: Double?
-        let repsMultiplier: Double?
-        let restAdjustmentSeconds: Double?
-
-        private enum CodingKeys: String, CodingKey {
-            case blockId = "block_id"
-            case setsMultiplier = "sets_multiplier"
-            case repsMultiplier = "reps_multiplier"
-            case restAdjustmentSeconds = "rest_adjustment_seconds"
-        }
-    }
-
-    let phases: [Phase]
 }
 
 struct HybridWorkoutPlanComposer: WorkoutPlanComposing {

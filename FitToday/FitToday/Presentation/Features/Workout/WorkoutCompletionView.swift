@@ -17,6 +17,11 @@ struct WorkoutCompletionView: View {
     @State private var errorMessage: String?
     @State private var isProfileIncomplete = false
     @State private var showProfilePrompt = false
+    
+    @State private var canUseHealthKit = false
+    @State private var healthKitState: HealthKitAuthorizationState = .notDetermined
+    @State private var isExportingHealthKit = false
+    @State private var healthKitExportMessage: String?
 
     var body: some View {
         VStack(spacing: FitTodaySpacing.lg) {
@@ -63,11 +68,27 @@ struct WorkoutCompletionView: View {
                 .disabled(isGeneratingNewPlan)
 
                 if status == .completed {
+                    if canUseHealthKit {
+                        Button(isExportingHealthKit ? "Exportando..." : "Exportar para Apple Health") {
+                            Task { await exportToHealthKitIfPossible() }
+                        }
+                        .fitSecondaryStyle()
+                        .disabled(isExportingHealthKit || healthKitState != .authorized)
+                    }
+                    
                     Button("Ver histórico") {
                         finalizeFlow(goToHistory: true)
                     }
                     .fitSecondaryStyle()
                 }
+            }
+            
+            if let msg = healthKitExportMessage {
+                Text(msg)
+                    .font(.system(.footnote, weight: .medium))
+                    .foregroundStyle(FitTodayColor.textSecondary)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal)
             }
 
             Spacer()
@@ -77,6 +98,7 @@ struct WorkoutCompletionView: View {
         .navigationBarBackButtonHidden(true)
         .task {
             await checkProfileCompletion()
+            await loadHealthKitAvailability()
         }
         .sheet(isPresented: $showProfilePrompt) {
             if let resolver = resolver as? Resolver {
@@ -142,6 +164,64 @@ struct WorkoutCompletionView: View {
             // Silently fail - não é crítico
         }
     }
+    
+    private func loadHealthKitAvailability() async {
+        guard status == .completed else { return }
+        
+        guard
+            let entitlementRepo = resolver.resolve(EntitlementRepository.self),
+            let healthKit = resolver.resolve(HealthKitServicing.self)
+        else {
+            canUseHealthKit = false
+            return
+        }
+        
+        do {
+            let entitlement = try await entitlementRepo.currentEntitlement()
+            guard entitlement.isPro else {
+                canUseHealthKit = false
+                return
+            }
+            
+            canUseHealthKit = true
+            healthKitState = await healthKit.authorizationState()
+        } catch {
+            // Não bloquear o fluxo por HealthKit
+            canUseHealthKit = false
+        }
+    }
+    
+    private func exportToHealthKitIfPossible() async {
+        guard status == .completed else { return }
+        guard canUseHealthKit, healthKitState == .authorized else {
+            healthKitExportMessage = "Conecte o Apple Health antes de exportar."
+            return
+        }
+        guard let plan = sessionStore.plan else { return }
+        guard
+            let healthKit = resolver.resolve(HealthKitServicing.self),
+            let historyRepo = resolver.resolve(WorkoutHistoryRepository.self)
+        else { return }
+        
+        do {
+            isExportingHealthKit = true
+            defer { isExportingHealthKit = false }
+            
+            let receipt = try await healthKit.exportWorkout(plan: plan, completedAt: Date())
+            
+            // Vincular UUID ao último item do histórico com este planId (melhor esforço)
+            let recent = try await historyRepo.listEntries(limit: 20, offset: 0)
+            if let idx = recent.firstIndex(where: { $0.planId == plan.id }) {
+                var updated = recent[idx]
+                updated.healthKitWorkoutUUID = receipt.workoutUUID
+                try await historyRepo.saveEntry(updated)
+            }
+            
+            healthKitExportMessage = "Exportado para Apple Health."
+        } catch {
+            healthKitExportMessage = "Falha ao exportar para Apple Health: \(error.localizedDescription)"
+        }
+    }
 
     private func generateNewWorkout() {
         guard let profileRepo = resolver.resolve(UserProfileRepository.self),
@@ -170,7 +250,8 @@ struct WorkoutCompletionView: View {
                 let checkIn = DailyCheckIn(
                     focus: currentFocus,
                     sorenessLevel: .none, // Novo treino sem considerar dor anterior
-                    sorenessAreas: []
+                    sorenessAreas: [],
+                    energyLevel: 5
                 )
                 
                 let generator = GenerateWorkoutPlanUseCase(

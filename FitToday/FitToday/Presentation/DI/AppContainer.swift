@@ -139,10 +139,29 @@ struct AppContainer {
             .inObjectScope(.container)
 
         // WorkoutPlanComposing verifica em tempo de execução se há chave do usuário
-        container.register(WorkoutPlanComposing.self) { _ in
-            DynamicHybridWorkoutPlanComposer(
+        container.register(WorkoutPlanComposing.self) { resolver in
+            let entitlementRepo = resolver.resolve(EntitlementRepository.self)
+            let historyRepo = resolver.resolve(WorkoutHistoryRepository.self)
+            return DynamicHybridWorkoutPlanComposer(
                 localComposer: localComposer,
-                usageLimiter: usageLimiter
+                usageLimiter: usageLimiter,
+                entitlementProvider: {
+                    return (try? await entitlementRepo?.currentEntitlement()) ?? .free
+                },
+                historyRepository: historyRepo
+            )
+        }
+        .inObjectScope(.container)
+        
+        // HealthKit (iPhone) - serviço de integração (PRO gating é feito na UI/fluxos)
+        let healthKitService = HealthKitService()
+        container.register(HealthKitServicing.self) { _ in healthKitService }
+            .inObjectScope(.container)
+        
+        container.register(HealthKitHistorySyncService.self) { resolver in
+            HealthKitHistorySyncService(
+                healthKit: resolver.resolve(HealthKitServicing.self)!,
+                historyRepository: resolver.resolve(WorkoutHistoryRepository.self)!
             )
         }
         .inObjectScope(.container)

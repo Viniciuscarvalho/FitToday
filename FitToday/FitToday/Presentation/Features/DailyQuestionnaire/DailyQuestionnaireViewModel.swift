@@ -13,11 +13,13 @@ final class DailyQuestionnaireViewModel: ObservableObject, ErrorPresenting {
     enum Step: Int, CaseIterable {
         case focus
         case soreness
+        case energy
 
         var title: String {
             switch self {
             case .focus: return "Qual foco para hoje?"
             case .soreness: return "Como está seu corpo?"
+            case .energy: return "Como está sua energia hoje?"
             }
         }
     }
@@ -26,6 +28,8 @@ final class DailyQuestionnaireViewModel: ObservableObject, ErrorPresenting {
     @Published var selectedFocus: DailyFocus?
     @Published var selectedSoreness: MuscleSorenessLevel?
     @Published var selectedAreas: Set<MuscleGroup> = []
+    /// Energia percebida (0–10). Default 5 para reduzir fricção.
+    @Published var energyLevel: Int = 5
     @Published private(set) var entitlement: ProEntitlement = .free
     @Published var isLoading = false
     @Published var errorMessage: ErrorMessage? // ErrorPresenting protocol
@@ -65,23 +69,46 @@ final class DailyQuestionnaireViewModel: ObservableObject, ErrorPresenting {
     var canAdvanceFromFocus: Bool {
         selectedFocus != nil
     }
-
-    var canSubmit: Bool {
-        guard selectedFocus != nil, let level = selectedSoreness else { return false }
-        if level == .strong {
+    
+    var canAdvanceFromSoreness: Bool {
+        canSubmitSoreness
+    }
+    
+    private var canSubmitSoreness: Bool {
+        guard selectedSoreness != nil else { return false }
+        if selectedSoreness == .strong {
             return !selectedAreas.isEmpty
         }
         return true
     }
 
+    var canSubmit: Bool {
+        guard selectedFocus != nil else { return false }
+        guard canSubmitSoreness else { return false }
+        return (0...10).contains(energyLevel)
+    }
+
     func goToNextStep() {
-        guard currentStep == .focus, canAdvanceFromFocus else { return }
-        currentStep = .soreness
+        switch currentStep {
+        case .focus:
+            guard canAdvanceFromFocus else { return }
+            currentStep = .soreness
+        case .soreness:
+            guard canAdvanceFromSoreness else { return }
+            currentStep = .energy
+        case .energy:
+            return
+        }
     }
 
     func goToPreviousStep() {
-        if currentStep == .soreness {
+        switch currentStep {
+        case .energy:
+            currentStep = .soreness
+        case .soreness:
             currentStep = .focus
+        case .focus:
+            return
         }
     }
 
@@ -114,7 +141,8 @@ final class DailyQuestionnaireViewModel: ObservableObject, ErrorPresenting {
         return try buildUseCase.execute(
             focus: focus,
             sorenessLevel: soreness,
-            areas: Array(selectedAreas)
+            areas: Array(selectedAreas),
+            energyLevel: energyLevel
         )
     }
 
@@ -123,7 +151,7 @@ final class DailyQuestionnaireViewModel: ObservableObject, ErrorPresenting {
     func generatePlan(for checkIn: DailyCheckIn) async throws -> WorkoutPlan {
         #if DEBUG
         print("[DailyQ] Iniciando geração de plano...")
-        print("[DailyQ] CheckIn: focus=\(checkIn.focus.rawValue) soreness=\(checkIn.sorenessLevel.rawValue)")
+        print("[DailyQ] CheckIn: focus=\(checkIn.focus.rawValue) soreness=\(checkIn.sorenessLevel.rawValue) energy=\(checkIn.energyLevel)")
         #endif
         
         let profileUseCase = GetUserProfileUseCase(repository: profileRepository)

@@ -263,6 +263,7 @@ struct BlueprintInput: Codable, Hashable, Sendable {
   let focus: DailyFocus
   let sorenessLevel: MuscleSorenessLevel
   let sorenessAreas: [MuscleGroup]
+  let energyLevel: Int // 0-10
   let dayOfWeek: Int // 1-7 (segunda-domingo)
   let weekOfYear: Int // 1-52
   let hourOfDay: Int // 0-23 (hora do dia para variação mais frequente)
@@ -278,6 +279,7 @@ struct BlueprintInput: Codable, Hashable, Sendable {
       level.rawValue,
       focus.rawValue,
       sorenessLevel.rawValue,
+      String(energyLevel),
       String(dayOfWeek),
       String(weekOfYear),
       String(hourOfDay),
@@ -321,6 +323,7 @@ struct BlueprintInput: Codable, Hashable, Sendable {
       focus: checkIn.focus,
       sorenessLevel: checkIn.sorenessLevel,
       sorenessAreas: checkIn.sorenessAreas,
+      energyLevel: checkIn.energyLevel,
       dayOfWeek: dayOfWeek,
       weekOfYear: weekOfYear,
       hourOfDay: hourOfDay,

@@ -43,6 +43,24 @@ final class WorkoutBlueprintEngineTests: XCTestCase {
     XCTAssertEqual(blueprint1.intensity, blueprint2.intensity)
   }
   
+  func testLowEnergyDowngradesIntensity() {
+    // Given
+    let profile = makeProfile(goal: .hypertrophy, structure: .fullGym, level: .intermediate)
+    let normalEnergy = DailyCheckIn(focus: .upper, sorenessLevel: .none, sorenessAreas: [], energyLevel: 7)
+    let lowEnergy = DailyCheckIn(focus: .upper, sorenessLevel: .none, sorenessAreas: [], energyLevel: 2)
+    
+    // When
+    let blueprintNormal = engine.generateBlueprint(profile: profile, checkIn: normalEnergy)
+    let blueprintLow = engine.generateBlueprint(profile: profile, checkIn: lowEnergy)
+    
+    // Then
+    // Energia baixa nunca deve aumentar intensidade; esperamos que seja <=
+    let order: [WorkoutIntensity] = [.low, .moderate, .high]
+    let normalIndex = order.firstIndex(of: blueprintNormal.intensity) ?? 0
+    let lowIndex = order.firstIndex(of: blueprintLow.intensity) ?? 0
+    XCTAssertLessThanOrEqual(lowIndex, normalIndex)
+  }
+  
   func testDifferentInputsProduceDifferentBlueprints() {
     // Given: inputs diferentes (goal diferente)
     let profile1 = makeProfile(goal: .hypertrophy, structure: .fullGym, level: .intermediate)

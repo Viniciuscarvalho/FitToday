@@ -35,10 +35,13 @@ extension MuscleGroup {
         switch self {
         case .chest: return "Peito"
         case .back: return "Costas"
+        case .lats: return "Latíssimos"
+        case .lowerBack: return "Lombar"
         case .shoulders: return "Ombros"
         case .arms: return "Braços"
         case .biceps: return "Bíceps"
         case .triceps: return "Tríceps"
+        case .forearms: return "Antebraços"
         case .core: return "Core"
         case .glutes: return "Glúteos"
         case .quads: return "Quadríceps"

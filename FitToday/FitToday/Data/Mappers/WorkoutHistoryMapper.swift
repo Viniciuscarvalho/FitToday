@@ -31,6 +31,7 @@ struct WorkoutHistoryMapper {
             programName: model.programName,
             durationMinutes: model.durationMinutes,
             caloriesBurned: model.caloriesBurned,
+            healthKitWorkoutUUID: model.healthKitWorkoutUUID,
             workoutPlan: workoutPlan
         )
     }
@@ -53,6 +54,7 @@ struct WorkoutHistoryMapper {
             programName: entry.programName,
             durationMinutes: entry.durationMinutes,
             caloriesBurned: entry.caloriesBurned,
+            healthKitWorkoutUUID: entry.healthKitWorkoutUUID,
             workoutPlanJSON: workoutPlanJSON
         )
     }
