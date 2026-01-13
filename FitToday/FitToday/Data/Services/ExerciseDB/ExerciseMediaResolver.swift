@@ -78,145 +78,183 @@ actor ExerciseMediaResolver: ExerciseMediaResolving {
   // MARK: - Performance Constants
   
   /// Limite máximo de candidatos a buscar por target (evita respostas muito grandes)
-  private static let maxCandidatesPerTarget = 30
+  nonisolated private static let maxCandidatesPerTarget = 30
   
   /// Limite máximo de candidatos a processar no ranking (evita processamento desnecessário)
-  private static let maxCandidatesForRanking = 30
+  nonisolated private static let maxCandidatesForRanking = 30
   
   /// Limite máximo de resultados por busca por nome
-  private static let maxResultsPerNameSearch = 10
+  nonisolated private static let maxResultsPerNameSearch = 10
   
   /// Limite máximo de queries de busca por nome (evita loops infinitos)
-  private static let maxSearchQueries = 5
+  nonisolated private static let maxSearchQueries = 5
   
   // MARK: - Exercise Name Translation (PT → EN)
   
   /// Dicionário de tradução de nomes de exercícios do português para inglês.
   /// Usado para melhorar a busca na API ExerciseDB que está em inglês.
+  /// 
+  /// IMPORTANTE: Manter sincronizado com exercícios do LibraryWorkoutsSeed.json
   nonisolated private static let exerciseNameTranslation: [String: String] = [
-    // ✅ EXERCÍCIOS ESPECÍFICOS PROBLEMÁTICOS (adicionados para 90%+ de assertividade)
-    // Abdominais específicos
+    // ✅ TRÍCEPS - Crítico para assertividade (problema reportado!)
+    "extensão de tríceps com halter": "dumbbell triceps extension",
+    "extensão de tríceps": "triceps extension",
+    "extensão de tríceps overhead com halter": "dumbbell triceps extension",
+    "tríceps testa": "lying triceps extension",
+    "tríceps francês": "dumbbell triceps extension",
+    "tríceps pulley": "triceps pushdown",
+    "tríceps corda": "cable rope triceps pushdown",
+    "triceps pushdown": "triceps pushdown",
+    "triceps extension": "triceps extension",
+    "dumbbell triceps extension": "dumbbell triceps extension",
+    
+    // ✅ BÍCEPS
+    "rosca direta": "barbell curl",
+    "rosca alternada": "dumbbell alternate bicep curl",
+    "rosca martelo": "hammer curl",
+    "rosca concentrada": "concentration curl",
+    "rosca scott": "ez barbell preacher curl",
+    "rosca com halter": "dumbbell curl",
+    "bíceps": "bicep curl",
+    "biceps curl": "bicep curl",
+    "rosca": "curl",
+    "curl": "curl",
+    
+    // ✅ PEITO
+    "supino reto com barra": "barbell bench press",
+    "supino reto": "barbell bench press",
+    "supino inclinado com halteres": "incline dumbbell press",
+    "supino inclinado": "incline dumbbell press",
+    "supino declinado": "decline barbell bench press",
+    "supino com halteres": "dumbbell bench press",
+    "supino": "bench press",
+    "bench press": "bench press",
+    "crucifixo": "dumbbell fly",
+    "voadora": "pec deck fly",
+    "voadora na máquina": "pec deck fly",
+    "crossover": "cable crossover",
+    "flexão": "push-up",
+    "push-up": "push-up",
+    "pushup": "push-up",
+    "flexão de braço": "push-up",
+    "flexão diamante": "diamond push-up",
+    "diamond push-up": "diamond push-up",
+    "flexão com aplauso": "clap push-up",
+    "flexão archer": "archer push-up",
+    "flexão pike": "pike push-up",
+    
+    // ✅ COSTAS
+    "puxada frontal": "lat pulldown",
+    "puxada": "lat pulldown",
+    "pulldown": "lat pulldown",
+    "remada curvada": "bent over barbell row",
+    "remada curvada com barra": "bent over barbell row",
+    "remada baixa": "cable seated row",
+    "remada unilateral com halter": "dumbbell bent over row",
+    "remada unilateral": "dumbbell bent over row",
+    "remada cavalinho": "t-bar row",
+    "remada serrote": "dumbbell bent over row",
+    "remada": "row",
+    "row": "row",
+    "barra": "pull-up",
+    "pull-up": "pull-up",
+    "pullup": "pull-up",
+    "barra fixa": "pull-up",
+    "bent over row": "bent over barbell row",
+    "one arm dumbbell row": "dumbbell bent over row",
+    "t-bar row": "t-bar row",
+    
+    // ✅ OMBROS
+    "desenvolvimento com halteres": "dumbbell shoulder press",
+    "desenvolvimento militar": "barbell shoulder press",
+    "desenvolvimento": "shoulder press",
+    "shoulder press": "shoulder press",
+    "elevação lateral": "dumbbell lateral raise",
+    "elevação lateral com halter": "dumbbell lateral raise",
+    "lateral raise": "dumbbell lateral raise",
+    "elevação frontal": "dumbbell front raise",
+    "crucifixo invertido": "reverse fly",
+    "face pull": "face pull",
+    
+    // ✅ PERNAS
+    "agachamento livre": "barbell squat",
+    "agachamento": "squat",
+    "squat": "squat",
+    "agachamento com salto": "jump squat",
+    "jump squat": "jump squat",
+    "agachamento búlgaro": "dumbbell single leg split squat",
+    "bulgarian split squat": "dumbbell single leg split squat",
+    "agachamento sumô": "sumo squat",
+    "sumo squat": "sumo squat",
+    "agachamento frontal": "barbell front squat",
+    "front squat": "barbell front squat",
+    "leg press": "leg press",
+    "leg press 45": "sled 45 leg press",
+    "extensão de pernas": "leg extension",
+    "extensão de perna": "leg extension",
+    "cadeira extensora": "leg extension",
+    "mesa flexora": "lying leg curl",
+    "flexão de perna": "lying leg curl",
+    "afundo": "dumbbell lunge",
+    "lunge": "dumbbell lunge",
+    "passada": "dumbbell lunge",
+    "stiff": "barbell stiff legged deadlift",
+    "levantamento terra": "barbell deadlift",
+    "deadlift": "barbell deadlift",
+    "elevação de panturrilha": "standing calf raise",
+    "panturrilha em pé": "standing calf raise",
+    "panturrilha sentado": "seated calf raise",
+    
+    // ✅ GLÚTEOS
+    "elevação pélvica": "glute bridge",
+    "glute bridge": "glute bridge",
+    "hip thrust": "barbell hip thrust",
+    "ponte": "glute bridge",
+    "elevação pélvica com halter": "dumbbell hip thrust",
+    "abdução de quadril": "hip abduction machine",
+    "kickback": "cable kickback",
+    
+    // ✅ CORE/ABDOMINAIS
+    "abdominal tradicional": "crunch",
+    "abdominal": "crunch",
+    "crunch": "crunch",
+    "abdominal infra": "reverse crunch",
+    "abdominal reverso": "reverse crunch",
+    "reverse crunch": "reverse crunch",
     "abdominal bicicleta": "bicycle crunch",
     "bicycle crunch": "bicycle crunch",
     "abdominal canivete": "v-up",
     "v-up": "v-up",
+    "abdominal oblíquo": "oblique crunch",
+    "side crunch": "oblique crunch",
+    "prancha": "plank",
+    "plank": "plank",
+    "prancha lateral": "side plank",
+    "side plank": "side plank",
+    "prancha com elevação de braço": "plank arm raise",
+    "prancha com rotação": "plank rotation",
+    "prancha lateral com rotação": "side plank rotation",
+    "prancha alta": "push-up position plank",
+    "prancha baixa": "forearm plank",
+    "dead bug": "dead bug",
+    "bird dog": "bird dog",
     "elevação de joelhos": "knee raise",
     "knee raise": "knee raise",
     "elevação de joelhos suspenso": "hanging knee raise",
     "hanging knee raise": "hanging knee raise",
     "elevação de pernas": "leg raise",
     "leg raise": "leg raise",
-
-    // Agachamentos específicos
-    "agachamento com salto": "jump squat",
-    "jump squat": "jump squat",
-    "agachamento búlgaro": "bulgarian split squat",
-    "bulgarian split squat": "bulgarian split squat",
-    "agachamento sumô": "sumo squat",
-    "sumo squat": "sumo squat",
-    "agachamento frontal": "front squat",
-    "front squat": "front squat",
-
-    // Prancha específicas
-    "prancha com elevação de braço": "plank arm raise",
-    "prancha com rotação": "plank rotation",
-    "prancha lateral com rotação": "side plank rotation",
-    "prancha alta": "high plank",
-    "prancha baixa": "forearm plank",
-
-    // Burpees específicos
-    "burpee com salto": "burpee",
-    "burpee com flexão": "burpee with push-up",
-    "burpee com salto lateral": "lateral burpee",
-
-    // Flexões específicas
-    "flexão diamante": "diamond push-up",
-    "diamond push-up": "diamond push-up",
-    "flexão com aplauso": "clap push-up",
-    "flexão archer": "archer push-up",
-    "flexão pike": "pike push-up",
-
-    // Remadas específicas
-    "remada unilateral com halter": "one arm dumbbell row",
-    "one arm dumbbell row": "one arm dumbbell row",
-    "remada curvada": "bent over row",
-    "bent over row": "bent over row",
-    "remada cavalinho": "t-bar row",
-    "t-bar row": "t-bar row",
-
-    // Core & Estabilidade
-    "prancha": "plank",
-    "plank": "plank",
-    "dead bug": "dead bug",
-    "bird dog": "bird dog",
-    "prancha lateral": "side plank",
-    "side plank": "side plank",
-    "abdominal reverso": "reverse crunch",
-    "reverse crunch": "reverse crunch",
-    "elevação pélvica": "glute bridge",
-    "glute bridge": "glute bridge",
-    "hip thrust": "glute bridge",
-    "ponte": "glute bridge",
-    "elevação pélvica com halter": "dumbbell hip thrust",
-
-    // Cardio & Full Body
+    
+    // ✅ CARDIO & FULL BODY
     "burpee": "burpee",
+    "burpee com salto": "burpee",
+    "burpee com flexão": "burpee",
     "mountain climber": "mountain climber",
     "escalador": "mountain climber",
-
-    // Upper Body
-    "flexão": "push-up",
-    "push-up": "push-up",
-    "pushup": "push-up",
-    "flexão de braço": "push-up",
-    "barra": "pull-up",
-    "pull-up": "pull-up",
-    "pullup": "pull-up",
-    "barra fixa": "pull-up",
-    "supino reto com barra": "barbell bench press",
-    "supino inclinado com halteres": "incline dumbbell press",
-    "supino": "bench press",
-    "bench press": "bench press",
-
-    // Lower Body
-    "agachamento": "squat",
-    "squat": "squat",
-    "afundo": "lunge",
-    "lunge": "lunge",
-    "passada": "lunge",
-    "leg press": "leg press",
-    "extensão de perna": "leg extension",
-    "flexão de perna": "leg curl",
-
-    // Abdominais gerais
-    "abdominal": "crunch",
-    "crunch": "crunch",
-    "abdominal tradicional": "crunch",
-    "abdominal oblíquo": "side crunch",
-    "side crunch": "side crunch",
-
-    // Ombros
-    "desenvolvimento": "shoulder press",
-    "shoulder press": "shoulder press",
-    "elevação lateral": "lateral raise",
-    "lateral raise": "lateral raise",
-
-    // Costas
-    "remada": "row",
-    "row": "row",
-    "puxada": "pulldown",
-    "pulldown": "pulldown",
-
-    // Tríceps
-    "tríceps": "triceps",
-    "triceps extension": "triceps extension",
-    "tríceps testa": "lying triceps extension",
-
-    // Bíceps
-    "bíceps": "biceps",
-    "biceps curl": "biceps curl",
-    "rosca": "curl",
-    "curl": "curl",
+    "jumping jack": "jumping jack",
+    "polichinelo": "jumping jack",
+    "high knees": "high knee skips",
+    "corrida no lugar": "high knee skips",
   ]
   
   // MARK: - Properties
@@ -241,57 +279,29 @@ actor ExerciseMediaResolver: ExerciseMediaResolving {
     for exercise: WorkoutExercise,
     context: MediaDisplayContext = .thumbnail
   ) async -> ResolvedExerciseMedia {
-    // 1) Se já temos mídia válida, verifica se precisa converter URLs antigas
+    // 1) Se já temos mídia válida, verifica se são URLs novas (RapidAPI)
     if let existing = exercise.media, existing.gifURL != nil || existing.imageURL != nil {
       let isLegacyImageURL = isLegacyURL(existing.imageURL)
       let isLegacyGifURL = isLegacyURL(existing.gifURL)
       
-      // Se for URL antiga, tenta converter; senão usa a original
-      let convertedImageURL: URL?
-      if isLegacyImageURL {
-        convertedImageURL = await convertLegacyURLToRapidAPI(
-          existing.imageURL,
-          exerciseId: exercise.id,
-          context: context
-        )
+      // ⚠️ CORREÇÃO CRÍTICA: Se qualquer URL é antiga (v2.exercisedb.io),
+      // ignora COMPLETAMENTE e busca via nome/target.
+      // IDs de URLs antigas são UNRELIABLE e podem mostrar exercícios errados!
+      if isLegacyImageURL || isLegacyGifURL {
+        #if DEBUG
+        print("[MediaResolver] ⚠️ URLs antigas detectadas para '\(exercise.name)' - ignorando e buscando via nome/target")
+        #endif
+        // Continua para buscar da API abaixo (não usa URLs antigas)
       } else {
-        convertedImageURL = existing.imageURL
-      }
-      
-      let convertedGifURL: URL?
-      if isLegacyGifURL {
-        convertedGifURL = await convertLegacyURLToRapidAPI(
-          existing.gifURL,
-          exerciseId: exercise.id,
-          context: context
-        )
-      } else {
-        convertedGifURL = existing.gifURL
-      }
-      
-      // Se conseguiu converter URL antiga OU não era URL antiga, usa a URL
-      // Se não conseguiu converter URL antiga, não usa a antiga - continua para buscar da API
-      if let finalImageURL = convertedImageURL ?? (isLegacyImageURL ? nil : existing.imageURL),
-         let finalGifURL = convertedGifURL ?? (isLegacyGifURL ? nil : existing.gifURL) {
-        // Tem pelo menos uma URL válida (convertida ou original não-antiga)
+        // URLs novas (RapidAPI) - usa diretamente
         let resolved = ResolvedExerciseMedia(
-          gifURL: finalGifURL,
-          imageURL: finalImageURL,
-          source: (isLegacyImageURL || isLegacyGifURL) ? .exerciseDB : .local
-        )
-        resolvedCache["\(exercise.id)_\(context.resolution.rawValue)"] = resolved
-        return resolved
-      } else if convertedImageURL != nil || convertedGifURL != nil {
-        // Pelo menos uma conversão funcionou (mas a outra falhou)
-        let resolved = ResolvedExerciseMedia(
-          gifURL: convertedGifURL,
-          imageURL: convertedImageURL,
-          source: .exerciseDB
+          gifURL: existing.gifURL,
+          imageURL: existing.imageURL,
+          source: .local
         )
         resolvedCache["\(exercise.id)_\(context.resolution.rawValue)"] = resolved
         return resolved
       }
-      // Se não conseguiu converter URL antiga, continua para buscar da API abaixo
     }
 
     // 2) Verifica cache
@@ -371,57 +381,29 @@ actor ExerciseMediaResolver: ExerciseMediaResolving {
     existingMedia: ExerciseMedia?,
     context: MediaDisplayContext = .thumbnail
   ) async -> ResolvedExerciseMedia {
-    // 1. Se já temos mídia válida, verifica se precisa converter URLs antigas
+    // 1. Se já temos mídia válida, verifica se são URLs novas (RapidAPI)
     if let existing = existingMedia, existing.gifURL != nil || existing.imageURL != nil {
       let isLegacyImageURL = isLegacyURL(existing.imageURL)
       let isLegacyGifURL = isLegacyURL(existing.gifURL)
       
-      // Se for URL antiga, tenta converter; senão usa a original
-      let convertedImageURL: URL?
-      if isLegacyImageURL {
-        convertedImageURL = await convertLegacyURLToRapidAPI(
-          existing.imageURL,
-          exerciseId: exerciseId,
-          context: context
-        )
+      // ⚠️ CORREÇÃO CRÍTICA: Se qualquer URL é antiga (v2.exercisedb.io),
+      // ignora COMPLETAMENTE e busca via API.
+      // IDs de URLs antigas são UNRELIABLE e podem mostrar exercícios errados!
+      if isLegacyImageURL || isLegacyGifURL {
+        #if DEBUG
+        print("[MediaResolver] ⚠️ URLs antigas detectadas para exerciseId '\(exerciseId)' - ignorando e buscando via API")
+        #endif
+        // Continua para buscar da API abaixo (não usa URLs antigas)
       } else {
-        convertedImageURL = existing.imageURL
-      }
-      
-      let convertedGifURL: URL?
-      if isLegacyGifURL {
-        convertedGifURL = await convertLegacyURLToRapidAPI(
-          existing.gifURL,
-          exerciseId: exerciseId,
-          context: context
-        )
-      } else {
-        convertedGifURL = existing.gifURL
-      }
-      
-      // Se conseguiu converter URL antiga OU não era URL antiga, usa a URL
-      // Se não conseguiu converter URL antiga, não usa a antiga - continua para buscar da API
-      if let finalImageURL = convertedImageURL ?? (isLegacyImageURL ? nil : existing.imageURL),
-         let finalGifURL = convertedGifURL ?? (isLegacyGifURL ? nil : existing.gifURL) {
-        // Tem pelo menos uma URL válida (convertida ou original não-antiga)
+        // URLs novas (RapidAPI) - usa diretamente
         let resolved = ResolvedExerciseMedia(
-          gifURL: finalGifURL,
-          imageURL: finalImageURL,
-          source: (isLegacyImageURL || isLegacyGifURL) ? .exerciseDB : .local
-        )
-        resolvedCache[exerciseId] = resolved
-        return resolved
-      } else if convertedImageURL != nil || convertedGifURL != nil {
-        // Pelo menos uma conversão funcionou (mas a outra falhou)
-        let resolved = ResolvedExerciseMedia(
-          gifURL: convertedGifURL,
-          imageURL: convertedImageURL,
-          source: .exerciseDB
+          gifURL: existing.gifURL,
+          imageURL: existing.imageURL,
+          source: .local
         )
         resolvedCache[exerciseId] = resolved
         return resolved
       }
-      // Se não conseguiu converter URL antiga, continua para buscar da API abaixo
     }
 
     // 2. Verifica cache (com contexto de resolução)
@@ -612,9 +594,12 @@ actor ExerciseMediaResolver: ExerciseMediaResolving {
   }
   
   /// Converte URLs antigas (v2.exercisedb.io) para o formato RapidAPI.
-  /// Extrai o exerciseId da URL antiga e constrói a URL RapidAPI correta.
-  /// Retorna `nil` se não for URL antiga ou se não conseguir converter.
-  /// IMPORTANTE: Valida se o exerciseId existe na API antes de retornar a URL.
+  /// 
+  /// IMPORTANTE: URLs antigas contêm IDs que podem corresponder a exercícios DIFERENTES
+  /// na API atual! Por isso, NÃO confiamos no ID extraído da URL antiga.
+  /// Retorna `nil` para forçar resolução por nome/target que é mais confiável.
+  ///
+  /// - Returns: Sempre `nil` para URLs antigas - força nova resolução
   private func convertLegacyURLToRapidAPI(
     _ url: URL?,
     exerciseId: String?,
@@ -628,58 +613,15 @@ actor ExerciseMediaResolver: ExerciseMediaResolving {
       return nil
     }
     
-    // Extrai exerciseId da URL antiga (último componente do path)
-    let extractedId = url.pathComponents.last ?? exerciseId ?? ""
-    
-    guard !extractedId.isEmpty else {
-      #if DEBUG
-      print("[MediaResolver] ⚠️ Não foi possível extrair exerciseId da URL antiga: \(url.absoluteString)")
-      #endif
-      return nil
-    }
-    
     #if DEBUG
-    print("[MediaResolver] 🔄 Convertendo URL antiga '\(url.absoluteString)' para RapidAPI (exerciseId=\(extractedId))")
+    print("[MediaResolver] ⚠️ URL antiga detectada (v2.exercisedb.io): \(url.absoluteString)")
+    print("[MediaResolver]    IDs de URLs antigas são UNRELIABLE - forçando nova resolução por nome/target")
     #endif
     
-    // Se temos service, valida e usa fetchImageURL para construir a URL correta
-    guard let service = service else {
-      #if DEBUG
-      print("[MediaResolver] ⚠️ Service não disponível para converter URL antiga")
-      #endif
-      return nil
-    }
-    
-    // PRIMEIRO: Valida se o exercício existe na API
-    do {
-      if let _ = try await service.fetchExercise(byId: extractedId) {
-        // Exercício existe, agora busca a URL
-        if let rapidAPIURL = try await service.fetchImageURL(
-          exerciseId: extractedId,
-          resolution: context.resolution
-        ) {
-          #if DEBUG
-          print("[MediaResolver] ✅ URL convertida e validada: \(rapidAPIURL.absoluteString)")
-          #endif
-          return rapidAPIURL
-        } else {
-          #if DEBUG
-          print("[MediaResolver] ⚠️ Exercício \(extractedId) existe mas fetchImageURL retornou nil")
-          #endif
-          return nil
-        }
-      } else {
-        #if DEBUG
-        print("[MediaResolver] ⚠️ ExerciseId \(extractedId) extraído da URL antiga não existe na API - URL inválida")
-        #endif
-        return nil
-      }
-    } catch {
-      #if DEBUG
-      print("[MediaResolver] ❌ Erro ao validar/converter URL antiga: \(error.localizedDescription)")
-      #endif
-      return nil
-    }
+    // ⚠️ CORREÇÃO CRÍTICA: Não confiamos em IDs extraídos de URLs antigas!
+    // O ID "0284" pode corresponder a um exercício completamente diferente na API atual.
+    // Retorna nil para forçar a resolução via nome/target que é mais confiável.
+    return nil
   }
 
   // MARK: - Hybrid ID resolution (target-based + name fallback)
@@ -898,7 +840,8 @@ actor ExerciseMediaResolver: ExerciseMediaResolving {
       return ["lats"]
 
     case .lowerBack:
-      return ["lower back"]
+      // "lower back" NÃO existe no ExerciseDB! O target correto é "spine"
+      return ["spine"]
 
     case .shoulders:
       // ✅ Corrigido: "shoulders" e "deltoids" NÃO existem, apenas "delts"
@@ -957,10 +900,12 @@ actor ExerciseMediaResolver: ExerciseMediaResolving {
   /// - Sem match de equipamento (0) + pelo menos 5 tokens de nome
   ///
   /// Isso FORÇA correspondência forte no nome, não aceita matches apenas por equipamento.
-  private static let minimumConfidenceThreshold = 5
+  nonisolated private static let minimumConfidenceThreshold = 5
 
   /// Rankeia candidatos e retorna o melhor match determinístico.
   /// Retorna nil se não houver match confiável (score abaixo do threshold).
+  /// 
+  /// IMPORTANTE: Valida que o target do candidato corresponde ao mainMuscle esperado!
   private func rankCandidates(
     _ candidates: [ExerciseDBExercise],
     for exercise: WorkoutExercise
@@ -968,9 +913,29 @@ actor ExerciseMediaResolver: ExerciseMediaResolving {
     guard !candidates.isEmpty else { return nil }
 
     var scoredCandidates: [(exercise: ExerciseDBExercise, score: Int, nameScore: Int)] = []
+    
+    // Targets esperados baseado no mainMuscle do exercício
+    let expectedTargets = targetCandidates(for: exercise.mainMuscle)
 
     for candidate in candidates {
       var score = 0
+      
+      // ✅ VALIDAÇÃO CRÍTICA: Verificar se o target do candidato corresponde ao mainMuscle esperado
+      // Isso evita mostrar imagem de panturrilha para exercício de tríceps!
+      let candidateTarget = candidate.target?.lowercased() ?? ""
+      let targetMatches = expectedTargets.isEmpty || expectedTargets.contains { candidateTarget.contains($0.lowercased()) }
+      
+      if !targetMatches && !expectedTargets.isEmpty {
+        #if DEBUG
+        print("[MediaResolver]   ❌ Candidato '\(candidate.name)' rejeitado: target '\(candidateTarget)' não corresponde ao esperado \(expectedTargets)")
+        #endif
+        continue // Pula candidatos com target incompatível
+      }
+      
+      // +5 pontos BONUS se o target corresponde exatamente ao esperado
+      if expectedTargets.contains(where: { candidateTarget == $0.lowercased() }) {
+        score += 5
+      }
 
       // Score de equipamento (+3 se match exato, +1 se similar, 0 se desconhecido)
       let equipmentScore = scoreEquipment(candidate.equipment, against: exercise.equipment)
@@ -1330,11 +1295,13 @@ actor ExerciseMediaResolver: ExerciseMediaResolving {
   // MARK: - Persisted cache (UserDefaults)
 
   private enum MappingKeys {
-    // ✅ v2: Incrementado para invalidar mappings antigos após melhorias no algoritmo (2026-01-08)
+    // ✅ v3: Incrementado para invalidar mappings antigos após melhorias (2026-01-13)
     // Changelog:
     // - v1: Versão inicial (tinha mappings incorretos devido a targets inválidos)
     // - v2: Após correção de targets + threshold=5 + 80% token coverage
-    static let mapping = "exercisedb_id_mapping_v2"
+    // - v3: Correção de URLs antigas (v2.exercisedb.io) + traduções PT→EN expandidas
+    //       + validação de target ao usar ID de URL antiga
+    static let mapping = "exercisedb_id_mapping_v3"
   }
 
   private func cachedExerciseDBId(forLocalExerciseId localId: String) -> String? {

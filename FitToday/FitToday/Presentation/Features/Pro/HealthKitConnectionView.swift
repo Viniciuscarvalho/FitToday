@@ -15,16 +15,13 @@ final class HealthKitConnectionViewModel: ObservableObject {
     @Published private(set) var lastSyncResult: String?
     @Published var errorMessage: ErrorMessage?
     
-    private let entitlementRepository: EntitlementRepository
     private let healthKit: any HealthKitServicing
     private let syncService: HealthKitHistorySyncService
     
     init(
-        entitlementRepository: EntitlementRepository,
         healthKit: any HealthKitServicing,
         syncService: HealthKitHistorySyncService
     ) {
-        self.entitlementRepository = entitlementRepository
         self.healthKit = healthKit
         self.syncService = syncService
     }
@@ -40,11 +37,7 @@ final class HealthKitConnectionViewModel: ObservableObject {
                 Task { @MainActor in self.isWorking = false }
             }
             
-            let entitlement = try await entitlementRepository.currentEntitlement()
-            guard entitlement.isPro else {
-                throw DomainError.invalidInput(reason: "Apple Health é um recurso PRO.")
-            }
-            
+            // HealthKit disponível para todos os usuários (free e PRO)
             try await healthKit.requestAuthorization()
             await refreshAuthorizationState()
         } catch {
@@ -59,11 +52,7 @@ final class HealthKitConnectionViewModel: ObservableObject {
                 Task { @MainActor in self.isWorking = false }
             }
             
-            let entitlement = try await entitlementRepository.currentEntitlement()
-            guard entitlement.isPro else {
-                throw DomainError.invalidInput(reason: "Apple Health é um recurso PRO.")
-            }
-            
+            // HealthKit disponível para todos os usuários (free e PRO)
             let updated = try await syncService.syncLastDays(30)
             await MainActor.run { self.lastSyncResult = "\(updated) treinos atualizados com duração/calorias." }
         } catch {
@@ -95,14 +84,12 @@ struct HealthKitConnectionView: View {
     
     init(resolver: Resolver) {
         guard
-            let entitlementRepo = resolver.resolve(EntitlementRepository.self),
             let healthKit = resolver.resolve(HealthKitServicing.self),
             let sync = resolver.resolve(HealthKitHistorySyncService.self)
         else {
             fatalError("Dependências de HealthKit não registradas.")
         }
         _viewModel = StateObject(wrappedValue: HealthKitConnectionViewModel(
-            entitlementRepository: entitlementRepo,
             healthKit: healthKit,
             syncService: sync
         ))

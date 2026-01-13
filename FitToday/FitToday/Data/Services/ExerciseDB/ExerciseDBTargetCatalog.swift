@@ -28,8 +28,17 @@ actor ExerciseDBTargetCatalog: ExerciseDBTargetCataloging {
     private var lastLoadDate: Date?
     
     // Chave para persistência
-    private static let cacheKey = "exercisedb_target_list_v1"
-    private static let timestampKey = "exercisedb_target_list_timestamp_v1"
+    private static let cacheKey = "exercisedb_target_list_v2"
+    private static let timestampKey = "exercisedb_target_list_timestamp_v2"
+    
+    /// Lista de targets válidos conhecidos (fallback offline)
+    /// Verificado em 2026-01-13 via API ExerciseDB
+    nonisolated private static let knownValidTargets: Set<String> = [
+        "abs", "adductors", "abductors", "biceps", "calves",
+        "cardiovascular system", "delts", "forearms", "glutes",
+        "hamstrings", "lats", "levator scapulae", "pectorals",
+        "quads", "serratus anterior", "spine", "traps", "triceps", "upper back"
+    ]
     
     /// Inicializa o catálogo.
     /// - Parameters:
@@ -74,15 +83,23 @@ actor ExerciseDBTargetCatalog: ExerciseDBTargetCataloging {
     }
     
     func isValidTarget(_ target: String) async -> Bool {
+        let normalizedInput = target.lowercased().trimmingCharacters(in: .whitespaces)
+        
+        // 1. Primeiro verifica lista de targets conhecidos (offline, rápido)
+        if Self.knownValidTargets.contains(normalizedInput) {
+            return true
+        }
+        
+        // 2. Busca na API para targets desconhecidos
         do {
             let targets = try await loadTargets()
-            let normalizedInput = target.lowercased().trimmingCharacters(in: .whitespaces)
             return targets.contains { $0.lowercased() == normalizedInput }
         } catch {
             #if DEBUG
             print("[TargetCatalog] Erro ao verificar target '\(target)': \(error)")
             #endif
-            return false
+            // Fallback: verifica lista offline
+            return Self.knownValidTargets.contains(normalizedInput)
         }
     }
     

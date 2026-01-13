@@ -193,7 +193,7 @@ struct ProfileProView: View {
                 Divider()
                     .padding(.leading, 56)
                 
-                SettingsRow(icon: "heart.fill", title: "Apple Health (PRO)") {
+                SettingsRow(icon: "heart.fill", title: "Apple Health") {
                     router.push(.healthKitSettings, on: .profile)
                 }
                 

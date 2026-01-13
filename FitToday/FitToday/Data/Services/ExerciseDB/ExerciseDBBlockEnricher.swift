@@ -75,19 +75,24 @@ struct ExerciseDBTargetMapper: Sendable {
     }
   }
 
-  /// Retorna lista de targets para um MuscleGroup
+  /// Retorna lista de targets VÁLIDOS para um MuscleGroup
+  /// 
+  /// IMPORTANTE: Usar APENAS targets que existem na API ExerciseDB:
+  /// abs, adductors, abductors, biceps, calves, cardiovascular system,
+  /// delts, forearms, glutes, hamstrings, lats, levator scapulae,
+  /// pectorals, quads, serratus anterior, spine, traps, triceps, upper back
   static func targetsFor(muscleGroup: MuscleGroup) -> [String] {
     switch muscleGroup {
     case .chest:
-      return ["pectorals", "chest"]
+      return ["pectorals"] // "chest" NÃO existe na API
     case .back:
-      return ["upper back", "traps"]
+      return ["lats", "upper back", "traps"]
     case .lats:
       return ["lats"]
     case .lowerBack:
-      return ["lower back"]
+      return ["spine"] // "lower back" NÃO existe na API
     case .shoulders:
-      return ["delts", "shoulders"]
+      return ["delts"] // "shoulders" NÃO existe na API
     case .biceps:
       return ["biceps"]
     case .triceps:
@@ -95,11 +100,9 @@ struct ExerciseDBTargetMapper: Sendable {
     case .forearms:
       return ["forearms"]
     case .arms:
-      return ["biceps", "triceps"]
-    case .quads:
-      return ["quads"]
-    case .quadriceps:
-      return ["quadriceps"]
+      return ["biceps", "triceps", "forearms"]
+    case .quads, .quadriceps:
+      return ["quads"] // "quadriceps" NÃO existe na API
     case .hamstrings:
       return ["hamstrings"]
     case .glutes:
@@ -107,7 +110,7 @@ struct ExerciseDBTargetMapper: Sendable {
     case .calves:
       return ["calves"]
     case .core:
-      return ["abs", "core"]
+      return ["abs", "serratus anterior"] // "core" NÃO existe na API
     case .cardioSystem:
       return ["cardiovascular system"]
     case .fullBody:
