@@ -9,14 +9,15 @@ import SwiftUI
 import Swinject
 
 struct HomeView: View {
-    @StateObject private var viewModel: HomeViewModel
-    @EnvironmentObject private var router: AppRouter
-    @EnvironmentObject private var sessionStore: WorkoutSessionStore
+    // 💡 Learn: Com @Observable, use @State em vez de @StateObject
+    @State private var viewModel: HomeViewModel
+    @Environment(AppRouter.self) private var router
+    @Environment(WorkoutSessionStore.self) private var sessionStore
     @State private var isGeneratingPlan = false
     @State private var heroErrorMessage: String?
 
     init(resolver: Resolver) {
-        _viewModel = StateObject(wrappedValue: HomeViewModel(resolver: resolver))
+        viewModel = HomeViewModel(resolver: resolver)
     }
 
     var body: some View {
@@ -524,8 +525,8 @@ struct WorkoutCardCompact: View {
 
     return NavigationStack {
         HomeView(resolver: container)
-            .environmentObject(AppRouter())
-            .environmentObject(WorkoutSessionStore(resolver: container))
+            .environment(AppRouter())
+            .environment(WorkoutSessionStore(resolver: container))
     }
 }
 

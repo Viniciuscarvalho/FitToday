@@ -6,15 +6,16 @@
 //
 
 import Foundation
-import Combine
 
+// 💡 Learn: @Observable substitui ObservableObject para gerenciamento de estado moderno
 @MainActor
-final class WorkoutTimerStore: ObservableObject {
-    @Published private(set) var elapsedSeconds: Int = 0
-    @Published private(set) var isRunning: Bool = false
-    @Published private(set) var hasStarted: Bool = false
-    
-    private var timerTask: Task<Void, Never>?
+@Observable final class WorkoutTimerStore {
+    private(set) var elapsedSeconds: Int = 0
+    private(set) var isRunning: Bool = false
+    private(set) var hasStarted: Bool = false
+
+    // 💡 Learn: nonisolated(unsafe) permite acesso de deinit sem isolamento do MainActor
+    private nonisolated(unsafe) var timerTask: Task<Void, Never>?
     private var startDate: Date?
     private var accumulatedTime: TimeInterval = 0
     

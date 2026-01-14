@@ -11,21 +11,22 @@ import Swinject
 
 struct PaywallView: View {
     @Environment(\.dismiss) private var dismiss
-    @EnvironmentObject private var router: AppRouter
-    @StateObject private var storeService: StoreKitService
+    @Environment(AppRouter.self) private var router
+    // 💡 Learn: Com @Observable, usamos @State em vez de @StateObject
+    @State private var storeService: StoreKitService
     @State private var selectedProduct: Product?
     @State private var showingError = false
     @State private var errorMessage = ""
-    
+
     private let onPurchaseSuccess: () -> Void
     private let onDismiss: () -> Void
-    
+
     init(
         storeService: StoreKitService,
         onPurchaseSuccess: @escaping () -> Void = {},
         onDismiss: @escaping () -> Void = {}
     ) {
-        _storeService = StateObject(wrappedValue: storeService)
+        _storeService = State(initialValue: storeService)
         self.onPurchaseSuccess = onPurchaseSuccess
         self.onDismiss = onDismiss
     }

@@ -11,7 +11,7 @@ import Swinject
 
 struct ProfileProView: View {
     @Environment(\.dependencyResolver) private var resolver
-    @EnvironmentObject private var router: AppRouter
+    @Environment(AppRouter.self) private var router
     @State private var entitlement: ProEntitlement = .free
     @State private var showingPaywall = false
     @State private var showingRestoreAlert = false
@@ -726,7 +726,7 @@ private struct SettingsRow: View {
     NavigationStack {
         ProfileProView()
             .environment(\.dependencyResolver, Container())
-            .environmentObject(AppRouter())
+            .environment(AppRouter())
     }
 }
 

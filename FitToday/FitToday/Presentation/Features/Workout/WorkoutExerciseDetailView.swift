@@ -8,10 +8,11 @@
 import SwiftUI
 
 struct WorkoutExerciseDetailView: View {
-    @EnvironmentObject private var router: AppRouter
-    @EnvironmentObject private var sessionStore: WorkoutSessionStore
+    @Environment(AppRouter.self) private var router
+    @Environment(WorkoutSessionStore.self) private var sessionStore
     @Environment(\.dependencyResolver) private var resolver
-    @StateObject private var restTimerStore = RestTimerStore()
+    // 💡 Learn: Com @Observable, usamos @State em vez de @StateObject
+    @State private var restTimerStore = RestTimerStore()
     @State private var errorMessage: String?
     @State private var showRestTimer = false
     @State private var showSubstitutionSheet = false

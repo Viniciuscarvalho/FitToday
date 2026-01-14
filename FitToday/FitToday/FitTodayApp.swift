@@ -12,15 +12,16 @@ import Swinject
 @main
 struct FitTodayApp: App {
     private let appContainer: AppContainer
-    @StateObject private var sessionStore: WorkoutSessionStore
+    // 💡 Learn: Com @Observable, use @State em vez de @StateObject
+    @State private var sessionStore: WorkoutSessionStore
 
     init() {
         // Bootstrap de segredos (apenas Debug) - popula Keychain a partir de Secrets.plist
         KeychainBootstrap.runIfNeeded()
-        
+
         let container = AppContainer.build()
         self.appContainer = container
-        _sessionStore = StateObject(wrappedValue: WorkoutSessionStore(resolver: container.container))
+        sessionStore = WorkoutSessionStore(resolver: container.container)
         
         // Configurar aparência global para tema escuro
         configureGlobalAppearance()
@@ -39,8 +40,9 @@ struct FitTodayApp: App {
     var body: some Scene {
         WindowGroup {
             TabRootView()
-                .environmentObject(appContainer.router)
-                .environmentObject(sessionStore)
+                // 💡 Learn: Com @Observable, use .environment() em vez de .environmentObject()
+                .environment(appContainer.router)
+                .environment(sessionStore)
                 .environment(\.dependencyResolver, appContainer.container)
                 .imageCacheService(appContainer.container.resolve(ImageCaching.self)!)
                 .preferredColorScheme(.dark)  // Forçar tema escuro

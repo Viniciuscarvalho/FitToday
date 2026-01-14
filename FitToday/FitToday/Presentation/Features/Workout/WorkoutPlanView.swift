@@ -44,11 +44,12 @@ enum PhaseDisplayMode: String, CaseIterable, Identifiable {
 }
 
 struct WorkoutPlanView: View {
-    @EnvironmentObject private var router: AppRouter
-    @EnvironmentObject private var sessionStore: WorkoutSessionStore
+    @Environment(AppRouter.self) private var router
+    @Environment(WorkoutSessionStore.self) private var sessionStore
     @Environment(\.dependencyResolver) private var resolver
     @Environment(\.imageCacheService) private var imageCacheService
-    @StateObject private var timerStore = WorkoutTimerStore()
+    // 💡 Learn: Com @Observable, usamos @State em vez de @StateObject
+    @State private var timerStore = WorkoutTimerStore()
     @State private var errorMessage: String?
     @State private var isFinishing = false
     @State private var isRegenerating = false
@@ -527,8 +528,8 @@ struct WorkoutPlanView: View {
     }
 
     private struct PhaseSection: View {
-        @EnvironmentObject private var router: AppRouter
-        @EnvironmentObject private var sessionStore: WorkoutSessionStore
+        @Environment(AppRouter.self) private var router
+        @Environment(WorkoutSessionStore.self) private var sessionStore
 
         let phase: WorkoutPlanPhase
         let displayMode: PhaseDisplayMode
@@ -711,23 +712,7 @@ struct WorkoutPlanView: View {
     }
 }
 
-private struct WorkoutMetaChip: View {
-    let icon: String
-    let label: String
-
-    var body: some View {
-        HStack(spacing: FitTodaySpacing.xs) {
-            Image(systemName: icon)
-                .font(.system(.footnote, weight: .semibold))
-            Text(label)
-                .font(FitTodayFont.ui(size: 13, weight: .medium))  // Retro font
-        }
-        .padding(.horizontal, FitTodaySpacing.sm)
-        .padding(.vertical, FitTodaySpacing.xs)
-        .background(FitTodayColor.surface)
-        .cornerRadius(FitTodayRadius.pill)
-    }
-}
+// 💡 Learn: WorkoutMetaChip movido para WorkoutPlanHeader.swift
 
 private struct WorkoutExerciseRow: View {
     let index: Int

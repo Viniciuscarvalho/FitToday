@@ -248,7 +248,7 @@ extension WorkoutPlan {
 
 ```swift
 struct WorkoutPlanView: View {
-  @EnvironmentObject private var sessionStore: WorkoutSessionStore
+  @Environment(WorkoutSessionStore.self) private var sessionStore
   @Environment(\.imageCacheService) private var imageCacheService
   
   @State private var isPrefetching = false

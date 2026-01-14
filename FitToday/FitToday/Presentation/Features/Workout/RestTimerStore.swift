@@ -6,21 +6,22 @@
 //
 
 import Foundation
-import Combine
 import UIKit
 
+// 💡 Learn: @Observable substitui ObservableObject para gerenciamento de estado moderno
 @MainActor
-final class RestTimerStore: ObservableObject {
-    // MARK: - Published State
-    
-    @Published private(set) var remainingSeconds: Int = 0
-    @Published private(set) var totalSeconds: Int = 0
-    @Published private(set) var isActive: Bool = false
-    @Published private(set) var isFinished: Bool = false
-    
+@Observable final class RestTimerStore {
+    // MARK: - State
+
+    private(set) var remainingSeconds: Int = 0
+    private(set) var totalSeconds: Int = 0
+    private(set) var isActive: Bool = false
+    private(set) var isFinished: Bool = false
+
     // MARK: - Private
-    
-    private var timerTask: Task<Void, Never>?
+
+    // 💡 Learn: nonisolated(unsafe) permite acesso de deinit sem isolamento do MainActor
+    private nonisolated(unsafe) var timerTask: Task<Void, Never>?
     private var startDate: Date?
     private var pausedRemainingTime: TimeInterval = 0
     

@@ -9,8 +9,8 @@ import SwiftUI
 import Swinject
 
 struct WorkoutCompletionView: View {
-    @EnvironmentObject private var router: AppRouter
-    @EnvironmentObject private var sessionStore: WorkoutSessionStore
+    @Environment(AppRouter.self) private var router
+    @Environment(WorkoutSessionStore.self) private var sessionStore
     @Environment(\.dependencyResolver) private var resolver
     
     @State private var isGeneratingNewPlan = false

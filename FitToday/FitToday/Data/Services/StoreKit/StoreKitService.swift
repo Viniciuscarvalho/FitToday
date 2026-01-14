@@ -6,17 +6,18 @@
 //
 
 import Foundation
-import Combine
 import StoreKit
 
 /// Serviço responsável por interagir com StoreKit 2 para compras e assinaturas.
+// 💡 Learn: @Observable substitui ObservableObject para gerenciamento de estado moderno
 @MainActor
-final class StoreKitService: ObservableObject {
-    @Published private(set) var products: [Product] = []
-    @Published private(set) var purchaseState: PurchaseState = .idle
-    @Published private(set) var hasActiveSubscription = false
-    
-    private var transactionListener: Task<Void, Never>?
+@Observable final class StoreKitService {
+    private(set) var products: [Product] = []
+    private(set) var purchaseState: PurchaseState = .idle
+    private(set) var hasActiveSubscription = false
+
+    // 💡 Learn: nonisolated(unsafe) permite acesso de deinit sem isolamento do MainActor
+    private nonisolated(unsafe) var transactionListener: Task<Void, Never>?
     private let logger: (String) -> Void
     
     enum PurchaseState: Equatable {

@@ -6,30 +6,25 @@
 //
 
 import Foundation
-import Combine
 
+// 💡 Learn: @Observable elimina a necessidade de Combine publishers
 @MainActor
-final class LibraryViewModel: ObservableObject, ErrorPresenting {
-    @Published private(set) var allWorkouts: [LibraryWorkout] = []
-    @Published private(set) var filteredWorkouts: [LibraryWorkout] = []
-    @Published var filter: LibraryFilter = .empty
-    @Published private(set) var isLoading = false
-    @Published var errorMessage: ErrorMessage? // ErrorPresenting protocol
+@Observable final class LibraryViewModel: ErrorPresenting {
+    private(set) var allWorkouts: [LibraryWorkout] = []
+    private(set) var filteredWorkouts: [LibraryWorkout] = []
+    var filter: LibraryFilter = .empty {
+        didSet {
+            // 💡 Learn: Com @Observable, use didSet em vez de Combine sink
+            applyFilter(filter)
+        }
+    }
+    private(set) var isLoading = false
+    var errorMessage: ErrorMessage? // ErrorPresenting protocol
 
     private let repository: LibraryWorkoutsRepository
-    private var cancellables = Set<AnyCancellable>()
 
     init(repository: LibraryWorkoutsRepository) {
         self.repository = repository
-        setupFilterBinding()
-    }
-
-    private func setupFilterBinding() {
-        $filter
-            .sink { [weak self] newFilter in
-                self?.applyFilter(newFilter)
-            }
-            .store(in: &cancellables)
     }
 
     func loadWorkouts() {

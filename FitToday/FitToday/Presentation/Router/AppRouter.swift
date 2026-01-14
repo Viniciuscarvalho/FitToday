@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import Combine
 import SwiftUI
 
 enum AppTab: Hashable, CaseIterable {
@@ -96,10 +95,11 @@ protocol AppRouting: AnyObject {
     func handle(deeplink: DeepLink)
 }
 
+// 💡 Learn: Navegação com @Observable permite melhor performance
 @MainActor
-final class AppRouter: ObservableObject, AppRouting {
-    @Published var selectedTab: AppTab = .home
-    @Published var tabPaths: [AppTab: NavigationPath] = [:]
+@Observable final class AppRouter: AppRouting {
+    var selectedTab: AppTab = .home
+    var tabPaths: [AppTab: NavigationPath] = [:]
 
     init() {
         AppTab.allCases.forEach { tab in

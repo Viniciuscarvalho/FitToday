@@ -10,45 +10,55 @@ import Swinject
 
 struct LibraryDetailView: View {
     @Environment(\.dependencyResolver) private var resolver
-    @EnvironmentObject private var router: AppRouter
-    @EnvironmentObject private var sessionStore: WorkoutSessionStore
+    @Environment(AppRouter.self) private var router
+    @Environment(WorkoutSessionStore.self) private var sessionStore
     @State private var workout: LibraryWorkout?
     @State private var isLoading = true
     @State private var errorMessage: String?
+    @State private var dependencyError: String?
 
     let workoutId: String
-    private let repository: LibraryWorkoutsRepository
+    private let repository: LibraryWorkoutsRepository?
 
     init(workoutId: String, resolver: Resolver) {
         self.workoutId = workoutId
-        guard let repo = resolver.resolve(LibraryWorkoutsRepository.self) else {
-            fatalError("LibraryWorkoutsRepository não registrado.")
+        if let repo = resolver.resolve(LibraryWorkoutsRepository.self) {
+            self.repository = repo
+            _dependencyError = State(initialValue: nil)
+        } else {
+            self.repository = nil
+            _dependencyError = State(initialValue: "Erro de configuração: repositório de treinos não está registrado.")
         }
-        self.repository = repo
     }
 
     var body: some View {
-        ScrollView {
-            if isLoading {
-                ProgressView()
-                    .frame(maxWidth: .infinity, minHeight: 300)
-            } else if let workout = workout {
-                content(for: workout)
+        Group {
+            if let error = dependencyError {
+                DependencyErrorView(message: error)
             } else {
-                EmptyStateView(
-                    title: "Treino não encontrado",
-                    message: "O treino que você procura não está disponível.",
-                    systemIcon: "questionmark.circle"
-                )
-                .padding()
+                ScrollView {
+                    if isLoading {
+                        ProgressView()
+                            .frame(maxWidth: .infinity, minHeight: 300)
+                    } else if let workout = workout {
+                        content(for: workout)
+                    } else {
+                        EmptyStateView(
+                            title: "Treino não encontrado",
+                            message: "O treino que você procura não está disponível.",
+                            systemIcon: "questionmark.circle"
+                        )
+                        .padding()
+                    }
+                }
+                .task {
+                    await loadWorkout()
+                }
             }
         }
         .background(FitTodayColor.background.ignoresSafeArea())
         .navigationTitle(workout?.title ?? "Detalhes")
         .navigationBarTitleDisplayMode(.inline)
-        .task {
-            await loadWorkout()
-        }
         .alert("Ops!", isPresented: Binding(
             get: { errorMessage != nil },
             set: { _ in errorMessage = nil }
@@ -133,6 +143,11 @@ struct LibraryDetailView: View {
     // MARK: - Actions
 
     private func loadWorkout() async {
+        guard let repository = repository else {
+            isLoading = false
+            return
+        }
+
         isLoading = true
         do {
             let workouts = try await repository.loadWorkouts()

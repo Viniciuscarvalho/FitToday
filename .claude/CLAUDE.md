@@ -76,3 +76,9 @@ answering questions about the codebase. Never make any claims about
 code before investigating unless you are certain of the correct
 answer - give grounded and hallucination-free answers.
 </investigate_before_answering>
+
+Make every task and code change you do as simple as possible. We want to avoid making any massive or complex changes. Every change should impact as little code as possible. Everything is about simplicity.
+
+<context7>
+Always use Context7 MCP when I need library/API documentation, code generation, setup or configuration steps without me having to explicitly ask.
+</context7>

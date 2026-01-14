@@ -14,7 +14,7 @@ struct WorkoutExercisePreviewView: View {
     let exerciseNumber: Int?
     let totalExercises: Int?
     
-    @EnvironmentObject private var router: AppRouter
+    @Environment(AppRouter.self) private var router
     
     init(
         prescription: ExercisePrescription,
@@ -199,7 +199,7 @@ struct WorkoutExercisePreviewView: View {
             exerciseNumber: 2,
             totalExercises: 6
         )
-        .environmentObject(AppRouter())
+        .environment(AppRouter())
     }
 }
 

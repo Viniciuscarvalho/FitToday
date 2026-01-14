@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import Combine
 
 struct HistorySection: Identifiable, Hashable {
     let id: Date
@@ -25,14 +24,15 @@ struct HistorySection: Identifiable, Hashable {
     }()
 }
 
+// 💡 Learn: @Observable permite observação granular - apenas propriedades acessadas disparam updates
 @MainActor
-final class HistoryViewModel: ObservableObject, ErrorPresenting {
-    @Published private(set) var sections: [HistorySection] = []
-    @Published private(set) var isLoading = false
-    @Published private(set) var isLoadingMore = false
-    @Published private(set) var hasMorePages = true
-    @Published private(set) var insights: HistoryInsights?
-    @Published var errorMessage: ErrorMessage? // ErrorPresenting protocol
+@Observable final class HistoryViewModel: ErrorPresenting {
+    private(set) var sections: [HistorySection] = []
+    private(set) var isLoading = false
+    private(set) var isLoadingMore = false
+    private(set) var hasMorePages = true
+    private(set) var insights: HistoryInsights?
+    var errorMessage: ErrorMessage? // ErrorPresenting protocol
 
     private let repository: WorkoutHistoryRepository
     private let pageSize = 20 // Carregar 20 itens por vez

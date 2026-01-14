@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import Combine
 
 /// Modo de onboarding: progressivo (2 passos) ou completo (6 passos)
 enum OnboardingMode {
@@ -15,19 +14,19 @@ enum OnboardingMode {
 }
 
 @MainActor
-final class OnboardingFlowViewModel: ObservableObject {
+@Observable final class OnboardingFlowViewModel {
     // MARK: - User Selections
-    @Published var selectedGoal: FitnessGoal?
-    @Published var selectedStructure: TrainingStructure?
-    @Published var selectedMethod: TrainingMethod?
-    @Published var selectedLevel: TrainingLevel?
-    @Published var selectedConditions: Set<HealthCondition> = []
-    @Published var weeklyFrequency: Int?
-    
+    var selectedGoal: FitnessGoal?
+    var selectedStructure: TrainingStructure?
+    var selectedMethod: TrainingMethod?
+    var selectedLevel: TrainingLevel?
+    var selectedConditions: Set<HealthCondition> = []
+    var weeklyFrequency: Int?
+
     // MARK: - State
-    @Published var isSaving = false
-    @Published var errorMessage: String?
-    @Published private(set) var isProfileIncomplete = false // Indica se perfil foi salvo com defaults
+    var isSaving = false
+    var errorMessage: String?
+    private(set) var isProfileIncomplete = false // Indica se perfil foi salvo com defaults
 
     private let createProfileUseCase: CreateOrUpdateProfileUseCase
     

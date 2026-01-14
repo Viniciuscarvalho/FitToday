@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import Combine
 import SwiftUI
 import Swinject
 
@@ -26,14 +25,16 @@ enum HomeJourneyState: Equatable {
     case error(message: String)
 }
 
+// 💡 Learn: @Observable substitui ObservableObject + @Published
+// Benefícios: observação granular, melhor performance, menos boilerplate
 @MainActor
-final class HomeViewModel: ObservableObject, ErrorPresenting {
-    @Published private(set) var journeyState: HomeJourneyState = .loading
-    @Published private(set) var entitlement: ProEntitlement = .free
-    @Published private(set) var topPrograms: [Program] = []
-    @Published private(set) var weekWorkouts: [LibraryWorkout] = []
-    @Published private(set) var dailyWorkoutState: DailyWorkoutState = DailyWorkoutState()
-    @Published var errorMessage: ErrorMessage? // ErrorPresenting protocol
+@Observable final class HomeViewModel: ErrorPresenting {
+    private(set) var journeyState: HomeJourneyState = .loading
+    private(set) var entitlement: ProEntitlement = .free
+    private(set) var topPrograms: [Program] = []
+    private(set) var weekWorkouts: [LibraryWorkout] = []
+    private(set) var dailyWorkoutState: DailyWorkoutState = DailyWorkoutState()
+    var errorMessage: ErrorMessage? // ErrorPresenting protocol
 
     private let resolver: Resolver
     private let dailyStateManager = DailyWorkoutStateManager.shared

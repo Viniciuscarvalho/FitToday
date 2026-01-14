@@ -10,35 +10,56 @@ import Swinject
 
 struct LibraryView: View {
     @Environment(\.dependencyResolver) private var resolver
-    @EnvironmentObject private var router: AppRouter
-    @StateObject private var viewModel: LibraryViewModel
+    @Environment(AppRouter.self) private var router
+    // 💡 Learn: Com @Observable, usamos @State em vez de @StateObject
+    @State private var viewModel: LibraryViewModel?
+    @State private var dependencyError: String?
     @State private var showingFilters = false
 
     init(resolver: Resolver) {
-        guard let repository = resolver.resolve(LibraryWorkoutsRepository.self) else {
-            fatalError("LibraryWorkoutsRepository não registrado.")
+        if let repository = resolver.resolve(LibraryWorkoutsRepository.self) {
+            _viewModel = State(initialValue: LibraryViewModel(repository: repository))
+            _dependencyError = State(initialValue: nil)
+        } else {
+            _viewModel = State(initialValue: nil)
+            _dependencyError = State(initialValue: "Erro de configuração: repositório de treinos não está registrado.")
         }
-        _viewModel = StateObject(wrappedValue: LibraryViewModel(repository: repository))
     }
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: FitTodaySpacing.lg) {
-                headerSection
-                filterChips
-                workoutsList
+        Group {
+            if let error = dependencyError {
+                DependencyErrorView(message: error)
+            } else if let viewModel = viewModel {
+                contentView(viewModel: viewModel)
+            } else {
+                ProgressView()
             }
-            .padding()
         }
         .background(FitTodayColor.background.ignoresSafeArea())
         .toolbar(.hidden, for: .navigationBar)
+    }
+
+    @ViewBuilder
+    private func contentView(viewModel: LibraryViewModel) -> some View {
+        ScrollView {
+            VStack(spacing: FitTodaySpacing.lg) {
+                headerSection
+                filterChips(viewModel: viewModel)
+                workoutsList(viewModel: viewModel)
+            }
+            .padding()
+        }
         .task {
             viewModel.loadWorkouts()
         }
         .sheet(isPresented: $showingFilters) {
             FilterSheet(viewModel: viewModel)
         }
-        .errorToast(errorMessage: $viewModel.errorMessage)
+        .errorToast(errorMessage: Binding(
+            get: { viewModel.errorMessage },
+            set: { viewModel.errorMessage = $0 }
+        ))
     }
 
     // MARK: - Header
@@ -57,7 +78,7 @@ struct LibraryView: View {
 
     // MARK: - Filters
 
-    private var filterChips: some View {
+    private func filterChips(viewModel: LibraryViewModel) -> some View {
         HStack(spacing: FitTodaySpacing.sm) {
             FilterButton(
                 title: viewModel.filter.goal?.displayName ?? "Objetivo",
@@ -89,7 +110,7 @@ struct LibraryView: View {
     // MARK: - Workouts List
 
     @ViewBuilder
-    private var workoutsList: some View {
+    private func workoutsList(viewModel: LibraryViewModel) -> some View {
         if viewModel.isLoading {
             ProgressView()
                 .frame(maxWidth: .infinity, minHeight: 200)
@@ -223,7 +244,8 @@ private struct IntensityBadge: View {
 // MARK: - Filter Sheet
 
 private struct FilterSheet: View {
-    @ObservedObject var viewModel: LibraryViewModel
+    // 💡 Learn: @Bindable permite criar bindings de objetos @Observable
+    @Bindable var viewModel: LibraryViewModel
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {

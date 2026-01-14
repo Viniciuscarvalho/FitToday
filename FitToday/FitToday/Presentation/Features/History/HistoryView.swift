@@ -6,37 +6,58 @@
 //
 
 import SwiftUI
-import Combine
 import Swinject
 
 struct HistoryView: View {
     @Environment(\.dependencyResolver) private var resolver
-    @StateObject private var viewModel: HistoryViewModel
-    @EnvironmentObject private var sessionStore: WorkoutSessionStore
+    // 💡 Learn: @State funciona perfeitamente com @Observable ViewModels
+    @State private var viewModel: HistoryViewModel?
+    @Environment(WorkoutSessionStore.self) private var sessionStore
+    @State private var dependencyError: String?
 
     init(resolver: Resolver) {
-        guard let repository = resolver.resolve(WorkoutHistoryRepository.self) else {
-            fatalError("WorkoutHistoryRepository não registrado.")
+        // 💡 Learn: Em vez de fatalError, use estado de erro para UI resiliente
+        if let repository = resolver.resolve(WorkoutHistoryRepository.self) {
+            _viewModel = State(initialValue: HistoryViewModel(repository: repository))
+        } else {
+            _dependencyError = State(initialValue: "Erro de configuração: repositório de histórico não encontrado")
         }
-        _viewModel = StateObject(wrappedValue: HistoryViewModel(repository: repository))
     }
 
     var body: some View {
         Group {
-            if viewModel.sections.isEmpty && !viewModel.isLoading {
+            // 💡 Learn: Mostrar UI de erro em vez de crashar o app
+            if let errorMessage = dependencyError {
+                DependencyErrorView(message: errorMessage)
+            } else if let vm = viewModel {
+                historyContent(vm: vm)
+            } else {
+                ProgressView("Carregando...")
+            }
+        }
+        .background(FitTodayColor.background.ignoresSafeArea())
+        .navigationTitle("Histórico")
+        .navigationBarTitleDisplayMode(.large)
+        .toolbarColorScheme(.dark, for: .navigationBar)
+    }
+
+    @ViewBuilder
+    private func historyContent(vm: HistoryViewModel) -> some View {
+        Group {
+            if vm.sections.isEmpty && !vm.isLoading {
                 EmptyState
             } else {
                 ScrollView {
                     LazyVStack(spacing: 0, pinnedViews: [.sectionHeaders]) {
                         // Insights header (scrola junto com o conteúdo)
-                        if let insights = viewModel.insights {
+                        if let insights = vm.insights {
                             HistoryInsightsHeader(insights: insights)
                                 .padding(.horizontal, FitTodaySpacing.md)
                                 .padding(.top, FitTodaySpacing.md)
                                 .padding(.bottom, FitTodaySpacing.lg)
                         }
-                        
-                        ForEach(viewModel.sections) { section in
+
+                        ForEach(vm.sections) { section in
                             Section {
                                 ForEach(section.entries) { entry in
                                     HistoryRow(entry: entry)
@@ -44,11 +65,11 @@ struct HistoryView: View {
                                         .padding(.vertical, FitTodaySpacing.sm)
                                         .onAppear {
                                             // Trigger load more ao aparecer último item
-                                            if entry.id == viewModel.sections.last?.entries.last?.id {
-                                                viewModel.loadMoreIfNeeded()
+                                            if entry.id == vm.sections.last?.entries.last?.id {
+                                                vm.loadMoreIfNeeded()
                                             }
                                         }
-                                    
+
                                     // Divider entre items (exceto o último da seção)
                                     if entry.id != section.entries.last?.id {
                                         Divider()
@@ -67,9 +88,9 @@ struct HistoryView: View {
                                     .textCase(nil)
                             }
                         }
-                        
+
                         // Loading indicator para scroll infinito
-                        if viewModel.isLoadingMore {
+                        if vm.isLoadingMore {
                             HStack {
                                 Spacer()
                                 ProgressView()
@@ -87,22 +108,16 @@ struct HistoryView: View {
                 .scrollContentBackground(.hidden)
             }
         }
-        .background(FitTodayColor.background.ignoresSafeArea())
-        .navigationTitle("Histórico")
-        .navigationBarTitleDisplayMode(.large)
-        .toolbarColorScheme(.dark, for: .navigationBar)
         .task {
-            viewModel.loadHistory()
+            vm.loadHistory()
         }
         .refreshable {
-            await viewModel.refresh()
+            await vm.refresh()
         }
-        .onReceive(sessionStore.$lastCompletionStatus.dropFirst()) { _ in
-            Task {
-                await viewModel.refresh()
-            }
-        }
-        .errorToast(errorMessage: $viewModel.errorMessage)
+        .errorToast(errorMessage: Binding(
+            get: { vm.errorMessage },
+            set: { vm.errorMessage = $0 }
+        ))
     }
 
     private var EmptyState: some View {

@@ -6,37 +6,44 @@
 //
 
 import Foundation
-import Combine
+// Combine removido - usando @Observable
 import Swinject
 import UIKit
 
+// 💡 Learn: @Observable oferece melhor performance para state management
 @MainActor
-final class WorkoutSessionStore: ObservableObject {
+@Observable final class WorkoutSessionStore {
     // MARK: - Published State
     
-    @Published private(set) var session: WorkoutSession?
-    @Published private(set) var currentExerciseIndex: Int = 0
-    @Published private(set) var skippedExerciseIDs: Set<String> = []
-    @Published private(set) var lastCompletionStatus: WorkoutStatus?
-    @Published private(set) var isSavingCompletion = false
-    @Published private(set) var progress: WorkoutProgress?
+    private(set) var session: WorkoutSession?
+    private(set) var currentExerciseIndex: Int = 0
+    private(set) var skippedExerciseIDs: Set<String> = []
+    private(set) var lastCompletionStatus: WorkoutStatus?
+    private(set) var isSavingCompletion = false
+    private(set) var progress: WorkoutProgress?
     
     /// Mapa de substituições: ID do exercício original → Alternativa escolhida
-    @Published private(set) var substitutions: [String: AlternativeExercise] = [:]
+    private(set) var substitutions: [String: AlternativeExercise] = [:]
     
+    // 💡 Learn: Estado de erro para indicar falha de DI
+    private(set) var dependencyError: String?
+
     // MARK: - Private
-    
+
     private let startUseCase = StartWorkoutSessionUseCase()
-    private let completeUseCase: CompleteWorkoutSessionUseCase
+    private let completeUseCase: CompleteWorkoutSessionUseCase?
     private let persistenceKey = WorkoutProgress.persistenceKey
     private let substitutionsKey = "active_workout_substitutions"
 
     init(resolver: Resolver) {
-        guard let historyRepository = resolver.resolve(WorkoutHistoryRepository.self) else {
-            fatalError("WorkoutHistoryRepository não registrado no container.")
+        // 💡 Learn: Tratamento gracioso de erro em vez de fatalError
+        if let historyRepository = resolver.resolve(WorkoutHistoryRepository.self) {
+            self.completeUseCase = CompleteWorkoutSessionUseCase(historyRepository: historyRepository)
+        } else {
+            self.completeUseCase = nil
+            self.dependencyError = "Repositório de histórico não configurado"
         }
-        self.completeUseCase = CompleteWorkoutSessionUseCase(historyRepository: historyRepository)
-        
+
         // Tentar restaurar sessão ativa ao iniciar
         restoreSessionIfNeeded()
         restoreSubstitutions()
@@ -227,9 +234,13 @@ final class WorkoutSessionStore: ObservableObject {
     func finish(status: WorkoutStatus) async throws {
         guard let session else { throw DomainError.invalidInput(reason: "Nenhum treino ativo.") }
         guard !isSavingCompletion else { return }
+        // 💡 Learn: Verificar dependência opcional antes de usar
+        guard let useCase = completeUseCase else {
+            throw DomainError.repositoryFailure(reason: "Serviço de histórico não configurado")
+        }
         isSavingCompletion = true
         defer { isSavingCompletion = false }
-        try await completeUseCase.execute(session: session, status: status)
+        try await useCase.execute(session: session, status: status)
         lastCompletionStatus = status
         
         // Limpar persistência após conclusão

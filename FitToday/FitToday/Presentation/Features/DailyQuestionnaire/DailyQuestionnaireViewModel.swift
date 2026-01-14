@@ -6,10 +6,9 @@
 //
 
 import Foundation
-import Combine
 
 @MainActor
-final class DailyQuestionnaireViewModel: ObservableObject, ErrorPresenting {
+@Observable final class DailyQuestionnaireViewModel: ErrorPresenting {
     enum Step: Int, CaseIterable {
         case focus
         case soreness
@@ -24,22 +23,23 @@ final class DailyQuestionnaireViewModel: ObservableObject, ErrorPresenting {
         }
     }
 
-    @Published var currentStep: Step = .focus
-    @Published var selectedFocus: DailyFocus?
-    @Published var selectedSoreness: MuscleSorenessLevel?
-    @Published var selectedAreas: Set<MuscleGroup> = []
+    var currentStep: Step = .focus
+    var selectedFocus: DailyFocus?
+    var selectedSoreness: MuscleSorenessLevel?
+    var selectedAreas: Set<MuscleGroup> = []
     /// Energia percebida (0–10). Default 5 para reduzir fricção.
-    @Published var energyLevel: Int = 5
-    @Published private(set) var entitlement: ProEntitlement = .free
-    @Published var isLoading = false
-    @Published var errorMessage: ErrorMessage? // ErrorPresenting protocol
+    var energyLevel: Int = 5
+    private(set) var entitlement: ProEntitlement = .free
+    var isLoading = false
+    var errorMessage: ErrorMessage? // ErrorPresenting protocol
 
     private let entitlementRepository: EntitlementRepository
     private let profileRepository: UserProfileRepository
     private let blocksRepository: WorkoutBlocksRepository
     private let composer: WorkoutPlanComposing
     private let buildUseCase = BuildDailyCheckInUseCase()
-    private var entitlementTask: Task<Void, Never>?
+    // 💡 Learn: nonisolated(unsafe) permite acesso de deinit sem isolamento do MainActor
+    private nonisolated(unsafe) var entitlementTask: Task<Void, Never>?
 
     init(
         entitlementRepository: EntitlementRepository,

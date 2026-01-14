@@ -14,9 +14,9 @@ struct OnboardingFlowView: View {
         case setup
     }
 
-    @EnvironmentObject private var router: AppRouter
+    @Environment(AppRouter.self) private var router
     @Environment(\.dependencyResolver) private var resolver
-    @StateObject private var viewModel: OnboardingFlowViewModel
+    @State private var viewModel: OnboardingFlowViewModel
     @State private var stage: Stage
     @State private var currentPage = 0
     @State private var currentStep = 0
@@ -43,7 +43,7 @@ struct OnboardingFlowView: View {
     init(resolver: Resolver, isEditing: Bool = false, onFinished: @escaping () -> Void) {
         let repository = resolver.resolve(UserProfileRepository.self)!
         let useCase = CreateOrUpdateProfileUseCase(repository: repository)
-        _viewModel = StateObject(wrappedValue: OnboardingFlowViewModel(createProfileUseCase: useCase))
+        viewModel = OnboardingFlowViewModel(createProfileUseCase: useCase)
         self.onFinished = onFinished
         self.isEditing = isEditing
         // Se estiver editando, pula direto para o setup
@@ -508,7 +508,7 @@ private extension HealthCondition {
     let repo = InMemoryProfileRepository()
     container.register(UserProfileRepository.self) { _ in repo }
     return OnboardingFlowView(resolver: container, isEditing: false, onFinished: {})
-        .environmentObject(AppRouter())
+        .environment(AppRouter())
 }
 
 #Preview("Edit Profile") {
@@ -516,7 +516,7 @@ private extension HealthCondition {
     let repo = InMemoryProfileRepository()
     container.register(UserProfileRepository.self) { _ in repo }
     return OnboardingFlowView(resolver: container, isEditing: true, onFinished: {})
-        .environmentObject(AppRouter())
+        .environment(AppRouter())
 }
 
 // Preview helper

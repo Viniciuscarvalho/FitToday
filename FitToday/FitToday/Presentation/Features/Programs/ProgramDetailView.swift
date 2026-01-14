@@ -7,34 +7,55 @@
 
 import SwiftUI
 import Swinject
-import Combine
 
 struct ProgramDetailView: View {
     let programId: String
-    
+
     @Environment(\.dependencyResolver) private var resolver
-    @EnvironmentObject private var router: AppRouter
-    @StateObject private var viewModel: ProgramDetailViewModel
-    
+    @Environment(AppRouter.self) private var router
+    // 💡 Learn: Com @Observable, usamos @State em vez de @StateObject
+    @State private var viewModel: ProgramDetailViewModel?
+    @State private var dependencyError: String?
+
     init(programId: String, resolver: Resolver) {
         self.programId = programId
-        guard let programRepo = resolver.resolve(ProgramRepository.self),
-              let workoutRepo = resolver.resolve(LibraryWorkoutsRepository.self) else {
-            fatalError("Repositories não registrados")
+        if let programRepo = resolver.resolve(ProgramRepository.self),
+           let workoutRepo = resolver.resolve(LibraryWorkoutsRepository.self) {
+            _viewModel = State(initialValue: ProgramDetailViewModel(
+                programId: programId,
+                programRepository: programRepo,
+                workoutRepository: workoutRepo
+            ))
+            _dependencyError = State(initialValue: nil)
+        } else {
+            _viewModel = State(initialValue: nil)
+            _dependencyError = State(initialValue: "Erro de configuração: repositórios não estão registrados.")
         }
-        _viewModel = StateObject(wrappedValue: ProgramDetailViewModel(
-            programId: programId,
-            programRepository: programRepo,
-            workoutRepository: workoutRepo
-        ))
     }
     
     var body: some View {
+        Group {
+            if let error = dependencyError {
+                DependencyErrorView(message: error)
+            } else if let viewModel = viewModel {
+                contentView(viewModel: viewModel)
+            } else {
+                ProgressView()
+            }
+        }
+        .background(FitTodayColor.background.ignoresSafeArea())
+        .navigationTitle(viewModel?.program?.name ?? "Programa")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar(.hidden, for: .tabBar)
+    }
+
+    @ViewBuilder
+    private func contentView(viewModel: ProgramDetailViewModel) -> some View {
         ScrollView {
             VStack(spacing: FitTodaySpacing.lg) {
                 if let program = viewModel.program {
                     heroSection(program)
-                    workoutsSection
+                    workoutsSection(viewModel: viewModel)
                 } else if viewModel.isLoading {
                     ProgressView()
                         .frame(maxWidth: .infinity, minHeight: 300)
@@ -44,10 +65,6 @@ struct ProgramDetailView: View {
                 }
             }
         }
-        .background(FitTodayColor.background.ignoresSafeArea())
-        .navigationTitle(viewModel.program?.name ?? "Programa")
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar(.hidden, for: .tabBar)
         .task {
             await viewModel.load()
         }
@@ -128,15 +145,15 @@ struct ProgramDetailView: View {
     }
     
     // MARK: - Workouts Section
-    
+
     @ViewBuilder
-    private var workoutsSection: some View {
+    private func workoutsSection(viewModel: ProgramDetailViewModel) -> some View {
         VStack(alignment: .leading, spacing: FitTodaySpacing.md) {
             Text("Treinos do Programa")
                 .font(.system(.headline, weight: .semibold))
                 .foregroundStyle(FitTodayColor.textPrimary)
                 .padding(.horizontal)
-            
+
             if viewModel.workouts.isEmpty && !viewModel.isLoading {
                 Text("Nenhum treino encontrado")
                     .font(.system(.subheadline))
@@ -172,16 +189,17 @@ struct ProgramDetailView: View {
 
 // MARK: - ViewModel
 
+// 💡 Learn: @Observable substitui ObservableObject para gerenciamento de estado moderno
 @MainActor
-final class ProgramDetailViewModel: ObservableObject {
-    @Published private(set) var program: Program?
-    @Published private(set) var workouts: [LibraryWorkout] = []
-    @Published private(set) var isLoading = false
-    
+@Observable final class ProgramDetailViewModel {
+    private(set) var program: Program?
+    private(set) var workouts: [LibraryWorkout] = []
+    private(set) var isLoading = false
+
     private let programId: String
     private let programRepository: ProgramRepository
     private let workoutRepository: LibraryWorkoutsRepository
-    
+
     init(
         programId: String,
         programRepository: ProgramRepository,
@@ -263,7 +281,7 @@ private struct WorkoutRowCard: View {
 #Preview {
     NavigationStack {
         ProgramDetailView(programId: "prog_push_pull_legs", resolver: Container())
-            .environmentObject(AppRouter())
+            .environment(AppRouter())
     }
 }
 

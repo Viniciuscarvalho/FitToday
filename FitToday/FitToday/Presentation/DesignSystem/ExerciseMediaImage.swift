@@ -24,7 +24,8 @@ struct ExerciseMediaImageURL: View {
   var cornerRadius: CGFloat = FitTodayRadius.md
   var context: MediaDisplayContext = .thumbnail  // Contexto para determinar resolution
 
-  @StateObject private var loader = ExerciseMediaLoader()
+  // 💡 Learn: Com @Observable, usamos @State em vez de @StateObject
+  @State private var loader = ExerciseMediaLoader()
 
   var body: some View {
     Group {
@@ -120,8 +121,9 @@ struct ExerciseThumbnail: View {
 
 // MARK: - Media Loader (Data + GIF support)
 
+// 💡 Learn: @Observable substitui ObservableObject para gerenciamento de estado moderno
 @MainActor
-final class ExerciseMediaLoader: ObservableObject {
+@Observable final class ExerciseMediaLoader {
   enum Phase {
     case idle
     case loading
@@ -129,10 +131,10 @@ final class ExerciseMediaLoader: ObservableObject {
     case failure(error: Error)
   }
 
-  @Published private(set) var phase: Phase = .idle
-  
-  // Rastreia tasks em andamento para evitar requisições duplicadas
-  private var currentTask: Task<Void, Never>?
+  private(set) var phase: Phase = .idle
+
+  // 💡 Learn: nonisolated(unsafe) permite acesso de propriedades de deinit
+  private nonisolated(unsafe) var currentTask: Task<Void, Never>?
 
   // Cache simples em memória (evita re-download em listas)
   private static let cache = NSCache<NSString, MediaCacheEntry>()

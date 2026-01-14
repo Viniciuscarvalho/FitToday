@@ -9,12 +9,14 @@ import SwiftUI
 import Swinject
 
 struct TabRootView: View {
-    @EnvironmentObject private var router: AppRouter
-    @EnvironmentObject private var sessionStore: WorkoutSessionStore
+    @Environment(AppRouter.self) private var router
+    @Environment(WorkoutSessionStore.self) private var sessionStore
     @Environment(\.dependencyResolver) private var resolver
 
     var body: some View {
-        TabView(selection: $router.selectedTab) {
+        // 💡 Learn: @Bindable wrapper permite binding de @Observable objects
+        @Bindable var routerBinding = router
+        TabView(selection: $routerBinding.selectedTab) {
             tabView(for: .home) {
                 HomeView(resolver: resolver)
             }
@@ -172,8 +174,8 @@ private struct PlaceholderView: View {
     container.register(WorkoutHistoryRepository.self) { _ in InMemoryHistoryRepository() }
     let sessionStore = WorkoutSessionStore(resolver: container)
     return TabRootView()
-        .environmentObject(AppRouter())
-        .environmentObject(sessionStore)
+        .environment(AppRouter())
+        .environment(sessionStore)
         .environment(\.dependencyResolver, container)
 }
 

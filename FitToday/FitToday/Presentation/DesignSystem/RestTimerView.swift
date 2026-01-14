@@ -8,7 +8,8 @@
 import SwiftUI
 
 struct RestTimerView: View {
-    @ObservedObject var timerStore: RestTimerStore
+    // 💡 Learn: @Bindable permite criar bindings de objetos @Observable
+    @Bindable var timerStore: RestTimerStore
     let defaultDuration: TimeInterval
     let onComplete: () -> Void
     let onSkip: () -> Void
@@ -152,7 +153,8 @@ struct RestTimerView: View {
 // MARK: - Compact Timer (para inline)
 
 struct CompactRestTimer: View {
-    @ObservedObject var timerStore: RestTimerStore
+    // 💡 Learn: @Bindable permite criar bindings de objetos @Observable
+    @Bindable var timerStore: RestTimerStore
     
     var body: some View {
         HStack(spacing: FitTodaySpacing.sm) {
@@ -183,7 +185,7 @@ struct CompactRestTimer: View {
 // MARK: - Previews
 
 #Preview("Rest Timer") {
-    @Previewable @StateObject var timerStore = RestTimerStore()
+    @Previewable @State var timerStore = RestTimerStore()
     
     VStack(spacing: 30) {
         RestTimerView(

@@ -7,33 +7,50 @@
 //
 
 import SwiftUI
-import Combine
 import Swinject
 
 struct ProgramsView: View {
     @Environment(\.dependencyResolver) private var resolver
-    @EnvironmentObject private var router: AppRouter
-    @StateObject private var viewModel: ProgramsViewModel
-    
+    @Environment(AppRouter.self) private var router
+    // 💡 Learn: Com @Observable, usamos @State em vez de @StateObject
+    @State private var viewModel: ProgramsViewModel?
+    @State private var dependencyError: String?
+
     init(resolver: Resolver) {
-        guard let repository = resolver.resolve(ProgramRepository.self) else {
-            fatalError("ProgramRepository não registrado.")
+        if let repository = resolver.resolve(ProgramRepository.self) {
+            _viewModel = State(initialValue: ProgramsViewModel(repository: repository))
+            _dependencyError = State(initialValue: nil)
+        } else {
+            _viewModel = State(initialValue: nil)
+            _dependencyError = State(initialValue: "Erro de configuração: repositório de programas não está registrado.")
         }
-        _viewModel = StateObject(wrappedValue: ProgramsViewModel(repository: repository))
     }
     
     var body: some View {
+        Group {
+            if let error = dependencyError {
+                DependencyErrorView(message: error)
+            } else if let viewModel = viewModel {
+                contentView(viewModel: viewModel)
+            } else {
+                ProgressView()
+            }
+        }
+        .background(FitTodayColor.background.ignoresSafeArea())
+        .toolbar(.hidden, for: .navigationBar)
+    }
+
+    @ViewBuilder
+    private func contentView(viewModel: ProgramsViewModel) -> some View {
         ScrollView {
             VStack(spacing: FitTodaySpacing.lg) {
                 headerSection
                     .padding(.horizontal, FitTodaySpacing.md)
-                programsGrid
+                programsGrid(viewModel: viewModel)
                     .padding(.horizontal, FitTodaySpacing.md)
             }
             .padding(.vertical, FitTodaySpacing.md)
         }
-        .background(FitTodayColor.background.ignoresSafeArea())
-        .toolbar(.hidden, for: .navigationBar)
         .task {
             await viewModel.loadPrograms()
         }
@@ -66,9 +83,9 @@ struct ProgramsView: View {
     }
     
     // MARK: - Programs Grid
-    
+
     @ViewBuilder
-    private var programsGrid: some View {
+    private func programsGrid(viewModel: ProgramsViewModel) -> some View {
         if viewModel.isLoading {
             ProgressView()
                 .frame(maxWidth: .infinity, minHeight: 200)
@@ -93,14 +110,15 @@ struct ProgramsView: View {
 
 // MARK: - ViewModel
 
+// 💡 Learn: @Observable substitui ObservableObject para gerenciamento de estado moderno
 @MainActor
-final class ProgramsViewModel: ObservableObject {
-    @Published private(set) var programs: [Program] = []
-    @Published private(set) var isLoading = false
-    @Published var errorMessage: String?
-    
+@Observable final class ProgramsViewModel {
+    private(set) var programs: [Program] = []
+    private(set) var isLoading = false
+    var errorMessage: String?
+
     private let repository: ProgramRepository
-    
+
     init(repository: ProgramRepository) {
         self.repository = repository
     }
@@ -209,9 +227,9 @@ struct ProgramCardLarge: View {
 
 #Preview {
     let container = Container()
-    return NavigationStack {
+    NavigationStack {
         ProgramsView(resolver: container)
-            .environmentObject(AppRouter())
+            .environment(AppRouter())
     }
 }
 

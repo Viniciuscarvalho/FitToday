@@ -14,32 +14,48 @@ enum DailyQuestionnaireFlowResult {
 }
 
 struct DailyQuestionnaireFlowView: View {
-    @StateObject private var viewModel: DailyQuestionnaireViewModel
-    @EnvironmentObject private var sessionStore: WorkoutSessionStore
+    @State private var viewModel: DailyQuestionnaireViewModel?
+    @State private var dependencyError: String?
+    @Environment(WorkoutSessionStore.self) private var sessionStore
     @State private var isGeneratingPlan = false
     private let onResult: (DailyQuestionnaireFlowResult) -> Void
 
     init(resolver: Resolver, onResult: @escaping (DailyQuestionnaireFlowResult) -> Void) {
-        guard
-            let entitlementRepo = resolver.resolve(EntitlementRepository.self),
-            let profileRepo = resolver.resolve(UserProfileRepository.self),
-            let blocksRepo = resolver.resolve(WorkoutBlocksRepository.self),
-            let composer = resolver.resolve(WorkoutPlanComposing.self)
-        else {
-            fatalError("Dependências do questionário diário não registradas.")
-        }
-        _viewModel = StateObject(
-            wrappedValue: DailyQuestionnaireViewModel(
+        // 💡 Learn: Com @Observable, usamos State em vez de StateObject
+        if let entitlementRepo = resolver.resolve(EntitlementRepository.self),
+           let profileRepo = resolver.resolve(UserProfileRepository.self),
+           let blocksRepo = resolver.resolve(WorkoutBlocksRepository.self),
+           let composer = resolver.resolve(WorkoutPlanComposing.self) {
+            _viewModel = State(initialValue: DailyQuestionnaireViewModel(
                 entitlementRepository: entitlementRepo,
                 profileRepository: profileRepo,
                 blocksRepository: blocksRepo,
                 composer: composer
-            )
-        )
+            ))
+            _dependencyError = State(initialValue: nil)
+        } else {
+            _viewModel = State(initialValue: nil)
+            _dependencyError = State(initialValue: "Erro de configuração: dependências do questionário não estão registradas.")
+        }
         self.onResult = onResult
     }
 
     var body: some View {
+        Group {
+            if let error = dependencyError {
+                DependencyErrorView(message: error)
+            } else if let viewModel = viewModel {
+                contentView(viewModel: viewModel)
+            } else {
+                ProgressView()
+            }
+        }
+        .navigationTitle("Questionário diário")
+        .navigationBarTitleDisplayMode(.inline)
+    }
+
+    @ViewBuilder
+    private func contentView(viewModel: DailyQuestionnaireViewModel) -> some View {
         ScrollView {
             VStack(alignment: .leading, spacing: FitTodaySpacing.lg) {
                 StepperHeader(
@@ -48,7 +64,7 @@ struct DailyQuestionnaireFlowView: View {
                     totalSteps: DailyQuestionnaireViewModel.Step.allCases.count
                 )
 
-                currentStepView
+                currentStepView(viewModel: viewModel)
 
                 if viewModel.currentStep == .energy {
                     FitBadge(
@@ -59,7 +75,7 @@ struct DailyQuestionnaireFlowView: View {
 
                 Spacer(minLength: FitTodaySpacing.lg)
 
-                actionButtons
+                actionButtons(viewModel: viewModel)
             }
             .padding()
         }
@@ -70,9 +86,10 @@ struct DailyQuestionnaireFlowView: View {
             }
             .ignoresSafeArea()
         )
-        .navigationTitle("Questionário diário")
-        .navigationBarTitleDisplayMode(.inline)
-        .errorToast(errorMessage: $viewModel.errorMessage)
+        .errorToast(errorMessage: Binding(
+            get: { viewModel.errorMessage },
+            set: { viewModel.errorMessage = $0 }
+        ))
         .task {
             viewModel.start()
         }
@@ -102,18 +119,18 @@ struct DailyQuestionnaireFlowView: View {
     }
 
     @ViewBuilder
-    private var currentStepView: some View {
+    private func currentStepView(viewModel: DailyQuestionnaireViewModel) -> some View {
         switch viewModel.currentStep {
         case .focus:
-            focusStep
+            focusStep(viewModel: viewModel)
         case .soreness:
-            sorenessStep
+            sorenessStep(viewModel: viewModel)
         case .energy:
-            energyStep
+            energyStep(viewModel: viewModel)
         }
     }
 
-    private var focusStep: some View {
+    private func focusStep(viewModel: DailyQuestionnaireViewModel) -> some View {
         LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: FitTodaySpacing.md) {
             ForEach(DailyFocus.allCases, id: \.self) { focus in
                 FocusCard(
@@ -130,7 +147,7 @@ struct DailyQuestionnaireFlowView: View {
         .animation(.easeInOut, value: viewModel.selectedFocus)
     }
 
-    private var sorenessStep: some View {
+    private func sorenessStep(viewModel: DailyQuestionnaireViewModel) -> some View {
         VStack(spacing: FitTodaySpacing.md) {
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: FitTodaySpacing.md) {
                 ForEach(MuscleSorenessLevel.allCases, id: \.self) { level in
@@ -169,7 +186,7 @@ struct DailyQuestionnaireFlowView: View {
         .animation(.easeInOut, value: viewModel.selectedSoreness)
     }
     
-    private var energyStep: some View {
+    private func energyStep(viewModel: DailyQuestionnaireViewModel) -> some View {
         VStack(alignment: .leading, spacing: FitTodaySpacing.md) {
             Text("De 0 a 10, como está sua energia agora?")
                 .font(FitTodayFont.ui(size: 15, weight: .medium))
@@ -210,13 +227,13 @@ struct DailyQuestionnaireFlowView: View {
         .fitCardShadow()
     }
 
-    private var actionButtons: some View {
+    private func actionButtons(viewModel: DailyQuestionnaireViewModel) -> some View {
         VStack(spacing: FitTodaySpacing.sm) {
-            Button(primaryButtonTitle) {
-                handlePrimaryAction()
+            Button(primaryButtonTitle(for: viewModel)) {
+                handlePrimaryAction(viewModel: viewModel)
             }
             .fitPrimaryStyle()
-            .disabled(!primaryButtonEnabled)
+            .disabled(!primaryButtonEnabled(for: viewModel))
 
             if viewModel.currentStep != .focus {
                 Button("Voltar") {
@@ -227,7 +244,7 @@ struct DailyQuestionnaireFlowView: View {
         }
     }
 
-    private var primaryButtonTitle: String {
+    private func primaryButtonTitle(for viewModel: DailyQuestionnaireViewModel) -> String {
         switch viewModel.currentStep {
         case .focus: return "Continuar"
         case .soreness: return "Continuar"
@@ -235,7 +252,7 @@ struct DailyQuestionnaireFlowView: View {
         }
     }
 
-    private var primaryButtonEnabled: Bool {
+    private func primaryButtonEnabled(for viewModel: DailyQuestionnaireViewModel) -> Bool {
         switch viewModel.currentStep {
         case .focus:
             return viewModel.canAdvanceFromFocus
@@ -246,7 +263,7 @@ struct DailyQuestionnaireFlowView: View {
         }
     }
 
-    private func handlePrimaryAction() {
+    private func handlePrimaryAction(viewModel: DailyQuestionnaireViewModel) {
         switch viewModel.currentStep {
         case .focus:
             viewModel.goToNextStep()
@@ -255,14 +272,14 @@ struct DailyQuestionnaireFlowView: View {
         case .energy:
             do {
                 let checkIn = try viewModel.buildCheckIn()
-                handleSubmission(for: checkIn)
+                handleSubmission(for: checkIn, viewModel: viewModel)
             } catch {
                 viewModel.handleError(error)
             }
         }
     }
 
-    private func handleSubmission(for checkIn: DailyCheckIn) {
+    private func handleSubmission(for checkIn: DailyCheckIn, viewModel: DailyQuestionnaireViewModel) {
         // Verificar entitlement, considerando debug override
         var isPro = viewModel.entitlement.isPro
         #if DEBUG
@@ -271,7 +288,7 @@ struct DailyQuestionnaireFlowView: View {
         }
         print("[DailyQ] handleSubmission: isPro=\(isPro) debugEnabled=\(DebugEntitlementOverride.shared.isEnabled)")
         #endif
-        
+
         guard isPro else {
             #if DEBUG
             print("[DailyQ] ⚠️ Não é Pro - mostrando paywall")
