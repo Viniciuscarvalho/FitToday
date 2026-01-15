@@ -88,10 +88,13 @@ final class WorkoutCompositionCacheRepositoryTests: XCTestCase {
             focus: .fullBody,
             sorenessLevel: .light,
             sorenessAreas: [.chest],
+            energyLevel: 7,
             dayOfWeek: 2,
-            weekOfYear: 1
+            weekOfYear: 1,
+            hourOfDay: 10,
+            minuteOfHour: 0
         )
-        
+
         let input2 = BlueprintInput(
             goal: .hypertrophy,
             structure: .fullGym,
@@ -99,8 +102,11 @@ final class WorkoutCompositionCacheRepositoryTests: XCTestCase {
             focus: .fullBody,
             sorenessLevel: .light,
             sorenessAreas: [.chest],
+            energyLevel: 7,
             dayOfWeek: 2,
-            weekOfYear: 1
+            weekOfYear: 1,
+            hourOfDay: 10,
+            minuteOfHour: 0
         )
         
         XCTAssertEqual(input1.cacheKey, input2.cacheKey, "Same inputs should produce same cache key")
@@ -114,10 +120,13 @@ final class WorkoutCompositionCacheRepositoryTests: XCTestCase {
             focus: .fullBody,
             sorenessLevel: .light,
             sorenessAreas: [],
+            energyLevel: 7,
             dayOfWeek: 2,
-            weekOfYear: 1
+            weekOfYear: 1,
+            hourOfDay: 10,
+            minuteOfHour: 0
         )
-        
+
         let input2 = BlueprintInput(
             goal: .weightLoss, // Different goal
             structure: .fullGym,
@@ -125,8 +134,11 @@ final class WorkoutCompositionCacheRepositoryTests: XCTestCase {
             focus: .fullBody,
             sorenessLevel: .light,
             sorenessAreas: [],
+            energyLevel: 7,
             dayOfWeek: 2,
-            weekOfYear: 1
+            weekOfYear: 1,
+            hourOfDay: 10,
+            minuteOfHour: 0
         )
         
         XCTAssertNotEqual(input1.cacheKey, input2.cacheKey, "Different inputs should produce different cache keys")
@@ -140,8 +152,11 @@ final class WorkoutCompositionCacheRepositoryTests: XCTestCase {
             focus: .fullBody,
             sorenessLevel: .none,
             sorenessAreas: [],
+            energyLevel: 7,
             dayOfWeek: 3,
-            weekOfYear: 5
+            weekOfYear: 5,
+            hourOfDay: 10,
+            minuteOfHour: 0
         )
         
         let seed1 = input.variationSeed

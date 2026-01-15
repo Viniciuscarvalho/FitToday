@@ -3,6 +3,7 @@
 //  FitToday
 //
 //  Created by AI on 04/01/26.
+//  Refactored on 15/01/26 - Extracted components to separate files
 //
 
 import SwiftUI
@@ -321,186 +322,11 @@ struct OnboardingFlowView: View {
 
 // MARK: - Helper Models
 
-private struct OnboardingPage: View {
-    let title: String
-    let bullets: [String]
-
-    var body: some View {
-        VStack(spacing: 16) {
-            Text(title)
-                .font(FitTodayFont.display(size: 32, weight: .extraBold))  // Retro font
-                .tracking(1.5)
-                .multilineTextAlignment(.center)
-            VStack(alignment: .leading, spacing: 12) {
-                ForEach(bullets, id: \.self) { bullet in
-                    HStack(alignment: .top, spacing: 10) {
-                        Image(systemName: "checkmark.seal.fill")
-                            .foregroundStyle(FitTodayColor.brandPrimary)
-                            .fitGlowEffect(color: FitTodayColor.brandPrimary.opacity(0.3))  // Neon glow
-                        Text(bullet)
-                            .font(FitTodayFont.ui(size: 17, weight: .medium))  // Retro font
-                            .foregroundStyle(FitTodayColor.textPrimary)
-                    }
-                }
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding()
-            .background(
-                RoundedRectangle(cornerRadius: FitTodayRadius.md)
-                    .fill(FitTodayColor.surface)
-                    .retroGridOverlay(spacing: 25)  // Grid overlay
-            )
-            .techCornerBorders(length: 14, thickness: 1.5)  // Tech corners
-            .cornerRadius(FitTodayRadius.md)
-            .fitCardShadow()
-        }
-        .padding(.horizontal, 8)
-    }
-
-    static let pages: [OnboardingPage] = [
-        OnboardingPage(
-            title: "Treinos que se adaptam a você",
-            bullets: [
-                "Responda 2 perguntas por dia e receba um treino seguro.",
-                "Sem precisar pensar em séries, ordem ou ajustes."
-            ]
-        ),
-        OnboardingPage(
-            title: "Fluxo ultra rápido",
-            bullets: [
-                "Menos de 10 segundos para responder.",
-                "Sempre alinhado ao seu objetivo atual."
-            ]
-        ),
-        OnboardingPage(
-            title: "Free vs Pro",
-            bullets: [
-                "Biblioteca básica gratuita para começar agora.",
-                "Plano Pro libera IA, ajustes por dor e histórico."
-            ]
-        )
-    ]
-}
-
 private struct ViewBuilderOption {
     let title: String
     let subtitle: String?
     let isSelected: Bool
     let action: () -> Void
-}
-
-private enum SetupStep: Int, CaseIterable {
-    case goal, structure, method, level, health, frequency
-
-    var title: String {
-        switch self {
-        case .goal: return "Qual é seu objetivo principal?"
-        case .structure: return "Onde você treina?"
-        case .method: return "Qual metodologia prefere?"
-        case .level: return "Qual seu nível atual?"
-        case .health: return "Alguma condição ou dor?"
-        case .frequency: return "Quantos dias por semana você treina?"
-        }
-    }
-}
-
-// MARK: - Display helpers
-
-private extension FitnessGoal {
-    var title: String {
-        switch self {
-        case .hypertrophy: return "Hipertrofia"
-        case .conditioning: return "Condicionamento"
-        case .endurance: return "Resistência"
-        case .weightLoss: return "Emagrecimento"
-        case .performance: return "Performance"
-        }
-    }
-    var subtitle: String {
-        switch self {
-        case .hypertrophy: return "Ganhe massa muscular"
-        case .conditioning: return "Melhore o fôlego diário"
-        case .endurance: return "Aumente resistência"
-        case .weightLoss: return "Defina e reduza gordura"
-        case .performance: return "Otimize performance esportiva"
-        }
-    }
-}
-
-private extension TrainingStructure {
-    var title: String {
-        switch self {
-        case .fullGym: return "Academia completa"
-        case .basicGym: return "Academia básica"
-        case .homeDumbbells: return "Casa (halteres)"
-        case .bodyweight: return "Peso corporal"
-        }
-    }
-    var subtitle: String? {
-        switch self {
-        case .fullGym: return "Máquinas + pesos livres"
-        case .basicGym: return "Equipamentos essenciais"
-        case .homeDumbbells: return "Até 2 pares de halteres"
-        case .bodyweight: return "Sem equipamentos"
-        }
-    }
-}
-
-private extension TrainingMethod {
-    var title: String {
-        switch self {
-        case .traditional: return "Tradicional"
-        case .circuit: return "Circuito"
-        case .hiit: return "HIIT"
-        case .mixed: return "Misto"
-        }
-    }
-    var subtitle: String? {
-        switch self {
-        case .traditional: return "Séries e repetições"
-        case .circuit: return "Blocos em sequência"
-        case .hiit: return "Intervalos intensos"
-        case .mixed: return "Combinação equilibrada"
-        }
-    }
-}
-
-private extension TrainingLevel {
-    var title: String {
-        switch self {
-        case .beginner: return "Iniciante"
-        case .intermediate: return "Intermediário"
-        case .advanced: return "Avançado"
-        }
-    }
-    var subtitle: String? {
-        switch self {
-        case .beginner: return "Até 6 meses treinando"
-        case .intermediate: return "Entre 6 meses e 2 anos"
-        case .advanced: return "2+ anos consistentes"
-        }
-    }
-}
-
-private extension HealthCondition {
-    var title: String {
-        switch self {
-        case .none: return "Nenhuma"
-        case .lowerBackPain: return "Dor lombar"
-        case .knee: return "Joelho"
-        case .shoulder: return "Ombro"
-        case .other: return "Outra"
-        }
-    }
-    var subtitle: String? {
-        switch self {
-        case .none: return "Tudo bem por aqui"
-        case .lowerBackPain: return "Adaptações para coluna"
-        case .knee: return "Proteja os joelhos"
-        case .shoulder: return "Cuidados em empurrar/puxar"
-        case .other: return "Tratamos com menor volume"
-        }
-    }
 }
 
 #Preview("Onboarding") {
