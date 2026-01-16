@@ -182,7 +182,7 @@ struct HomeHeroCard: View {
                         Image(systemName: "arrow.right")
                             .font(.system(.body, weight: .bold))
                     }
-                    .foregroundStyle(FitTodayColor.brandPrimary)
+                    .foregroundStyle(Color(red: 0.4, green: 0.6, blue: 0))
                     .frame(maxWidth: .infinity)
                     .padding()
                     .background(.white)
