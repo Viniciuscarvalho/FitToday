@@ -90,6 +90,11 @@ struct AppContainer {
             container.register(ExerciseDBTargetCataloging.self) { _ in targetCatalog }
                 .inObjectScope(.container)
 
+            // 💡 Learn: ExerciseNameNormalizer para normalização de nomes de exercícios
+            let exerciseNameNormalizer = ExerciseNameNormalizer(exerciseDBService: exerciseDBService)
+            container.register(ExerciseNameNormalizing.self) { _ in exerciseNameNormalizer }
+                .inObjectScope(.container)
+
             let mediaResolver = ExerciseMediaResolver(
                 service: exerciseDBService,
                 targetCatalog: targetCatalog,
@@ -142,9 +147,13 @@ struct AppContainer {
         container.register(WorkoutPlanComposing.self) { resolver in
             let entitlementRepo = resolver.resolve(EntitlementRepository.self)
             let historyRepo = resolver.resolve(WorkoutHistoryRepository.self)
+            let normalizer = resolver.resolve(ExerciseNameNormalizing.self)
+            let mediaResolver = resolver.resolve(ExerciseMediaResolving.self)
             return DynamicHybridWorkoutPlanComposer(
                 localComposer: localComposer,
                 usageLimiter: usageLimiter,
+                exerciseNameNormalizer: normalizer,
+                mediaResolver: mediaResolver,
                 entitlementProvider: {
                     return (try? await entitlementRepo?.currentEntitlement()) ?? .free
                 },

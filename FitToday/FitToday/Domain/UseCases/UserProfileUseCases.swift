@@ -7,6 +7,8 @@
 
 import Foundation
 
+// 💡 Learn: Use Case para criação/atualização de perfil do usuário
+// A validação de weeklyFrequency é feita no init do UserProfile (clamping para min=1)
 struct CreateOrUpdateProfileUseCase {
     private let repository: UserProfileRepository
 
@@ -15,9 +17,6 @@ struct CreateOrUpdateProfileUseCase {
     }
 
     func execute(_ profile: UserProfile) async throws {
-        guard profile.weeklyFrequency > 0 else {
-            throw DomainError.invalidInput(reason: "Frequência semanal deve ser maior que zero.")
-        }
         try await repository.saveProfile(profile)
     }
 }

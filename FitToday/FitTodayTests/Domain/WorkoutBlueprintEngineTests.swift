@@ -326,10 +326,13 @@ final class WorkoutBlueprintEngineTests: XCTestCase {
       focus: .upper,
       sorenessLevel: .none,
       sorenessAreas: [],
+      energyLevel: 7,
       dayOfWeek: 2,
-      weekOfYear: 5
+      weekOfYear: 5,
+      hourOfDay: 10,
+      minuteOfHour: 0
     )
-    
+
     let input2 = BlueprintInput(
       goal: .hypertrophy,
       structure: .fullGym,
@@ -337,8 +340,11 @@ final class WorkoutBlueprintEngineTests: XCTestCase {
       focus: .upper,
       sorenessLevel: .none,
       sorenessAreas: [],
+      energyLevel: 7,
       dayOfWeek: 2,
-      weekOfYear: 5
+      weekOfYear: 5,
+      hourOfDay: 10,
+      minuteOfHour: 0
     )
     
     // Then

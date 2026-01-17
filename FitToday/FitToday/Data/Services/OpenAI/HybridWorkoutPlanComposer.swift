@@ -14,11 +14,15 @@ struct OpenAIWorkoutPlanComposer: WorkoutPlanComposing {
     private let promptAssembler: WorkoutPromptAssembler
     private let qualityGate: WorkoutPlanQualityGate
     private let historyRepository: WorkoutHistoryRepository?
+    private let exerciseNameNormalizer: ExerciseNameNormalizing
+    private let mediaResolver: ExerciseMediaResolving?
     private let logger: (String) -> Void
 
     init(
         client: OpenAIClienting,
         localComposer: LocalWorkoutPlanComposer,
+        exerciseNameNormalizer: ExerciseNameNormalizing,
+        mediaResolver: ExerciseMediaResolving? = nil,
         blueprintEngine: WorkoutBlueprintEngine = WorkoutBlueprintEngine(),
         promptAssembler: WorkoutPromptAssembler = WorkoutPromptAssembler(),
         qualityGate: WorkoutPlanQualityGate = WorkoutPlanQualityGate(),
@@ -27,6 +31,8 @@ struct OpenAIWorkoutPlanComposer: WorkoutPlanComposing {
     ) {
         self.client = client
         self.localComposer = localComposer
+        self.exerciseNameNormalizer = exerciseNameNormalizer
+        self.mediaResolver = mediaResolver
         self.blueprintEngine = blueprintEngine
         self.promptAssembler = promptAssembler
         self.qualityGate = qualityGate
@@ -91,7 +97,7 @@ struct OpenAIWorkoutPlanComposer: WorkoutPlanComposing {
             logger("✅ Resposta validada: \(openAIResponse.phases.count) fases")
             
             // 7. Converter resposta OpenAI em WorkoutPlan
-            let plan = convertOpenAIResponseToPlan(
+            let plan = await convertOpenAIResponseToPlan(
                 response: openAIResponse,
                 blueprint: blueprint,
                 profile: profile,
@@ -220,7 +226,7 @@ struct OpenAIWorkoutPlanComposer: WorkoutPlanComposing {
             expectedBlueprint: blueprint
         )
         
-        let plan = convertOpenAIResponseToPlan(
+        let plan = await convertOpenAIResponseToPlan(
             response: openAIResponse,
             blueprint: blueprint,
             profile: profile,
@@ -250,7 +256,7 @@ struct OpenAIWorkoutPlanComposer: WorkoutPlanComposing {
         profile: UserProfile,
         checkIn: DailyCheckIn,
         blocks: [WorkoutBlock]
-    ) -> WorkoutPlan {
+    ) async -> WorkoutPlan {
         var phases: [WorkoutPlanPhase] = []
         
         // Mapear exercícios disponíveis por nome para facilitar lookup
@@ -284,18 +290,31 @@ struct OpenAIWorkoutPlanComposer: WorkoutPlanComposing {
             // Adicionar exercícios
             if let exercises = openAIPhase.exercises {
                 for ex in exercises {
-                    // Tentar encontrar exercício no catálogo (busca exata primeiro)
-                    var exercise = exercisesByName[ex.name.lowercased()]
-                    
+                    // ✅ NOVA: Normalizar nome com ExerciseDB antes de fazer matching
+                    let normalizedName: String
+                    do {
+                        normalizedName = try await exerciseNameNormalizer.normalize(
+                            exerciseName: ex.name,
+                            equipment: ex.equipment,
+                            muscleGroup: ex.muscleGroup
+                        )
+                    } catch {
+                        logger("⚠️ Erro ao normalizar '\(ex.name)': \(error.localizedDescription) - usando nome original")
+                        normalizedName = ex.name
+                    }
+
+                    // Tentar encontrar exercício no catálogo com nome normalizado
+                    var exercise = exercisesByName[normalizedName.lowercased()]
+
                     // Se não encontrar, tentar busca parcial
                     if exercise == nil {
-                        let searchName = ex.name.lowercased()
+                        let searchName = normalizedName.lowercased()
                         exercise = allExercises.first { exerc in
                             exerc.name.lowercased().contains(searchName) ||
                             searchName.contains(exerc.name.lowercased())
                         }
                     }
-                    
+
                     // Se ainda não encontrar, tentar buscar por grupo muscular
                     if exercise == nil {
                         if let muscleGroup = MuscleGroup(rawValue: ex.muscleGroup.lowercased()) {
@@ -305,12 +324,80 @@ struct OpenAIWorkoutPlanComposer: WorkoutPlanComposing {
                             }
                         }
                     }
-                    
-                    guard let foundExercise = exercise else {
-                        logger("❌ Exercício não encontrado: \(ex.name)")
-                        continue
+
+                    // ✅ NOVA: Fallback para criar exercício com nome da OpenAI + buscar mídia no ExerciseDB
+                    let foundExercise: WorkoutExercise
+                    if let catalogExercise = exercise {
+                        foundExercise = catalogExercise
+                    } else {
+                        // Criar exercício temporário com nome normalizado
+                        var newExercise = WorkoutExercise(
+                            id: UUID().uuidString,
+                            name: normalizedName, // Usar nome normalizado (ExerciseDB) para buscar mídia
+                            mainMuscle: MuscleGroup(rawValue: ex.muscleGroup.lowercased()) ?? .chest,
+                            equipment: EquipmentType(rawValue: ex.equipment.lowercased()) ?? .bodyweight,
+                            instructions: [], // OpenAI não retorna instruções na resposta
+                            media: nil
+                        )
+
+                        // Buscar mídia do ExerciseDB usando o nome normalizado
+                        // 💡 Learn: Usar do-catch para não quebrar o fluxo se houver erro de rede
+                        if let resolver = mediaResolver {
+                            do {
+                                let resolvedMedia = await resolver.resolveMedia(for: newExercise, context: .card)
+                                if resolvedMedia.hasMedia {
+                                    newExercise = WorkoutExercise(
+                                        id: newExercise.id,
+                                        name: ex.name, // Mostrar nome original da OpenAI ao usuário
+                                        mainMuscle: newExercise.mainMuscle,
+                                        equipment: newExercise.equipment,
+                                        instructions: newExercise.instructions,
+                                        media: ExerciseMedia(
+                                            imageURL: resolvedMedia.imageURL,
+                                            gifURL: resolvedMedia.gifURL
+                                        )
+                                    )
+                                    logger("✅ Mídia encontrada para '\(ex.name)' via nome normalizado '\(normalizedName)'")
+                                } else {
+                                    // Usar nome original da OpenAI se não encontrar mídia
+                                    newExercise = WorkoutExercise(
+                                        id: newExercise.id,
+                                        name: ex.name,
+                                        mainMuscle: newExercise.mainMuscle,
+                                        equipment: newExercise.equipment,
+                                        instructions: newExercise.instructions,
+                                        media: nil
+                                    )
+                                    logger("⚠️ Exercício '\(ex.name)' não encontrado no catálogo e sem mídia no ExerciseDB")
+                                }
+                            } catch {
+                                // Se houver erro ao buscar mídia (ex: timeout), continuar sem mídia
+                                newExercise = WorkoutExercise(
+                                    id: newExercise.id,
+                                    name: ex.name,
+                                    mainMuscle: newExercise.mainMuscle,
+                                    equipment: newExercise.equipment,
+                                    instructions: newExercise.instructions,
+                                    media: nil
+                                )
+                                logger("⚠️ Erro ao buscar mídia para '\(ex.name)': \(error.localizedDescription) - continuando sem mídia")
+                            }
+                        } else {
+                            // Sem media resolver, usar nome original
+                            newExercise = WorkoutExercise(
+                                id: newExercise.id,
+                                name: ex.name,
+                                mainMuscle: newExercise.mainMuscle,
+                                equipment: newExercise.equipment,
+                                instructions: newExercise.instructions,
+                                media: nil
+                            )
+                            logger("⚠️ Exercício '\(ex.name)' não encontrado no catálogo - usando nome da OpenAI")
+                        }
+
+                        foundExercise = newExercise
                     }
-                    
+
                     // Parsear reps
                     let repsComponents = ex.reps.components(separatedBy: "-")
                     let minReps = Int(repsComponents.first ?? "10") ?? 10
@@ -438,6 +525,8 @@ enum AICapability: String, CaseIterable {
 struct DynamicHybridWorkoutPlanComposer: WorkoutPlanComposing {
     private let localComposer: LocalWorkoutPlanComposer
     private let usageLimiter: OpenAIUsageLimiting?
+    private let exerciseNameNormalizer: ExerciseNameNormalizing?
+    private let mediaResolver: ExerciseMediaResolving?
     private let entitlementProvider: (() async -> ProEntitlement)?
     private let historyRepository: WorkoutHistoryRepository?
     private let clock: () -> Date
@@ -446,6 +535,8 @@ struct DynamicHybridWorkoutPlanComposer: WorkoutPlanComposing {
     init(
         localComposer: LocalWorkoutPlanComposer,
         usageLimiter: OpenAIUsageLimiting?,
+        exerciseNameNormalizer: ExerciseNameNormalizing? = nil,
+        mediaResolver: ExerciseMediaResolving? = nil,
         entitlementProvider: (() async -> ProEntitlement)? = nil,
         historyRepository: WorkoutHistoryRepository? = nil,
         clock: @escaping () -> Date = { Date() },
@@ -453,6 +544,8 @@ struct DynamicHybridWorkoutPlanComposer: WorkoutPlanComposing {
     ) {
         self.localComposer = localComposer
         self.usageLimiter = usageLimiter
+        self.exerciseNameNormalizer = exerciseNameNormalizer
+        self.mediaResolver = mediaResolver
         self.entitlementProvider = entitlementProvider
         self.historyRepository = historyRepository
         self.clock = clock
@@ -487,9 +580,15 @@ struct DynamicHybridWorkoutPlanComposer: WorkoutPlanComposing {
         
         // Criar cliente e compositor sob demanda
         let client = OpenAIClient(configuration: configuration)
+
+        // 💡 Learn: Usar normalizer se disponível, senão usa fallback que retorna nome original
+        let normalizer = exerciseNameNormalizer ?? NoOpExerciseNameNormalizer()
+
         let remoteComposer = OpenAIWorkoutPlanComposer(
             client: client,
             localComposer: localComposer,
+            exerciseNameNormalizer: normalizer,
+            mediaResolver: mediaResolver,
             historyRepository: historyRepository,
             logger: logger
         )
