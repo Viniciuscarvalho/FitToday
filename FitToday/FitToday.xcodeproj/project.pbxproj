@@ -7,6 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		EA07E6B92F1A80EB00B08007 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = EA07E6B82F1A80EB00B08007 /* FirebaseAnalytics */; };
+		EA07E6BB2F1A80EB00B08007 /* FirebaseDatabase in Frameworks */ = {isa = PBXBuildFile; productRef = EA07E6BA2F1A80EB00B08007 /* FirebaseDatabase */; };
+		EA07E6BD2F1A80EB00B08007 /* FirebaseRemoteConfig in Frameworks */ = {isa = PBXBuildFile; productRef = EA07E6BC2F1A80EB00B08007 /* FirebaseRemoteConfig */; };
+		EA07E6BF2F1A80EB00B08007 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = EA07E6BE2F1A80EB00B08007 /* FirebaseAuth */; };
+		EA07E6C12F1A80EB00B08007 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = EA07E6C02F1A80EB00B08007 /* FirebaseFirestore */; };
 		EA5DDB022F0AEA4D005B7F4E /* Swinject in Frameworks */ = {isa = PBXBuildFile; productRef = EA5DDB012F0AEA4D005B7F4E /* Swinject */; };
 /* End PBXBuildFile section */
 
@@ -56,7 +61,12 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				EA07E6BB2F1A80EB00B08007 /* FirebaseDatabase in Frameworks */,
+				EA07E6B92F1A80EB00B08007 /* FirebaseAnalytics in Frameworks */,
+				EA07E6BF2F1A80EB00B08007 /* FirebaseAuth in Frameworks */,
+				EA07E6C12F1A80EB00B08007 /* FirebaseFirestore in Frameworks */,
 				EA5DDB022F0AEA4D005B7F4E /* Swinject in Frameworks */,
+				EA07E6BD2F1A80EB00B08007 /* FirebaseRemoteConfig in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -126,6 +136,11 @@
 			name = FitToday;
 			packageProductDependencies = (
 				EA5DDB012F0AEA4D005B7F4E /* Swinject */,
+				EA07E6B82F1A80EB00B08007 /* FirebaseAnalytics */,
+				EA07E6BA2F1A80EB00B08007 /* FirebaseDatabase */,
+				EA07E6BC2F1A80EB00B08007 /* FirebaseRemoteConfig */,
+				EA07E6BE2F1A80EB00B08007 /* FirebaseAuth */,
+				EA07E6C02F1A80EB00B08007 /* FirebaseFirestore */,
 			);
 			productName = FitToday;
 			productReference = EAF534E72F09A1AD00B64D8D /* FitToday.app */;
@@ -211,6 +226,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				EA5DDB002F0AEA4D005B7F4E /* XCRemoteSwiftPackageReference "Swinject" */,
+				EA07E6B72F1A80EB00B08007 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = EAF534E82F09A1AD00B64D8D /* Products */;
@@ -407,6 +423,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = FitToday/FitToday.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 6U8286L9PF;
@@ -443,6 +460,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = FitToday/FitToday.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 6U8286L9PF;
@@ -618,6 +636,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		EA07E6B72F1A80EB00B08007 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.8.0;
+			};
+		};
 		EA5DDB002F0AEA4D005B7F4E /* XCRemoteSwiftPackageReference "Swinject" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/Swinject/Swinject.git";
@@ -629,6 +655,31 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		EA07E6B82F1A80EB00B08007 /* FirebaseAnalytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = EA07E6B72F1A80EB00B08007 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalytics;
+		};
+		EA07E6BA2F1A80EB00B08007 /* FirebaseDatabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = EA07E6B72F1A80EB00B08007 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseDatabase;
+		};
+		EA07E6BC2F1A80EB00B08007 /* FirebaseRemoteConfig */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = EA07E6B72F1A80EB00B08007 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseRemoteConfig;
+		};
+		EA07E6BE2F1A80EB00B08007 /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = EA07E6B72F1A80EB00B08007 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
+		};
+		EA07E6C02F1A80EB00B08007 /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = EA07E6B72F1A80EB00B08007 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
+		};
 		EA5DDB012F0AEA4D005B7F4E /* Swinject */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = EA5DDB002F0AEA4D005B7F4E /* XCRemoteSwiftPackageReference "Swinject" */;

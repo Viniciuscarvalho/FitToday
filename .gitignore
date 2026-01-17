@@ -66,6 +66,7 @@ fastlane/test_output
 **/OpenAIConfig.plist
 **/ExerciseDBConfig.plist
 **/Secrets.plist
+**/GoogleService-Info.plist
 *.xcconfig
 
 # Keep .example files for documentation

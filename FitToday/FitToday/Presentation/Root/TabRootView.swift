@@ -144,6 +144,14 @@ struct TabRootView: View {
             APIKeySettingsView()
         case .healthKitSettings:
             HealthKitConnectionView(resolver: resolver)
+        case .authentication(let inviteContext):
+            AuthenticationView(resolver: resolver, inviteContext: inviteContext)
+        case .groupInvite(let groupId):
+            // For MVP, redirect to authentication with group context
+            AuthenticationView(
+                resolver: resolver,
+                inviteContext: "Entre para participar do grupo"
+            )
         }
     }
 }

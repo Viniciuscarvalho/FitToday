@@ -53,6 +53,7 @@ struct UserProfile: Codable, Hashable, Sendable {
     var weeklyFrequency: Int
     var createdAt: Date
     var isProfileComplete: Bool // Indica se perfil foi preenchido completamente ou usa defaults
+    var socialUserId: String? // Firebase UID from social authentication
 
     init(
         id: UUID = .init(),
@@ -63,7 +64,8 @@ struct UserProfile: Codable, Hashable, Sendable {
         healthConditions: [HealthCondition],
         weeklyFrequency: Int,
         createdAt: Date = .init(),
-        isProfileComplete: Bool = true
+        isProfileComplete: Bool = true,
+        socialUserId: String? = nil
     ) {
         self.id = id
         self.mainGoal = mainGoal
@@ -74,6 +76,7 @@ struct UserProfile: Codable, Hashable, Sendable {
         self.weeklyFrequency = max(1, weeklyFrequency)
         self.createdAt = createdAt
         self.isProfileComplete = isProfileComplete
+        self.socialUserId = socialUserId
     }
 }
 

@@ -5,6 +5,7 @@
 //  Created by Vinicius Carvalho on 03/01/26.
 //
 
+import FirebaseCore
 import SwiftData
 import SwiftUI
 import Swinject
@@ -16,6 +17,9 @@ struct FitTodayApp: App {
     @State private var sessionStore: WorkoutSessionStore
 
     init() {
+        // Configure Firebase
+        FirebaseApp.configure()
+
         // Bootstrap de segredos (apenas Debug) - popula Keychain a partir de Secrets.plist
         KeychainBootstrap.runIfNeeded()
 

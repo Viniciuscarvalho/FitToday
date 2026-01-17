@@ -166,6 +166,18 @@ struct AppContainer {
         }
         .inObjectScope(.container)
 
+        // Firebase Authentication
+        let firebaseAuthService = FirebaseAuthService()
+        container.register(FirebaseAuthService.self) { _ in firebaseAuthService }
+            .inObjectScope(.container)
+
+        container.register(AuthenticationRepository.self) { resolver in
+            FirebaseAuthenticationRepository(
+                authService: resolver.resolve(FirebaseAuthService.self)!
+            )
+        }
+        .inObjectScope(.container)
+
         return AppContainer(container: container, router: router, modelContainer: modelContainer)
     }
 

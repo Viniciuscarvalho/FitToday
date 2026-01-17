@@ -48,6 +48,8 @@ enum AppRoute: Hashable {
     case programExerciseDetail(ExercisePrescription)  // Detalhe de exercício na biblioteca/programa
     case apiKeySettings  // Configuração de chave de API do usuário
     case healthKitSettings // Integração Apple Health (PRO)
+    case authentication(inviteContext: String?)  // Authentication flow
+    case groupInvite(groupId: String)  // Group invitation deep link
 }
 
 struct DeepLink {
@@ -57,6 +59,7 @@ struct DeepLink {
         case setup
         case dailyQuestionnaire
         case paywall
+        case groupInvite(groupId: String)
     }
 
     let destination: Destination
@@ -66,8 +69,19 @@ struct DeepLink {
             return nil
         }
 
-        let path = url.host?.lowercased() ?? url.path.lowercased()
-        switch path {
+        let host = url.host?.lowercased() ?? ""
+        let path = url.path.lowercased()
+
+        // Handle group invite: fittoday://group/invite/{groupId}
+        if host == "group", path.hasPrefix("/invite/") {
+            let groupId = String(path.dropFirst("/invite/".count))
+            destination = .groupInvite(groupId: groupId)
+            return
+        }
+
+        // Handle other routes
+        let pathOrHost = !host.isEmpty ? host : path
+        switch pathOrHost {
         case "home", "/home":
             destination = .home
         case "onboarding", "/onboarding":
@@ -144,6 +158,9 @@ protocol AppRouting: AnyObject {
         case .paywall:
             select(tab: .home)
             push(.paywall, on: .home)
+        case .groupInvite(let groupId):
+            select(tab: .home)
+            push(.groupInvite(groupId: groupId), on: .home)
         }
     }
 

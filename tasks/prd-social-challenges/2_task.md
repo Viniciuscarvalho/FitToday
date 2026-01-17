@@ -1,6 +1,6 @@
 # [2.0] Firebase Authentication Implementation (L)
 
-## status: pending
+## status: completed
 
 <task_context>
 <domain>data/services/authentication</domain>

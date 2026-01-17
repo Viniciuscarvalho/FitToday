@@ -1,6 +1,6 @@
 # [3.0] Authentication UI & Flows (M)
 
-## status: pending
+## status: completed
 
 <task_context>
 <domain>presentation/authentication</domain>
