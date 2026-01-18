@@ -13,6 +13,7 @@ struct ProfileSettingsSection: View {
     let onEditProfile: () -> Void
     let onRedoDailyQuestionnaire: () -> Void
     let onOpenHealthKit: () -> Void
+    let onOpenPrivacySettings: () -> Void
     let onRestorePurchases: () -> Void
     let onOpenSupport: () -> Void
 
@@ -30,6 +31,10 @@ struct ProfileSettingsSection: View {
                 Divider().padding(.leading, 56)
 
                 SettingsRow(icon: "heart.fill", title: "Apple Health", action: onOpenHealthKit)
+
+                Divider().padding(.leading, 56)
+
+                SettingsRow(icon: "lock.shield", title: "Privacidade", action: onOpenPrivacySettings)
 
                 Divider().padding(.leading, 56)
 

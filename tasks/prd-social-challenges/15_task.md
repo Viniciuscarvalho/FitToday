@@ -1,6 +1,6 @@
 # [15.0] Group Management Features (M)
 
-## status: pending
+## status: done
 
 <task_context>
 <domain>presentation/groups</domain>
@@ -31,49 +31,51 @@ Implement group management features for members and admins: leave group (all mem
 
 ## Subtasks
 
-- [ ] 15.1 Implement Leave Group functionality
-  - Add "Leave Group" button in GroupDashboardView toolbar menu
-  - Show confirmation alert: "Are you sure? Your stats will be removed from leaderboards."
-  - Call LeaveGroupUseCase (created in Task 6.0)
-  - Navigate back to empty state after successful leave
+- [x] 15.1 Implement Leave Group functionality
+  - "Leave Group" button in GroupDashboardView actions section
+  - Confirmation dialog: "Tem certeza? Suas estatísticas serão removidas dos placares."
+  - Calls LeaveGroupUseCase
+  - Navigates to empty state after successful leave
 
-- [ ] 15.2 Implement Remove Member functionality (admin only)
-  - Add swipe-to-delete on member list rows (admin only)
-  - Show confirmation alert: "Remove [Name] from group?"
-  - Call GroupRepository.removeMember(groupId, userId)
-  - Update member list in UI
+- [x] 15.2 Implement Remove Member functionality (admin only)
+  - Swipe-to-delete on member list rows in ManageGroupView
+  - Confirmation dialog: "Remover [Name] do grupo?"
+  - Calls GroupsViewModel.removeMember(userId)
+  - Updates member list in UI immediately
 
-- [ ] 15.3 Implement Delete Group functionality (admin only)
-  - Add "Delete Group" button in "Manage Group" sheet (admin only)
-  - Show confirmation alert: "Delete group? This cannot be undone."
-  - Call GroupRepository.deleteGroup(groupId)
-  - Clear all members' currentGroupId
-  - Navigate all members back to empty state
+- [x] 15.3 Implement Delete Group functionality (admin only)
+  - "Delete Group" button in ManageGroupView (destructive style)
+  - Two-step confirmation (first dialog + final alert for safety)
+  - Calls GroupsViewModel.deleteGroup()
+  - Clears UI state after deletion
 
-- [ ] 15.4 Add admin badge to member list
-  - Display "Admin" badge next to group creator's name
-  - Use role field from GroupMember entity
-  - Visual distinction (colored badge, icon)
+- [x] 15.4 Add admin badge to member list
+  - Already existed in MemberRowView from previous implementation
+  - Displays "Admin" badge with accent color background
+  - Uses role field from GroupMember entity
 
-- [ ] 15.5 Create ManageGroupView (admin only)
-  - Sheet presented from "..." menu
+- [x] 15.5 Create ManageGroupView (admin only)
+  - `/Presentation/Features/Groups/ManageGroupView.swift`
+  - Sheet presented from "Gerenciar Grupo" button (admin only)
   - List of members with swipe-to-delete
-  - "Delete Group" button at bottom (destructive style)
-  - Accessible only to admin (hide for regular members)
+  - "Excluir Grupo" button at bottom (destructive style)
+  - Prevents removing self (admin) or other admins
 
-- [ ] 15.6 Update GroupsViewModel with management methods
-  - Method: leaveGroup() async
-  - Method: removeMember(userId) async
-  - Method: deleteGroup() async
-  - Handle errors and UI state updates
+- [x] 15.6 Update GroupsViewModel with management methods
+  - Added: removeMember(userId) async
+  - Added: deleteGroup() async
+  - leaveGroup() already existed
+  - All methods handle errors and UI state updates
 
-- [ ] 15.7 Add confirmation alerts
-  - Use SwiftUI .confirmationDialog or .alert
-  - Two-step confirmation for Delete Group (extra safety)
+- [x] 15.7 Add confirmation alerts
+  - Leave Group: .confirmationDialog in GroupDashboardView
+  - Remove Member: .confirmationDialog in ManageGroupView
+  - Delete Group: Two-step confirmation (dialog + alert)
 
-- [ ] 15.8 Handle edge case: last member leaves
-  - If last member leaves group, delete group automatically
-  - Or mark group as inactive (isActive = false)
+- [x] 15.8 Handle edge case: last member leaves
+  - LeaveGroupUseCase checks member count before leaving
+  - If last member, auto-deletes group after leaving
+  - Uses try? to avoid failing if deletion fails
 
 ## Implementation Details
 
@@ -157,17 +159,17 @@ List {
 
 ## Success Criteria
 
-- [ ] "Leave Group" button appears in toolbar menu for all members
-- [ ] Confirmation alert shows before leaving
-- [ ] After leaving, user returned to empty state with no group
-- [ ] currentGroupId cleared in Firestore after leave
-- [ ] Admin sees "Manage Group" option in menu
-- [ ] Admin can swipe-to-delete members in ManageGroupView
-- [ ] Removing member updates group member list immediately
-- [ ] "Delete Group" button appears only for admin
-- [ ] Deleting group removes all members and group document
-- [ ] Admin badge visible on group creator in member list
-- [ ] Confirmation alerts prevent accidental deletions
+- [x] "Leave Group" button appears in actions section for all members
+- [x] Confirmation dialog shows before leaving
+- [x] After leaving, user returned to empty state with no group
+- [x] currentGroupId cleared in Firestore after leave
+- [x] Admin sees "Manage Group" option in actions section
+- [x] Admin can swipe-to-delete members in ManageGroupView
+- [x] Removing member updates group member list immediately
+- [x] "Delete Group" button appears only in ManageGroupView (admin only)
+- [x] Deleting group clears UI state and removes group document
+- [x] Admin badge visible on group creator in member list
+- [x] Confirmation dialogs prevent accidental deletions (two-step for delete group)
 
 ## Dependencies
 

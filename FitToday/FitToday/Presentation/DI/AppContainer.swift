@@ -175,6 +175,11 @@ struct AppContainer {
         }
         .inObjectScope(.container)
 
+        // Firebase Analytics Service
+        let analyticsService = FirebaseAnalyticsService()
+        container.register(AnalyticsTracking.self) { _ in analyticsService }
+            .inObjectScope(.container)
+
         // Firebase Authentication
         let firebaseAuthService = FirebaseAuthService()
         container.register(FirebaseAuthService.self) { _ in firebaseAuthService }
@@ -183,6 +188,114 @@ struct AppContainer {
         container.register(AuthenticationRepository.self) { resolver in
             FirebaseAuthenticationRepository(
                 authService: resolver.resolve(FirebaseAuthService.self)!
+            )
+        }
+        .inObjectScope(.container)
+
+        // Firebase Group Management
+        let firebaseGroupService = FirebaseGroupService()
+        container.register(FirebaseGroupService.self) { _ in firebaseGroupService }
+            .inObjectScope(.container)
+
+        container.register(GroupRepository.self) { resolver in
+            FirebaseGroupRepository(
+                groupService: resolver.resolve(FirebaseGroupService.self)!
+            )
+        }
+        .inObjectScope(.container)
+
+        // Firebase User Repository
+        let firebaseUserService = FirebaseUserService()
+        container.register(FirebaseUserService.self) { _ in firebaseUserService }
+            .inObjectScope(.container)
+
+        container.register(UserRepository.self) { resolver in
+            FirebaseUserRepository(
+                userService: resolver.resolve(FirebaseUserService.self)!
+            )
+        }
+        .inObjectScope(.container)
+
+        // Firebase Notification Service and Repository
+        let firebaseNotificationService = FirebaseNotificationService()
+        container.register(FirebaseNotificationService.self) { _ in firebaseNotificationService }
+            .inObjectScope(.container)
+
+        container.register(NotificationRepository.self) { resolver in
+            FirebaseNotificationRepository(
+                notificationService: resolver.resolve(FirebaseNotificationService.self)!
+            )
+        }
+        .inObjectScope(.container)
+
+        // Group Management Use Cases
+        container.register(CreateGroupUseCase.self) { resolver in
+            CreateGroupUseCase(
+                groupRepository: resolver.resolve(GroupRepository.self)!,
+                userRepository: resolver.resolve(UserRepository.self)!,
+                authRepository: resolver.resolve(AuthenticationRepository.self)!,
+                analytics: resolver.resolve(AnalyticsTracking.self)
+            )
+        }
+        .inObjectScope(.container)
+
+        container.register(JoinGroupUseCase.self) { resolver in
+            JoinGroupUseCase(
+                groupRepository: resolver.resolve(GroupRepository.self)!,
+                userRepository: resolver.resolve(UserRepository.self)!,
+                authRepository: resolver.resolve(AuthenticationRepository.self)!,
+                notificationRepository: resolver.resolve(NotificationRepository.self),
+                analytics: resolver.resolve(AnalyticsTracking.self)
+            )
+        }
+        .inObjectScope(.container)
+
+        container.register(LeaveGroupUseCase.self) { resolver in
+            LeaveGroupUseCase(
+                groupRepository: resolver.resolve(GroupRepository.self)!,
+                userRepository: resolver.resolve(UserRepository.self)!,
+                authRepository: resolver.resolve(AuthenticationRepository.self)!,
+                analytics: resolver.resolve(AnalyticsTracking.self)
+            )
+        }
+        .inObjectScope(.container)
+
+        container.register(GenerateInviteLinkUseCase.self) { _ in
+            GenerateInviteLinkUseCase()
+        }
+        .inObjectScope(.container)
+
+        // Firebase Leaderboard
+        let firebaseLeaderboardService = FirebaseLeaderboardService()
+        container.register(FirebaseLeaderboardService.self) { _ in firebaseLeaderboardService }
+            .inObjectScope(.container)
+
+        container.register(LeaderboardRepository.self) { resolver in
+            FirebaseLeaderboardRepository(
+                leaderboardService: resolver.resolve(FirebaseLeaderboardService.self)!
+            )
+        }
+        .inObjectScope(.container)
+
+        // Offline Sync Queue - buffers workout completions when offline
+        let pendingSyncQueue = PendingSyncQueue()
+        container.register(PendingSyncQueue.self) { _ in pendingSyncQueue }
+            .inObjectScope(.container)
+
+        // Network Monitor - detects connectivity changes
+        let networkMonitor = NetworkMonitor()
+        container.register(NetworkMonitor.self) { _ in networkMonitor }
+            .inObjectScope(.container)
+
+        // Workout Sync Use Case - syncs workout completion to Firebase leaderboard
+        container.register(SyncWorkoutCompletionUseCase.self) { resolver in
+            SyncWorkoutCompletionUseCase(
+                leaderboardRepository: resolver.resolve(LeaderboardRepository.self)!,
+                userRepository: resolver.resolve(UserRepository.self)!,
+                authRepository: resolver.resolve(AuthenticationRepository.self)!,
+                historyRepository: resolver.resolve(WorkoutHistoryRepository.self)!,
+                pendingQueue: resolver.resolve(PendingSyncQueue.self),
+                analytics: resolver.resolve(AnalyticsTracking.self)
             )
         }
         .inObjectScope(.container)

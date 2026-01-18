@@ -1,6 +1,6 @@
 # [19.0] Firebase Data Layer Tests (M)
 
-## status: pending
+## status: done
 
 <task_context>
 <domain>testing/integration</domain>

@@ -29,6 +29,10 @@ struct TabRootView: View {
                 HistoryView(resolver: resolver)
             }
 
+            tabView(for: .groups) {
+                GroupsView(resolver: resolver)
+            }
+
             tabView(for: .profile) {
                 ProfileProView()
             }
@@ -144,14 +148,15 @@ struct TabRootView: View {
             APIKeySettingsView()
         case .healthKitSettings:
             HealthKitConnectionView(resolver: resolver)
+        case .privacySettings:
+            PrivacySettingsView(resolver: resolver)
         case .authentication(let inviteContext):
             AuthenticationView(resolver: resolver, inviteContext: inviteContext)
         case .groupInvite(let groupId):
-            // For MVP, redirect to authentication with group context
-            AuthenticationView(
-                resolver: resolver,
-                inviteContext: "Entre para participar do grupo"
-            )
+            JoinGroupView(groupId: groupId, resolver: resolver) {
+                // After joining, refresh groups tab
+                router.select(tab: .groups)
+            }
         }
     }
 }

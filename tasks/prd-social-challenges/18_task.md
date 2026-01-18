@@ -1,6 +1,6 @@
 # [18.0] Unit Tests for Domain Layer (M)
 
-## status: pending
+## status: done
 
 <task_context>
 <domain>testing/unit</domain>

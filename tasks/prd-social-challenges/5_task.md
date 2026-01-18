@@ -1,6 +1,6 @@
 # [5.0] Firebase Group Service & Repository (L)
 
-## status: pending
+## status: completed
 
 <task_context>
 <domain>data/services/firebase</domain>

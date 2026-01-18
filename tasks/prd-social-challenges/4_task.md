@@ -1,6 +1,6 @@
 # [4.0] Domain Layer for Social Entities (M)
 
-## status: pending
+## status: completed
 
 <task_context>
 <domain>domain/entities</domain>

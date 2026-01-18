@@ -1,6 +1,6 @@
 # [8.0] Challenge & Leaderboard Domain Models (M)
 
-## status: pending
+## status: completed
 
 <task_context>
 <domain>domain/entities</domain>

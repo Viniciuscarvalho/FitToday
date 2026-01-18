@@ -1,6 +1,6 @@
 # [6.0] Group Management Use Cases (M)
 
-## status: pending
+## status: completed
 
 <task_context>
 <domain>domain/usecases</domain>

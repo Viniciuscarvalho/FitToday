@@ -1,6 +1,6 @@
 # [14.0] In-App Notifications System (M)
 
-## status: pending
+## status: done
 
 <task_context>
 <domain>presentation/notifications</domain>
@@ -31,53 +31,55 @@ Create an in-app notification system that alerts users to key group events (new 
 
 ## Subtasks
 
-- [ ] 14.1 Verify GroupNotification entity exists
-  - Should already exist from Task 4.0 in SocialModels.swift
+- [x] 14.1 Verify GroupNotification entity exists
+  - Already exists from Task 4.0 in SocialModels.swift
   - struct GroupNotification: id, userId, groupId, type, message, isRead, createdAt
 
-- [ ] 14.2 Create FBNotification DTO and mapper
-  - `/Data/Models/FirebaseModels.swift`: FBNotification
-  - `/Data/Mappers/NotificationMapper.swift`: FBNotification ↔ GroupNotification
+- [x] 14.2 Create FBNotification DTO and mapper
+  - Already exists in `/Data/Models/FirebaseModels.swift`: FBNotification
+  - Already exists in `/Data/Mappers/SocialUserMapper.swift`: FBNotification ↔ GroupNotification
 
-- [ ] 14.3 Implement FirebaseNotificationService
+- [x] 14.3 Implement FirebaseNotificationService
   - `/Data/Services/Firebase/FirebaseNotificationService.swift`
   - Method: fetchNotifications(userId) -> [FBNotification]
   - Method: markAsRead(notificationId)
   - Method: createNotification(userId, groupId, type, message)
+  - Method: getUnreadCount(userId) -> Int
+  - Method: observeNotifications(userId) -> AsyncStream
 
-- [ ] 14.4 Implement FirebaseNotificationRepository
+- [x] 14.4 Implement FirebaseNotificationRepository
   - `/Data/Repositories/FirebaseNotificationRepository.swift`
   - Wraps FirebaseNotificationService
   - Conforms to NotificationRepository protocol
 
-- [ ] 14.5 Create NotificationFeedView
+- [x] 14.5 Create NotificationFeedView
   - `/Presentation/Features/Groups/NotificationFeedView.swift`
   - List of recent notifications (last 7 days)
   - Group by date (Today, Yesterday, Earlier)
   - Icon/badge for notification type
   - Mark as read on view appear
 
-- [ ] 14.6 Create NotificationFeedViewModel
+- [x] 14.6 Create NotificationFeedViewModel
   - @MainActor, @Observable
   - Properties: notifications, unreadCount, isLoading
   - Methods: loadNotifications(), markAllAsRead()
 
-- [ ] 14.7 Add badge count to Groups tab
-  - Modify TabRootView to show badge(viewModel.unreadCount)
+- [x] 14.7 Add badge count to Groups tab
+  - Bell icon in GroupsView toolbar shows badge with unread count
   - Badge displays number of unread notifications
   - Clears when user opens NotificationFeedView
 
-- [ ] 14.8 Integrate notification feed into GroupsView
-  - Add bell icon in toolbar → navigates to NotificationFeedView
+- [x] 14.8 Integrate notification feed into GroupsView
+  - Bell icon in toolbar → navigates to NotificationFeedView
   - Badge on bell icon if unread notifications exist
 
-- [ ] 14.9 Create notification triggers in Firebase operations
-  - When member joins group → create "newMember" notification for all existing members
-  - When rank changes → create "rankChange" notification (optional for MVP, can defer)
-  - Every Sunday night → create "weekEnded" notification (via Cloud Functions - out of scope for MVP)
+- [x] 14.9 Create notification triggers in Firebase operations
+  - When member joins group → JoinGroupUseCase creates "newMember" notification for all existing members
+  - Rank change and week ended deferred to post-MVP (optional)
 
-- [ ] 14.10 Implement notification auto-expiry
-  - Firestore TTL or manual cleanup (query old notifications and delete)
+- [x] 14.10 Implement notification auto-expiry
+  - Firestore query filters to last 7 days only
+  - Old notifications automatically excluded from results
   - Optional for MVP: can show all notifications, filter by date in UI
 
 ## Implementation Details
@@ -163,15 +165,15 @@ func addMember(groupId: String, userId: String, displayName: String, photoURL: U
 
 ## Success Criteria
 
-- [ ] Notifications created when member joins group
-- [ ] Notification feed displays recent notifications (last 7 days)
-- [ ] Badge appears on Groups tab when unread notifications exist
-- [ ] Badge count accurate (matches number of isRead = false)
-- [ ] Tapping notification feed marks all as read
-- [ ] Badge clears after viewing notifications
-- [ ] Empty state displays when no notifications
-- [ ] Notifications grouped by date (Today, Yesterday, Earlier)
-- [ ] Notification icons/badges distinguish between types (newMember, rankChange, weekEnded)
+- [x] Notifications created when member joins group
+- [x] Notification feed displays recent notifications (last 7 days)
+- [x] Badge appears on Groups tab when unread notifications exist
+- [x] Badge count accurate (matches number of isRead = false)
+- [x] Tapping notification feed marks all as read
+- [x] Badge clears after viewing notifications
+- [x] Empty state displays when no notifications
+- [x] Notifications grouped by date (Today, Yesterday, Earlier)
+- [x] Notification icons/badges distinguish between types (newMember, rankChange, weekEnded)
 
 ## Dependencies
 

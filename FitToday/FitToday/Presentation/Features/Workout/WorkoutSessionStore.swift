@@ -32,6 +32,7 @@ import UIKit
 
     private let startUseCase = StartWorkoutSessionUseCase()
     private let completeUseCase: CompleteWorkoutSessionUseCase?
+    private let syncWorkoutUseCase: SyncWorkoutCompletionUseCase?
     private let persistenceKey = WorkoutProgress.persistenceKey
     private let substitutionsKey = "active_workout_substitutions"
 
@@ -43,6 +44,9 @@ import UIKit
             self.completeUseCase = nil
             self.dependencyError = "Repositório de histórico não configurado"
         }
+
+        // Social sync use case - optional (may not be configured)
+        self.syncWorkoutUseCase = resolver.resolve(SyncWorkoutCompletionUseCase.self)
 
         // Tentar restaurar sessão ativa ao iniciar
         restoreSessionIfNeeded()
@@ -242,7 +246,26 @@ import UIKit
         defer { isSavingCompletion = false }
         try await useCase.execute(session: session, status: status)
         lastCompletionStatus = status
-        
+
+        // Sync to Firebase leaderboard in background (don't block UI)
+        if status == .completed, let syncUseCase = syncWorkoutUseCase {
+            let entry = WorkoutHistoryEntry(
+                planId: session.plan.id,
+                title: session.plan.title,
+                focus: session.plan.focus,
+                status: status
+            )
+            Task.detached {
+                do {
+                    try await syncUseCase.execute(entry: entry)
+                } catch {
+                    #if DEBUG
+                    print("[WorkoutSync] Failed to sync to leaderboard: \(error)")
+                    #endif
+                }
+            }
+        }
+
         // Limpar persistência após conclusão
         clearPersistedProgress()
     }

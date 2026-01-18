@@ -45,6 +45,7 @@ struct ProfileProView: View {
                     onEditProfile: { router.push(.onboarding, on: .profile) },
                     onRedoDailyQuestionnaire: redoDailyQuestionnaire,
                     onOpenHealthKit: { router.push(.healthKitSettings, on: .profile) },
+                    onOpenPrivacySettings: { router.push(.privacySettings, on: .profile) },
                     onRestorePurchases: { Task { await restorePurchases() } },
                     onOpenSupport: openSupportURL
                 )

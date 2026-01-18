@@ -12,6 +12,7 @@ enum AppTab: Hashable, CaseIterable {
     case home
     case programs  // Renomeado de library
     case history
+    case groups
     case profile
 
     var title: String {
@@ -19,6 +20,7 @@ enum AppTab: Hashable, CaseIterable {
         case .home: return "Home"
         case .programs: return "Programas"
         case .history: return "Histórico"
+        case .groups: return "Grupos"
         case .profile: return "Perfil"
         }
     }
@@ -28,6 +30,7 @@ enum AppTab: Hashable, CaseIterable {
         case .home: return "house"
         case .programs: return "rectangle.stack.fill"
         case .history: return "clock.fill"
+        case .groups: return "person.3.fill"
         case .profile: return "person.crop.circle"
         }
     }
@@ -48,6 +51,7 @@ enum AppRoute: Hashable {
     case programExerciseDetail(ExercisePrescription)  // Detalhe de exercício na biblioteca/programa
     case apiKeySettings  // Configuração de chave de API do usuário
     case healthKitSettings // Integração Apple Health (PRO)
+    case privacySettings  // Privacy settings for social features
     case authentication(inviteContext: String?)  // Authentication flow
     case groupInvite(groupId: String)  // Group invitation deep link
 }

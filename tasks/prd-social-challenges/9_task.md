@@ -1,6 +1,6 @@
 # [9.0] Firebase Leaderboard Service (L)
 
-## status: pending
+## status: completed
 
 <task_context>
 <domain>data/services/firebase</domain>

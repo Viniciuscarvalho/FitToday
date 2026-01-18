@@ -129,6 +129,69 @@ enum ErrorMapper {
         message: "Renove sua assinatura para continuar usando recursos Pro.",
         action: .dismiss
       )
+
+    case .notAuthenticated:
+      return ErrorMessage(
+        title: "Autenticação necessária",
+        message: "Você precisa estar autenticado para realizar esta ação.",
+        action: .dismiss
+      )
+
+    case .alreadyInGroup:
+      return ErrorMessage(
+        title: "Já está em um grupo",
+        message: "Você já faz parte de um grupo. Saia do grupo atual para entrar em outro.",
+        action: .dismiss
+      )
+
+    case .groupNotFound:
+      return ErrorMessage(
+        title: "Grupo não encontrado",
+        message: "O grupo que você está procurando não existe ou foi removido.",
+        action: .dismiss
+      )
+
+    case .groupFull:
+      return ErrorMessage(
+        title: "Grupo cheio",
+        message: "Este grupo já atingiu o limite máximo de membros.",
+        action: .dismiss
+      )
+
+    case .notGroupAdmin:
+      return ErrorMessage(
+        title: "Permissão negada",
+        message: "Apenas administradores do grupo podem realizar esta ação.",
+        action: .dismiss
+      )
+
+    case .networkUnavailable:
+      return ErrorMessage(
+        title: "Sem conexão",
+        message: "Verifique sua conexão com a internet e tente novamente.",
+        action: .openSettings
+      )
+
+    case .challengeNotFound:
+      return ErrorMessage(
+        title: "Desafio não encontrado",
+        message: "O desafio que você está procurando não existe.",
+        action: .dismiss
+      )
+
+    case .invalidChallengeType:
+      return ErrorMessage(
+        title: "Tipo de desafio inválido",
+        message: "O tipo de desafio especificado não é válido.",
+        action: .dismiss
+      )
+
+    case .challengeExpired:
+      return ErrorMessage(
+        title: "Desafio expirado",
+        message: "Este desafio já terminou.",
+        action: .dismiss
+      )
     }
   }
   

@@ -1,6 +1,6 @@
 # [10.0] Leaderboard UI with Real-Time Updates (L)
 
-## status: pending
+## status: completed
 
 <task_context>
 <domain>presentation/leaderboards</domain>

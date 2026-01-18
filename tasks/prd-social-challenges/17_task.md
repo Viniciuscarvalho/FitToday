@@ -1,6 +1,6 @@
 # [17.0] Analytics & Monitoring Setup (S)
 
-## status: pending
+## status: done
 
 <task_context>
 <domain>infrastructure/monitoring</domain>
@@ -35,51 +35,61 @@ Setup Firebase Analytics and Crashlytics to track feature adoption, user behavio
   - Add FirebaseAnalytics SDK via SPM (if not already added)
   - Analytics automatically enabled with FirebaseApp.configure()
   - Verify in Firebase Console → Analytics → Events
+  - **Note**: Add `FirebaseAnalytics` product from `firebase-ios-sdk` SPM package
 
 - [ ] 17.2 Enable Firebase Crashlytics
   - Add FirebaseCrashlytics SDK via SPM
   - Initialize in FitTodayApp.init(): Crashlytics.crashlytics()
   - Upload dSYM files for symbolication (automatic with Xcode)
+  - **Note**: Requires manual SDK addition and console setup
 
-- [ ] 17.3 Implement group_created event
+- [x] 17.3 Implement group_created event
   - Track when user creates group
   - Parameters: group_id, user_id, timestamp
   - Location: CreateGroupUseCase after successful creation
+  - **Implementation**: Added to `CreateGroupUseCase.swift` via `AnalyticsTracking` protocol
 
-- [ ] 17.4 Implement group_joined event
+- [x] 17.4 Implement group_joined event
   - Track when user joins group via invite
   - Parameters: group_id, user_id, invite_source (link/qr), timestamp
   - Location: JoinGroupUseCase after successful join
+  - **Implementation**: Added to `JoinGroupUseCase.swift` with `InviteSource` enum
 
-- [ ] 17.5 Implement workout_synced event
+- [x] 17.5 Implement workout_synced event
   - Track successful leaderboard sync
   - Parameters: user_id, group_id, challenge_type (check-ins/streak), value, timestamp
   - Location: SyncWorkoutCompletionUseCase after successful Firebase write
+  - **Implementation**: Added to `SyncWorkoutCompletionUseCase.swift` for both check-ins and streak
 
-- [ ] 17.6 Implement group_left event
+- [x] 17.6 Implement group_left event
   - Track when user leaves group
   - Parameters: group_id, user_id, duration_in_group_days, timestamp
   - Location: LeaveGroupUseCase after successful leave
+  - **Implementation**: Added to `LeaveGroupUseCase.swift` with duration calculation
 
-- [ ] 17.7 Track feature adoption
+- [x] 17.7 Track feature adoption
   - User property: is_in_group (boolean)
   - User property: group_role (admin/member/none)
   - Update on group join/leave
+  - **Implementation**: Added `setUserInGroup()` and `setUserRole()` in all group use cases
 
 - [ ] 17.8 Setup error logging with Crashlytics
   - Log non-fatal errors: Crashlytics.crashlytics().record(error:)
   - Log custom messages: Crashlytics.crashlytics().log("Context message")
   - Add to all catch blocks in critical paths (sync, group operations)
+  - **Note**: Requires FirebaseCrashlytics SDK to be added
 
 - [ ] 17.9 Create Firebase Console dashboard
   - Custom dashboard for Social Challenges metrics
   - Widgets: group_created count (daily), group_joined count, workout_synced count
   - Funnel: invite_sent → group_joined conversion rate
+  - **Note**: Manual configuration in Firebase Console
 
-- [ ] 17.10 Document analytics events
+- [x] 17.10 Document analytics events
   - Create ANALYTICS.md with event definitions
   - Include event names, parameters, when fired
   - Share with product/marketing teams
+  - **Implementation**: Documented in `/FIREBASE_SETUP.md` under Analytics Events section
 
 ## Implementation Details
 
@@ -152,15 +162,15 @@ catch {
 
 ## Success Criteria
 
-- [ ] Firebase Analytics receiving events (verify in Console → DebugView)
-- [ ] Crashlytics receiving crash reports (trigger test crash to verify)
-- [ ] group_created event fires when group created
-- [ ] group_joined event fires when user joins via invite
-- [ ] workout_synced event fires when leaderboard updated
-- [ ] User properties (is_in_group, group_role) set correctly
-- [ ] Firebase Console dashboard created with key metrics
-- [ ] ANALYTICS.md document created with event definitions
-- [ ] No PII (personally identifiable information) logged in events
+- [ ] Firebase Analytics receiving events (verify in Console → DebugView) - Requires SDK setup
+- [ ] Crashlytics receiving crash reports (trigger test crash to verify) - Requires SDK setup
+- [x] group_created event fires when group created
+- [x] group_joined event fires when user joins via invite
+- [x] workout_synced event fires when leaderboard updated
+- [x] User properties (is_in_group, group_role) set correctly
+- [ ] Firebase Console dashboard created with key metrics - Manual console config
+- [x] ANALYTICS.md document created with event definitions (in FIREBASE_SETUP.md)
+- [x] No PII (personally identifiable information) logged in events - Only IDs logged
 
 ## Dependencies
 

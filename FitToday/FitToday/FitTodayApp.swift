@@ -15,6 +15,7 @@ struct FitTodayApp: App {
     private let appContainer: AppContainer
     // 💡 Learn: Com @Observable, use @State em vez de @StateObject
     @State private var sessionStore: WorkoutSessionStore
+    @Environment(\.scenePhase) private var scenePhase
 
     init() {
         // Configure Firebase
@@ -53,8 +54,53 @@ struct FitTodayApp: App {
                 .onOpenURL { url in
                     appContainer.router.handle(url: url)
                 }
+                .onAppear {
+                    setupNetworkMonitor()
+                }
         }
         .modelContainer(appContainer.modelContainer)
+        .onChange(of: scenePhase) { _, newPhase in
+            if newPhase == .active {
+                Task {
+                    await processPendingQueue()
+                }
+            }
+        }
+    }
+
+    // MARK: - Offline Sync Queue Processing
+
+    /// Process pending sync queue when app becomes active or network is restored.
+    private func processPendingQueue() async {
+        guard let syncUseCase = appContainer.container.resolve(SyncWorkoutCompletionUseCase.self),
+              let queue = appContainer.container.resolve(PendingSyncQueue.self) else {
+            return
+        }
+
+        await queue.processQueue { entry in
+            try await syncUseCase.performSync(entry: entry)
+        }
+    }
+
+    /// Setup network monitor to process queue when connection is restored.
+    private func setupNetworkMonitor() {
+        guard let networkMonitor = appContainer.container.resolve(NetworkMonitor.self),
+              let syncUseCase = appContainer.container.resolve(SyncWorkoutCompletionUseCase.self),
+              let queue = appContainer.container.resolve(PendingSyncQueue.self) else {
+            return
+        }
+
+        networkMonitor.onConnectionRestored = {
+            await queue.processQueue { entry in
+                try await syncUseCase.performSync(entry: entry)
+            }
+        }
+
+        networkMonitor.startMonitoring()
+
+        #if DEBUG
+        print("[FitTodayApp] Network monitor configured for offline sync queue")
+        #endif
     }
     
     /// Configura a aparência global de UIKit components para tema escuro

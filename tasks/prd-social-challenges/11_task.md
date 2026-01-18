@@ -1,6 +1,6 @@
 # [11.0] Workout Sync Use Case (L)
 
-## status: pending
+## status: completed
 
 <task_context>
 <domain>domain/usecases</domain>
@@ -31,49 +31,49 @@ Create the critical SyncWorkoutCompletionUseCase that connects workout completio
 
 ## Subtasks
 
-- [ ] 11.1 Create SyncWorkoutCompletionUseCase
+- [x] 11.1 Create SyncWorkoutCompletionUseCase
   - `/Domain/UseCases/SyncWorkoutCompletionUseCase.swift`
   - Dependencies: LeaderboardRepository, UserRepository, AuthenticationRepository, WorkoutHistoryRepository
   - Method: execute(entry: WorkoutHistoryEntry) async throws
 
-- [ ] 11.2 Implement privacy gating
+- [x] 11.2 Implement privacy gating
   - Check user.privacySettings.shareWorkoutData
   - Early-exit if false (don't sync to Firebase)
 
-- [ ] 11.3 Implement authentication and group validation
+- [x] 11.3 Implement authentication and group validation
   - Verify user is authenticated
   - Verify user is in a group (currentGroupId not nil)
   - Skip sync if either check fails
 
-- [ ] 11.4 Fetch current week's challenges
+- [x] 11.4 Fetch current week's challenges
   - Call LeaderboardRepository.getCurrentWeekChallenges(groupId)
   - Filter for check-ins and streak challenges
 
-- [ ] 11.5 Implement check-ins challenge update
+- [x] 11.5 Implement check-ins challenge update
   - Call LeaderboardRepository.incrementCheckIn(challengeId, userId)
   - This increments workout count for the week
 
-- [ ] 11.6 Implement streak computation logic
+- [x] 11.6 Implement streak computation logic
   - Private method: computeCurrentStreak(userId) async throws -> Int
   - Fetch all completed workouts from WorkoutHistoryRepository
   - Sort by date descending
   - Check if most recent is today or yesterday (streak still active)
   - Count consecutive days backward from most recent
 
-- [ ] 11.7 Implement streak challenge update
+- [x] 11.7 Implement streak challenge update
   - Call LeaderboardRepository.updateStreak(challengeId, userId, streakDays)
   - Pass computed streak value
 
-- [ ] 11.8 Add error handling
+- [x] 11.8 Add error handling
   - Catch and log errors (don't crash app if sync fails)
   - Network errors should be retried by offline queue (Task 13.0)
 
-- [ ] 11.9 Integrate into WorkoutCompletionView
-  - Modify `/Presentation/Features/WorkoutCompletion/WorkoutCompletionView.swift`
+- [x] 11.9 Integrate into WorkoutCompletionView
+  - Modified `/Presentation/Features/Workout/WorkoutSessionStore.swift`
   - After saving workout to WorkoutHistoryRepository, call SyncWorkoutCompletionUseCase
   - Run in background Task (don't block UI dismissal)
 
-- [ ] 11.10 Register SyncWorkoutCompletionUseCase in AppContainer
+- [x] 11.10 Register SyncWorkoutCompletionUseCase in AppContainer
 
 ## Implementation Details
 
@@ -164,15 +164,15 @@ func onDismiss() async {
 
 ## Success Criteria
 
-- [ ] Workout completion triggers leaderboard update
-- [ ] Check-ins count increments by 1 after workout
-- [ ] Streak value updates correctly (consecutive days)
-- [ ] Privacy toggle prevents sync when disabled
-- [ ] Unauthenticated users don't crash (gracefully skip sync)
-- [ ] Users not in group don't crash (gracefully skip sync)
-- [ ] Streak computation handles edge cases (no workouts, 1 workout, broken streak)
-- [ ] Leaderboard reflects update within 5 seconds
-- [ ] Sync errors don't block UI or crash app
+- [x] Workout completion triggers leaderboard update
+- [x] Check-ins count increments by 1 after workout
+- [x] Streak value updates correctly (consecutive days)
+- [x] Privacy toggle prevents sync when disabled
+- [x] Unauthenticated users don't crash (gracefully skip sync)
+- [x] Users not in group don't crash (gracefully skip sync)
+- [x] Streak computation handles edge cases (no workouts, 1 workout, broken streak)
+- [x] Leaderboard reflects update within 5 seconds
+- [x] Sync errors don't block UI or crash app
 
 ## Dependencies
 

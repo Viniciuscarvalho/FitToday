@@ -1,6 +1,6 @@
 # [13.0] Offline Sync Queue (M)
 
-## status: pending
+## status: done
 
 <task_context>
 <domain>data/services/offline</domain>
@@ -30,48 +30,50 @@ Implement a pending sync queue to buffer workout completions when offline, with 
 
 ## Subtasks
 
-- [ ] 13.1 Create PendingSyncQueue actor
-  - `/Data/Services/PendingSyncQueue.swift`
+- [x] 13.1 Create PendingSyncQueue actor
+  - `/Data/Services/Offline/PendingSyncQueue.swift`
   - Actor-isolated for thread safety
   - Properties: queue ([WorkoutHistoryEntry]), isProcessing (Bool)
-  - Methods: enqueue(entry), processQueue(syncUseCase)
+  - Methods: enqueue(entry), processQueue(syncClosure)
 
-- [ ] 13.2 Implement queue persistence
-  - Save queue to UserDefaults or local file as JSON
+- [x] 13.2 Implement queue persistence
+  - Save queue to UserDefaults as JSON
   - Method: persistQueue() - called after enqueue/dequeue
-  - Method: loadQueue() - called on init
+  - Loading happens in init synchronously
   - Use Codable for serialization
 
-- [ ] 13.3 Implement network reachability monitoring
+- [x] 13.3 Implement network reachability monitoring
+  - `/Data/Services/Offline/NetworkMonitor.swift`
   - Use NWPathMonitor from Network framework
   - Observe network status changes
-  - Trigger processQueue() when connection restored
+  - Trigger processQueue() when connection restored via callback
 
-- [ ] 13.4 Implement retry logic
-  - Method: processQueue(syncUseCase: SyncWorkoutCompletionUseCase)
+- [x] 13.4 Implement retry logic
+  - Method: processQueue(sync:) with async closure
   - Iterate through queue, attempt sync for each entry
-  - Remove from queue on success
+  - Remove from queue on success (mark as synced)
   - Keep in queue on failure (retry later)
-  - Exponential backoff for repeated failures (optional for MVP)
 
-- [ ] 13.5 Implement idempotency check
-  - Track synced entry IDs to prevent duplicates
+- [x] 13.5 Implement idempotency check
+  - Track synced entry IDs in syncedEntryIds Set<UUID>
   - If entry already synced, remove from queue without re-syncing
-  - Use Set<UUID> or Firestore write timestamps to detect duplicates
+  - Persisted to UserDefaults to survive app restarts
 
-- [ ] 13.6 Integrate into SyncWorkoutCompletionUseCase
-  - Catch network errors in execute()
-  - On error, call pendingQueue.enqueue(entry)
-  - Don't throw error (graceful degradation)
+- [x] 13.6 Integrate into SyncWorkoutCompletionUseCase
+  - Added pendingQueue dependency (optional)
+  - execute() catches errors and enqueues for retry
+  - performSync() is the internal method that throws
+  - Graceful degradation - no error thrown to caller
 
-- [ ] 13.7 Trigger queue processing on app lifecycle events
-  - App foreground: process queue
-  - Network reconnects: process queue
-  - Use SwiftUI .onChange(of: scenePhase) or AppDelegate methods
+- [x] 13.7 Trigger queue processing on app lifecycle events
+  - App foreground: process queue via .onChange(of: scenePhase)
+  - Network reconnects: process queue via NetworkMonitor callback
+  - Implemented in FitTodayApp.swift
 
 - [ ] 13.8 Add queue status indicator (optional)
   - Badge or text in Groups tab: "Syncing 2 workouts..."
   - Clear when queue empty
+  - (Deferred - optional for MVP)
 
 ## Implementation Details
 
@@ -204,15 +206,15 @@ private func processPendingQueue() async {
 
 ## Success Criteria
 
-- [ ] Workout completed offline is enqueued successfully
-- [ ] Queue persists across app restarts (UserDefaults)
-- [ ] Queue processes automatically when connection restored
-- [ ] Successfully synced entries removed from queue
-- [ ] Failed entries remain in queue for retry
-- [ ] No duplicate syncs (idempotency check works)
-- [ ] App foreground triggers queue processing
-- [ ] Queue empty after all retries succeed
-- [ ] No crashes when processing empty queue or during sync failures
+- [x] Workout completed offline is enqueued successfully
+- [x] Queue persists across app restarts (UserDefaults)
+- [x] Queue processes automatically when connection restored
+- [x] Successfully synced entries removed from queue
+- [x] Failed entries remain in queue for retry
+- [x] No duplicate syncs (idempotency check works)
+- [x] App foreground triggers queue processing
+- [x] Queue empty after all retries succeed
+- [x] No crashes when processing empty queue or during sync failures
 
 ## Dependencies
 

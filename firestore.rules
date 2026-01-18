@@ -1,0 +1,82 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper function to check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Helper function to check if user is a member of a group
+    function isMemberOfGroup(groupId) {
+      return exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid));
+    }
+
+    // Helper function to check if user is admin of a group
+    function isAdminOfGroup(groupId) {
+      let memberDoc = get(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid));
+      return memberDoc.data.role == 'admin';
+    }
+
+    // Users collection - users can read and write their own document
+    match /users/{userId} {
+      allow read: if isAuthenticated() && request.auth.uid == userId;
+      allow write: if isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Groups collection
+    match /groups/{groupId} {
+      // Anyone authenticated can create a group
+      allow create: if isAuthenticated();
+
+      // Only members can read group data
+      allow read: if isAuthenticated() && isMemberOfGroup(groupId);
+
+      // Only admins can update or delete groups
+      allow update, delete: if isAuthenticated() && isAdminOfGroup(groupId);
+
+      // Members subcollection
+      match /members/{userId} {
+        // Any member of the group can read members
+        allow read: if isAuthenticated() && isMemberOfGroup(groupId);
+
+        // Users can write their own member document (for joining)
+        // Or admins can write any member document (for managing members)
+        allow write: if isAuthenticated() &&
+                       (request.auth.uid == userId || isAdminOfGroup(groupId));
+      }
+    }
+
+    // Challenges collection
+    match /challenges/{challengeId} {
+      // Any authenticated user can read challenges
+      allow read: if isAuthenticated();
+
+      // Only authenticated users can create challenges (usually done by system/cloud functions)
+      allow create: if isAuthenticated();
+
+      // Challenge entries subcollection
+      match /entries/{userId} {
+        // Any authenticated user can read entries
+        allow read: if isAuthenticated();
+
+        // Users can only write their own entries
+        allow write: if isAuthenticated() && request.auth.uid == userId;
+      }
+    }
+
+    // Notifications collection
+    match /notifications/{notificationId} {
+      // Users can only read their own notifications
+      allow read: if isAuthenticated() &&
+                    resource.data.userId == request.auth.uid;
+
+      // Any authenticated user can create notifications
+      allow create: if isAuthenticated();
+
+      // Users can update their own notifications (mark as read)
+      allow update: if isAuthenticated() &&
+                      resource.data.userId == request.auth.uid;
+    }
+  }
+}

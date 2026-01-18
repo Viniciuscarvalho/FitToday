@@ -1,6 +1,6 @@
 # [7.0] Groups UI & Navigation (L)
 
-## status: pending
+## status: completed
 
 <task_context>
 <domain>presentation/groups</domain>
