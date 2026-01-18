@@ -20,6 +20,15 @@ struct WorkoutHistoryMapper {
             workoutPlan = try? JSONDecoder().decode(WorkoutPlan.self, from: jsonData)
         }
 
+        // Decodificar lista de exercícios completados
+        var completedExercises: [CompletedExercise]? = nil
+        if let exercisesData = model.completedExercisesJSON {
+            completedExercises = try? JSONDecoder().decode([CompletedExercise].self, from: exercisesData)
+        }
+
+        // Converter userRating string para enum
+        let userRating = WorkoutRating(rawString: model.userRating)
+
         return WorkoutHistoryEntry(
             id: model.id,
             date: model.date,
@@ -32,7 +41,9 @@ struct WorkoutHistoryMapper {
             durationMinutes: model.durationMinutes,
             caloriesBurned: model.caloriesBurned,
             healthKitWorkoutUUID: model.healthKitWorkoutUUID,
-            workoutPlan: workoutPlan
+            workoutPlan: workoutPlan,
+            userRating: userRating,
+            completedExercises: completedExercises
         )
     }
 
@@ -42,7 +53,13 @@ struct WorkoutHistoryMapper {
         if let plan = entry.workoutPlan {
             workoutPlanJSON = try? JSONEncoder().encode(plan)
         }
-        
+
+        // Serializar lista de exercícios completados
+        var completedExercisesJSON: Data? = nil
+        if let exercises = entry.completedExercises {
+            completedExercisesJSON = try? JSONEncoder().encode(exercises)
+        }
+
         return SDWorkoutHistoryEntry(
             id: entry.id,
             date: entry.date,
@@ -55,7 +72,9 @@ struct WorkoutHistoryMapper {
             durationMinutes: entry.durationMinutes,
             caloriesBurned: entry.caloriesBurned,
             healthKitWorkoutUUID: entry.healthKitWorkoutUUID,
-            workoutPlanJSON: workoutPlanJSON
+            workoutPlanJSON: workoutPlanJSON,
+            userRating: entry.userRating?.rawValue,
+            completedExercisesJSON: completedExercisesJSON
         )
     }
 }

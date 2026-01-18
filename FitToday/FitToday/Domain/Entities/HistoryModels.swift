@@ -32,6 +32,12 @@ struct WorkoutHistoryEntry: Codable, Hashable, Sendable, Identifiable {
     // WorkoutPlan completo (para histórico de variação)
     var workoutPlan: WorkoutPlan?
 
+    // User feedback sobre o treino (Task 1.0 - Workout Quality Optimization)
+    var userRating: WorkoutRating?
+
+    // Lista de exercícios completados
+    var completedExercises: [CompletedExercise]?
+
     init(
         id: UUID = .init(),
         date: Date = .init(),
@@ -44,7 +50,9 @@ struct WorkoutHistoryEntry: Codable, Hashable, Sendable, Identifiable {
         durationMinutes: Int? = nil,
         caloriesBurned: Int? = nil,
         healthKitWorkoutUUID: UUID? = nil,
-        workoutPlan: WorkoutPlan? = nil
+        workoutPlan: WorkoutPlan? = nil,
+        userRating: WorkoutRating? = nil,
+        completedExercises: [CompletedExercise]? = nil
     ) {
         self.id = id
         self.date = date
@@ -58,6 +66,8 @@ struct WorkoutHistoryEntry: Codable, Hashable, Sendable, Identifiable {
         self.caloriesBurned = caloriesBurned
         self.healthKitWorkoutUUID = healthKitWorkoutUUID
         self.workoutPlan = workoutPlan
+        self.userRating = userRating
+        self.completedExercises = completedExercises
     }
 }
 

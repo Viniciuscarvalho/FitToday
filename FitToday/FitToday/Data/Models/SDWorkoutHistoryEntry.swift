@@ -27,6 +27,12 @@ final class SDWorkoutHistoryEntry {
     // WorkoutPlan completo serializado (para histórico de variação)
     var workoutPlanJSON: Data?
 
+    // User feedback sobre o treino (Task 1.0 - Workout Quality Optimization)
+    var userRating: String?  // "too_easy", "adequate", "too_hard"
+
+    // Lista de exercícios completados serializada
+    var completedExercisesJSON: Data?
+
     init(
         id: UUID,
         date: Date,
@@ -39,7 +45,9 @@ final class SDWorkoutHistoryEntry {
         durationMinutes: Int? = nil,
         caloriesBurned: Int? = nil,
         healthKitWorkoutUUID: UUID? = nil,
-        workoutPlanJSON: Data? = nil
+        workoutPlanJSON: Data? = nil,
+        userRating: String? = nil,
+        completedExercisesJSON: Data? = nil
     ) {
         self.id = id
         self.date = date
@@ -53,6 +61,8 @@ final class SDWorkoutHistoryEntry {
         self.caloriesBurned = caloriesBurned
         self.healthKitWorkoutUUID = healthKitWorkoutUUID
         self.workoutPlanJSON = workoutPlanJSON
+        self.userRating = userRating
+        self.completedExercisesJSON = completedExercisesJSON
     }
 }
 

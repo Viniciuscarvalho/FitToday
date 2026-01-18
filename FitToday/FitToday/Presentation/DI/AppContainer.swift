@@ -45,6 +45,10 @@ struct AppContainer {
         container.register(WorkoutHistoryRepository.self) { _ in
             SwiftDataWorkoutHistoryRepository(modelContainer: modelContainer)
         }.inObjectScope(.container)
+
+        container.register(UserStatsRepository.self) { _ in
+            SwiftDataUserStatsRepository(modelContainer: modelContainer)
+        }.inObjectScope(.container)
         
         // Workout Composition Cache (F7)
         container.register(WorkoutCompositionCacheRepository.self) { _ in
@@ -308,7 +312,8 @@ struct AppContainer {
             SDUserProfile.self,
             SDWorkoutHistoryEntry.self,
             SDProEntitlementSnapshot.self,
-            SDCachedWorkout.self
+            SDCachedWorkout.self,
+            SDUserStats.self
         ])
         
         // Configuração com migração automática leve

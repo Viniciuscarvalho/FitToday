@@ -77,3 +77,17 @@ protocol WorkoutCompositionCacheRepository: Sendable {
     /// Get cache statistics (DEBUG)
     func getStats() async throws -> (total: Int, expired: Int, validCount: Int)
 }
+
+// MARK: - User Stats Repository
+
+/// Repository for storing and retrieving aggregated user statistics
+protocol UserStatsRepository: Sendable {
+    /// Fetch current user statistics
+    func getCurrentStats() async throws -> UserStats?
+
+    /// Save or update user statistics
+    func saveStats(_ stats: UserStats) async throws
+
+    /// Reset all statistics (for testing/debug)
+    func resetStats() async throws
+}
