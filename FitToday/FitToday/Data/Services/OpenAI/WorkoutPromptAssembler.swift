@@ -17,7 +17,8 @@ protocol WorkoutPromptAssembling: Sendable {
     blocks: [WorkoutBlock],
     profile: UserProfile,
     checkIn: DailyCheckIn,
-    previousWorkouts: [WorkoutPlan]
+    previousWorkouts: [WorkoutPlan],
+    intensityAdjustment: IntensityAdjustment
   ) -> WorkoutPrompt
 }
 
@@ -45,7 +46,8 @@ struct WorkoutPrompt: Sendable, Equatable {
       metadata.focus.rawValue,
       String(metadata.energyLevel),
       metadata.sorenessLevel.rawValue,
-      metadata.blueprintVersion.rawValue
+      metadata.blueprintVersion.rawValue,
+      metadata.feedbackHash  // NOVO: incluir hash do feedback para invalidar cache quando ajuste mudar
     ]
     return Hashing.sha256(components.joined(separator: "|"))
   }
@@ -62,15 +64,16 @@ struct PromptMetadata: Sendable, Equatable {
   let variationSeed: UInt64
   let blueprintVersion: BlueprintVersion
   let contextSource: String // "personal-active/emagrecimento.md" etc.
+  let feedbackHash: String // Hash do ajuste de intensidade baseado em feedback
   let timestamp: Date
-  
+
   var logDescription: String {
     """
     [PromptMetadata] goal=\(goal.rawValue) structure=\(structure.rawValue) \
     level=\(level.rawValue) focus=\(focus.rawValue) \
     energy=\(energyLevel) soreness=\(sorenessLevel.rawValue) \
     seed=\(variationSeed) version=\(blueprintVersion.rawValue) \
-    context=\(contextSource)
+    context=\(contextSource) feedback=\(feedbackHash)
     """
   }
 }
@@ -215,25 +218,30 @@ struct WorkoutPromptAssembler: WorkoutPromptAssembling, Sendable {
     blocks: [WorkoutBlock],
     profile: UserProfile,
     checkIn: DailyCheckIn,
-    previousWorkouts: [WorkoutPlan] = []
+    previousWorkouts: [WorkoutPlan] = [],
+    intensityAdjustment: IntensityAdjustment = .noChange
   ) -> WorkoutPrompt {
     let contextSource = contextFileName(for: profile.mainGoal)
     let guidelines = loadPersonalActiveGuidelines(for: profile.mainGoal)
-    
+
     let systemMessage = buildSystemMessage(
       goal: profile.mainGoal,
       guidelines: guidelines,
       blueprint: blueprint
     )
-    
+
     let userMessage = buildUserMessage(
       blueprint: blueprint,
       blocks: blocks,
       profile: profile,
       checkIn: checkIn,
-      previousWorkouts: previousWorkouts
+      previousWorkouts: previousWorkouts,
+      intensityAdjustment: intensityAdjustment
     )
-    
+
+    // Generate feedback hash from adjustment values
+    let feedbackHash = generateFeedbackHash(intensityAdjustment)
+
     let metadata = PromptMetadata(
       goal: profile.mainGoal,
       structure: profile.availableStructure,
@@ -244,20 +252,30 @@ struct WorkoutPromptAssembler: WorkoutPromptAssembling, Sendable {
       variationSeed: blueprint.variationSeed,
       blueprintVersion: blueprint.version,
       contextSource: contextSource,
+      feedbackHash: feedbackHash,
       timestamp: Date()
     )
-    
+
     #if DEBUG
     print("[PromptAssembler] \(metadata.logDescription)")
     print("[PromptAssembler] systemMessage length: \(systemMessage.count)")
     print("[PromptAssembler] userMessage length: \(userMessage.count)")
     #endif
-    
+
     return WorkoutPrompt(
       systemMessage: systemMessage,
       userMessage: userMessage,
       metadata: metadata
     )
+  }
+
+  private func generateFeedbackHash(_ adjustment: IntensityAdjustment) -> String {
+    let components = [
+      String(adjustment.volumeMultiplier),
+      String(adjustment.rpeAdjustment),
+      String(adjustment.restAdjustment)
+    ]
+    return components.joined(separator: "-")
   }
   
   // MARK: - System Message
@@ -306,34 +324,80 @@ struct WorkoutPromptAssembler: WorkoutPromptAssembling, Sendable {
     blocks: [WorkoutBlock],
     profile: UserProfile,
     checkIn: DailyCheckIn,
-    previousWorkouts: [WorkoutPlan]
+    previousWorkouts: [WorkoutPlan],
+    intensityAdjustment: IntensityAdjustment
   ) -> String {
     let blueprintJSON = formatBlueprint(blueprint)
     let catalogJSON = formatCatalog(blocks: blocks, blueprint: blueprint)
     let previousExercisesContext = formatPreviousWorkouts(previousWorkouts)
-    
+    let feedbackContext = formatFeedbackHistory(intensityAdjustment)
+    let exerciseLimits = formatExerciseLimits()
+    let diversityRules = formatDiversityRules()
+
     return """
     ## USUÁRIO
     **OBJETIVO PRINCIPAL: \(profile.mainGoal.rawValue.uppercased())**
     Nível: \(profile.level.rawValue) | Equipamentos: \(profile.availableStructure.rawValue) | Frequência: \(profile.weeklyFrequency)x/sem
     Condições de saúde: \(formatHealthConditions(profile.healthConditions))\(formatHealthSafetyRules(profile.healthConditions))
-    
+
     ## HOJE
     Foco: \(checkIn.focus.rawValue) | DOMS: \(checkIn.sorenessLevel.rawValue)\(checkIn.sorenessAreas.isEmpty ? "" : " (áreas: \(checkIn.sorenessAreas.map(\.rawValue).joined(separator: ", ")))") | Energia: \(checkIn.energyLevel)/10
-    
+
     Regras de adaptação:
-    - Se energia <= 3 OU DOMS == strong: mantenha o treino conservador (menos “agressivo”), priorize técnica e segurança.
-    
+    - Se energia <= 3 OU DOMS == strong: mantenha o treino conservador (menos "agressivo"), priorize técnica e segurança.
+
     ## ESTRUTURA DO TREINO (OBRIGATÓRIO)
     Título: \(blueprint.title) | Intensidade: \(blueprint.intensity.rawValue) | Duração: ~\(blueprint.estimatedDurationMinutes)min
     \(blueprintJSON)
-    
+
+    \(exerciseLimits)
+
     \(previousExercisesContext)
-    
+
+    \(feedbackContext)
+
+    \(diversityRules)
+
     ## EXERCÍCIOS DISPONÍVEIS (use APENAS estes)
     \(catalogJSON)
-    
+
     Retorne APENAS o JSON final.
+    """
+  }
+
+  // MARK: - Feedback History Formatting
+
+  private func formatFeedbackHistory(_ adjustment: IntensityAdjustment) -> String {
+    // Only include feedback section if there's an actual adjustment
+    guard adjustment != .noChange else { return "" }
+
+    return """
+    ## HISTÓRICO DE FEEDBACK DO USUÁRIO
+    \(adjustment.recommendation)
+    """
+  }
+
+  // MARK: - Exercise Limits Formatting
+
+  private func formatExerciseLimits() -> String {
+    """
+    ## LIMITES POR FASE (RESPEITAR)
+    - Warmup: 2-3 exercícios
+    - Strength: 4-6 exercícios
+    - Accessory: 2-4 exercícios
+    - Conditioning: 2-3 exercícios
+    - Cooldown: 2-3 exercícios
+    """
+  }
+
+  // MARK: - Movement Pattern Diversity
+
+  private func formatDiversityRules() -> String {
+    """
+    ## REGRA DE DIVERSIDADE
+    - Variar padrões de movimento: incluir PUSH, PULL, HINGE, SQUAT
+    - ≥80% dos exercícios devem ser DIFERENTES dos últimos 3 treinos
+    - Equilibrar grupos musculares: não repetir o mesmo padrão em sequência
     """
   }
   
@@ -344,11 +408,11 @@ struct WorkoutPromptAssembler: WorkoutPromptAssembling, Sendable {
       return ""
     }
 
-    // Pegar apenas os últimos 3 treinos para não estourar contexto
-    let recentWorkouts = Array(workouts.prefix(3))
+    // Expandido para 7 dias de histórico para melhor diversidade (era 3)
+    let recentWorkouts = Array(workouts.prefix(7))
 
     var lines: [String] = []
-    lines.append("## EXERCÍCIOS PROIBIDOS")
+    lines.append("## EXERCÍCIOS PROIBIDOS (últimos 7 treinos)")
     lines.append("")
     lines.append("Regra crítica: NÃO repita estes exercícios. Selecione exercícios diferentes.")
     lines.append("")

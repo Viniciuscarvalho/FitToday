@@ -532,11 +532,16 @@ struct WorkoutDiversityGate: Sendable {
 
 /// Coordenador do quality gate completo
 struct WorkoutPlanQualityGate: Sendable {
-  
+
   private let validator = BlueprintPlanValidator()
   private let normalizer = WorkoutPlanNormalizer()
   private let diversityGate = WorkoutDiversityGate()
-  
+  private let exerciseDiversityValidator: ExerciseDiversityValidating
+
+  init(exerciseDiversityValidator: ExerciseDiversityValidating = ExerciseDiversityValidator()) {
+    self.exerciseDiversityValidator = exerciseDiversityValidator
+  }
+
   /// Resultado do quality gate
   struct QualityResult: Sendable {
     let originalPlan: WorkoutPlan
@@ -544,14 +549,16 @@ struct WorkoutPlanQualityGate: Sendable {
     let status: Status
     let validationResult: WorkoutPlanValidationResult
     let diversityResult: WorkoutDiversityGate.DiversityResult?
-    
+    let exerciseDiversityResult: DiversityResult?
+
     enum Status: Sendable {
       case passed
       case normalizedAndPassed
       case failedValidation
       case failedDiversity
+      case failedExerciseDiversity
     }
-    
+
     var succeeded: Bool {
       status == .passed || status == .normalizedAndPassed
     }
@@ -566,30 +573,31 @@ struct WorkoutPlanQualityGate: Sendable {
   ) -> QualityResult {
     // 1. Validar
     let validationResult = validator.validate(plan: plan, blueprint: blueprint, profile: profile)
-    
+
     // 2. Se inválido com issues críticas, falhar
     if !validationResult.isValid && validationResult.hasCriticalIssues {
       #if DEBUG
       print("[QualityGate] FAILED: Issues críticas de validação")
       #endif
-      
+
       return QualityResult(
         originalPlan: plan,
         finalPlan: nil,
         status: .failedValidation,
         validationResult: validationResult,
-        diversityResult: nil
+        diversityResult: nil,
+        exerciseDiversityResult: nil
       )
     }
-    
+
     // 3. Normalizar se necessário
     let normalizedPlan: WorkoutPlan
     let wasNormalized: Bool
-    
+
     if !validationResult.isValid && validationResult.canBeNormalized {
       normalizedPlan = normalizer.normalize(plan: plan, blueprint: blueprint)
       wasNormalized = true
-      
+
       #if DEBUG
       print("[QualityGate] Plano normalizado com \(validationResult.issues.count) correções")
       #endif
@@ -597,47 +605,81 @@ struct WorkoutPlanQualityGate: Sendable {
       normalizedPlan = plan
       wasNormalized = false
     }
-    
-    // 4. Verificar diversidade
+
+    // 4. Verificar diversidade estrutural
     let diversityResult = diversityGate.analyze(
       newPlan: normalizedPlan,
       previousPlans: previousPlans
     )
-    
+
     if !diversityResult.passesGate {
       #if DEBUG
-      print("[QualityGate] FAILED: Diversidade insuficiente (\(String(format: "%.2f", diversityResult.score)) < \(WorkoutDiversityGate.minimumDiversityScore))")
+      print("[QualityGate] FAILED: Diversidade estrutural insuficiente (\(String(format: "%.2f", diversityResult.score)) < \(WorkoutDiversityGate.minimumDiversityScore))")
       #endif
-      
+
       return QualityResult(
         originalPlan: plan,
         finalPlan: nil,
         status: .failedDiversity,
         validationResult: validationResult,
-        diversityResult: diversityResult
+        diversityResult: diversityResult,
+        exerciseDiversityResult: nil
       )
     }
-    
-    // 5. Sucesso
+
+    // 5. Verificar diversidade de exercícios (80% rule)
+    let newExercises = normalizedPlan.exercises.map { $0.exercise.name }
+    let previousExercises = previousPlans.prefix(3).map { plan in
+      plan.exercises.map { $0.exercise.name }
+    }
+    let exerciseDiversityResult = exerciseDiversityValidator.calculateDiversityScore(
+      newExercises: newExercises,
+      previousExercises: Array(previousExercises)
+    )
+
     #if DEBUG
-    print("[QualityGate] PASSED: diversidade=\(String(format: "%.2f", diversityResult.score)), normalized=\(wasNormalized)")
+    print("[QualityGate] Exercise diversity: \(String(format: "%.0f", exerciseDiversityResult.score * 100))% (\(exerciseDiversityResult.uniqueCount)/\(exerciseDiversityResult.totalCount) unique)")
     #endif
-    
+
+    if !exerciseDiversityResult.isValid {
+      #if DEBUG
+      print("[QualityGate] FAILED: Diversidade de exercícios insuficiente (\(String(format: "%.0f", exerciseDiversityResult.score * 100))% < 80%)")
+      if !exerciseDiversityResult.repeatedExercises.isEmpty {
+        print("[QualityGate] Exercícios repetidos: \(exerciseDiversityResult.repeatedExercises.joined(separator: ", "))")
+      }
+      #endif
+
+      return QualityResult(
+        originalPlan: plan,
+        finalPlan: nil,
+        status: .failedExerciseDiversity,
+        validationResult: validationResult,
+        diversityResult: diversityResult,
+        exerciseDiversityResult: exerciseDiversityResult
+      )
+    }
+
+    // 6. Sucesso
+    #if DEBUG
+    print("[QualityGate] PASSED: struct_diversity=\(String(format: "%.2f", diversityResult.score)), exercise_diversity=\(String(format: "%.0f", exerciseDiversityResult.score * 100))%, normalized=\(wasNormalized)")
+    #endif
+
     return QualityResult(
       originalPlan: plan,
       finalPlan: normalizedPlan,
       status: wasNormalized ? .normalizedAndPassed : .passed,
       validationResult: validationResult,
-      diversityResult: diversityResult
+      diversityResult: diversityResult,
+      exerciseDiversityResult: exerciseDiversityResult
     )
   }
   
   /// Gera feedback para retry baseado no resultado
   func generateRetryFeedback(from result: QualityResult) -> String? {
     guard !result.succeeded else { return nil }
-    
+
     var feedback: [String] = []
-    
+
     switch result.status {
     case .failedValidation:
       feedback.append("O treino anterior teve problemas de estrutura:")
@@ -645,18 +687,30 @@ struct WorkoutPlanQualityGate: Sendable {
         feedback.append("- \(issue)")
       }
       feedback.append("Por favor, corrija e gere novamente respeitando o blueprint.")
-      
+
     case .failedDiversity:
       if let diversity = result.diversityResult {
         feedback.append("O treino gerado é muito similar aos anteriores (similaridade: \(Int((1 - diversity.score) * 100))%).")
         feedback.append("Por favor, varie mais os exercícios e a ordem de execução.")
         feedback.append("Use a seed de variação para garantir diferenciação.")
       }
-      
+
+    case .failedExerciseDiversity:
+      if let exerciseDiversity = result.exerciseDiversityResult {
+        let percentage = Int(exerciseDiversity.score * 100)
+        feedback.append("⚠️ ATENÇÃO: O treino anterior teve diversidade de apenas \(percentage)%.")
+        if !exerciseDiversity.repeatedExercises.isEmpty {
+          let repeatedList = exerciseDiversity.repeatedExercises.prefix(5).joined(separator: ", ")
+          feedback.append("Exercícios repetidos: \(repeatedList)")
+        }
+        feedback.append("Por favor, substitua os exercícios repetidos por alternativas do catálogo.")
+        feedback.append("Objetivo: ≥80% dos exercícios devem ser DIFERENTES dos últimos 3 treinos.")
+      }
+
     case .passed, .normalizedAndPassed:
       return nil
     }
-    
+
     return feedback.joined(separator: "\n")
   }
 }

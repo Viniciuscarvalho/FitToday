@@ -36,6 +36,25 @@ struct PrivacySettingsView: View {
             }
 
             Section {
+                Toggle("Sincronizar com Apple Health", isOn: $viewModel.healthKitSyncEnabled)
+                    .disabled(viewModel.isLoading)
+                    .onChange(of: viewModel.healthKitSyncEnabled) { _, newValue in
+                        Task {
+                            await viewModel.updateHealthKitSync(enabled: newValue)
+                        }
+                    }
+            } header: {
+                HStack(spacing: FitTodaySpacing.xs) {
+                    Image(systemName: "heart.fill")
+                        .foregroundStyle(.red)
+                    Text("Apple Health")
+                }
+            } footer: {
+                Text("Treinos concluídos são automaticamente exportados para o Apple Health. Calorias queimadas do Apple Watch são importadas após o treino.")
+                    .font(.caption)
+            }
+
+            Section {
                 VStack(alignment: .leading, spacing: FitTodaySpacing.sm) {
                     HStack(spacing: FitTodaySpacing.sm) {
                         Image(systemName: "lock.shield.fill")

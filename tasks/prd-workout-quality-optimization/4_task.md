@@ -1,6 +1,6 @@
 # [4.0] Create workout rating UI component (M)
 
-## status: pending
+## status: completed
 
 <task_context>
 <domain>presentation/features</domain>

@@ -192,6 +192,13 @@ enum ErrorMapper {
         message: "Este desafio já terminou.",
         action: .dismiss
       )
+
+    case .notFound(let resource):
+      return ErrorMessage(
+        title: "Não encontrado",
+        message: "Recurso não encontrado: \(resource)",
+        action: .dismiss
+      )
     }
   }
   

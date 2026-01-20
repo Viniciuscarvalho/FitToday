@@ -13,17 +13,25 @@ import Swinject
 @MainActor
 @Observable final class PrivacySettingsViewModel {
     var shareWorkoutData: Bool = true
+    var healthKitSyncEnabled: Bool = false
     private(set) var isLoading = false
     private(set) var isSaving = false
     var errorMessage: ErrorMessage?
 
     private let userRepository: UserRepository?
     private let authRepository: AuthenticationRepository?
+    private let healthKitService: HealthKitServicing?
     private var currentUserId: String?
+
+    private static let healthKitSyncKey = "healthKitSyncEnabled"
 
     init(resolver: Resolver) {
         self.userRepository = resolver.resolve(UserRepository.self)
         self.authRepository = resolver.resolve(AuthenticationRepository.self)
+        self.healthKitService = resolver.resolve(HealthKitServicing.self)
+
+        // Load HealthKit preference from UserDefaults
+        self.healthKitSyncEnabled = UserDefaults.standard.bool(forKey: Self.healthKitSyncKey)
     }
 
     // MARK: - Load Settings
@@ -70,5 +78,50 @@ import Swinject
             print("[PrivacySettings] Failed to update: \(error)")
             #endif
         }
+    }
+
+    // MARK: - HealthKit Sync
+
+    func updateHealthKitSync(enabled: Bool) async {
+        // If enabling, request HealthKit authorization first
+        if enabled {
+            guard let healthKit = healthKitService else {
+                errorMessage = ErrorMessage(title: "Erro", message: "HealthKit não disponível")
+                healthKitSyncEnabled = false
+                return
+            }
+
+            let authState = await healthKit.authorizationState()
+
+            if authState == .notAvailable {
+                errorMessage = ErrorMessage(title: "Indisponível", message: "HealthKit não está disponível neste dispositivo")
+                healthKitSyncEnabled = false
+                return
+            }
+
+            if authState == .notDetermined || authState == .denied {
+                do {
+                    try await healthKit.requestAuthorization()
+                    #if DEBUG
+                    print("[PrivacySettings] HealthKit authorization granted")
+                    #endif
+                } catch {
+                    errorMessage = ErrorMessage(title: "Permissão Negada", message: "Permita acesso ao Apple Health em Configurações para sincronizar treinos")
+                    healthKitSyncEnabled = false
+                    #if DEBUG
+                    print("[PrivacySettings] HealthKit authorization failed: \(error)")
+                    #endif
+                    return
+                }
+            }
+        }
+
+        // Save preference to UserDefaults
+        UserDefaults.standard.set(enabled, forKey: Self.healthKitSyncKey)
+        healthKitSyncEnabled = enabled
+
+        #if DEBUG
+        print("[PrivacySettings] HealthKit sync \(enabled ? "enabled" : "disabled")")
+        #endif
     }
 }

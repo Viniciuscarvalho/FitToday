@@ -1,6 +1,6 @@
 # [7.0] Complete bidirectional HealthKit sync (M)
 
-## status: pending
+## status: completed
 
 <task_context>
 <domain>data/services</domain>
@@ -28,14 +28,14 @@ Complete the bidirectional HealthKit integration: (1) automatically export compl
 
 ## Subtasks
 
-- [ ] 7.1 Add `fetchCaloriesForWorkout` method to HealthKitService
-- [ ] 7.2 Create `SyncWorkoutWithHealthKitUseCase`
-- [ ] 7.3 Implement automatic export on workout completion
-- [ ] 7.4 Implement calorie import with 5s delay
-- [ ] 7.5 Update SDWorkoutHistoryEntry with HealthKit data
-- [ ] 7.6 Add `healthKitSyncEnabled` user preference
-- [ ] 7.7 Handle edge cases (no Apple Watch, authorization denied)
-- [ ] 7.8 Write unit tests with mock HealthKit service
+- [x] 7.1 Add `fetchCaloriesForWorkout` method to HealthKitService
+- [x] 7.2 Create `SyncWorkoutWithHealthKitUseCase`
+- [x] 7.3 Implement automatic export on workout completion
+- [x] 7.4 Implement calorie import with 5s delay
+- [x] 7.5 Update SDWorkoutHistoryEntry with HealthKit data
+- [x] 7.6 Add `healthKitSyncEnabled` user preference
+- [x] 7.7 Handle edge cases (no Apple Watch, authorization denied)
+- [x] 7.8 Write unit tests with mock HealthKit service
 
 ## Implementation Details
 
@@ -104,13 +104,13 @@ Workout Completed
 
 ## Success Criteria
 
-- [ ] Workouts auto-export to HealthKit when authorized
-- [ ] Calories imported from HealthKit after workout
-- [ ] History entry updated with actual calories (not estimated)
-- [ ] HealthKit UUID stored in entry for tracking
-- [ ] Graceful handling when HealthKit denied
-- [ ] No blocking/freezing during sync (async)
-- [ ] Unit tests pass with mock HealthKit service
+- [x] Workouts auto-export to HealthKit when authorized
+- [x] Calories imported from HealthKit after workout
+- [x] History entry updated with actual calories (not estimated)
+- [x] HealthKit UUID stored in entry for tracking
+- [x] Graceful handling when HealthKit denied
+- [x] No blocking/freezing during sync (async)
+- [x] Unit tests pass with mock HealthKit service
 
 ## Dependencies
 

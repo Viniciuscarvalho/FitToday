@@ -14,6 +14,7 @@ struct OpenAIWorkoutPlanComposer: WorkoutPlanComposing {
     private let promptAssembler: WorkoutPromptAssembler
     private let qualityGate: WorkoutPlanQualityGate
     private let historyRepository: WorkoutHistoryRepository?
+    private let feedbackAnalyzer: FeedbackAnalyzing
     private let exerciseNameNormalizer: ExerciseNameNormalizing
     private let mediaResolver: ExerciseMediaResolving?
     private let logger: (String) -> Void
@@ -27,6 +28,7 @@ struct OpenAIWorkoutPlanComposer: WorkoutPlanComposing {
         promptAssembler: WorkoutPromptAssembler = WorkoutPromptAssembler(),
         qualityGate: WorkoutPlanQualityGate = WorkoutPlanQualityGate(),
         historyRepository: WorkoutHistoryRepository? = nil,
+        feedbackAnalyzer: FeedbackAnalyzing = FeedbackAnalyzer(),
         logger: @escaping (String) -> Void = { print("[OpenAI]", $0) }
     ) {
         self.client = client
@@ -37,6 +39,7 @@ struct OpenAIWorkoutPlanComposer: WorkoutPlanComposing {
         self.promptAssembler = promptAssembler
         self.qualityGate = qualityGate
         self.historyRepository = historyRepository
+        self.feedbackAnalyzer = feedbackAnalyzer
         self.logger = logger
     }
 
@@ -47,23 +50,35 @@ struct OpenAIWorkoutPlanComposer: WorkoutPlanComposing {
     ) async throws -> WorkoutPlan {
         // 1. Gerar blueprint determinístico
         let blueprint = blueprintEngine.generateBlueprint(profile: profile, checkIn: checkIn)
-        
+
         logger("Blueprint gerado: \(blueprint.title) (seed=\(blueprint.variationSeed))")
-        
-        // 2. Buscar treinos anteriores para evitar repetição
-        let previousWorkouts = await fetchRecentWorkouts(limit: 3)
-        
+
+        // 2. Buscar treinos anteriores para evitar repetição (expandido para 7 dias)
+        let previousWorkouts = await fetchRecentWorkouts(limit: 7)
+
         if !previousWorkouts.isEmpty {
             logger("Histórico: \(previousWorkouts.count) treinos recentes para evitar repetição")
         }
-        
-        // 3. Montar prompt com variação baseada em seed
+
+        // 3. Buscar e analisar feedback do usuário
+        let recentRatings = await fetchRecentRatings(limit: 5)
+        let intensityAdjustment = feedbackAnalyzer.analyzeRecentFeedback(
+            ratings: recentRatings,
+            currentIntensity: blueprint.intensity
+        )
+
+        if intensityAdjustment != .noChange {
+            logger("Ajuste de intensidade: \(intensityAdjustment.recommendation)")
+        }
+
+        // 4. Montar prompt com variação baseada em seed e feedback
         let workoutPrompt = promptAssembler.assemblePrompt(
             blueprint: blueprint,
             blocks: blocks,
             profile: profile,
             checkIn: checkIn,
-            previousWorkouts: previousWorkouts
+            previousWorkouts: previousWorkouts,
+            intensityAdjustment: intensityAdjustment
         )
         
         logger("Prompt montado: \(workoutPrompt.systemMessage.count + workoutPrompt.userMessage.count) chars")
@@ -171,21 +186,46 @@ struct OpenAIWorkoutPlanComposer: WorkoutPlanComposing {
         guard let historyRepository = historyRepository else {
             return []
         }
-        
+
         do {
             // Buscar últimas entradas de histórico
             let entries = try await historyRepository.listEntries(limit: limit, offset: 0)
-            
+
             // Extrair WorkoutPlans das entries que tiverem
             let plans = entries.compactMap { $0.workoutPlan }
-            
+
             #if DEBUG
             logger("Histórico carregado: \(entries.count) entradas, \(plans.count) com plano completo")
             #endif
-            
+
             return plans
         } catch {
             logger("⚠️ Erro ao buscar histórico: \(error.localizedDescription)")
+            return []
+        }
+    }
+
+    private func fetchRecentRatings(limit: Int) async -> [WorkoutRating] {
+        guard let historyRepository = historyRepository else {
+            return []
+        }
+
+        do {
+            // Buscar últimas entradas de histórico com avaliação
+            let entries = try await historyRepository.listEntries(limit: limit, offset: 0)
+
+            // Extrair ratings das entries que tiverem
+            let ratings = entries.compactMap { $0.userRating }
+
+            #if DEBUG
+            if !ratings.isEmpty {
+                logger("Feedback carregado: \(ratings.count) avaliações recentes")
+            }
+            #endif
+
+            return ratings
+        } catch {
+            logger("⚠️ Erro ao buscar avaliações: \(error.localizedDescription)")
             return []
         }
     }
@@ -527,6 +567,7 @@ struct DynamicHybridWorkoutPlanComposer: WorkoutPlanComposing {
     private let usageLimiter: OpenAIUsageLimiting?
     private let exerciseNameNormalizer: ExerciseNameNormalizing?
     private let mediaResolver: ExerciseMediaResolving?
+    private let feedbackAnalyzer: FeedbackAnalyzing
     private let entitlementProvider: (() async -> ProEntitlement)?
     private let historyRepository: WorkoutHistoryRepository?
     private let clock: () -> Date
@@ -537,6 +578,7 @@ struct DynamicHybridWorkoutPlanComposer: WorkoutPlanComposing {
         usageLimiter: OpenAIUsageLimiting?,
         exerciseNameNormalizer: ExerciseNameNormalizing? = nil,
         mediaResolver: ExerciseMediaResolving? = nil,
+        feedbackAnalyzer: FeedbackAnalyzing = FeedbackAnalyzer(),
         entitlementProvider: (() async -> ProEntitlement)? = nil,
         historyRepository: WorkoutHistoryRepository? = nil,
         clock: @escaping () -> Date = { Date() },
@@ -546,6 +588,7 @@ struct DynamicHybridWorkoutPlanComposer: WorkoutPlanComposing {
         self.usageLimiter = usageLimiter
         self.exerciseNameNormalizer = exerciseNameNormalizer
         self.mediaResolver = mediaResolver
+        self.feedbackAnalyzer = feedbackAnalyzer
         self.entitlementProvider = entitlementProvider
         self.historyRepository = historyRepository
         self.clock = clock
@@ -590,6 +633,7 @@ struct DynamicHybridWorkoutPlanComposer: WorkoutPlanComposing {
             exerciseNameNormalizer: normalizer,
             mediaResolver: mediaResolver,
             historyRepository: historyRepository,
+            feedbackAnalyzer: feedbackAnalyzer,
             logger: logger
         )
         

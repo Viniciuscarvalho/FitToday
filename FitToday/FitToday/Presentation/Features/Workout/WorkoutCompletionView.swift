@@ -23,6 +23,11 @@ struct WorkoutCompletionView: View {
     @State private var isExportingHealthKit = false
     @State private var healthKitExportMessage: String?
 
+    // Rating state
+    @State private var selectedRating: WorkoutRating?
+    @State private var hasRated = false
+    @State private var isSavingRating = false
+
     var body: some View {
         VStack(spacing: FitTodaySpacing.lg) {
             Image(systemName: statusIcon)
@@ -40,9 +45,23 @@ struct WorkoutCompletionView: View {
                     .multilineTextAlignment(.center)
             }
             .padding(.horizontal)
-            
+
+            // Rating prompt for completed workouts
+            if status == .completed && !hasRated {
+                WorkoutRatingView(
+                    selectedRating: $selectedRating,
+                    onRatingSelected: { rating in
+                        Task { await saveRating(rating) }
+                    },
+                    onSkip: {
+                        hasRated = true
+                    }
+                )
+                .padding(.horizontal)
+            }
+
             // Prompt para completar perfil (se incompleto)
-            if isProfileIncomplete && status == .completed {
+            if isProfileIncomplete && status == .completed && hasRated {
                 profileCompletionPrompt
             }
 
@@ -286,6 +305,34 @@ struct WorkoutCompletionView: View {
 
         if goToHistory {
             router.select(tab: .history)
+        }
+    }
+
+    private func saveRating(_ rating: WorkoutRating?) async {
+        guard let planId = sessionStore.plan?.id else {
+            hasRated = true
+            return
+        }
+
+        guard let historyRepo = resolver.resolve(WorkoutHistoryRepository.self) else {
+            hasRated = true
+            return
+        }
+
+        isSavingRating = true
+        defer { isSavingRating = false }
+
+        let useCase = SaveWorkoutRatingUseCase(historyRepository: historyRepo)
+
+        do {
+            try await useCase.execute(rating: rating, planId: planId)
+            hasRated = true
+        } catch {
+            // Still mark as rated to allow user to continue
+            hasRated = true
+            #if DEBUG
+            print("[WorkoutCompletion] Failed to save rating: \(error)")
+            #endif
         }
     }
 

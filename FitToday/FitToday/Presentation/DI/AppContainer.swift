@@ -179,6 +179,15 @@ struct AppContainer {
         }
         .inObjectScope(.container)
 
+        // HealthKit Workout Sync Use Case - auto-exports workouts and imports calories
+        container.register(SyncWorkoutWithHealthKitUseCase.self) { resolver in
+            SyncWorkoutWithHealthKitUseCase(
+                healthKitService: resolver.resolve(HealthKitServicing.self)!,
+                historyRepository: resolver.resolve(WorkoutHistoryRepository.self)!
+            )
+        }
+        .inObjectScope(.container)
+
         // Firebase Analytics Service
         let analyticsService = FirebaseAnalyticsService()
         container.register(AnalyticsTracking.self) { _ in analyticsService }
@@ -300,6 +309,42 @@ struct AppContainer {
                 historyRepository: resolver.resolve(WorkoutHistoryRepository.self)!,
                 pendingQueue: resolver.resolve(PendingSyncQueue.self),
                 analytics: resolver.resolve(AnalyticsTracking.self)
+            )
+        }
+        .inObjectScope(.container)
+
+        // Feedback Analyzer - analyzes workout ratings for adaptive training
+        let feedbackAnalyzer = FeedbackAnalyzer()
+        container.register(FeedbackAnalyzing.self) { _ in feedbackAnalyzer }
+            .inObjectScope(.container)
+
+        // Fetch Recent Ratings Use Case
+        container.register(FetchRecentRatingsUseCase.self) { resolver in
+            FetchRecentRatingsUseCase(
+                historyRepository: resolver.resolve(WorkoutHistoryRepository.self)!
+            )
+        }
+        .inObjectScope(.container)
+
+        // Save Workout Rating Use Case
+        container.register(SaveWorkoutRatingUseCase.self) { resolver in
+            SaveWorkoutRatingUseCase(
+                historyRepository: resolver.resolve(WorkoutHistoryRepository.self)!
+            )
+        }
+        .inObjectScope(.container)
+
+        // User Stats Calculator - computes streaks, weekly/monthly aggregates
+        let statsCalculator = UserStatsCalculator()
+        container.register(UserStatsCalculating.self) { _ in statsCalculator }
+            .inObjectScope(.container)
+
+        // Update User Stats Use Case - updates stats after workout completion
+        container.register(UpdateUserStatsUseCase.self) { resolver in
+            UpdateUserStatsUseCase(
+                historyRepository: resolver.resolve(WorkoutHistoryRepository.self)!,
+                statsRepository: resolver.resolve(UserStatsRepository.self)!,
+                calculator: resolver.resolve(UserStatsCalculating.self)!
             )
         }
         .inObjectScope(.container)

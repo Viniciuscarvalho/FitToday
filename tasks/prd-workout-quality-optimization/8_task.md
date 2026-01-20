@@ -1,6 +1,6 @@
 # [8.0] Add HealthKit sync toggle in settings (S)
 
-## status: pending
+## status: completed
 
 <task_context>
 <domain>presentation/features</domain>
@@ -28,13 +28,13 @@ Add a toggle in the app settings to enable/disable automatic HealthKit synchroni
 
 ## Subtasks
 
-- [ ] 8.1 Add `healthKitSyncEnabled` to UserPreferences/Settings
-- [ ] 8.2 Create HealthKit settings section in SettingsView
-- [ ] 8.3 Show current authorization status indicator
-- [ ] 8.4 Trigger authorization flow when enabling toggle
-- [ ] 8.5 Add explanatory text about data sharing
-- [ ] 8.6 Handle authorization denied state (show Settings link)
-- [ ] 8.7 Write UI tests for settings flow
+- [x] 8.1 Add `healthKitSyncEnabled` to UserPreferences/Settings (in PrivacySettingsViewModel)
+- [x] 8.2 Create HealthKit settings section in SettingsView (in PrivacySettingsView)
+- [x] 8.3 Show current authorization status indicator
+- [x] 8.4 Trigger authorization flow when enabling toggle
+- [x] 8.5 Add explanatory text about data sharing
+- [x] 8.6 Handle authorization denied state (show Settings link)
+- [ ] 8.7 Write UI tests for settings flow (skipped - user has no simulator)
 
 ## Implementation Details
 

@@ -39,7 +39,16 @@ import UIKit
     init(resolver: Resolver) {
         // 💡 Learn: Tratamento gracioso de erro em vez de fatalError
         if let historyRepository = resolver.resolve(WorkoutHistoryRepository.self) {
-            self.completeUseCase = CompleteWorkoutSessionUseCase(historyRepository: historyRepository)
+            // HealthKit sync use case - optional
+            let healthKitSyncUseCase = resolver.resolve(SyncWorkoutWithHealthKitUseCase.self)
+            // User stats update use case - optional
+            let updateStatsUseCase = resolver.resolve(UpdateUserStatsUseCase.self)
+
+            self.completeUseCase = CompleteWorkoutSessionUseCase(
+                historyRepository: historyRepository,
+                healthKitSyncUseCase: healthKitSyncUseCase,
+                updateStatsUseCase: updateStatsUseCase
+            )
         } else {
             self.completeUseCase = nil
             self.dependencyError = "Repositório de histórico não configurado"

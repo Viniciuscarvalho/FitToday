@@ -25,6 +25,7 @@ enum DomainError: Error, LocalizedError, Sendable, Equatable {
     case challengeNotFound
     case invalidChallengeType
     case challengeExpired
+    case notFound(resource: String)
 
     var errorDescription: String? {
         switch self {
@@ -58,6 +59,8 @@ enum DomainError: Error, LocalizedError, Sendable, Equatable {
             return "Tipo de desafio inválido."
         case .challengeExpired:
             return "Este desafio já expirou."
+        case .notFound(let resource):
+            return "Recurso não encontrado: \(resource)"
         }
     }
 }

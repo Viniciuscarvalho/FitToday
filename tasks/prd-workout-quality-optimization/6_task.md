@@ -1,6 +1,6 @@
 # [6.0] Implement exercise diversity validation (80% rule) (M)
 
-## status: pending
+## status: completed
 
 <task_context>
 <domain>domain/services</domain>

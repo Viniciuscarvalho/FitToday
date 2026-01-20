@@ -33,6 +33,13 @@ protocol HealthKitServicing: Sendable {
     func requestAuthorization() async throws
     func fetchWorkouts(in range: DateInterval) async throws -> [ImportedSessionMetric]
     func exportWorkout(plan: WorkoutPlan, completedAt: Date) async throws -> ExportedWorkoutReceipt
+
+    /// Fetches calories for a specific workout by UUID
+    /// - Parameters:
+    ///   - workoutUUID: The UUID of the exported workout
+    ///   - around: The approximate completion time (used to narrow search)
+    /// - Returns: Calories burned, or nil if not found
+    func fetchCaloriesForWorkout(workoutUUID: UUID, around date: Date) async throws -> Int?
 }
 
 actor HealthKitService: HealthKitServicing {
@@ -165,6 +172,24 @@ actor HealthKitService: HealthKitServicing {
         return ExportedWorkoutReceipt(workoutUUID: workout.uuid, exportedAt: Date())
     }
     
+    func fetchCaloriesForWorkout(workoutUUID: UUID, around date: Date) async throws -> Int? {
+        guard HKHealthStore.isHealthDataAvailable() else { return nil }
+
+        // Search in a 2-hour window around the completion time
+        let start = date.addingTimeInterval(-3600)
+        let end = date.addingTimeInterval(3600)
+        let range = DateInterval(start: start, end: end)
+
+        let workouts = try await fetchWorkouts(in: range)
+
+        // Find the matching workout by UUID
+        if let matched = workouts.first(where: { $0.workoutUUID == workoutUUID }) {
+            return matched.caloriesBurned
+        }
+
+        return nil
+    }
+
     private func mapActivityType(from focus: DailyFocus) -> HKWorkoutActivityType {
         switch focus {
         case .cardio:

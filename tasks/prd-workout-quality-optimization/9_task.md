@@ -1,6 +1,6 @@
 # [9.0] Implement UserStatsCalculator service (M)
 
-## status: pending
+## status: completed
 
 <task_context>
 <domain>domain/services</domain>
@@ -29,15 +29,15 @@ Implement the `UserStatsCalculator` service that computes user statistics includ
 
 ## Subtasks
 
-- [ ] 9.1 Create `UserStatsCalculating` protocol
-- [ ] 9.2 Create `WeeklyStats` and `MonthlyStats` structs
-- [ ] 9.3 Implement `UserStatsCalculator` concrete class
-- [ ] 9.4 Implement streak calculation with gap detection
-- [ ] 9.5 Implement weekly aggregation
-- [ ] 9.6 Implement monthly aggregation
-- [ ] 9.7 Create `UpdateUserStatsUseCase`
-- [ ] 9.8 Trigger stats update after workout completion
-- [ ] 9.9 Write comprehensive unit tests for edge cases
+- [x] 9.1 Create `UserStatsCalculating` protocol
+- [x] 9.2 Create `WeeklyStats` and `MonthlyStats` structs
+- [x] 9.3 Implement `UserStatsCalculator` concrete class
+- [x] 9.4 Implement streak calculation with gap detection
+- [x] 9.5 Implement weekly aggregation
+- [x] 9.6 Implement monthly aggregation
+- [x] 9.7 Create `UpdateUserStatsUseCase`
+- [x] 9.8 Trigger stats update after workout completion
+- [x] 9.9 Write comprehensive unit tests for edge cases
 
 ## Implementation Details
 
@@ -112,13 +112,13 @@ func calculateCurrentStreak(from history: [WorkoutHistoryEntry]) -> Int {
 
 ## Success Criteria
 
-- [ ] Streak calculated correctly for consecutive days
-- [ ] Streak resets when gap > 1 day
-- [ ] Weekly stats aggregate correctly
-- [ ] Monthly stats aggregate correctly
-- [ ] SDUserStats updated after workout completion
-- [ ] Calculation completes in <100ms
-- [ ] Unit tests cover all edge cases (empty history, gaps, timezone)
+- [x] Streak calculated correctly for consecutive days
+- [x] Streak resets when gap > 1 day
+- [x] Weekly stats aggregate correctly
+- [x] Monthly stats aggregate correctly
+- [x] SDUserStats updated after workout completion
+- [x] Calculation completes in <100ms
+- [x] Unit tests cover all edge cases (empty history, gaps, timezone)
 
 ## Dependencies
 

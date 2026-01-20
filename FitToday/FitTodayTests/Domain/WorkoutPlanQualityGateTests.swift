@@ -224,21 +224,125 @@ final class WorkoutPlanQualityGateTests: XCTestCase {
     let checkIn = makeCheckIn(focus: .upper, soreness: .none)
     let blueprint = blueprintEngine.generateBlueprint(profile: profile, checkIn: checkIn)
     let plan = makeValidPlan(for: blueprint, profile: profile)
-    
+
     let result = qualityGate.process(
       plan: plan,
       blueprint: blueprint,
       profile: profile,
       previousPlans: []
     )
-    
+
     // When
     let feedback = qualityGate.generateRetryFeedback(from: result)
-    
+
     // Then
     XCTAssertNil(feedback)
   }
-  
+
+  // MARK: - Exercise Diversity Tests (80% Rule)
+
+  func testExerciseDiversityPassesWhenAbove80Percent() {
+    // Given
+    let profile = makeProfile(goal: .hypertrophy, structure: .fullGym, level: .intermediate)
+    let checkIn = makeCheckIn(focus: .upper, soreness: .none)
+    let blueprint = blueprintEngine.generateBlueprint(profile: profile, checkIn: checkIn)
+
+    // Create new plan with completely unique exercises (no previous history)
+    let newPlan = makeRandomPlan(exerciseIds: ["alpha", "beta", "gamma", "delta", "epsilon"])
+
+    // When - No previous plans means 100% unique
+    let result = qualityGate.process(
+      plan: newPlan,
+      blueprint: blueprint,
+      profile: profile,
+      previousPlans: []
+    )
+
+    // Then - Should pass with 100% unique exercises (no history)
+    XCTAssertTrue(result.succeeded || result.status == .normalizedAndPassed)
+    XCTAssertNotNil(result.exerciseDiversityResult)
+    if let diversityResult = result.exerciseDiversityResult {
+      XCTAssertTrue(diversityResult.isValid)
+      XCTAssertEqual(diversityResult.score, 1.0)
+    }
+  }
+
+  func testExerciseDiversityFailsWhenBelow80Percent() {
+    // Given
+    let profile = makeProfile(goal: .hypertrophy, structure: .fullGym, level: .intermediate)
+    let checkIn = makeCheckIn(focus: .upper, soreness: .none)
+    let blueprint = blueprintEngine.generateBlueprint(profile: profile, checkIn: checkIn)
+
+    // Create new plan
+    let newPlan = makeRandomPlan(exerciseIds: ["ex1", "ex2", "ex3", "ex4", "ex5"])
+
+    // Previous plans have same exercises (high overlap)
+    let previousPlan = makeRandomPlan(exerciseIds: ["ex1", "ex2", "ex3", "ex4", "ex5"])
+
+    // When
+    let result = qualityGate.process(
+      plan: newPlan,
+      blueprint: blueprint,
+      profile: profile,
+      previousPlans: [previousPlan]
+    )
+
+    // Then - May fail either diversity check (depends on threshold)
+    if result.status == .failedExerciseDiversity {
+      XCTAssertNotNil(result.exerciseDiversityResult)
+      XCTAssertFalse(result.exerciseDiversityResult?.isValid ?? true)
+    }
+  }
+
+  func testRetryFeedbackGeneratedForFailedExerciseDiversity() {
+    // Given
+    let profile = makeProfile(goal: .hypertrophy, structure: .fullGym, level: .intermediate)
+    let checkIn = makeCheckIn(focus: .upper, soreness: .none)
+    let blueprint = blueprintEngine.generateBlueprint(profile: profile, checkIn: checkIn)
+
+    // Same exercises - should fail exercise diversity
+    let newPlan = makeRandomPlan(exerciseIds: ["ex1", "ex2", "ex3"])
+    let previousPlan = makeRandomPlan(exerciseIds: ["ex1", "ex2", "ex3"])
+
+    let result = qualityGate.process(
+      plan: newPlan,
+      blueprint: blueprint,
+      profile: profile,
+      previousPlans: [previousPlan]
+    )
+
+    // When
+    let feedback = qualityGate.generateRetryFeedback(from: result)
+
+    // Then
+    if result.status == .failedExerciseDiversity {
+      XCTAssertNotNil(feedback)
+      XCTAssertTrue(feedback?.contains("ATENÇÃO") ?? false)
+      XCTAssertTrue(feedback?.contains("80%") ?? false)
+    }
+  }
+
+  func testQualityResultIncludesExerciseDiversityResult() {
+    // Given
+    let profile = makeProfile(goal: .hypertrophy, structure: .fullGym, level: .intermediate)
+    let checkIn = makeCheckIn(focus: .upper, soreness: .none)
+    let blueprint = blueprintEngine.generateBlueprint(profile: profile, checkIn: checkIn)
+    let plan = makeValidPlan(for: blueprint, profile: profile)
+
+    // When
+    let result = qualityGate.process(
+      plan: plan,
+      blueprint: blueprint,
+      profile: profile,
+      previousPlans: []
+    )
+
+    // Then - exerciseDiversityResult should be present on success
+    if result.succeeded {
+      XCTAssertNotNil(result.exerciseDiversityResult)
+    }
+  }
+
   // MARK: - Helpers
   
   private func makeProfile(

@@ -74,9 +74,20 @@ struct StartWorkoutSessionUseCase {
 
 struct CompleteWorkoutSessionUseCase {
     private let historyRepository: WorkoutHistoryRepository
+    private let healthKitSyncUseCase: SyncWorkoutWithHealthKitUseCase?
+    private let updateStatsUseCase: UpdateUserStatsUseCase?
+    private let isHealthKitSyncEnabled: () -> Bool
 
-    init(historyRepository: WorkoutHistoryRepository) {
+    init(
+        historyRepository: WorkoutHistoryRepository,
+        healthKitSyncUseCase: SyncWorkoutWithHealthKitUseCase? = nil,
+        updateStatsUseCase: UpdateUserStatsUseCase? = nil,
+        isHealthKitSyncEnabled: @escaping () -> Bool = { UserDefaults.standard.bool(forKey: "healthKitSyncEnabled") }
+    ) {
         self.historyRepository = historyRepository
+        self.healthKitSyncUseCase = healthKitSyncUseCase
+        self.updateStatsUseCase = updateStatsUseCase
+        self.isHealthKitSyncEnabled = isHealthKitSyncEnabled
     }
 
     func execute(session: WorkoutSession, status: WorkoutStatus) async throws {
@@ -85,7 +96,8 @@ struct CompleteWorkoutSessionUseCase {
         guard status == .completed else {
             return
         }
-        
+
+        let completedAt = Date()
         let entry = WorkoutHistoryEntry(
             planId: session.plan.id,
             title: session.plan.title,
@@ -94,6 +106,43 @@ struct CompleteWorkoutSessionUseCase {
             workoutPlan: session.plan // ← Salvar o plano completo para histórico de variação
         )
         try await historyRepository.saveEntry(entry)
+
+        // Update user stats in background (streak, weekly/monthly totals)
+        if let statsUseCase = updateStatsUseCase {
+            Task.detached {
+                do {
+                    try await statsUseCase.execute()
+                } catch {
+                    #if DEBUG
+                    print("[WorkoutComplete] Failed to update stats: \(error)")
+                    #endif
+                }
+            }
+        }
+
+        // Sync with HealthKit in background (don't block completion)
+        if isHealthKitSyncEnabled(), let syncUseCase = healthKitSyncUseCase {
+            Task.detached {
+                let result = await syncUseCase.execute(
+                    entry: entry,
+                    plan: session.plan,
+                    completedAt: completedAt
+                )
+
+                #if DEBUG
+                switch result.status {
+                case .success:
+                    print("[WorkoutComplete] HealthKit sync succeeded: \(result.caloriesBurned ?? 0) kcal")
+                case .partialSuccess(let reason):
+                    print("[WorkoutComplete] HealthKit partial sync: \(reason)")
+                case .skipped(let reason):
+                    print("[WorkoutComplete] HealthKit sync skipped: \(reason)")
+                case .failed(let reason):
+                    print("[WorkoutComplete] HealthKit sync failed: \(reason)")
+                }
+                #endif
+            }
+        }
     }
 }
 

@@ -1,6 +1,6 @@
 # [5.0] Refactor WorkoutPromptAssembler with limits and feedback (L)
 
-## status: pending
+## status: completed
 
 <task_context>
 <domain>data/services</domain>
