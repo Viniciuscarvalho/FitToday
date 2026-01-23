@@ -29,11 +29,7 @@ struct TabRootView: View {
                 HistoryView(resolver: resolver)
             }
 
-            tabView(for: .groups) {
-                GroupsView(resolver: resolver)
-            }
-
-            tabView(for: .profile) {
+            tabView(for: .settings) {
                 ProfileProView()
             }
         }
@@ -154,8 +150,8 @@ struct TabRootView: View {
             AuthenticationView(resolver: resolver, inviteContext: inviteContext)
         case .groupInvite(let groupId):
             JoinGroupView(groupId: groupId, resolver: resolver) {
-                // After joining, refresh groups tab
-                router.select(tab: .groups)
+                // After joining, refresh history tab (where challenges are shown)
+                router.select(tab: .history)
             }
         }
     }

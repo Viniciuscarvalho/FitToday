@@ -10,28 +10,25 @@ import SwiftUI
 
 enum AppTab: Hashable, CaseIterable {
     case home
-    case programs  // Renomeado de library
+    case programs
     case history
-    case groups
-    case profile
+    case settings
 
     var title: String {
         switch self {
         case .home: return "Home"
-        case .programs: return "Programas"
-        case .history: return "Histórico"
-        case .groups: return "Grupos"
-        case .profile: return "Perfil"
+        case .programs: return "Programs"
+        case .history: return "History"
+        case .settings: return "Settings"
         }
     }
 
     var systemImage: String {
         switch self {
-        case .home: return "house"
-        case .programs: return "rectangle.stack.fill"
-        case .history: return "clock.fill"
-        case .groups: return "person.3.fill"
-        case .profile: return "person.crop.circle"
+        case .home: return "house.fill"
+        case .programs: return "square.grid.2x2.fill"
+        case .history: return "calendar"
+        case .settings: return "gearshape.fill"
         }
     }
 }

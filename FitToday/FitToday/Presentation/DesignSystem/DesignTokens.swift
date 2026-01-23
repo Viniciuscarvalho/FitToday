@@ -8,74 +8,111 @@
 
 import SwiftUI
 
-// MARK: - Color System (Dark Theme - Gym App Style)
+// MARK: - Color System (Dark Theme - Purple Futuristic)
 
 enum FitTodayColor {
-    // Cores de marca - Verde/Lime neon típico de apps de fitness
-    static let brandPrimary = Color(hex: "#A8FF00")  // Lime neon vibrante
-    static let brandSecondary = Color(hex: "#FF6B35")  // Laranja energético
-    static let brandAccent = Color(hex: "#7B61FF")  // Roxo para destaques
-    
-    // Backgrounds - Dark theme
-    static let background = Color(hex: "#0A0A0A")  // Preto profundo
-    static let backgroundElevated = Color(hex: "#141414")  // Elevação leve
-    static let surface = Color(hex: "#1C1C1E")  // Cards e superfícies
-    static let surfaceElevated = Color(hex: "#2C2C2E")  // Cards elevados
-    
+    // Cores de marca - Roxo/Purple como cor principal
+    static let brandPrimary = Color(hex: "#7C3AED")  // Purple vibrante
+    static let brandSecondary = Color(hex: "#A78BFA")  // Purple claro
+    static let brandAccent = Color(hex: "#5B21B6")  // Purple escuro
+
+    // Backgrounds - Dark purple theme
+    static let background = Color(hex: "#0D0D14")  // Deep dark purple/navy
+    static let backgroundElevated = Color(hex: "#1A1A28")  // Elevação leve
+    static let surface = Color(hex: "#1E1E2E")  // Cards e superfícies
+    static let surfaceElevated = Color(hex: "#24243A")  // Cards elevados
+
     // Texto
     static let textPrimary = Color.white
-    static let textSecondary = Color(hex: "#A1A1A1")  // Cinza claro
-    static let textTertiary = Color(hex: "#6B6B6B")  // Cinza médio
-    static let textInverse = Color(hex: "#0A0A0A")  // Para botões com fundo claro
-    
+    static let textSecondary = Color(hex: "#A0A0B8")  // Cinza azulado claro
+    static let textTertiary = Color(hex: "#64648C")  // Cinza azulado médio
+    static let textInverse = Color(hex: "#0D0D14")  // Para botões com fundo claro
+
     // Separadores e bordas
-    static let outline = Color(hex: "#2D2D2D")
-    static let outlineVariant = Color(hex: "#404040")
-    
+    static let outline = Color(hex: "#2A2A3C")
+    static let outlineVariant = Color(hex: "#3D3D52")
+
     // Status colors
-    static let success = Color(hex: "#34C759")  // Verde Apple
-    static let warning = Color(hex: "#FF9500")  // Laranja Apple
-    static let error = Color(hex: "#FF3B30")  // Vermelho Apple
-    static let info = Color(hex: "#5AC8FA")  // Azul claro
-    
-    // Gradientes
+    static let success = Color(hex: "#22C55E")  // Verde moderno
+    static let warning = Color(hex: "#F59E0B")  // Amber
+    static let error = Color(hex: "#EF4444")  // Vermelho moderno
+    static let info = Color(hex: "#3B82F6")  // Azul moderno
+
+    // Gradientes principais
     static let gradientPrimary = LinearGradient(
-        colors: [brandPrimary, Color(hex: "#8BDD00")],
+        colors: [brandPrimary, brandAccent],
         startPoint: .topLeading,
         endPoint: .bottomTrailing
     )
-    
+
     static let gradientSecondary = LinearGradient(
-        colors: [brandSecondary, Color(hex: "#FF8C5A")],
+        colors: [brandSecondary, brandPrimary],
         startPoint: .topLeading,
         endPoint: .bottomTrailing
     )
-    
+
     static let gradientPro = LinearGradient(
         colors: [Color(hex: "#FFD700"), Color(hex: "#FFA500")],
         startPoint: .topLeading,
         endPoint: .bottomTrailing
     )
-    
+
     static let gradientBackground = LinearGradient(
-        colors: [background, Color(hex: "#121212")],
+        colors: [background, Color(hex: "#121218")],
         startPoint: .top,
         endPoint: .bottom
     )
 
-    // MARK: - Retro-Futuristic Colors
+    // MARK: - Program Category Gradients
 
-    // Neon Accents (80s palette)
+    // Strength - Purple (matches brand)
+    static let gradientStrength = LinearGradient(
+        colors: [Color(hex: "#7C3AED"), Color(hex: "#5B21B6")],
+        startPoint: .topLeading,
+        endPoint: .bottomTrailing
+    )
+
+    // Conditioning - Orange
+    static let gradientConditioning = LinearGradient(
+        colors: [Color(hex: "#F97316"), Color(hex: "#C2410C")],
+        startPoint: .topLeading,
+        endPoint: .bottomTrailing
+    )
+
+    // Aerobic - Pink
+    static let gradientAerobic = LinearGradient(
+        colors: [Color(hex: "#EC4899"), Color(hex: "#BE185D")],
+        startPoint: .topLeading,
+        endPoint: .bottomTrailing
+    )
+
+    // Endurance - Blue
+    static let gradientEndurance = LinearGradient(
+        colors: [Color(hex: "#3B82F6"), Color(hex: "#1D4ED8")],
+        startPoint: .topLeading,
+        endPoint: .bottomTrailing
+    )
+
+    // Wellness - Green
+    static let gradientWellness = LinearGradient(
+        colors: [Color(hex: "#22C55E"), Color(hex: "#15803D")],
+        startPoint: .topLeading,
+        endPoint: .bottomTrailing
+    )
+
+    // MARK: - Legacy/Accent Colors (mantidos para compatibilidade)
+
+    // Neon Accents
     static let neonCyan = Color(hex: "#00E5FF")
     static let neonMagenta = Color(hex: "#FF00E5")
     static let neonYellow = Color(hex: "#FFEA00")
     static let neonPurple = Color(hex: "#B026FF")
 
     // Grid & Tech Elements
-    static let gridLine = Color(hex: "#00FFFF").opacity(0.15)
-    static let gridAccent = Color(hex: "#FF00E5").opacity(0.25)
-    static let scanLine = Color.white.opacity(0.03)
-    static let techBorder = Color(hex: "#00E5FF").opacity(0.4)
+    static let gridLine = Color(hex: "#7C3AED").opacity(0.1)
+    static let gridAccent = Color(hex: "#A78BFA").opacity(0.15)
+    static let scanLine = Color.white.opacity(0.02)
+    static let techBorder = Color(hex: "#7C3AED").opacity(0.3)
 
     // VHS / Glitch Effects
     static let glitchRed = Color(hex: "#FF0040")
@@ -83,7 +120,7 @@ enum FitTodayColor {
 
     // Enhanced Gradients
     static let gradientRetroSunset = LinearGradient(
-        colors: [neonPurple, neonMagenta, brandSecondary],
+        colors: [neonPurple, neonMagenta, Color(hex: "#F97316")],
         startPoint: .topLeading,
         endPoint: .bottomTrailing
     )
@@ -95,7 +132,7 @@ enum FitTodayColor {
     )
 
     static let gradientNeonGlow = LinearGradient(
-        colors: [neonCyan, brandPrimary, neonYellow],
+        colors: [brandSecondary, brandPrimary, brandAccent],
         startPoint: .leading,
         endPoint: .trailing
     )
@@ -250,7 +287,7 @@ extension View {
     
     /// Glow effect para elementos de destaque.
     func fitGlowEffect(color: Color = FitTodayColor.brandPrimary) -> some View {
-        shadow(color: color.opacity(0.4), radius: 12, x: 0, y: 0)
+        shadow(color: color.opacity(0.5), radius: 16, x: 0, y: 4)
     }
 
     // MARK: - Retro Visual Effects

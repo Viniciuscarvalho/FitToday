@@ -3,12 +3,11 @@
 //  FitToday
 //
 //  Created by AI on 15/01/26.
+//  Redesigned on 23/01/26 - New avatar-based design
 //
 
 import SwiftUI
 
-// 💡 Learn: Header da Home com saudação e badges
-// Componente extraído para manter a view principal < 100 linhas
 struct HomeHeader: View {
     let greeting: String
     let dateFormatted: String
@@ -16,62 +15,102 @@ struct HomeHeader: View {
     let goalBadgeText: String?
 
     var body: some View {
-        HStack(alignment: .top) {
-            VStack(alignment: .leading, spacing: FitTodaySpacing.xs) {
-                Text(greeting)
-                    .font(FitTodayFont.ui(size: 28, weight: .bold))
-                    .foregroundStyle(FitTodayColor.textPrimary)
+        HStack(spacing: 12) {
+            // Avatar
+            ZStack {
+                Circle()
+                    .fill(FitTodayColor.gradientPrimary)
+                    .frame(width: 44, height: 44)
 
-                Text(dateFormatted)
-                    .font(FitTodayFont.ui(size: 14, weight: .medium))
+                Text(String(greeting.prefix(1)).uppercased())
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundStyle(.white)
+            }
+
+            // Greeting Column
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Welcome back")
+                    .font(.system(size: 13, weight: .regular))
                     .foregroundStyle(FitTodayColor.textSecondary)
+
+                Text(greeting)
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundStyle(FitTodayColor.textPrimary)
             }
 
             Spacer()
 
-            HStack(spacing: FitTodaySpacing.sm) {
-                if let badgeText = goalBadgeText {
-                    goalBadge(text: badgeText)
-                }
-
-                if isPro {
-                    proBadge
-                }
+            // Notification Button
+            Button(action: {}) {
+                Image(systemName: "bell")
+                    .font(.system(size: 20, weight: .medium))
+                    .foregroundStyle(FitTodayColor.textSecondary)
+                    .frame(width: 44, height: 44)
+                    .background(FitTodayColor.surface)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
             }
+            .buttonStyle(.plain)
         }
         .padding(.horizontal)
         .padding(.top, FitTodaySpacing.sm)
     }
+}
 
-    // MARK: - Subviews
+// MARK: - Quick Stats Component
 
-    private func goalBadge(text: String) -> some View {
-        Text(text)
-            .font(.system(size: 11, weight: .bold))
-            .foregroundStyle(FitTodayColor.brandPrimary)
-            .padding(.horizontal, FitTodaySpacing.sm)
-            .padding(.vertical, FitTodaySpacing.xs)
-            .background(FitTodayColor.surface)
-            .clipShape(Capsule())
+struct HomeQuickStats: View {
+    let workoutsThisWeek: Int
+    let caloriesBurned: String
+    let streakDays: Int
+
+    var body: some View {
+        HStack(spacing: 12) {
+            statCard(
+                label: "This Week",
+                value: "\(workoutsThisWeek)",
+                unit: "workouts",
+                valueColor: FitTodayColor.textPrimary
+            )
+
+            statCard(
+                label: "Calories",
+                value: caloriesBurned,
+                unit: "burned",
+                valueColor: FitTodayColor.brandPrimary
+            )
+
+            statCard(
+                label: "Streak",
+                value: "\(streakDays)",
+                unit: "days",
+                valueColor: FitTodayColor.success
+            )
+        }
+        .padding(.horizontal)
     }
 
-    private var proBadge: some View {
-        HStack(spacing: 4) {
-            Image(systemName: "crown.fill")
-                .font(.system(size: 11, weight: .bold))
-            Text("PRO")
-                .font(FitTodayFont.ui(size: 11, weight: .bold))
+    private func statCard(
+        label: String,
+        value: String,
+        unit: String,
+        valueColor: Color
+    ) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(label)
+                .font(.system(size: 12, weight: .medium))
+                .foregroundStyle(FitTodayColor.textTertiary)
+
+            Text(value)
+                .font(.system(size: 28, weight: .bold))
+                .foregroundStyle(valueColor)
+
+            Text(unit)
+                .font(.system(size: 12, weight: .medium))
+                .foregroundStyle(FitTodayColor.textSecondary)
         }
-        .foregroundStyle(.white)
-        .padding(.horizontal, FitTodaySpacing.sm)
-        .padding(.vertical, FitTodaySpacing.xs)
-        .background(
-            LinearGradient(
-                colors: [.orange, .yellow],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-        )
-        .clipShape(Capsule())
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(16)
+        .background(FitTodayColor.surface)
+        .clipShape(RoundedRectangle(cornerRadius: 16))
     }
 }

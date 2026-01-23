@@ -3,12 +3,11 @@
 //  FitToday
 //
 //  Created by AI on 15/01/26.
+//  Redesigned on 23/01/26 - New purple AI-focused design
 //
 
 import SwiftUI
 
-// 💡 Learn: Hero card da Home com estados dinâmicos
-// Componente extraído para manter a view principal < 100 linhas
 struct HomeHeroCard: View {
     let journeyState: HomeJourneyState
     let isGeneratingPlan: Bool
@@ -19,12 +18,12 @@ struct HomeHeroCard: View {
     let onGeneratePlan: () -> Void
 
     var body: some View {
-        VStack(alignment: .leading, spacing: FitTodaySpacing.lg) {
+        VStack(alignment: .leading, spacing: FitTodaySpacing.md) {
             heroContent
         }
         .padding(FitTodaySpacing.lg)
         .background(heroGradient)
-        .clipShape(RoundedRectangle(cornerRadius: FitTodayRadius.lg))
+        .clipShape(RoundedRectangle(cornerRadius: 20))
         .padding(.horizontal)
         .padding(.top, FitTodaySpacing.md)
     }
@@ -39,7 +38,13 @@ struct HomeHeroCard: View {
         case .noProfile:
             noProfileContent
         case .needsDailyCheckIn:
-            needsCheckInContent
+            aiWorkoutContent(
+                title: "Dynamic Workout",
+                subtitle: "Get a personalized workout based on your goals, equipment and available time",
+                buttonTitle: "Generate Workout",
+                buttonIcon: "bolt.fill",
+                action: onStartDailyCheckIn
+            )
         case .workoutReady:
             workoutReadyContent
         case .workoutCompleted:
@@ -49,85 +54,87 @@ struct HomeHeroCard: View {
         }
     }
 
+    // MARK: - AI Powered Badge
+
+    private var aiPoweredBadge: some View {
+        HStack(spacing: 6) {
+            Image(systemName: "sparkles")
+                .font(.system(size: 12, weight: .semibold))
+            Text("AI Powered")
+                .font(.system(size: 11, weight: .semibold))
+        }
+        .foregroundStyle(.white)
+        .padding(.horizontal, 10)
+        .padding(.vertical, 4)
+        .background(.white.opacity(0.2))
+        .clipShape(Capsule())
+    }
+
     // MARK: - Loading State
 
     private var loadingContent: some View {
         VStack(spacing: FitTodaySpacing.md) {
             ProgressView()
                 .tint(.white)
-            Text("Carregando...")
-                .font(FitTodayFont.ui(size: 16, weight: .medium))
+            Text("Loading...")
+                .font(.system(size: 16, weight: .medium))
                 .foregroundStyle(.white.opacity(0.8))
         }
         .frame(maxWidth: .infinity)
-        .frame(height: 200)
+        .frame(height: 180)
     }
 
     // MARK: - No Profile State
 
     private var noProfileContent: some View {
         VStack(alignment: .leading, spacing: FitTodaySpacing.md) {
-            Image(systemName: "person.crop.circle.badge.plus")
-                .font(.system(.largeTitle, weight: .bold))
+            HStack {
+                aiPoweredBadge
+                Spacer()
+                iconContainer(systemName: "person.badge.plus")
+            }
+
+            Text("Welcome to FitToday!")
+                .font(.system(size: 22, weight: .bold))
                 .foregroundStyle(.white)
 
-            Text("Bem-vindo ao FitToday!")
-                .font(FitTodayFont.ui(size: 24, weight: .bold))
-                .foregroundStyle(.white)
-
-            Text("Crie seu perfil de treino para começar sua jornada fitness")
-                .font(FitTodayFont.ui(size: 15, weight: .medium))
-                .foregroundStyle(.white.opacity(0.9))
+            Text("Create your training profile to start your personalized fitness journey")
+                .font(.system(size: 14, weight: .regular))
+                .foregroundStyle(.white.opacity(0.85))
+                .lineSpacing(2)
                 .fixedSize(horizontal: false, vertical: true)
 
-            Button(action: onCreateProfile) {
-                HStack {
-                    Text("Criar Perfil")
-                        .font(FitTodayFont.ui(size: 16, weight: .bold))
-                    Image(systemName: "arrow.right")
-                        .font(.system(.body, weight: .bold))
-                }
-                .foregroundStyle(FitTodayColor.brandPrimary)
-                .frame(maxWidth: .infinity)
-                .padding()
-                .background(.white)
-                .clipShape(RoundedRectangle(cornerRadius: FitTodayRadius.md))
-            }
-            .buttonStyle(.plain)
+            primaryButton(title: "Create Profile", icon: "arrow.right", action: onCreateProfile)
         }
     }
 
-    // MARK: - Needs Check-In State
+    // MARK: - AI Workout Content (Reusable)
 
-    private var needsCheckInContent: some View {
+    private func aiWorkoutContent(
+        title: String,
+        subtitle: String,
+        buttonTitle: String,
+        buttonIcon: String,
+        action: @escaping () -> Void
+    ) -> some View {
         VStack(alignment: .leading, spacing: FitTodaySpacing.md) {
-            Image(systemName: "flame.fill")
-                .font(.system(.largeTitle, weight: .bold))
-                .foregroundStyle(.orange)
+            HStack {
+                aiPoweredBadge
+                Spacer()
+                iconContainer(systemName: "brain.head.profile")
+            }
 
-            Text("Como você está hoje?")
-                .font(FitTodayFont.ui(size: 24, weight: .bold))
+            Text(title)
+                .font(.system(size: 22, weight: .bold))
                 .foregroundStyle(.white)
 
-            Text("Responda um breve check-in para gerar seu treino personalizado do dia")
-                .font(FitTodayFont.ui(size: 15, weight: .medium))
-                .foregroundStyle(.white.opacity(0.9))
+            Text(subtitle)
+                .font(.system(size: 14, weight: .regular))
+                .foregroundStyle(.white.opacity(0.85))
+                .lineSpacing(2)
                 .fixedSize(horizontal: false, vertical: true)
 
-            Button(action: onStartDailyCheckIn) {
-                HStack {
-                    Text("Fazer Check-in")
-                        .font(FitTodayFont.ui(size: 16, weight: .bold))
-                    Image(systemName: "arrow.right")
-                        .font(.system(.body, weight: .bold))
-                }
-                .foregroundStyle(FitTodayColor.brandPrimary)
-                .frame(maxWidth: .infinity)
-                .padding()
-                .background(.white)
-                .clipShape(RoundedRectangle(cornerRadius: FitTodayRadius.md))
-            }
-            .buttonStyle(.plain)
+            primaryButton(title: buttonTitle, icon: buttonIcon, action: action)
         }
     }
 
@@ -136,114 +143,183 @@ struct HomeHeroCard: View {
     private var workoutReadyContent: some View {
         VStack(alignment: .leading, spacing: FitTodaySpacing.md) {
             HStack {
-                Image(systemName: "figure.run")
-                    .font(.system(.title, weight: .bold))
-                    .foregroundStyle(.white)
-
+                readyBadge
                 Spacer()
-
                 if let errorMsg = heroErrorMessage {
                     Text(errorMsg)
-                        .font(FitTodayFont.ui(size: 12, weight: .medium))
-                        .foregroundStyle(.red.opacity(0.9))
-                        .padding(.horizontal, FitTodaySpacing.sm)
-                        .padding(.vertical, FitTodaySpacing.xs)
-                        .background(.white.opacity(0.2))
+                        .font(.system(size: 11, weight: .medium))
+                        .foregroundStyle(.red)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(.white.opacity(0.15))
                         .clipShape(Capsule())
                 }
+                iconContainer(systemName: "figure.run")
             }
 
-            Text("Treino de Hoje")
-                .font(FitTodayFont.ui(size: 24, weight: .bold))
+            Text("Today's Workout")
+                .font(.system(size: 22, weight: .bold))
                 .foregroundStyle(.white)
 
-            Text("Treino personalizado pronto para você")
-                .font(FitTodayFont.ui(size: 15, weight: .medium))
-                .foregroundStyle(.white.opacity(0.9))
+            Text("Your personalized workout is ready. Let's crush it!")
+                .font(.system(size: 14, weight: .regular))
+                .foregroundStyle(.white.opacity(0.85))
+                .lineSpacing(2)
                 .fixedSize(horizontal: false, vertical: true)
 
             if isGeneratingPlan {
-                HStack {
-                    ProgressView()
-                        .tint(.white)
-                    Text("Gerando novo plano...")
-                        .font(FitTodayFont.ui(size: 14, weight: .medium))
-                        .foregroundStyle(.white.opacity(0.9))
-                }
-                .frame(maxWidth: .infinity)
-                .padding()
-                .background(.white.opacity(0.1))
-                .clipShape(RoundedRectangle(cornerRadius: FitTodayRadius.md))
+                generatingIndicator
             } else {
-                Button(action: onViewTodayWorkout) {
-                    HStack {
-                        Text("Ver Treino de Hoje")
-                            .font(FitTodayFont.ui(size: 16, weight: .bold))
-                        Image(systemName: "arrow.right")
-                            .font(.system(.body, weight: .bold))
-                    }
-                    .foregroundStyle(Color(red: 0.4, green: 0.6, blue: 0))
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(.white)
-                    .clipShape(RoundedRectangle(cornerRadius: FitTodayRadius.md))
-                }
-                .buttonStyle(.plain)
+                primaryButton(title: "Start Workout", icon: "play.fill", action: onViewTodayWorkout)
             }
         }
+    }
+
+    private var readyBadge: some View {
+        HStack(spacing: 6) {
+            Image(systemName: "checkmark.circle.fill")
+                .font(.system(size: 12, weight: .semibold))
+            Text("Ready")
+                .font(.system(size: 11, weight: .semibold))
+        }
+        .foregroundStyle(.white)
+        .padding(.horizontal, 10)
+        .padding(.vertical, 4)
+        .background(FitTodayColor.success.opacity(0.3))
+        .clipShape(Capsule())
+    }
+
+    private var generatingIndicator: some View {
+        HStack(spacing: 10) {
+            ProgressView()
+                .tint(.white)
+            Text("Generating new plan...")
+                .font(.system(size: 14, weight: .medium))
+                .foregroundStyle(.white.opacity(0.9))
+        }
+        .frame(maxWidth: .infinity)
+        .padding()
+        .background(.white.opacity(0.1))
+        .clipShape(RoundedRectangle(cornerRadius: 14))
     }
 
     // MARK: - Workout Completed State
 
     private var workoutCompletedContent: some View {
         VStack(alignment: .leading, spacing: FitTodaySpacing.md) {
-            Image(systemName: "checkmark.circle.fill")
-                .font(.system(.largeTitle, weight: .bold))
-                .foregroundStyle(.green)
+            HStack {
+                completedBadge
+                Spacer()
+                iconContainer(systemName: "trophy.fill", iconColor: .yellow)
+            }
 
-            Text("Treino Concluído!")
-                .font(FitTodayFont.ui(size: 24, weight: .bold))
+            Text("Workout Complete!")
+                .font(.system(size: 22, weight: .bold))
                 .foregroundStyle(.white)
 
-            Text("Você já treinou hoje! Descanse e volte amanhã.")
-                .font(FitTodayFont.ui(size: 15, weight: .medium))
-                .foregroundStyle(.white.opacity(0.9))
+            Text("Great job today! Rest up and come back stronger tomorrow.")
+                .font(.system(size: 14, weight: .regular))
+                .foregroundStyle(.white.opacity(0.85))
+                .lineSpacing(2)
                 .fixedSize(horizontal: false, vertical: true)
         }
+    }
+
+    private var completedBadge: some View {
+        HStack(spacing: 6) {
+            Image(systemName: "checkmark.seal.fill")
+                .font(.system(size: 12, weight: .semibold))
+            Text("Completed")
+                .font(.system(size: 11, weight: .semibold))
+        }
+        .foregroundStyle(.white)
+        .padding(.horizontal, 10)
+        .padding(.vertical, 4)
+        .background(FitTodayColor.success.opacity(0.4))
+        .clipShape(Capsule())
     }
 
     // MARK: - Error State
 
     private func errorContent(message: String) -> some View {
         VStack(alignment: .leading, spacing: FitTodaySpacing.md) {
-            Image(systemName: "exclamationmark.triangle.fill")
-                .font(.system(.largeTitle, weight: .bold))
-                .foregroundStyle(.red)
+            HStack {
+                errorBadge
+                Spacer()
+                iconContainer(systemName: "exclamationmark.triangle.fill", iconColor: .red)
+            }
 
-            Text("Erro ao Carregar Treino")
-                .font(FitTodayFont.ui(size: 24, weight: .bold))
+            Text("Something went wrong")
+                .font(.system(size: 22, weight: .bold))
                 .foregroundStyle(.white)
 
             Text(message)
-                .font(FitTodayFont.ui(size: 15, weight: .medium))
-                .foregroundStyle(.white.opacity(0.9))
+                .font(.system(size: 14, weight: .regular))
+                .foregroundStyle(.white.opacity(0.85))
+                .lineSpacing(2)
                 .fixedSize(horizontal: false, vertical: true)
 
-            Button(action: onGeneratePlan) {
-                HStack {
-                    Text("Tentar Novamente")
-                        .font(FitTodayFont.ui(size: 16, weight: .bold))
-                    Image(systemName: "arrow.clockwise")
-                        .font(.system(.body, weight: .bold))
-                }
-                .foregroundStyle(.white)
-                .frame(maxWidth: .infinity)
-                .padding()
-                .background(.white.opacity(0.2))
-                .clipShape(RoundedRectangle(cornerRadius: FitTodayRadius.md))
-            }
-            .buttonStyle(.plain)
+            secondaryButton(title: "Try Again", icon: "arrow.clockwise", action: onGeneratePlan)
         }
+    }
+
+    private var errorBadge: some View {
+        HStack(spacing: 6) {
+            Image(systemName: "xmark.circle.fill")
+                .font(.system(size: 12, weight: .semibold))
+            Text("Error")
+                .font(.system(size: 11, weight: .semibold))
+        }
+        .foregroundStyle(.white)
+        .padding(.horizontal, 10)
+        .padding(.vertical, 4)
+        .background(FitTodayColor.error.opacity(0.4))
+        .clipShape(Capsule())
+    }
+
+    // MARK: - Reusable Components
+
+    private func iconContainer(systemName: String, iconColor: Color = .white) -> some View {
+        Image(systemName: systemName)
+            .font(.system(size: 26, weight: .medium))
+            .foregroundStyle(iconColor)
+            .frame(width: 48, height: 48)
+            .background(.white.opacity(0.15))
+            .clipShape(RoundedRectangle(cornerRadius: 14))
+    }
+
+    private func primaryButton(title: String, icon: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            HStack(spacing: 8) {
+                Image(systemName: icon)
+                    .font(.system(size: 16, weight: .semibold))
+                Text(title)
+                    .font(.system(size: 15, weight: .semibold))
+            }
+            .foregroundStyle(FitTodayColor.brandPrimary)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 14)
+            .background(.white)
+            .clipShape(RoundedRectangle(cornerRadius: 14))
+        }
+        .buttonStyle(.plain)
+    }
+
+    private func secondaryButton(title: String, icon: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            HStack(spacing: 8) {
+                Image(systemName: icon)
+                    .font(.system(size: 16, weight: .semibold))
+                Text(title)
+                    .font(.system(size: 15, weight: .semibold))
+            }
+            .foregroundStyle(.white)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 14)
+            .background(.white.opacity(0.15))
+            .clipShape(RoundedRectangle(cornerRadius: 14))
+        }
+        .buttonStyle(.plain)
     }
 
     // MARK: - Gradient
@@ -252,37 +328,23 @@ struct HomeHeroCard: View {
         switch journeyState {
         case .loading:
             return LinearGradient(
-                colors: [.gray.opacity(0.6), .gray.opacity(0.4)],
+                colors: [FitTodayColor.surface, FitTodayColor.surfaceElevated],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
-        case .noProfile:
-            return LinearGradient(
-                colors: [FitTodayColor.brandPrimary.opacity(0.8), .purple.opacity(0.6)],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-        case .needsDailyCheckIn:
-            return LinearGradient(
-                colors: [.orange.opacity(0.8), .red.opacity(0.6)],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
+        case .noProfile, .needsDailyCheckIn:
+            return FitTodayColor.gradientPrimary
         case .workoutReady:
-            return LinearGradient(
-                colors: [.blue.opacity(0.7), .cyan.opacity(0.5)],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
+            return FitTodayColor.gradientPrimary
         case .workoutCompleted:
             return LinearGradient(
-                colors: [.green.opacity(0.7), .teal.opacity(0.5)],
+                colors: [FitTodayColor.success, FitTodayColor.success.opacity(0.7)],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
         case .error:
             return LinearGradient(
-                colors: [.red.opacity(0.6), .orange.opacity(0.4)],
+                colors: [FitTodayColor.error.opacity(0.8), FitTodayColor.error.opacity(0.5)],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )

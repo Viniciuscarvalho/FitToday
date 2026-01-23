@@ -34,6 +34,7 @@ enum HomeJourneyState: Equatable {
     private(set) var topPrograms: [Program] = []
     private(set) var weekWorkouts: [LibraryWorkout] = []
     private(set) var dailyWorkoutState: DailyWorkoutState = DailyWorkoutState()
+    private(set) var historyEntries: [WorkoutHistoryEntry] = []
     var errorMessage: ErrorMessage? // ErrorPresenting protocol
 
     private let resolver: Resolver
@@ -87,6 +88,68 @@ enum HomeJourneyState: Equatable {
         case .weightLoss: return "⚖️ Emagrecimento"
         case .performance: return "🎯 Performance"
         }
+    }
+
+    // MARK: - Quick Stats
+
+    var workoutsThisWeek: Int {
+        let calendar = Calendar.current
+        let now = Date()
+        guard let weekStart = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: now)) else {
+            return 0
+        }
+        return historyEntries.filter { $0.date >= weekStart }.count
+    }
+
+    var caloriesBurnedFormatted: String {
+        let calendar = Calendar.current
+        let now = Date()
+        guard let weekStart = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: now)) else {
+            return "0"
+        }
+        let weekCalories = historyEntries
+            .filter { $0.date >= weekStart }
+            .reduce(0) { $0 + ($1.caloriesBurned ?? 0) }
+
+        if weekCalories >= 1000 {
+            return String(format: "%.1fk", Double(weekCalories) / 1000.0)
+        }
+        return "\(weekCalories)"
+    }
+
+    var streakDays: Int {
+        guard !historyEntries.isEmpty else { return 0 }
+
+        let calendar = Calendar.current
+        let sortedDates = historyEntries
+            .map { calendar.startOfDay(for: $0.date) }
+            .sorted(by: >)
+
+        guard let mostRecent = sortedDates.first else { return 0 }
+
+        // Check if streak is still active (workout today or yesterday)
+        let today = calendar.startOfDay(for: Date())
+        let yesterday = calendar.date(byAdding: .day, value: -1, to: today)!
+
+        guard mostRecent >= yesterday else { return 0 }
+
+        var streak = 1
+        var currentDate = mostRecent
+
+        for date in sortedDates.dropFirst() {
+            let expectedPrevious = calendar.date(byAdding: .day, value: -1, to: currentDate)!
+            if date == expectedPrevious {
+                streak += 1
+                currentDate = date
+            } else if date == currentDate {
+                // Same day, skip
+                continue
+            } else {
+                break
+            }
+        }
+
+        return streak
     }
 
     var ctaTitle: String {
@@ -195,13 +258,13 @@ enum HomeJourneyState: Equatable {
 
     private func loadProgramsAndWorkouts(profile: UserProfile?) async {
         let recommender = ProgramRecommender()
-        var history: [WorkoutHistoryEntry] = []
-        
-        // Carregar histórico para recomendação
+
+        // Carregar histórico para recomendação e stats
         if let historyRepo = resolver.resolve(WorkoutHistoryRepository.self) {
             do {
-                history = try await historyRepo.listEntries()
+                historyEntries = try await historyRepo.listEntries()
             } catch {
+                historyEntries = []
                 #if DEBUG
                 print("[Home] Erro ao carregar histórico: \(error)")
                 #endif
@@ -215,7 +278,7 @@ enum HomeJourneyState: Equatable {
                 topPrograms = recommender.recommend(
                     programs: allPrograms,
                     profile: profile,
-                    history: history,
+                    history: historyEntries,
                     limit: 4
                 )
             } catch {
@@ -232,7 +295,7 @@ enum HomeJourneyState: Equatable {
                 weekWorkouts = recommender.recommendWorkouts(
                     workouts: allWorkouts,
                     profile: profile,
-                    history: history,
+                    history: historyEntries,
                     limit: 3
                 )
             } catch {

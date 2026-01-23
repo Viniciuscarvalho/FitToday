@@ -1,17 +1,14 @@
 //
-//  ProfileProView.swift
+//  ProfileProView.swift (Settings Tab)
 //  FitToday
 //
-//  Created by AI on 04/01/26.
-//  Refactored on 14/01/26 - Extracted components to separate files
+//  Redesigned on 23/01/26 - New Settings layout with Premium and Apple Health
 //
 
 import SwiftUI
 import SwiftData
 import Swinject
 
-// 💡 Learn: View refatorada com componentes extraídos para manutenibilidade
-// Seguindo diretriz de < 100 linhas por view
 struct ProfileProView: View {
     @Environment(\.dependencyResolver) private var resolver
     @Environment(AppRouter.self) private var router
@@ -20,7 +17,6 @@ struct ProfileProView: View {
     @State private var showingRestoreAlert = false
     @State private var restoreMessage = ""
 
-    // Debug mode state
     #if DEBUG
     @State private var debugModeEnabled = false
     @State private var debugIsPro = false
@@ -37,18 +33,19 @@ struct ProfileProView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: FitTodaySpacing.lg) {
-                ProfileHeader(entitlement: entitlement)
+                headerSection
 
-                subscriptionSection
+                // Premium Card
+                premiumCard
 
-                ProfileSettingsSection(
-                    onEditProfile: { router.push(.onboarding, on: .profile) },
-                    onRedoDailyQuestionnaire: redoDailyQuestionnaire,
-                    onOpenHealthKit: { router.push(.healthKitSettings, on: .profile) },
-                    onOpenPrivacySettings: { router.push(.privacySettings, on: .profile) },
-                    onRestorePurchases: { Task { await restorePurchases() } },
-                    onOpenSupport: openSupportURL
-                )
+                // Apple Health Integration
+                appleHealthCard
+
+                // Profile Settings
+                settingsSection
+
+                // Account
+                accountSection
 
                 #if DEBUG
                 DebugSection(
@@ -65,35 +62,267 @@ struct ProfileProView: View {
                 AppInfoFooter()
             }
             .padding()
+            .padding(.bottom, FitTodaySpacing.xl)
         }
         .background(FitTodayColor.background.ignoresSafeArea())
-        .navigationTitle("Perfil")
-        .navigationBarTitleDisplayMode(.large)
-        .toolbarColorScheme(.dark, for: .navigationBar)
+        .toolbar(.hidden, for: .navigationBar)
         .task { await loadEntitlement() }
-        .sheet(isPresented: $showingPaywall, onDismiss: {
-            showingPaywall = false
-        }) {
+        .sheet(isPresented: $showingPaywall) {
             paywallSheet
         }
-        .alert("Restaurar Compras", isPresented: $showingRestoreAlert) {
+        .alert("Restore Purchases", isPresented: $showingRestoreAlert) {
             Button("Ok", role: .cancel) {}
         } message: {
             Text(restoreMessage)
         }
     }
 
-    // MARK: - Subscription Section
+    // MARK: - Header
 
-    private var subscriptionSection: some View {
+    private var headerSection: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text("Settings")
+                .font(.system(size: 28, weight: .bold))
+                .foregroundStyle(FitTodayColor.textPrimary)
+            Text("Manage your account and preferences")
+                .font(.system(size: 14))
+                .foregroundStyle(FitTodayColor.textSecondary)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.top, FitTodaySpacing.md)
+    }
+
+    // MARK: - Premium Card
+
+    private var premiumCard: some View {
         VStack(alignment: .leading, spacing: FitTodaySpacing.md) {
-            SectionHeader(title: "Assinatura", actionTitle: nil)
+            // Badge
+            HStack {
+                HStack(spacing: 6) {
+                    Image(systemName: entitlement.isPro ? "crown.fill" : "sparkles")
+                        .font(.system(size: 12, weight: .semibold))
+                    Text(entitlement.isPro ? "Pro Member" : "Free Plan")
+                        .font(.system(size: 11, weight: .semibold))
+                }
+                .foregroundStyle(.white)
+                .padding(.horizontal, 10)
+                .padding(.vertical, 4)
+                .background(entitlement.isPro ? FitTodayColor.success : FitTodayColor.brandPrimary)
+                .clipShape(Capsule())
 
-            SubscriptionCard(
-                isPro: entitlement.isPro,
-                onManageSubscription: openSubscriptionManagement,
-                onShowPaywall: { showingPaywall = true }
-            )
+                Spacer()
+            }
+
+            if entitlement.isPro {
+                // Pro content
+                Text("FitToday Pro")
+                    .font(.system(size: 20, weight: .bold))
+                    .foregroundStyle(FitTodayColor.textPrimary)
+
+                Text("You have access to all premium features")
+                    .font(.system(size: 14))
+                    .foregroundStyle(FitTodayColor.textSecondary)
+
+                // Sync status
+                HStack(spacing: FitTodaySpacing.md) {
+                    syncStatusItem(icon: "checkmark.icloud.fill", label: "Cloud Sync", isActive: true)
+                    syncStatusItem(icon: "heart.fill", label: "Apple Health", isActive: true)
+                    syncStatusItem(icon: "bolt.fill", label: "AI Workouts", isActive: true)
+                }
+                .padding(.top, 4)
+
+                Button {
+                    openSubscriptionManagement()
+                } label: {
+                    HStack {
+                        Spacer()
+                        Text("Manage Subscription")
+                            .font(.system(size: 14, weight: .semibold))
+                        Spacer()
+                    }
+                    .foregroundStyle(FitTodayColor.brandPrimary)
+                    .padding(.vertical, 12)
+                    .background(FitTodayColor.brandPrimary.opacity(0.15))
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                }
+                .buttonStyle(.plain)
+            } else {
+                // Free plan upgrade prompt
+                Text("Upgrade to Pro")
+                    .font(.system(size: 20, weight: .bold))
+                    .foregroundStyle(FitTodayColor.textPrimary)
+
+                Text("Unlock unlimited AI workouts, cloud sync, and Apple Health integration")
+                    .font(.system(size: 14))
+                    .foregroundStyle(FitTodayColor.textSecondary)
+
+                // Features preview
+                VStack(alignment: .leading, spacing: 8) {
+                    featureItem(icon: "sparkles", text: "Unlimited AI Workouts")
+                    featureItem(icon: "icloud.fill", text: "Cloud Sync Across Devices")
+                    featureItem(icon: "heart.fill", text: "Apple Health Integration")
+                }
+                .padding(.top, 4)
+
+                Button {
+                    showingPaywall = true
+                } label: {
+                    HStack {
+                        Spacer()
+                        Text("Try Pro Free")
+                            .font(.system(size: 14, weight: .semibold))
+                        Image(systemName: "arrow.right")
+                            .font(.system(size: 12, weight: .semibold))
+                        Spacer()
+                    }
+                    .foregroundStyle(.white)
+                    .padding(.vertical, 12)
+                    .background(FitTodayColor.gradientPrimary)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(FitTodaySpacing.lg)
+        .background(FitTodayColor.surface)
+        .clipShape(RoundedRectangle(cornerRadius: 20))
+    }
+
+    private func syncStatusItem(icon: String, label: String, isActive: Bool) -> some View {
+        VStack(spacing: 4) {
+            Image(systemName: icon)
+                .font(.system(size: 16))
+                .foregroundStyle(isActive ? FitTodayColor.success : FitTodayColor.textTertiary)
+            Text(label)
+                .font(.system(size: 10, weight: .medium))
+                .foregroundStyle(FitTodayColor.textSecondary)
+        }
+        .frame(maxWidth: .infinity)
+    }
+
+    private func featureItem(icon: String, text: String) -> some View {
+        HStack(spacing: 10) {
+            Image(systemName: icon)
+                .font(.system(size: 14))
+                .foregroundStyle(FitTodayColor.brandPrimary)
+                .frame(width: 20)
+            Text(text)
+                .font(.system(size: 13))
+                .foregroundStyle(FitTodayColor.textPrimary)
+        }
+    }
+
+    // MARK: - Apple Health Card
+
+    private var appleHealthCard: some View {
+        Button {
+            router.push(.healthKitSettings, on: .settings)
+        } label: {
+            HStack(spacing: FitTodaySpacing.md) {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(Color(hex: "#FF2D55").opacity(0.15))
+                        .frame(width: 44, height: 44)
+                    Image(systemName: "heart.fill")
+                        .font(.system(size: 20))
+                        .foregroundStyle(Color(hex: "#FF2D55"))
+                }
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Apple Health")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundStyle(FitTodayColor.textPrimary)
+                    Text(entitlement.isPro ? "Connected" : "Connect to sync workouts")
+                        .font(.system(size: 13))
+                        .foregroundStyle(FitTodayColor.textSecondary)
+                }
+
+                Spacer()
+
+                if entitlement.isPro {
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.system(size: 20))
+                        .foregroundStyle(FitTodayColor.success)
+                } else {
+                    Text("PRO")
+                        .font(.system(size: 10, weight: .bold))
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(FitTodayColor.brandPrimary)
+                        .clipShape(Capsule())
+                }
+
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 14))
+                    .foregroundStyle(FitTodayColor.textTertiary)
+            }
+            .padding(FitTodaySpacing.md)
+            .background(FitTodayColor.surface)
+            .clipShape(RoundedRectangle(cornerRadius: 16))
+        }
+        .buttonStyle(.plain)
+    }
+
+    // MARK: - Settings Section
+
+    private var settingsSection: some View {
+        VStack(alignment: .leading, spacing: FitTodaySpacing.sm) {
+            Text("Profile")
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundStyle(FitTodayColor.textSecondary)
+                .padding(.leading, 4)
+
+            VStack(spacing: 0) {
+                SettingsRow(icon: "person.text.rectangle", title: "Edit Training Profile") {
+                    router.push(.editProfile, on: .settings)
+                }
+
+                Divider().padding(.leading, 56)
+
+                SettingsRow(icon: "flame", title: "Redo Daily Questionnaire") {
+                    redoDailyQuestionnaire()
+                }
+
+                Divider().padding(.leading, 56)
+
+                SettingsRow(icon: "lock.shield", title: "Privacy Settings") {
+                    router.push(.privacySettings, on: .settings)
+                }
+            }
+            .background(FitTodayColor.surface)
+            .clipShape(RoundedRectangle(cornerRadius: 16))
+        }
+    }
+
+    // MARK: - Account Section
+
+    private var accountSection: some View {
+        VStack(alignment: .leading, spacing: FitTodaySpacing.sm) {
+            Text("Account")
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundStyle(FitTodayColor.textSecondary)
+                .padding(.leading, 4)
+
+            VStack(spacing: 0) {
+                SettingsRow(icon: "arrow.counterclockwise", title: "Restore Purchases") {
+                    Task { await restorePurchases() }
+                }
+
+                Divider().padding(.leading, 56)
+
+                SettingsRow(icon: "questionmark.circle", title: "Help & Support") {
+                    openSupportURL()
+                }
+
+                Divider().padding(.leading, 56)
+
+                SettingsRow(icon: "key", title: "API Key Settings") {
+                    router.push(.apiKeySettings, on: .settings)
+                }
+            }
+            .background(FitTodayColor.surface)
+            .clipShape(RoundedRectangle(cornerRadius: 16))
         }
     }
 
@@ -137,7 +366,7 @@ struct ProfileProView: View {
         UserDefaults.standard.removeObject(forKey: AppStorageKeys.lastDailyCheckInDate)
         UserDefaults.standard.removeObject(forKey: AppStorageKeys.lastDailyCheckInData)
         DailyWorkoutStateManager.shared.resetForNewDay()
-        router.push(.dailyQuestionnaire, on: .profile)
+        router.push(.dailyQuestionnaire, on: .settings)
     }
 
     private func restorePurchases() async {
@@ -145,9 +374,9 @@ struct ProfileProView: View {
         let restored = await repo.service.restorePurchases()
         if restored {
             await loadEntitlement()
-            restoreMessage = "Sua assinatura foi restaurada com sucesso!"
+            restoreMessage = "Your subscription has been restored successfully!"
         } else {
-            restoreMessage = "Nenhuma assinatura encontrada para restaurar."
+            restoreMessage = "No subscription found to restore."
         }
         showingRestoreAlert = true
     }
@@ -163,8 +392,6 @@ struct ProfileProView: View {
             UIApplication.shared.open(url)
         }
     }
-
-    // MARK: - Debug Handlers
 
     #if DEBUG
     private func handleDebugModeChange(_ enabled: Bool) {
@@ -183,8 +410,6 @@ struct ProfileProView: View {
     }
     #endif
 }
-
-// MARK: - Preview
 
 #Preview {
     NavigationStack {

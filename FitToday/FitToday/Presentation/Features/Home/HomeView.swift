@@ -28,7 +28,7 @@ struct HomeView: View {
 
     var body: some View {
         ScrollView {
-            VStack(spacing: FitTodaySpacing.md) {
+            VStack(spacing: FitTodaySpacing.lg) {
                 HomeHeader(
                     greeting: viewModel.greeting,
                     dateFormatted: viewModel.currentDateFormatted,
@@ -44,6 +44,13 @@ struct HomeView: View {
                     onStartDailyCheckIn: { router.push(.dailyQuestionnaire, on: .home) },
                     onViewTodayWorkout: { openTodayWorkout() },
                     onGeneratePlan: { generateTodayWorkout() }
+                )
+
+                // Quick Stats Section
+                HomeQuickStats(
+                    workoutsThisWeek: viewModel.workoutsThisWeek,
+                    caloriesBurned: viewModel.caloriesBurnedFormatted,
+                    streakDays: viewModel.streakDays
                 )
 
                 if !viewModel.topPrograms.isEmpty {
@@ -66,6 +73,7 @@ struct HomeView: View {
 
                 Spacer(minLength: FitTodaySpacing.xl)
             }
+            .padding(.bottom, FitTodaySpacing.xxl)
         }
         .background(FitTodayColor.background.ignoresSafeArea())
         .navigationBarHidden(true)
