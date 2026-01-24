@@ -112,7 +112,7 @@ struct LocalWorkoutPlanComposer: WorkoutPlanComposing, Sendable {
     }
     
     // MARK: - Plan Assembly
-    
+
     private func assemblePlan(
         _ blocks: [WorkoutBlock],
         profile: UserProfile,
@@ -121,17 +121,21 @@ struct LocalWorkoutPlanComposer: WorkoutPlanComposing, Sendable {
         domsAdjustment: SpecialistSessionRules.DOMSAdjustment
     ) -> WorkoutPlan {
         let appliedFocus = checkIn.focus == .surprise ? (blocks.first?.group ?? .fullBody) : checkIn.focus
-        
+
         // Separar exercícios principais e acessórios
         let mainPrescription = SpecialistSessionRules.mainPrescription(for: sessionType)
         let accessoryPrescription = SpecialistSessionRules.accessoryPrescription(for: sessionType)
-        
+
+        // Track used exercise IDs to prevent duplicates across phases
+        var usedExerciseIds = Set<String>()
+
         // 1) Aquecimento: mescla atividade guiada + alguns exercícios leves (opcional)
         let warmupPhase = buildWarmupPhase(
             from: blocks,
             profile: profile,
             checkIn: checkIn,
-            domsAdjustment: domsAdjustment
+            domsAdjustment: domsAdjustment,
+            usedExerciseIds: &usedExerciseIds
         )
 
         // 2) Fase de força/principal: primeiros blocos
@@ -143,7 +147,8 @@ struct LocalWorkoutPlanComposer: WorkoutPlanComposing, Sendable {
                     basePrescription: mainPrescription,
                     profile: profile,
                     checkIn: checkIn,
-                    domsAdjustment: domsAdjustment
+                    domsAdjustment: domsAdjustment,
+                    usedExerciseIds: &usedExerciseIds
                 )
             }
             .map { .exercise($0) }
@@ -164,7 +169,8 @@ struct LocalWorkoutPlanComposer: WorkoutPlanComposing, Sendable {
                     basePrescription: accessoryPrescription,
                     profile: profile,
                     checkIn: checkIn,
-                    domsAdjustment: domsAdjustment
+                    domsAdjustment: domsAdjustment,
+                    usedExerciseIds: &usedExerciseIds
                 )
             }
             .map { .exercise($0) }
@@ -209,16 +215,21 @@ struct LocalWorkoutPlanComposer: WorkoutPlanComposing, Sendable {
     }
     
     // MARK: - Prescription Generation
-    
+
     private func prescriptions(
         from block: WorkoutBlock,
         basePrescription: SpecialistSessionRules.PhasePrescription,
         profile: UserProfile,
         checkIn: DailyCheckIn,
-        domsAdjustment: SpecialistSessionRules.DOMSAdjustment
+        domsAdjustment: SpecialistSessionRules.DOMSAdjustment,
+        usedExerciseIds: inout Set<String>
     ) -> [ExercisePrescription] {
-        
-        return block.exercises.map { exercise in
+        // Filter out already used exercises to prevent duplicates
+        let availableExercises = block.exercises.filter { !usedExerciseIds.contains($0.id) }
+
+        return availableExercises.map { exercise in
+            // Mark exercise as used
+            usedExerciseIds.insert(exercise.id)
             // Calcular sets ajustados por DOMS
             let baseSets = basePrescription.setsRange.average
             let adjustedSets = Int(Double(baseSets) * domsAdjustment.volumeMultiplier)
@@ -345,7 +356,8 @@ struct LocalWorkoutPlanComposer: WorkoutPlanComposing, Sendable {
         from blocks: [WorkoutBlock],
         profile: UserProfile,
         checkIn: DailyCheckIn,
-        domsAdjustment: SpecialistSessionRules.DOMSAdjustment
+        domsAdjustment: SpecialistSessionRules.DOMSAdjustment,
+        usedExerciseIds: inout Set<String>
     ) -> WorkoutPlanPhase {
         let activity = ActivityPrescription(
             kind: .mobility,
@@ -356,16 +368,22 @@ struct LocalWorkoutPlanComposer: WorkoutPlanComposing, Sendable {
 
         // Seleciona 1-2 exercícios leves do catálogo já presente (sem inventar exercício).
         // Heurística: pegar exercícios únicos do início dos blocos selecionados.
+        // Skip exercises already used to prevent duplicates across phases.
         var seen = Set<String>()
         let warmupExercises: [WorkoutExercise] = blocks
             .flatMap(\.exercises)
             .filter { ex in
-                if seen.contains(ex.id) { return false }
+                if seen.contains(ex.id) || usedExerciseIds.contains(ex.id) { return false }
                 seen.insert(ex.id)
                 return true
             }
             .prefix(2)
             .map { $0 }
+
+        // Track warmup exercises as used to prevent duplication in later phases
+        for ex in warmupExercises {
+            usedExerciseIds.insert(ex.id)
+        }
 
         let warmupItems: [WorkoutPlanItem] = warmupExercises.map { ex in
             let prescription = ExercisePrescription(

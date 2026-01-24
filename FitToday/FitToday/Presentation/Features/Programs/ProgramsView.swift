@@ -12,14 +12,25 @@ import Swinject
 // MARK: - Program Category
 
 enum ProgramCategory: String, CaseIterable, Identifiable {
-    case all = "All"
-    case strength = "Strength"
-    case conditioning = "Conditioning"
-    case aerobic = "Aerobic"
-    case endurance = "Endurance"
-    case wellness = "Wellness"
+    case all
+    case strength
+    case conditioning
+    case aerobic
+    case endurance
+    case wellness
 
     var id: String { rawValue }
+
+    var displayName: String {
+        switch self {
+        case .all: return "programs.category.all".localized
+        case .strength: return "programs.category.strength".localized
+        case .conditioning: return "programs.category.conditioning".localized
+        case .aerobic: return "programs.category.aerobic".localized
+        case .endurance: return "programs.category.endurance".localized
+        case .wellness: return "programs.category.wellness".localized
+        }
+    }
 
     var icon: String {
         switch self {
@@ -116,10 +127,10 @@ struct ProgramsView: View {
 
     private var headerSection: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text("Programs")
+            Text("programs.title".localized)
                 .font(.system(size: 28, weight: .bold))
                 .foregroundStyle(FitTodayColor.textPrimary)
-            Text("Find the perfect program for your goals")
+            Text("programs.subtitle".localized)
                 .font(.system(size: 14))
                 .foregroundStyle(FitTodayColor.textSecondary)
         }
@@ -157,8 +168,8 @@ struct ProgramsView: View {
                 .frame(maxWidth: .infinity, minHeight: 200)
         } else if filteredPrograms(viewModel.programs).isEmpty {
             EmptyStateView(
-                title: "No programs found",
-                message: "Try selecting a different category",
+                title: "programs.empty.title".localized,
+                message: "programs.empty.message".localized,
                 systemIcon: "rectangle.stack"
             )
             .padding(.vertical, FitTodaySpacing.xl)
@@ -189,10 +200,12 @@ struct ProgramsView: View {
             return .strength
         case .conditioning:
             return .conditioning
-        case .metabolic:
+        case .aerobic:
             return .aerobic
-        case .mobility:
+        case .core:
             return .wellness
+        case .endurance:
+            return .endurance
         }
     }
 }
@@ -209,7 +222,7 @@ struct CategoryPill: View {
             HStack(spacing: 6) {
                 Image(systemName: category.icon)
                     .font(.system(size: 12, weight: .semibold))
-                Text(category.rawValue)
+                Text(category.displayName)
                     .font(.system(size: 13, weight: .semibold))
             }
             .foregroundStyle(isSelected ? .white : FitTodayColor.textSecondary)
@@ -259,7 +272,7 @@ struct ProgramCategoryCard: View {
                     HStack(spacing: 4) {
                         Image(systemName: category.icon)
                             .font(.system(size: 10, weight: .bold))
-                        Text(category.rawValue)
+                        Text(category.displayName)
                             .font(.system(size: 10, weight: .bold))
                     }
                     .foregroundStyle(.white)
@@ -293,7 +306,7 @@ struct ProgramCategoryCard: View {
                     // Start button
                     HStack {
                         Spacer()
-                        Text("Start Program")
+                        Text("programs.card.start".localized)
                             .font(.system(size: 14, weight: .semibold))
                             .foregroundStyle(.white)
                         Image(systemName: "arrow.right")

@@ -194,11 +194,11 @@ struct ProgramRecommender: ProgramRecommending {
     private func convertFocusToProgramTag(_ focus: DailyFocus) -> ProgramGoalTag {
         switch focus {
         case .cardio:
-            return .metabolic
+            return .aerobic
         case .upper, .lower, .fullBody:
             return .strength
         case .core:
-            return .conditioning
+            return .core
         case .surprise:
             return .conditioning
         }
@@ -232,12 +232,14 @@ struct ProgramRecommender: ProgramRecommending {
     
     private func mapGoalToTag(_ goal: FitnessGoal) -> ProgramGoalTag {
         switch goal {
-        case .weightLoss, .conditioning:
-            return .metabolic
+        case .weightLoss:
+            return .aerobic
+        case .conditioning:
+            return .conditioning
         case .hypertrophy, .performance:
             return .strength
         case .endurance:
-            return .conditioning
+            return .endurance
         }
     }
     

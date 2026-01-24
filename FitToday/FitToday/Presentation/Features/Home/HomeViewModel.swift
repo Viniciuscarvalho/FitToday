@@ -32,7 +32,6 @@ enum HomeJourneyState: Equatable {
     private(set) var journeyState: HomeJourneyState = .loading
     private(set) var entitlement: ProEntitlement = .free
     private(set) var topPrograms: [Program] = []
-    private(set) var weekWorkouts: [LibraryWorkout] = []
     private(set) var dailyWorkoutState: DailyWorkoutState = DailyWorkoutState()
     private(set) var historyEntries: [WorkoutHistoryEntry] = []
     var errorMessage: ErrorMessage? // ErrorPresenting protocol
@@ -64,11 +63,11 @@ enum HomeJourneyState: Equatable {
         let hour = Calendar.current.component(.hour, from: Date())
         switch hour {
         case 5..<12:
-            return "Bom dia"
+            return "home.greeting.morning".localized
         case 12..<18:
-            return "Boa tarde"
+            return "home.greeting.afternoon".localized
         default:
-            return "Boa noite"
+            return "home.greeting.evening".localized
         }
     }
 
@@ -155,31 +154,31 @@ enum HomeJourneyState: Equatable {
     var ctaTitle: String {
         switch journeyState {
         case .loading:
-            return "Carregando..."
+            return "home.cta.loading".localized
         case .noProfile:
-            return "Configurar Perfil"
+            return "home.cta.setup_profile".localized
         case .needsDailyCheckIn:
-            return "Responder Questionário"
+            return "home.cta.answer_questionnaire".localized
         case .workoutReady:
-            return "Ver Treino de Hoje"
+            return "home.cta.view_today_workout".localized
         case .workoutCompleted:
-            return "Próximo treino em breve"
+            return "home.cta.next_workout_soon".localized
         case .error:
-            return "Tentar Novamente"
+            return "home.cta.retry".localized
         }
     }
 
     var ctaSubtitle: String? {
         switch journeyState {
         case .needsDailyCheckIn:
-            return "2 perguntas rápidas antes de começar"
+            return "home.cta.subtitle.questionnaire".localized
         case .workoutReady:
             if canSwapSuggestion {
-                return "Não gostou? Toque em trocar para nova sugestão"
+                return "home.cta.subtitle.swap".localized
             }
-            return "Treino personalizado pronto para você"
+            return "home.cta.subtitle.workout_ready".localized
         case .workoutCompleted:
-            return "Você já treinou hoje! Descanse e volte amanhã"
+            return "home.cta.subtitle.completed".localized
         default:
             return nil
         }
@@ -284,23 +283,6 @@ enum HomeJourneyState: Equatable {
             } catch {
                 #if DEBUG
                 print("[Home] Erro ao carregar programas: \(error)")
-                #endif
-            }
-        }
-
-        // Carregar treinos da semana (até 3) usando o recomendador
-        if let workoutRepo = resolver.resolve(LibraryWorkoutsRepository.self) {
-            do {
-                let allWorkouts = try await workoutRepo.loadWorkouts()
-                weekWorkouts = recommender.recommendWorkouts(
-                    workouts: allWorkouts,
-                    profile: profile,
-                    history: historyEntries,
-                    limit: 3
-                )
-            } catch {
-                #if DEBUG
-                print("[Home] Erro ao carregar treinos: \(error)")
                 #endif
             }
         }

@@ -62,15 +62,6 @@ struct HomeView: View {
                     )
                 }
 
-                if !viewModel.weekWorkouts.isEmpty {
-                    WeeksWorkoutSection(
-                        workouts: viewModel.weekWorkouts,
-                        onWorkoutTap: { workout in
-                            router.push(.programWorkoutDetail(workout.id), on: .home)
-                        }
-                    )
-                }
-
                 Spacer(minLength: FitTodaySpacing.xl)
             }
             .padding(.bottom, FitTodaySpacing.xxl)

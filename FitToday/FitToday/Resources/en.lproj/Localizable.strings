@@ -1,0 +1,188 @@
+/*
+  Localizable.strings (English)
+  FitToday
+*/
+
+// MARK: - Common
+"common.cancel" = "Cancel";
+"common.save" = "Save";
+"common.done" = "Done";
+"common.next" = "Next";
+"common.back" = "Back";
+"common.skip" = "Skip";
+"common.start" = "Start";
+"common.finish" = "Finish";
+"common.confirm" = "Confirm";
+"common.error" = "Error";
+"common.loading" = "Loading...";
+"common.retry" = "Retry";
+"common.see_all" = "See All";
+
+// MARK: - Home
+"home.greeting.morning" = "Good morning";
+"home.greeting.afternoon" = "Good afternoon";
+"home.greeting.evening" = "Good evening";
+"home.section.top_for_you" = "Top for You";
+"home.section.weeks_workouts" = "Week's Workouts";
+"home.cta.loading" = "Loading...";
+"home.cta.setup_profile" = "Setup Profile";
+"home.cta.answer_questionnaire" = "Answer Questionnaire";
+"home.cta.view_today_workout" = "View Today's Workout";
+"home.cta.next_workout_soon" = "Next workout soon";
+"home.cta.retry" = "Try Again";
+"home.cta.subtitle.questionnaire" = "2 quick questions before starting";
+"home.cta.subtitle.workout_ready" = "Personalized workout ready for you";
+"home.cta.subtitle.swap" = "Don't like it? Tap swap for a new suggestion";
+"home.cta.subtitle.completed" = "You already trained today! Rest and come back tomorrow";
+"home.hero.error" = "Error generating workout";
+
+// MARK: - Home Hero Card
+"home.hero.welcome.title" = "Welcome to FitToday!";
+"home.hero.welcome.subtitle" = "Create your training profile to start your personalized fitness journey";
+"home.hero.create_profile" = "Create Profile";
+"home.hero.dynamic.title" = "Dynamic Workout";
+"home.hero.dynamic.subtitle" = "Get a personalized workout based on your goals, equipment and available time";
+"home.hero.generate" = "Generate Workout";
+"home.hero.ready.title" = "Today's Workout";
+"home.hero.ready.subtitle" = "Your personalized workout is ready. Let's crush it!";
+"home.hero.start_workout" = "Start Workout";
+"home.hero.badge.ready" = "Ready";
+"home.hero.generating" = "Generating new plan...";
+"home.hero.completed.title" = "Workout Complete!";
+"home.hero.completed.subtitle" = "Great job today! Rest up and come back stronger tomorrow.";
+"home.hero.badge.completed" = "Completed";
+"home.hero.error.title" = "Something went wrong";
+
+// MARK: - Stats
+"stats.workouts_this_week" = "Workouts";
+"stats.calories_burned" = "Calories";
+"stats.streak_days" = "Streak";
+
+// MARK: - Programs
+"programs.title" = "Programs";
+"programs.subtitle" = "Find the perfect program for your goals";
+"programs.category.all" = "All";
+"programs.category.strength" = "Strength";
+"programs.category.conditioning" = "Conditioning";
+"programs.category.aerobic" = "Aerobic";
+"programs.category.endurance" = "Endurance";
+"programs.category.wellness" = "Wellness";
+"programs.card.start" = "Start Program";
+"programs.card.duration" = "%d weeks";
+"programs.card.sessions" = "%dx per week";
+"programs.detail.workouts" = "Workouts";
+"programs.detail.start_program" = "Start Program";
+"programs.detail.enrolled" = "Enrolled";
+"programs.empty.title" = "No programs found";
+"programs.empty.message" = "Try selecting a different category";
+
+// MARK: - Workout
+"workout.title" = "Workout";
+"workout.phase.warmup" = "Warmup";
+"workout.phase.strength" = "Strength";
+"workout.phase.accessory" = "Accessories";
+"workout.phase.aerobic" = "Aerobic";
+"workout.phase.cooldown" = "Cooldown";
+"workout.sets" = "%d sets";
+"workout.reps" = "%d-%d reps";
+"workout.rest" = "%d sec rest";
+"workout.start_workout" = "Start Workout";
+"workout.finish_workout" = "Finish Workout";
+"workout.skip_workout" = "Skip Workout";
+"workout.pause" = "Pause";
+"workout.resume" = "Resume";
+"workout.next_exercise" = "Next Exercise";
+"workout.previous_exercise" = "Previous Exercise";
+"workout.complete_set" = "Complete Set";
+"workout.rest_timer" = "Rest Timer";
+"workout.skip_rest" = "Skip Rest";
+
+// MARK: - Daily Questionnaire
+"questionnaire.title" = "Daily Check-in";
+"questionnaire.focus.title" = "What's your focus today?";
+"questionnaire.focus.upper" = "Upper Body";
+"questionnaire.focus.lower" = "Lower Body";
+"questionnaire.focus.fullbody" = "Full Body";
+"questionnaire.focus.cardio" = "Cardio";
+"questionnaire.focus.core" = "Core";
+"questionnaire.focus.surprise" = "Surprise Me";
+"questionnaire.energy.title" = "How's your energy level?";
+"questionnaire.energy.low" = "Low";
+"questionnaire.energy.medium" = "Medium";
+"questionnaire.energy.high" = "High";
+"questionnaire.soreness.title" = "Any muscle soreness?";
+"questionnaire.soreness.none" = "None";
+"questionnaire.soreness.light" = "Light";
+"questionnaire.soreness.moderate" = "Moderate";
+"questionnaire.soreness.strong" = "Strong";
+"questionnaire.generate" = "Generate Workout";
+
+// MARK: - Settings
+"settings.title" = "Settings";
+"settings.subtitle" = "Manage your account and preferences";
+"settings.language" = "Language";
+"settings.language.english" = "English";
+"settings.language.portuguese" = "Portugues";
+"settings.account" = "Account";
+"settings.notifications" = "Notifications";
+"settings.about" = "About";
+"settings.privacy" = "Privacy Policy";
+"settings.terms" = "Terms of Service";
+"settings.logout" = "Log Out";
+"settings.delete_account" = "Delete Account";
+"settings.version" = "Version %@";
+
+// MARK: - Onboarding
+"onboarding.welcome.title" = "Welcome to FitToday";
+"onboarding.welcome.subtitle" = "Your personalized fitness journey starts here";
+"onboarding.goal.title" = "What's your main goal?";
+"onboarding.goal.hypertrophy" = "Build Muscle";
+"onboarding.goal.weight_loss" = "Lose Weight";
+"onboarding.goal.conditioning" = "Get Fit";
+"onboarding.goal.endurance" = "Build Endurance";
+"onboarding.goal.performance" = "Improve Performance";
+"onboarding.level.title" = "What's your experience level?";
+"onboarding.level.beginner" = "Beginner";
+"onboarding.level.intermediate" = "Intermediate";
+"onboarding.level.advanced" = "Advanced";
+"onboarding.equipment.title" = "What equipment do you have?";
+"onboarding.equipment.bodyweight" = "Bodyweight Only";
+"onboarding.equipment.home_dumbbells" = "Home with Dumbbells";
+"onboarding.equipment.basic_gym" = "Basic Gym";
+"onboarding.equipment.full_gym" = "Full Gym";
+"onboarding.frequency.title" = "How often do you want to train?";
+"onboarding.frequency.times_per_week" = "%d times per week";
+"onboarding.complete" = "Let's Go!";
+
+// MARK: - Goals
+"goal.hypertrophy" = "Hypertrophy";
+"goal.weight_loss" = "Weight Loss";
+"goal.conditioning" = "Conditioning";
+"goal.endurance" = "Endurance";
+"goal.performance" = "Performance";
+
+// MARK: - History
+"history.title" = "History";
+"history.empty" = "No workouts yet";
+"history.completed" = "Completed";
+"history.skipped" = "Skipped";
+"history.duration" = "%d min";
+"history.calories" = "%d cal";
+
+// MARK: - Pro
+"pro.title" = "Go Pro";
+"pro.subtitle" = "Unlock all features";
+"pro.feature.unlimited" = "Unlimited workouts";
+"pro.feature.ai" = "AI-powered plans";
+"pro.feature.analytics" = "Advanced analytics";
+"pro.feature.priority" = "Priority support";
+"pro.subscribe" = "Subscribe";
+"pro.restore" = "Restore Purchase";
+"pro.price_per_month" = "%@ / month";
+"pro.price_per_year" = "%@ / year";
+
+// MARK: - Errors
+"error.network" = "Network error. Please check your connection.";
+"error.generic" = "Something went wrong. Please try again.";
+"error.no_profile" = "Profile not found. Please complete setup.";
+"error.workout_generation" = "Could not generate workout. Please try again.";

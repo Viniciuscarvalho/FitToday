@@ -39,9 +39,9 @@ struct HomeHeroCard: View {
             noProfileContent
         case .needsDailyCheckIn:
             aiWorkoutContent(
-                title: "Dynamic Workout",
-                subtitle: "Get a personalized workout based on your goals, equipment and available time",
-                buttonTitle: "Generate Workout",
+                title: "home.hero.dynamic.title".localized,
+                subtitle: "home.hero.dynamic.subtitle".localized,
+                buttonTitle: "home.hero.generate".localized,
                 buttonIcon: "bolt.fill",
                 action: onStartDailyCheckIn
             )
@@ -76,7 +76,7 @@ struct HomeHeroCard: View {
         VStack(spacing: FitTodaySpacing.md) {
             ProgressView()
                 .tint(.white)
-            Text("Loading...")
+            Text("common.loading".localized)
                 .font(.system(size: 16, weight: .medium))
                 .foregroundStyle(.white.opacity(0.8))
         }
@@ -94,17 +94,17 @@ struct HomeHeroCard: View {
                 iconContainer(systemName: "person.badge.plus")
             }
 
-            Text("Welcome to FitToday!")
+            Text("home.hero.welcome.title".localized)
                 .font(.system(size: 22, weight: .bold))
                 .foregroundStyle(.white)
 
-            Text("Create your training profile to start your personalized fitness journey")
+            Text("home.hero.welcome.subtitle".localized)
                 .font(.system(size: 14, weight: .regular))
                 .foregroundStyle(.white.opacity(0.85))
                 .lineSpacing(2)
                 .fixedSize(horizontal: false, vertical: true)
 
-            primaryButton(title: "Create Profile", icon: "arrow.right", action: onCreateProfile)
+            primaryButton(title: "home.hero.create_profile".localized, icon: "arrow.right", action: onCreateProfile)
         }
     }
 
@@ -157,11 +157,11 @@ struct HomeHeroCard: View {
                 iconContainer(systemName: "figure.run")
             }
 
-            Text("Today's Workout")
+            Text("home.hero.ready.title".localized)
                 .font(.system(size: 22, weight: .bold))
                 .foregroundStyle(.white)
 
-            Text("Your personalized workout is ready. Let's crush it!")
+            Text("home.hero.ready.subtitle".localized)
                 .font(.system(size: 14, weight: .regular))
                 .foregroundStyle(.white.opacity(0.85))
                 .lineSpacing(2)
@@ -170,7 +170,7 @@ struct HomeHeroCard: View {
             if isGeneratingPlan {
                 generatingIndicator
             } else {
-                primaryButton(title: "Start Workout", icon: "play.fill", action: onViewTodayWorkout)
+                primaryButton(title: "home.hero.start_workout".localized, icon: "play.fill", action: onViewTodayWorkout)
             }
         }
     }
@@ -179,7 +179,7 @@ struct HomeHeroCard: View {
         HStack(spacing: 6) {
             Image(systemName: "checkmark.circle.fill")
                 .font(.system(size: 12, weight: .semibold))
-            Text("Ready")
+            Text("home.hero.badge.ready".localized)
                 .font(.system(size: 11, weight: .semibold))
         }
         .foregroundStyle(.white)
@@ -193,7 +193,7 @@ struct HomeHeroCard: View {
         HStack(spacing: 10) {
             ProgressView()
                 .tint(.white)
-            Text("Generating new plan...")
+            Text("home.hero.generating".localized)
                 .font(.system(size: 14, weight: .medium))
                 .foregroundStyle(.white.opacity(0.9))
         }
@@ -213,11 +213,11 @@ struct HomeHeroCard: View {
                 iconContainer(systemName: "trophy.fill", iconColor: .yellow)
             }
 
-            Text("Workout Complete!")
+            Text("home.hero.completed.title".localized)
                 .font(.system(size: 22, weight: .bold))
                 .foregroundStyle(.white)
 
-            Text("Great job today! Rest up and come back stronger tomorrow.")
+            Text("home.hero.completed.subtitle".localized)
                 .font(.system(size: 14, weight: .regular))
                 .foregroundStyle(.white.opacity(0.85))
                 .lineSpacing(2)
@@ -229,7 +229,7 @@ struct HomeHeroCard: View {
         HStack(spacing: 6) {
             Image(systemName: "checkmark.seal.fill")
                 .font(.system(size: 12, weight: .semibold))
-            Text("Completed")
+            Text("home.hero.badge.completed".localized)
                 .font(.system(size: 11, weight: .semibold))
         }
         .foregroundStyle(.white)
@@ -249,7 +249,7 @@ struct HomeHeroCard: View {
                 iconContainer(systemName: "exclamationmark.triangle.fill", iconColor: .red)
             }
 
-            Text("Something went wrong")
+            Text("home.hero.error.title".localized)
                 .font(.system(size: 22, weight: .bold))
                 .foregroundStyle(.white)
 
@@ -259,7 +259,7 @@ struct HomeHeroCard: View {
                 .lineSpacing(2)
                 .fixedSize(horizontal: false, vertical: true)
 
-            secondaryButton(title: "Try Again", icon: "arrow.clockwise", action: onGeneratePlan)
+            secondaryButton(title: "common.retry".localized, icon: "arrow.clockwise", action: onGeneratePlan)
         }
     }
 
@@ -267,7 +267,7 @@ struct HomeHeroCard: View {
         HStack(spacing: 6) {
             Image(systemName: "xmark.circle.fill")
                 .font(.system(size: 12, weight: .semibold))
-            Text("Error")
+            Text("common.error".localized)
                 .font(.system(size: 11, weight: .semibold))
         }
         .foregroundStyle(.white)

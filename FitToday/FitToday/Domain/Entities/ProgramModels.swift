@@ -10,10 +10,11 @@ import Foundation
 
 /// Tag de objetivo do programa para classificação e recomendação.
 public enum ProgramGoalTag: String, Sendable, Codable, CaseIterable {
-    case metabolic   // Foco em queima calórica, circuitos, HIIT
-    case strength    // Foco em força e hipertrofia
-    case conditioning // Foco em resistência e condicionamento geral
-    case mobility    // Foco em mobilidade e recuperação
+    case strength     // Foco em força e hipertrofia
+    case conditioning // Foco em HIIT e circuitos metabólicos
+    case aerobic      // Foco em cardio e queima calórica
+    case core         // Foco em abdominal e estabilidade
+    case endurance    // Foco em resistência muscular e stamina
 }
 
 /// Nível de dificuldade do programa.
@@ -92,19 +93,21 @@ public struct Program: Identifiable, Hashable, Sendable {
 extension ProgramGoalTag {
     var displayName: String {
         switch self {
-        case .metabolic: return "Queima de Gordura"
-        case .strength: return "Força & Hipertrofia"
-        case .conditioning: return "Condicionamento"
-        case .mobility: return "Mobilidade"
+        case .strength: return "programs.category.strength".localized
+        case .conditioning: return "programs.category.conditioning".localized
+        case .aerobic: return "programs.category.aerobic".localized
+        case .core: return "programs.category.wellness".localized
+        case .endurance: return "programs.category.endurance".localized
         }
     }
-    
+
     var iconName: String {
         switch self {
-        case .metabolic: return "flame.fill"
         case .strength: return "dumbbell.fill"
-        case .conditioning: return "figure.run"
-        case .mobility: return "figure.yoga"
+        case .conditioning: return "flame.fill"
+        case .aerobic: return "figure.run"
+        case .core: return "figure.core.training"
+        case .endurance: return "heart.fill"
         }
     }
 }

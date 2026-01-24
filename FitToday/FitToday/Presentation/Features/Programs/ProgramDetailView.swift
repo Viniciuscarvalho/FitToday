@@ -179,10 +179,11 @@ struct ProgramDetailView: View {
     
     private func gradientColors(for goalTag: ProgramGoalTag) -> [Color] {
         switch goalTag {
-        case .metabolic: return [.orange, .red]
         case .strength: return [.blue, .purple]
-        case .conditioning: return [.green, .teal]
-        case .mobility: return [.cyan, .mint]
+        case .conditioning: return [.orange, .red]
+        case .aerobic: return [.green, .teal]
+        case .core: return [.cyan, .mint]
+        case .endurance: return [.indigo, .blue]
         }
     }
 }

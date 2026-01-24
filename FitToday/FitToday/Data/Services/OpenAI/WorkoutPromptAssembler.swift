@@ -301,6 +301,8 @@ struct WorkoutPromptAssembler: WorkoutPromptAssembling, Sendable {
     3. Respeite o blueprint: cada fase deve ter o número EXATO de exercícios e o kind correto.
     4. Priorize segurança: evite exercícios que agravem limitações articulares/dor informadas pelo usuário.
     5. Evite repetição com base no histórico fornecido (quando existir).
+    6. CADA EXERCÍCIO DEVE APARECER APENAS UMA VEZ no treino inteiro. Nunca repita o mesmo exercício em fases diferentes.
+    7. Use os nomes EXATOS dos exercícios em inglês conforme fornecido no catálogo.
     
     ## FORMATO (responda APENAS com JSON válido)
     {
@@ -398,6 +400,7 @@ struct WorkoutPromptAssembler: WorkoutPromptAssembling, Sendable {
     - Variar padrões de movimento: incluir PUSH, PULL, HINGE, SQUAT
     - ≥80% dos exercícios devem ser DIFERENTES dos últimos 3 treinos
     - Equilibrar grupos musculares: não repetir o mesmo padrão em sequência
+    - PROIBIDO: repetir qualquer exercício dentro do mesmo treino (cada exercício aparece UMA vez)
     """
   }
   

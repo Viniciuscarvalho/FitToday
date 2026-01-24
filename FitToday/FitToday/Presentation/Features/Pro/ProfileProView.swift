@@ -81,10 +81,10 @@ struct ProfileProView: View {
 
     private var headerSection: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text("Settings")
+            Text("settings.title".localized)
                 .font(.system(size: 28, weight: .bold))
                 .foregroundStyle(FitTodayColor.textPrimary)
-            Text("Manage your account and preferences")
+            Text("settings.subtitle".localized)
                 .font(.system(size: 14))
                 .foregroundStyle(FitTodayColor.textSecondary)
         }
@@ -289,10 +289,63 @@ struct ProfileProView: View {
                 SettingsRow(icon: "lock.shield", title: "Privacy Settings") {
                     router.push(.privacySettings, on: .settings)
                 }
+
+                Divider().padding(.leading, 56)
+
+                languageRow
             }
             .background(FitTodayColor.surface)
             .clipShape(RoundedRectangle(cornerRadius: 16))
         }
+    }
+
+    // MARK: - Language Row
+
+    @MainActor
+    private var languageRow: some View {
+        let manager = LocalizationManager.shared
+        return HStack(spacing: FitTodaySpacing.md) {
+            ZStack {
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(FitTodayColor.brandPrimary.opacity(0.15))
+                    .frame(width: 36, height: 36)
+                Image(systemName: "globe")
+                    .font(.system(size: 16))
+                    .foregroundStyle(FitTodayColor.brandPrimary)
+            }
+
+            Text("settings.language".localized)
+                .font(.system(size: 15))
+                .foregroundStyle(FitTodayColor.textPrimary)
+
+            Spacer()
+
+            Menu {
+                ForEach(LocalizationManager.Language.allCases) { language in
+                    Button {
+                        manager.setLanguage(language)
+                    } label: {
+                        HStack {
+                            Text(language.displayName)
+                            if manager.selectedLanguage == language {
+                                Image(systemName: "checkmark")
+                            }
+                        }
+                    }
+                }
+            } label: {
+                HStack(spacing: 4) {
+                    Text(manager.selectedLanguage.displayName)
+                        .font(.system(size: 14))
+                        .foregroundStyle(FitTodayColor.textSecondary)
+                    Image(systemName: "chevron.up.chevron.down")
+                        .font(.system(size: 10))
+                        .foregroundStyle(FitTodayColor.textTertiary)
+                }
+            }
+        }
+        .padding(.horizontal, FitTodaySpacing.md)
+        .padding(.vertical, FitTodaySpacing.sm)
     }
 
     // MARK: - Account Section

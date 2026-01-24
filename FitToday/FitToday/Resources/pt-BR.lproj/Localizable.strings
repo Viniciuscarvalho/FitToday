@@ -1,0 +1,188 @@
+/*
+  Localizable.strings (Portuguese - Brazil)
+  FitToday
+*/
+
+// MARK: - Common
+"common.cancel" = "Cancelar";
+"common.save" = "Salvar";
+"common.done" = "Concluido";
+"common.next" = "Proximo";
+"common.back" = "Voltar";
+"common.skip" = "Pular";
+"common.start" = "Iniciar";
+"common.finish" = "Finalizar";
+"common.confirm" = "Confirmar";
+"common.error" = "Erro";
+"common.loading" = "Carregando...";
+"common.retry" = "Tentar novamente";
+"common.see_all" = "Ver Todos";
+
+// MARK: - Home
+"home.greeting.morning" = "Bom dia";
+"home.greeting.afternoon" = "Boa tarde";
+"home.greeting.evening" = "Boa noite";
+"home.section.top_for_you" = "Top pra Voce";
+"home.section.weeks_workouts" = "Treinos da Semana";
+"home.cta.loading" = "Carregando...";
+"home.cta.setup_profile" = "Configurar Perfil";
+"home.cta.answer_questionnaire" = "Responder Questionario";
+"home.cta.view_today_workout" = "Ver Treino de Hoje";
+"home.cta.next_workout_soon" = "Proximo treino em breve";
+"home.cta.retry" = "Tentar Novamente";
+"home.cta.subtitle.questionnaire" = "2 perguntas rapidas antes de comecar";
+"home.cta.subtitle.workout_ready" = "Treino personalizado pronto para voce";
+"home.cta.subtitle.swap" = "Nao gostou? Toque em trocar para nova sugestao";
+"home.cta.subtitle.completed" = "Voce ja treinou hoje! Descanse e volte amanha";
+"home.hero.error" = "Erro ao gerar treino";
+
+// MARK: - Home Hero Card
+"home.hero.welcome.title" = "Bem-vindo ao FitToday!";
+"home.hero.welcome.subtitle" = "Crie seu perfil de treino para comecar sua jornada fitness personalizada";
+"home.hero.create_profile" = "Criar Perfil";
+"home.hero.dynamic.title" = "Treino Dinamico";
+"home.hero.dynamic.subtitle" = "Receba um treino personalizado com base em seus objetivos, equipamentos e tempo disponivel";
+"home.hero.generate" = "Gerar Treino";
+"home.hero.ready.title" = "Treino de Hoje";
+"home.hero.ready.subtitle" = "Seu treino personalizado esta pronto. Vamos nessa!";
+"home.hero.start_workout" = "Iniciar Treino";
+"home.hero.badge.ready" = "Pronto";
+"home.hero.generating" = "Gerando novo plano...";
+"home.hero.completed.title" = "Treino Concluido!";
+"home.hero.completed.subtitle" = "Otimo trabalho hoje! Descanse e volte mais forte amanha.";
+"home.hero.badge.completed" = "Concluido";
+"home.hero.error.title" = "Algo deu errado";
+
+// MARK: - Stats
+"stats.workouts_this_week" = "Treinos";
+"stats.calories_burned" = "Calorias";
+"stats.streak_days" = "Sequencia";
+
+// MARK: - Programs
+"programs.title" = "Programas";
+"programs.subtitle" = "Encontre o programa perfeito para seus objetivos";
+"programs.category.all" = "Todos";
+"programs.category.strength" = "Forca";
+"programs.category.conditioning" = "Condicionamento";
+"programs.category.aerobic" = "Aerobico";
+"programs.category.endurance" = "Resistencia";
+"programs.category.wellness" = "Bem-estar";
+"programs.card.start" = "Iniciar Programa";
+"programs.card.duration" = "%d semanas";
+"programs.card.sessions" = "%dx por semana";
+"programs.detail.workouts" = "Treinos";
+"programs.detail.start_program" = "Iniciar Programa";
+"programs.detail.enrolled" = "Inscrito";
+"programs.empty.title" = "Nenhum programa encontrado";
+"programs.empty.message" = "Tente selecionar outra categoria";
+
+// MARK: - Workout
+"workout.title" = "Treino";
+"workout.phase.warmup" = "Aquecimento";
+"workout.phase.strength" = "Forca";
+"workout.phase.accessory" = "Acessorios";
+"workout.phase.aerobic" = "Aerobico";
+"workout.phase.cooldown" = "Desaquecimento";
+"workout.sets" = "%d series";
+"workout.reps" = "%d-%d reps";
+"workout.rest" = "%d seg descanso";
+"workout.start_workout" = "Iniciar Treino";
+"workout.finish_workout" = "Finalizar Treino";
+"workout.skip_workout" = "Pular Treino";
+"workout.pause" = "Pausar";
+"workout.resume" = "Continuar";
+"workout.next_exercise" = "Proximo Exercicio";
+"workout.previous_exercise" = "Exercicio Anterior";
+"workout.complete_set" = "Completar Serie";
+"workout.rest_timer" = "Tempo de Descanso";
+"workout.skip_rest" = "Pular Descanso";
+
+// MARK: - Daily Questionnaire
+"questionnaire.title" = "Check-in Diario";
+"questionnaire.focus.title" = "Qual e seu foco hoje?";
+"questionnaire.focus.upper" = "Superior";
+"questionnaire.focus.lower" = "Inferior";
+"questionnaire.focus.fullbody" = "Corpo Inteiro";
+"questionnaire.focus.cardio" = "Cardio";
+"questionnaire.focus.core" = "Core";
+"questionnaire.focus.surprise" = "Surpreenda-me";
+"questionnaire.energy.title" = "Como esta sua energia?";
+"questionnaire.energy.low" = "Baixa";
+"questionnaire.energy.medium" = "Media";
+"questionnaire.energy.high" = "Alta";
+"questionnaire.soreness.title" = "Alguma dor muscular?";
+"questionnaire.soreness.none" = "Nenhuma";
+"questionnaire.soreness.light" = "Leve";
+"questionnaire.soreness.moderate" = "Moderada";
+"questionnaire.soreness.strong" = "Forte";
+"questionnaire.generate" = "Gerar Treino";
+
+// MARK: - Settings
+"settings.title" = "Configuracoes";
+"settings.subtitle" = "Gerencie sua conta e preferencias";
+"settings.language" = "Idioma";
+"settings.language.english" = "English";
+"settings.language.portuguese" = "Portugues";
+"settings.account" = "Conta";
+"settings.notifications" = "Notificacoes";
+"settings.about" = "Sobre";
+"settings.privacy" = "Politica de Privacidade";
+"settings.terms" = "Termos de Servico";
+"settings.logout" = "Sair";
+"settings.delete_account" = "Excluir Conta";
+"settings.version" = "Versao %@";
+
+// MARK: - Onboarding
+"onboarding.welcome.title" = "Bem-vindo ao FitToday";
+"onboarding.welcome.subtitle" = "Sua jornada fitness personalizada comeca aqui";
+"onboarding.goal.title" = "Qual e seu objetivo principal?";
+"onboarding.goal.hypertrophy" = "Ganhar Musculo";
+"onboarding.goal.weight_loss" = "Perder Peso";
+"onboarding.goal.conditioning" = "Ficar em Forma";
+"onboarding.goal.endurance" = "Construir Resistencia";
+"onboarding.goal.performance" = "Melhorar Performance";
+"onboarding.level.title" = "Qual seu nivel de experiencia?";
+"onboarding.level.beginner" = "Iniciante";
+"onboarding.level.intermediate" = "Intermediario";
+"onboarding.level.advanced" = "Avancado";
+"onboarding.equipment.title" = "Que equipamentos voce tem?";
+"onboarding.equipment.bodyweight" = "Apenas Peso Corporal";
+"onboarding.equipment.home_dumbbells" = "Casa com Halteres";
+"onboarding.equipment.basic_gym" = "Academia Basica";
+"onboarding.equipment.full_gym" = "Academia Completa";
+"onboarding.frequency.title" = "Quantas vezes quer treinar?";
+"onboarding.frequency.times_per_week" = "%d vezes por semana";
+"onboarding.complete" = "Vamos La!";
+
+// MARK: - Goals
+"goal.hypertrophy" = "Hipertrofia";
+"goal.weight_loss" = "Emagrecimento";
+"goal.conditioning" = "Condicionamento";
+"goal.endurance" = "Resistencia";
+"goal.performance" = "Performance";
+
+// MARK: - History
+"history.title" = "Historico";
+"history.empty" = "Nenhum treino ainda";
+"history.completed" = "Concluido";
+"history.skipped" = "Pulado";
+"history.duration" = "%d min";
+"history.calories" = "%d cal";
+
+// MARK: - Pro
+"pro.title" = "Seja Pro";
+"pro.subtitle" = "Desbloqueie todos os recursos";
+"pro.feature.unlimited" = "Treinos ilimitados";
+"pro.feature.ai" = "Planos com IA";
+"pro.feature.analytics" = "Analises avancadas";
+"pro.feature.priority" = "Suporte prioritario";
+"pro.subscribe" = "Assinar";
+"pro.restore" = "Restaurar Compra";
+"pro.price_per_month" = "%@ / mes";
+"pro.price_per_year" = "%@ / ano";
+
+// MARK: - Errors
+"error.network" = "Erro de rede. Verifique sua conexao.";
+"error.generic" = "Algo deu errado. Tente novamente.";
+"error.no_profile" = "Perfil nao encontrado. Complete a configuracao.";
+"error.workout_generation" = "Nao foi possivel gerar o treino. Tente novamente.";
