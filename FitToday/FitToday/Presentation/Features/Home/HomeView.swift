@@ -33,7 +33,9 @@ struct HomeView: View {
                     greeting: viewModel.greeting,
                     dateFormatted: viewModel.currentDateFormatted,
                     isPro: viewModel.entitlement.isPro,
-                    goalBadgeText: viewModel.goalBadgeText
+                    goalBadgeText: viewModel.goalBadgeText,
+                    userName: viewModel.userName,
+                    userPhotoURL: viewModel.userPhotoURL
                 )
 
                 HomeHeroCard(

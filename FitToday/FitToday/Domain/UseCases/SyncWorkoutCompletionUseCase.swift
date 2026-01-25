@@ -51,30 +51,49 @@ struct SyncWorkoutCompletionUseCase: Sendable {
         }
     }
 
+    /// Minimum workout duration in minutes to count for challenges
+    private static let minimumWorkoutMinutes = 30
+
     /// Internal sync method that can throw errors.
     /// Used by both execute() and queue processing.
     func performSync(entry: WorkoutHistoryEntry) async throws {
         // 1. Skip if workout skipped (not completed)
         guard entry.status == .completed else { return }
 
-        // 2. Verify authentication and group membership
+        // 2. Validate minimum duration (30 minutes)
+        let workoutDuration = entry.durationMinutes ?? 0
+        guard workoutDuration >= Self.minimumWorkoutMinutes else {
+            #if DEBUG
+            print("[SyncWorkoutCompletionUseCase] Workout too short (\(workoutDuration) min), minimum is \(Self.minimumWorkoutMinutes) min")
+            #endif
+            return
+        }
+
+        // 3. Verify authentication and group membership
         guard let user = try await authRepository.currentUser(),
               let groupId = user.currentGroupId else { return }
 
-        // 3. Respect privacy settings
+        // 4. Respect privacy settings
         guard user.privacySettings.shareWorkoutData else { return }
 
-        // 4. Fetch current week's challenges
+        // 5. Update member weekly stats
+        try await leaderboardRepository.updateMemberWeeklyStats(
+            groupId: groupId,
+            userId: user.id,
+            workoutMinutes: workoutDuration
+        )
+
+        // 6. Fetch current week's challenges
         let challenges = try await leaderboardRepository.getCurrentWeekChallenges(groupId: groupId)
 
-        // 5. Update check-ins challenge
+        // 7. Update check-ins challenge
         if let checkInsChallenge = challenges.first(where: { $0.type == .checkIns }) {
             try await leaderboardRepository.incrementCheckIn(challengeId: checkInsChallenge.id, userId: user.id)
             // Track check-ins sync event (value is incremented, so we don't have exact count here)
             analytics?.trackWorkoutSynced(userId: user.id, groupId: groupId, challengeType: .checkIns, value: 1)
         }
 
-        // 6. Compute and update streak challenge
+        // 8. Compute and update streak challenge
         if let streakChallenge = challenges.first(where: { $0.type == .streak }) {
             let streak = try await computeCurrentStreak(userId: user.id)
             try await leaderboardRepository.updateStreak(challengeId: streakChallenge.id, userId: user.id, streakDays: streak)

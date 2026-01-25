@@ -11,7 +11,7 @@
       {
         "exercise": {
           "id": "barbell_bench_press",
-          "name": "Supino Reto com Barra",
+          "name": "Barbell Bench Press",
           "main_muscle": "chest",
           "equipment": "barbell",
           "instructions": [
@@ -34,7 +34,7 @@
       {
         "exercise": {
           "id": "incline_dumbbell_press",
-          "name": "Supino Inclinado com Halteres",
+          "name": "Incline Dumbbell Press",
           "main_muscle": "chest",
           "equipment": "dumbbell",
           "instructions": [
@@ -57,7 +57,7 @@
       {
         "exercise": {
           "id": "cable_crossover",
-          "name": "Crossover no Cabo",
+          "name": "Cable Crossover",
           "main_muscle": "chest",
           "equipment": "cable",
           "instructions": [
@@ -80,7 +80,7 @@
       {
         "exercise": {
           "id": "seated_dumbbell_shoulder_press",
-          "name": "Desenvolvimento com Halteres Sentado",
+          "name": "Seated Dumbbell Shoulder Press",
           "main_muscle": "shoulders",
           "equipment": "dumbbell",
           "instructions": [
@@ -103,7 +103,7 @@
       {
         "exercise": {
           "id": "lateral_raise",
-          "name": "Elevação Lateral",
+          "name": "Dumbbell Lateral Raise",
           "main_muscle": "shoulders",
           "equipment": "dumbbell",
           "instructions": [
@@ -126,7 +126,7 @@
       {
         "exercise": {
           "id": "tricep_rope_pushdown",
-          "name": "Tríceps na Polia com Corda",
+          "name": "Triceps Rope Pushdown",
           "main_muscle": "triceps",
           "equipment": "cable",
           "instructions": [
@@ -149,7 +149,7 @@
       {
         "exercise": {
           "id": "pec_deck_fly",
-          "name": "Voadora na Máquina",
+          "name": "Pec Deck Fly",
           "main_muscle": "chest",
           "equipment": "machine",
           "instructions": [
@@ -172,7 +172,7 @@
       {
         "exercise": {
           "id": "overhead_tricep_extension",
-          "name": "Extensão de Tríceps com Halter",
+          "name": "Dumbbell Overhead Triceps Extension",
           "main_muscle": "triceps",
           "equipment": "dumbbell",
           "instructions": [
@@ -206,7 +206,7 @@
       {
         "exercise": {
           "id": "lat_pulldown",
-          "name": "Puxada Alta na Polia",
+          "name": "Lat Pulldown",
           "main_muscle": "back",
           "equipment": "cable",
           "instructions": [
@@ -229,7 +229,7 @@
       {
         "exercise": {
           "id": "barbell_row",
-          "name": "Remada Curvada com Barra",
+          "name": "Barbell Bent Over Row",
           "main_muscle": "back",
           "equipment": "barbell",
           "instructions": [
@@ -252,7 +252,7 @@
       {
         "exercise": {
           "id": "seated_cable_row",
-          "name": "Remada Sentada na Polia",
+          "name": "Seated Cable Row",
           "main_muscle": "back",
           "equipment": "cable",
           "instructions": [
@@ -298,7 +298,7 @@
       {
         "exercise": {
           "id": "barbell_curl",
-          "name": "Rosca Direta com Barra",
+          "name": "Barbell Curl",
           "main_muscle": "biceps",
           "equipment": "barbell",
           "instructions": [
@@ -321,7 +321,7 @@
       {
         "exercise": {
           "id": "hammer_curl",
-          "name": "Rosca Martelo",
+          "name": "Dumbbell Hammer Curl",
           "main_muscle": "biceps",
           "equipment": "dumbbell",
           "instructions": [
@@ -344,7 +344,7 @@
       {
         "exercise": {
           "id": "back_extension",
-          "name": "Extensão de Costas",
+          "name": "Back Extension",
           "main_muscle": "back",
           "equipment": "machine",
           "instructions": [
@@ -367,7 +367,7 @@
       {
         "exercise": {
           "id": "cable_preacher_curl",
-          "name": "Rosca Scott na Polia",
+          "name": "Cable Preacher Curl",
           "main_muscle": "biceps",
           "equipment": "cable",
           "instructions": [
@@ -401,7 +401,7 @@
       {
         "exercise": {
           "id": "barbell_squat",
-          "name": "Agachamento Livre",
+          "name": "Barbell Squat",
           "main_muscle": "quads",
           "equipment": "barbell",
           "instructions": [
@@ -424,7 +424,7 @@
       {
         "exercise": {
           "id": "leg_press",
-          "name": "Leg Press 45°",
+          "name": "Leg Press",
           "main_muscle": "quads",
           "equipment": "machine",
           "instructions": [
@@ -447,7 +447,7 @@
       {
         "exercise": {
           "id": "romanian_deadlift",
-          "name": "Stiff com Barra",
+          "name": "Barbell Romanian Deadlift",
           "main_muscle": "hamstrings",
           "equipment": "barbell",
           "instructions": [
@@ -470,7 +470,7 @@
       {
         "exercise": {
           "id": "leg_curl_lying",
-          "name": "Mesa Flexora",
+          "name": "Lying Leg Curl",
           "main_muscle": "hamstrings",
           "equipment": "machine",
           "instructions": [
@@ -493,7 +493,7 @@
       {
         "exercise": {
           "id": "leg_extension",
-          "name": "Cadeira Extensora",
+          "name": "Leg Extension",
           "main_muscle": "quads",
           "equipment": "machine",
           "instructions": [
@@ -516,7 +516,7 @@
       {
         "exercise": {
           "id": "standing_calf_raise",
-          "name": "Panturrilha em Pé",
+          "name": "Standing Calf Raise",
           "main_muscle": "calves",
           "equipment": "machine",
           "instructions": [
@@ -539,7 +539,7 @@
       {
         "exercise": {
           "id": "leg_press_wide",
-          "name": "Leg Press Pés Afastados",
+          "name": "Wide Stance Leg Press",
           "main_muscle": "glutes",
           "equipment": "machine",
           "instructions": [
@@ -619,7 +619,7 @@
       {
         "exercise": {
           "id": "push_up",
-          "name": "Flexão de Braços",
+          "name": "Push Up",
           "main_muscle": "chest",
           "equipment": "bodyweight",
           "instructions": [
@@ -642,7 +642,7 @@
       {
         "exercise": {
           "id": "bodyweight_squat",
-          "name": "Agachamento Livre",
+          "name": "Bodyweight Squat",
           "main_muscle": "quads",
           "equipment": "bodyweight",
           "instructions": [
@@ -665,7 +665,7 @@
       {
         "exercise": {
           "id": "mountain_climber",
-          "name": "Escalador",
+          "name": "Mountain Climber",
           "main_muscle": "core",
           "equipment": "bodyweight",
           "instructions": [
@@ -688,7 +688,7 @@
       {
         "exercise": {
           "id": "plank",
-          "name": "Prancha",
+          "name": "Plank",
           "main_muscle": "core",
           "equipment": "bodyweight",
           "instructions": [
@@ -711,7 +711,7 @@
       {
         "exercise": {
           "id": "jumping_jacks",
-          "name": "Polichinelo",
+          "name": "Jumping Jack",
           "main_muscle": "fullBody",
           "equipment": "bodyweight",
           "instructions": [
@@ -734,7 +734,7 @@
       {
         "exercise": {
           "id": "push_up_wide",
-          "name": "Flexão com Pegada Larga",
+          "name": "Wide Grip Push Up",
           "main_muscle": "chest",
           "equipment": "bodyweight",
           "instructions": [
@@ -757,7 +757,7 @@
       {
         "exercise": {
           "id": "tricep_dips_bodyweight",
-          "name": "Mergulho para Tríceps",
+          "name": "Triceps Dip",
           "main_muscle": "triceps",
           "equipment": "bodyweight",
           "instructions": [
@@ -791,7 +791,7 @@
       {
         "exercise": {
           "id": "high_knees",
-          "name": "Elevação de Joelhos",
+          "name": "High Knees",
           "main_muscle": "cardioSystem",
           "equipment": "bodyweight",
           "instructions": [
@@ -814,7 +814,7 @@
       {
         "exercise": {
           "id": "squat_jump",
-          "name": "Agachamento com Salto",
+          "name": "Jump Squat",
           "main_muscle": "quads",
           "equipment": "bodyweight",
           "instructions": [
@@ -837,7 +837,7 @@
       {
         "exercise": {
           "id": "burpee_no_pushup",
-          "name": "Burpee (sem flexão)",
+          "name": "Burpee (No Push Up)",
           "main_muscle": "fullBody",
           "equipment": "bodyweight",
           "instructions": [
@@ -883,7 +883,7 @@
       {
         "exercise": {
           "id": "bicycle_crunch",
-          "name": "Abdominal Bicicleta",
+          "name": "Bicycle Crunch",
           "main_muscle": "core",
           "equipment": "bodyweight",
           "instructions": [
@@ -906,7 +906,7 @@
       {
         "exercise": {
           "id": "plank_jacks",
-          "name": "Prancha com Abertura de Pernas",
+          "name": "Plank Jacks",
           "main_muscle": "fullBody",
           "equipment": "bodyweight",
           "instructions": [
@@ -929,7 +929,7 @@
       {
         "exercise": {
           "id": "mountain_climber_speed",
-          "name": "Escalador Rápido",
+          "name": "Speed Mountain Climber",
           "main_muscle": "fullBody",
           "equipment": "bodyweight",
           "instructions": [
@@ -963,7 +963,7 @@
       {
         "exercise": {
           "id": "dumbbell_bench_press_floor",
-          "name": "Supino com Halteres no Chão",
+          "name": "Floor Dumbbell Press",
           "main_muscle": "chest",
           "equipment": "dumbbell",
           "instructions": [
@@ -986,7 +986,7 @@
       {
         "exercise": {
           "id": "dumbbell_row_single_arm",
-          "name": "Remada Unilateral com Halter",
+          "name": "Single Arm Dumbbell Row",
           "main_muscle": "back",
           "equipment": "dumbbell",
           "instructions": [
@@ -1009,7 +1009,7 @@
       {
         "exercise": {
           "id": "dumbbell_shoulder_press_standing",
-          "name": "Desenvolvimento em Pé",
+          "name": "Standing Dumbbell Press",
           "main_muscle": "shoulders",
           "equipment": "dumbbell",
           "instructions": [
@@ -1032,7 +1032,7 @@
       {
         "exercise": {
           "id": "dumbbell_curl",
-          "name": "Rosca Alternada com Halteres",
+          "name": "Alternating Dumbbell Curl",
           "main_muscle": "biceps",
           "equipment": "dumbbell",
           "instructions": [
@@ -1055,7 +1055,7 @@
       {
         "exercise": {
           "id": "dumbbell_tricep_kickback",
-          "name": "Tríceps Coice",
+          "name": "Dumbbell Triceps Kickback",
           "main_muscle": "triceps",
           "equipment": "dumbbell",
           "instructions": [
@@ -1078,7 +1078,7 @@
       {
         "exercise": {
           "id": "dumbbell_lateral_raise",
-          "name": "Elevação Lateral com Halteres",
+          "name": "Dumbbell Lateral Raise",
           "main_muscle": "shoulders",
           "equipment": "dumbbell",
           "instructions": [
@@ -1101,7 +1101,7 @@
       {
         "exercise": {
           "id": "dumbbell_pullover",
-          "name": "Puxador com Halter",
+          "name": "Dumbbell Pullover",
           "main_muscle": "chest",
           "equipment": "dumbbell",
           "instructions": [
@@ -1124,7 +1124,7 @@
       {
         "exercise": {
           "id": "dumbbell_reverse_fly",
-          "name": "Voadora Reversa com Halteres",
+          "name": "Dumbbell Reverse Fly",
           "main_muscle": "shoulders",
           "equipment": "dumbbell",
           "instructions": [
@@ -1158,7 +1158,7 @@
       {
         "exercise": {
           "id": "goblet_squat",
-          "name": "Agachamento Cálice",
+          "name": "Goblet Squat",
           "main_muscle": "quads",
           "equipment": "dumbbell",
           "instructions": [
@@ -1181,7 +1181,7 @@
       {
         "exercise": {
           "id": "dumbbell_lunge",
-          "name": "Afundo com Halteres",
+          "name": "Dumbbell Lunge",
           "main_muscle": "quads",
           "equipment": "dumbbell",
           "instructions": [
@@ -1204,7 +1204,7 @@
       {
         "exercise": {
           "id": "dumbbell_romanian_deadlift",
-          "name": "Stiff com Halteres",
+          "name": "Dumbbell Romanian Deadlift",
           "main_muscle": "hamstrings",
           "equipment": "dumbbell",
           "instructions": [
@@ -1227,7 +1227,7 @@
       {
         "exercise": {
           "id": "dumbbell_hip_thrust",
-          "name": "Elevação Pélvica com Halter",
+          "name": "Dumbbell Hip Thrust",
           "main_muscle": "glutes",
           "equipment": "dumbbell",
           "instructions": [
@@ -1250,7 +1250,7 @@
       {
         "exercise": {
           "id": "dumbbell_sumo_squat",
-          "name": "Agachamento Sumô com Halter",
+          "name": "Dumbbell Sumo Squat",
           "main_muscle": "glutes",
           "equipment": "dumbbell",
           "instructions": [
@@ -1273,7 +1273,7 @@
       {
         "exercise": {
           "id": "dumbbell_calf_raise",
-          "name": "Panturrilha com Halter",
+          "name": "Dumbbell Calf Raise",
           "main_muscle": "calves",
           "equipment": "dumbbell",
           "instructions": [
@@ -1296,7 +1296,7 @@
       {
         "exercise": {
           "id": "dumbbell_step_up",
-          "name": "Subida de Degrau com Halteres",
+          "name": "Dumbbell Step Up",
           "main_muscle": "quads",
           "equipment": "dumbbell",
           "instructions": [
@@ -1319,7 +1319,7 @@
       {
         "exercise": {
           "id": "dumbbell_bulgarian_split_squat",
-          "name": "Agachamento Búlgaro Dividido",
+          "name": "Bulgarian Split Squat",
           "main_muscle": "quads",
           "equipment": "dumbbell",
           "instructions": [
@@ -1353,7 +1353,7 @@
       {
         "exercise": {
           "id": "plank_forearm",
-          "name": "Prancha",
+          "name": "Plank",
           "main_muscle": "core",
           "equipment": "bodyweight",
           "instructions": [
@@ -1422,7 +1422,7 @@
       {
         "exercise": {
           "id": "side_plank",
-          "name": "Prancha Lateral",
+          "name": "Side Plank",
           "main_muscle": "core",
           "equipment": "bodyweight",
           "instructions": [
@@ -1445,7 +1445,7 @@
       {
         "exercise": {
           "id": "reverse_crunch",
-          "name": "Abdominal Reverso",
+          "name": "Reverse Crunch",
           "main_muscle": "core",
           "equipment": "bodyweight",
           "instructions": [
@@ -1468,7 +1468,7 @@
       {
         "exercise": {
           "id": "glute_bridge",
-          "name": "Elevação Pélvica",
+          "name": "Glute Bridge",
           "main_muscle": "glutes",
           "equipment": "bodyweight",
           "instructions": [
@@ -1491,7 +1491,7 @@
       {
         "exercise": {
           "id": "pallof_press_bodyweight",
-          "name": "Flexão Pallof com Halter",
+          "name": "Dumbbell Pallof Press",
           "main_muscle": "core",
           "equipment": "dumbbell",
           "instructions": [
@@ -1514,7 +1514,7 @@
       {
         "exercise": {
           "id": "suitcase_carry",
-          "name": "Caminhada com Halter (Suitcase)",
+          "name": "Suitcase Carry",
           "main_muscle": "core",
           "equipment": "dumbbell",
           "instructions": [

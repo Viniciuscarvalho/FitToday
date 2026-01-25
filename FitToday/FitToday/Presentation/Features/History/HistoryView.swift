@@ -11,8 +11,15 @@ import Swinject
 // MARK: - History Tab Selection
 
 enum HistoryTabSelection: String, CaseIterable {
-    case history = "History"
-    case challenges = "Challenges"
+    case history
+    case challenges
+
+    var displayName: String {
+        switch self {
+        case .history: return "history.tab.history".localized
+        case .challenges: return "history.tab.challenges".localized
+        }
+    }
 }
 
 struct HistoryView: View {
@@ -77,10 +84,10 @@ struct HistoryView: View {
 
     private var headerSection: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text("Activity")
+            Text("history.header.title".localized)
                 .font(.system(size: 28, weight: .bold))
                 .foregroundStyle(FitTodayColor.textPrimary)
-            Text("Track your progress and join challenges")
+            Text("history.header.subtitle".localized)
                 .font(.system(size: 14))
                 .foregroundStyle(FitTodayColor.textSecondary)
         }
@@ -99,7 +106,7 @@ struct HistoryView: View {
                         selectedTab = tab
                     }
                 } label: {
-                    Text(tab.rawValue)
+                    Text(tab.displayName)
                         .font(.system(size: 14, weight: .semibold))
                         .foregroundStyle(selectedTab == tab ? .white : FitTodayColor.textSecondary)
                         .frame(maxWidth: .infinity)
@@ -172,7 +179,7 @@ struct HistoryView: View {
                         Spacer()
                         ProgressView()
                             .tint(FitTodayColor.brandPrimary)
-                        Text("Loading more...")
+                        Text("history.loading_more".localized)
                             .font(.footnote)
                             .foregroundStyle(FitTodayColor.textSecondary)
                         Spacer()
@@ -188,10 +195,10 @@ struct HistoryView: View {
             Image(systemName: "clock.arrow.circlepath")
                 .font(.system(size: 48))
                 .foregroundStyle(FitTodayColor.brandPrimary)
-            Text("No workouts yet")
+            Text("history.empty".localized)
                 .font(.system(size: 18, weight: .bold))
                 .foregroundStyle(FitTodayColor.textPrimary)
-            Text("Complete a workout to see your progress here")
+            Text("history.empty.subtitle".localized)
                 .font(.system(size: 14))
                 .foregroundStyle(FitTodayColor.textSecondary)
                 .multilineTextAlignment(.center)
@@ -201,31 +208,376 @@ struct HistoryView: View {
 
     // MARK: - Challenges Content
 
+    @ViewBuilder
     private var challengesContent: some View {
-        VStack(spacing: FitTodaySpacing.lg) {
-            // Active Challenge Card
-            ActiveChallengeCard()
+        // Check if user is authenticated
+        let isAuthenticated = UserDefaults.standard.string(forKey: "socialUserId") != nil
 
-            // Join Challenge Card
-            JoinChallengeCard {
-                // Navigate to authentication or group creation
-                router.push(.authentication(inviteContext: nil), on: .history)
+        if isAuthenticated {
+            // Show the actual groups view when authenticated
+            GroupsContentView(resolver: resolver)
+        } else {
+            // Show authentication prompt when not logged in
+            VStack(spacing: FitTodaySpacing.lg) {
+                JoinChallengeCard {
+                    // Navigate to authentication
+                    router.push(.authentication(inviteContext: "Entre para criar ou participar de desafios com amigos"), on: .history)
+                }
+
+                // Info section
+                VStack(alignment: .leading, spacing: FitTodaySpacing.md) {
+                    Text("challenges.info.title".localized)
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundStyle(FitTodayColor.textPrimary)
+                        .padding(.horizontal)
+
+                    Text("challenges.info.subtitle".localized)
+                        .font(.system(size: 14))
+                        .foregroundStyle(FitTodayColor.textSecondary)
+                        .padding(.horizontal)
+                }
             }
+            .padding(.horizontal)
+        }
+    }
+}
 
-            // Past challenges section
-            VStack(alignment: .leading, spacing: FitTodaySpacing.md) {
-                Text("Past Challenges")
-                    .font(.system(size: 16, weight: .semibold))
-                    .foregroundStyle(FitTodayColor.textPrimary)
-                    .padding(.horizontal)
+// MARK: - Groups Content View (Embedded)
 
-                Text("Complete your first challenge to see your history here")
-                    .font(.system(size: 14))
-                    .foregroundStyle(FitTodayColor.textSecondary)
-                    .padding(.horizontal)
+private struct GroupsContentView: View {
+    @State private var viewModel: GroupsViewModel
+    @State private var showingCreateGroup = false
+    @State private var showingNotifications = false
+    @State private var showingManageGroup = false
+    let resolver: Resolver
+
+    init(resolver: Resolver) {
+        self.resolver = resolver
+        _viewModel = State(initialValue: GroupsViewModel(resolver: resolver))
+    }
+
+    var body: some View {
+        VStack(spacing: FitTodaySpacing.lg) {
+            if viewModel.isLoading && viewModel.currentGroup == nil {
+                ProgressView()
+                    .frame(maxWidth: .infinity, minHeight: 200)
+            } else if let group = viewModel.currentGroup {
+                // User has a group - show dashboard
+                GroupDashboardCard(
+                    group: group,
+                    members: viewModel.members,
+                    isAdmin: viewModel.isAdmin,
+                    unreadCount: viewModel.unreadNotificationsCount,
+                    onNotificationsTapped: { showingNotifications = true },
+                    onManageTapped: { showingManageGroup = true }
+                )
+
+                // Leaderboard preview
+                if !viewModel.members.isEmpty {
+                    LeaderboardPreviewCard(members: viewModel.members)
+                }
+            } else {
+                // No group - show create/join options
+                EmptyGroupCard {
+                    showingCreateGroup = true
+                }
             }
         }
         .padding(.horizontal)
+        .task {
+            await viewModel.onAppear()
+        }
+        .refreshable {
+            await viewModel.loadCurrentGroup()
+            await viewModel.loadUnreadNotificationsCount()
+        }
+        .sheet(isPresented: $showingCreateGroup) {
+            CreateGroupView(resolver: resolver) { _ in
+                Task {
+                    await viewModel.loadCurrentGroup()
+                }
+            }
+        }
+        .sheet(isPresented: $showingNotifications) {
+            NavigationStack {
+                NotificationFeedView(
+                    viewModel: NotificationFeedViewModel(resolver: resolver)
+                )
+            }
+            .onDisappear {
+                viewModel.clearUnreadCount()
+                Task {
+                    await viewModel.loadUnreadNotificationsCount()
+                }
+            }
+        }
+        .sheet(isPresented: $showingManageGroup) {
+            if let group = viewModel.currentGroup {
+                ManageGroupView(
+                    group: group,
+                    members: viewModel.members,
+                    currentUserId: viewModel.currentUserId,
+                    onRemoveMember: { userId in
+                        Task {
+                            await viewModel.removeMember(userId: userId)
+                        }
+                    },
+                    onDeleteGroup: {
+                        Task {
+                            await viewModel.deleteGroup()
+                        }
+                    }
+                )
+            }
+        }
+        .showErrorAlert(errorMessage: $viewModel.errorMessage)
+    }
+}
+
+// MARK: - Group Dashboard Card
+
+private struct GroupDashboardCard: View {
+    let group: SocialGroup
+    let members: [GroupMember]
+    let isAdmin: Bool
+    let unreadCount: Int
+    let onNotificationsTapped: () -> Void
+    let onManageTapped: () -> Void
+
+    // Generate invite links for sharing
+    private var inviteLinks: InviteLinks {
+        GenerateInviteLinkUseCase().execute(groupId: group.id)
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: FitTodaySpacing.md) {
+            // Header
+            HStack {
+                HStack(spacing: 6) {
+                    Image(systemName: "person.3.fill")
+                        .font(.system(size: 12, weight: .semibold))
+                    Text("groups.active".localized)
+                        .font(.system(size: 11, weight: .semibold))
+                }
+                .foregroundStyle(.white)
+                .padding(.horizontal, 10)
+                .padding(.vertical, 4)
+                .background(FitTodayColor.success)
+                .clipShape(Capsule())
+
+                Spacer()
+
+                // Share/Invite button
+                ShareLink(
+                    item: inviteLinks.shareURL,
+                    subject: Text("groups.invite.subject".localized),
+                    message: Text(String(format: "groups.invite.message".localized, group.name))
+                ) {
+                    Image(systemName: "square.and.arrow.up")
+                        .font(.system(size: 16))
+                        .foregroundStyle(FitTodayColor.brandPrimary)
+                }
+                .padding(.trailing, FitTodaySpacing.sm)
+
+                // Notifications button
+                Button(action: onNotificationsTapped) {
+                    ZStack(alignment: .topTrailing) {
+                        Image(systemName: "bell.fill")
+                            .font(.system(size: 18))
+                            .foregroundStyle(FitTodayColor.textSecondary)
+
+                        if unreadCount > 0 {
+                            Text("\(min(unreadCount, 99))")
+                                .font(.system(size: 9, weight: .bold))
+                                .foregroundStyle(.white)
+                                .padding(3)
+                                .background(Color.red)
+                                .clipShape(Circle())
+                                .offset(x: 6, y: -6)
+                        }
+                    }
+                }
+            }
+
+            // Group name
+            Text(group.name)
+                .font(.system(size: 20, weight: .bold))
+                .foregroundStyle(FitTodayColor.textPrimary)
+
+            // Members count - use actual members array count instead of stored memberCount
+            Text("\(members.count) " + "groups.members".localized)
+                .font(.system(size: 14))
+                .foregroundStyle(FitTodayColor.textSecondary)
+
+            // Members preview
+            if !members.isEmpty {
+                HStack(spacing: -8) {
+                    ForEach(members.prefix(5), id: \.id) { member in
+                        Circle()
+                            .fill(FitTodayColor.surfaceElevated)
+                            .frame(width: 32, height: 32)
+                            .overlay(
+                                Text(member.displayName.prefix(1).uppercased())
+                                    .font(.system(size: 12, weight: .bold))
+                                    .foregroundStyle(FitTodayColor.textPrimary)
+                            )
+                            .overlay(
+                                Circle()
+                                    .stroke(FitTodayColor.surface, lineWidth: 2)
+                            )
+                    }
+
+                    if members.count > 5 {
+                        Text("+\(members.count - 5)")
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundStyle(FitTodayColor.textSecondary)
+                            .padding(.leading, 16)
+                    }
+                }
+            }
+
+            // Manage button (admin only)
+            if isAdmin {
+                Button(action: onManageTapped) {
+                    HStack {
+                        Spacer()
+                        Image(systemName: "gearshape.fill")
+                            .font(.system(size: 12))
+                        Text("groups.manage".localized)
+                            .font(.system(size: 14, weight: .semibold))
+                        Spacer()
+                    }
+                    .foregroundStyle(FitTodayColor.brandPrimary)
+                    .padding(.vertical, 12)
+                    .background(FitTodayColor.brandPrimary.opacity(0.15))
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(FitTodaySpacing.lg)
+        .background(FitTodayColor.surface)
+        .clipShape(RoundedRectangle(cornerRadius: 20))
+    }
+}
+
+// MARK: - Leaderboard Preview Card
+
+private struct LeaderboardPreviewCard: View {
+    let members: [GroupMember]
+
+    // Sort members by workout count descending
+    private var rankedMembers: [GroupMember] {
+        members.sorted { $0.weeklyWorkoutCount > $1.weeklyWorkoutCount }
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: FitTodaySpacing.md) {
+            HStack {
+                Text("groups.leaderboard".localized)
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundStyle(FitTodayColor.textPrimary)
+                Spacer()
+                Text("groups.this_week".localized)
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundStyle(FitTodayColor.textSecondary)
+            }
+
+            ForEach(Array(rankedMembers.prefix(5).enumerated()), id: \.element.id) { index, member in
+                HStack(spacing: FitTodaySpacing.md) {
+                    // Rank
+                    Text("\(index + 1)")
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundStyle(index == 0 ? FitTodayColor.brandPrimary : FitTodayColor.textSecondary)
+                        .frame(width: 24)
+
+                    // Avatar
+                    Circle()
+                        .fill(FitTodayColor.surfaceElevated)
+                        .frame(width: 36, height: 36)
+                        .overlay(
+                            Text(member.displayName.prefix(1).uppercased())
+                                .font(.system(size: 14, weight: .bold))
+                                .foregroundStyle(FitTodayColor.textPrimary)
+                        )
+
+                    // Name
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(member.displayName)
+                            .font(.system(size: 14, weight: .medium))
+                            .foregroundStyle(FitTodayColor.textPrimary)
+                        Text("leaderboard.minutes".localized(with: member.weeklyWorkoutMinutes))
+                            .font(.system(size: 11))
+                            .foregroundStyle(FitTodayColor.textTertiary)
+                    }
+
+                    Spacer()
+
+                    // Workout count
+                    VStack(alignment: .trailing, spacing: 2) {
+                        Text("\(member.weeklyWorkoutCount)")
+                            .font(.system(size: 16, weight: .bold))
+                            .foregroundStyle(index == 0 ? FitTodayColor.brandPrimary : FitTodayColor.textPrimary)
+                        Text("leaderboard.workouts".localized)
+                            .font(.system(size: 10))
+                            .foregroundStyle(FitTodayColor.textTertiary)
+                    }
+
+                    // Badge for top 3
+                    if index < 3 {
+                        Image(systemName: index == 0 ? "crown.fill" : "medal.fill")
+                            .font(.system(size: 14))
+                            .foregroundStyle(index == 0 ? .yellow : (index == 1 ? .gray : .orange))
+                    }
+                }
+                .padding(.vertical, 4)
+            }
+        }
+        .padding(FitTodaySpacing.lg)
+        .background(FitTodayColor.surface)
+        .clipShape(RoundedRectangle(cornerRadius: 20))
+    }
+}
+
+// MARK: - Empty Group Card
+
+private struct EmptyGroupCard: View {
+    let onCreateTapped: () -> Void
+
+    var body: some View {
+        VStack(spacing: FitTodaySpacing.lg) {
+            Image(systemName: "person.3.fill")
+                .font(.system(size: 48))
+                .foregroundStyle(FitTodayColor.brandPrimary)
+
+            Text("groups.empty.title".localized)
+                .font(.system(size: 18, weight: .bold))
+                .foregroundStyle(FitTodayColor.textPrimary)
+
+            Text("groups.empty.subtitle".localized)
+                .font(.system(size: 14))
+                .foregroundStyle(FitTodayColor.textSecondary)
+                .multilineTextAlignment(.center)
+
+            Button(action: onCreateTapped) {
+                HStack {
+                    Spacer()
+                    Image(systemName: "plus")
+                        .font(.system(size: 14, weight: .semibold))
+                    Text("groups.create".localized)
+                        .font(.system(size: 14, weight: .semibold))
+                    Spacer()
+                }
+                .foregroundStyle(.white)
+                .padding(.vertical, 12)
+                .background(FitTodayColor.gradientPrimary)
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(FitTodaySpacing.xl)
+        .background(FitTodayColor.surface)
+        .clipShape(RoundedRectangle(cornerRadius: 20))
     }
 }
 
@@ -353,11 +705,11 @@ struct JoinChallengeCard: View {
                 Spacer()
             }
 
-            Text("Join a Challenge")
+            Text("challenges.join.title".localized)
                 .font(.system(size: 18, weight: .bold))
                 .foregroundStyle(FitTodayColor.textPrimary)
 
-            Text("Compete with friends and stay motivated together")
+            Text("challenges.join.subtitle".localized)
                 .font(.system(size: 14))
                 .foregroundStyle(FitTodayColor.textSecondary)
 
@@ -366,7 +718,7 @@ struct JoinChallengeCard: View {
                     Spacer()
                     Image(systemName: "plus")
                         .font(.system(size: 14, weight: .semibold))
-                    Text("Create or Join")
+                    Text("challenges.join.button".localized)
                         .font(.system(size: 14, weight: .semibold))
                     Spacer()
                 }
@@ -390,8 +742,8 @@ private struct HistoryRow: View {
 
     private var statusText: String {
         switch entry.status {
-        case .completed: return "Completed"
-        case .skipped: return "Skipped"
+        case .completed: return "history.completed".localized
+        case .skipped: return "history.skipped".localized
         }
     }
 
@@ -457,22 +809,22 @@ private struct HistoryInsightsHeader: View {
             // Stats row
             HStack(spacing: 12) {
                 StatCard(
-                    label: "Current Streak",
+                    label: "history.streak.current".localized,
                     value: "\(insights.currentStreak)",
-                    unit: "days",
+                    unit: "history.streak.days".localized,
                     color: FitTodayColor.success
                 )
                 StatCard(
-                    label: "Best Streak",
+                    label: "history.streak.best".localized,
                     value: "\(insights.bestStreak)",
-                    unit: "days",
+                    unit: "history.streak.days".localized,
                     color: FitTodayColor.brandPrimary
                 )
             }
 
             // Sparkline card
             VStack(alignment: .leading, spacing: FitTodaySpacing.sm) {
-                Text("Weekly Minutes")
+                Text("history.weekly_minutes".localized)
                     .font(.system(size: 13, weight: .semibold))
                     .foregroundStyle(FitTodayColor.textPrimary)
 
@@ -481,7 +833,7 @@ private struct HistoryInsightsHeader: View {
 
                 let totalSessions = insights.weekly.reduce(0) { $0 + $1.sessions }
                 let totalMinutes = insights.weekly.reduce(0) { $0 + $1.minutes }
-                Text("Last \(insights.weekly.count) weeks • \(totalSessions) sessions • \(totalMinutes) min")
+                Text(String(format: "history.weekly_summary".localized, insights.weekly.count, totalSessions, totalMinutes))
                     .font(.system(size: 11, weight: .medium))
                     .foregroundStyle(FitTodayColor.textSecondary)
             }
@@ -565,12 +917,12 @@ private struct HistoryInsightsHeader: View {
 private extension WorkoutHistoryEntry {
     var focusTitle: String {
         switch focus {
-        case .upper: return "Upper"
-        case .lower: return "Lower"
-        case .cardio: return "Cardio"
-        case .core: return "Core"
-        case .fullBody: return "Full Body"
-        case .surprise: return "Surprise"
+        case .upper: return "questionnaire.focus.upper".localized
+        case .lower: return "questionnaire.focus.lower".localized
+        case .cardio: return "questionnaire.focus.cardio".localized
+        case .core: return "questionnaire.focus.core".localized
+        case .fullBody: return "questionnaire.focus.fullbody".localized
+        case .surprise: return "questionnaire.focus.surprise".localized
         }
     }
 }

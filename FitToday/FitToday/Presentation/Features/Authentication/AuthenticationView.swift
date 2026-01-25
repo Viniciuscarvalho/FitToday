@@ -11,6 +11,7 @@ import Swinject
 
 struct AuthenticationView: View {
     @Environment(\.dependencyResolver) private var resolver
+    @Environment(\.dismiss) private var dismiss
     @State private var viewModel: AuthenticationViewModel?
 
     // Email/Password state
@@ -23,8 +24,12 @@ struct AuthenticationView: View {
     // Context for deep link (e.g., group invitation)
     var inviteContext: String?
 
-    init(resolver: Resolver, inviteContext: String? = nil) {
+    // Callback when authentication succeeds
+    var onAuthenticated: (() -> Void)?
+
+    init(resolver: Resolver, inviteContext: String? = nil, onAuthenticated: (() -> Void)? = nil) {
         self.inviteContext = inviteContext
+        self.onAuthenticated = onAuthenticated
         _viewModel = State(initialValue: AuthenticationViewModel(resolver: resolver))
     }
 
@@ -258,6 +263,15 @@ struct AuthenticationView: View {
         } message: {
             if let message = viewModel?.errorMessage?.message {
                 Text(message)
+            }
+        }
+        .onChange(of: viewModel?.didAuthenticate) { _, didAuthenticate in
+            if didAuthenticate == true {
+                #if DEBUG
+                print("[Auth] ✅ Authentication succeeded, dismissing view")
+                #endif
+                onAuthenticated?()
+                dismiss()
             }
         }
     }

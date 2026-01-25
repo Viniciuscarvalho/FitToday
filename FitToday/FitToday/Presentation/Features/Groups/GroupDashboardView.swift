@@ -8,6 +8,20 @@
 import SwiftUI
 import Swinject
 
+// MARK: - GroupTab
+
+enum GroupTab: String, CaseIterable {
+    case feed = "Feed"
+    case leaderboard = "Ranking"
+
+    var icon: String {
+        switch self {
+        case .feed: return "photo.stack"
+        case .leaderboard: return "trophy"
+        }
+    }
+}
+
 // MARK: - GroupDashboardView
 
 struct GroupDashboardView: View {
@@ -21,62 +35,69 @@ struct GroupDashboardView: View {
     var onManageGroupTapped: (() -> Void)?
 
     @State private var showLeaveConfirmation = false
+    @State private var selectedTab: GroupTab = .feed
+    @State private var feedViewModel: CheckInFeedViewModel?
 
     var body: some View {
-        List {
-            // Group Info Section
-            Section {
-                VStack(alignment: .leading, spacing: 8) {
-                    Text(group.name)
-                        .font(.title2.bold())
+        VStack(spacing: 0) {
+            // Group Header
+            GroupHeaderView(group: group, membersCount: members.count)
 
-                    Text("\(members.count) \(members.count == 1 ? "membro" : "membros")")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
+            // Tab selector
+            HStack(spacing: 0) {
+                ForEach(GroupTab.allCases, id: \.self) { tab in
+                    Button {
+                        withAnimation(.easeInOut(duration: 0.2)) {
+                            selectedTab = tab
+                        }
+                    } label: {
+                        VStack(spacing: 4) {
+                            Image(systemName: tab.icon)
+                                .font(.system(size: 20))
+                            Text(tab.rawValue)
+                                .font(.caption)
+                        }
+                        .foregroundStyle(selectedTab == tab ? FitTodayColor.brandPrimary : FitTodayColor.textSecondary)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                    }
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.vertical, 8)
             }
+            .background(FitTodayColor.surface)
 
-            // Members Section
-            Section("Membros") {
-                ForEach(members) { member in
-                    MemberRowView(member: member)
+            // Content
+            TabView(selection: $selectedTab) {
+                // Feed tab
+                Group {
+                    if let feedVM = feedViewModel {
+                        CheckInFeedView(viewModel: feedVM)
+                    } else {
+                        ProgressView()
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    }
                 }
-            }
+                .tag(GroupTab.feed)
 
-            // Leaderboards
-            Section("Desafios da Semana") {
+                // Leaderboard tab
                 LeaderboardView(
                     groupId: group.id,
                     currentUserId: currentUserId,
                     resolver: resolver
                 )
-                .frame(height: 400)
+                .tag(GroupTab.leaderboard)
             }
+            .tabViewStyle(.page(indexDisplayMode: .never))
 
-            // Actions Section
-            Section {
-                Button {
-                    onInviteTapped()
-                } label: {
-                    Label("Convidar Amigos", systemImage: "person.badge.plus")
-                }
-
-                if isAdmin {
-                    Button {
-                        onManageGroupTapped?()
-                    } label: {
-                        Label("Gerenciar Grupo", systemImage: "gearshape")
-                    }
-                }
-
-                Button(role: .destructive) {
-                    showLeaveConfirmation = true
-                } label: {
-                    Label("Sair do Grupo", systemImage: "rectangle.portrait.and.arrow.right")
-                }
-            }
+            // Action buttons
+            GroupActionsBar(
+                isAdmin: isAdmin,
+                onInviteTapped: onInviteTapped,
+                onManageTapped: onManageGroupTapped,
+                onLeaveTapped: { showLeaveConfirmation = true }
+            )
+        }
+        .task {
+            initializeFeedViewModel()
         }
         .confirmationDialog(
             "Sair do Grupo",
@@ -90,6 +111,76 @@ struct GroupDashboardView: View {
         } message: {
             Text("Tem certeza? Suas estatísticas serão removidas dos placares.")
         }
+    }
+
+    private func initializeFeedViewModel() {
+        guard let checkInRepo = resolver.resolve(CheckInRepository.self) else { return }
+        feedViewModel = CheckInFeedViewModel(
+            checkInRepository: checkInRepo,
+            groupId: group.id
+        )
+    }
+}
+
+// MARK: - GroupHeaderView
+
+private struct GroupHeaderView: View {
+    let group: SocialGroup
+    let membersCount: Int
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: FitTodaySpacing.xs) {
+            Text(group.name)
+                .font(.title2.bold())
+
+            Text("\(membersCount) \(membersCount == 1 ? "membro" : "membros")")
+                .font(.subheadline)
+                .foregroundStyle(FitTodayColor.textSecondary)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding()
+        .background(FitTodayColor.surface)
+    }
+}
+
+// MARK: - GroupActionsBar
+
+private struct GroupActionsBar: View {
+    let isAdmin: Bool
+    let onInviteTapped: () -> Void
+    var onManageTapped: (() -> Void)?
+    let onLeaveTapped: () -> Void
+
+    var body: some View {
+        HStack(spacing: FitTodaySpacing.md) {
+            Button {
+                onInviteTapped()
+            } label: {
+                Label("Convidar", systemImage: "person.badge.plus")
+                    .font(.caption)
+            }
+            .fitSecondaryStyle()
+
+            if isAdmin {
+                Button {
+                    onManageTapped?()
+                } label: {
+                    Label("Gerenciar", systemImage: "gearshape")
+                        .font(.caption)
+                }
+                .fitSecondaryStyle()
+            }
+
+            Button {
+                onLeaveTapped()
+            } label: {
+                Label("Sair", systemImage: "rectangle.portrait.and.arrow.right")
+                    .font(.caption)
+            }
+            .fitDestructiveStyle()
+        }
+        .padding()
+        .background(FitTodayColor.surface)
     }
 }
 

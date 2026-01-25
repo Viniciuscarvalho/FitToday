@@ -81,3 +81,52 @@ struct FBNotification: Codable {
     var isRead: Bool
     @ServerTimestamp var createdAt: Timestamp?
 }
+
+// MARK: - Check-In DTOs
+
+struct FBCheckIn: Codable {
+    @DocumentID var id: String?
+    var groupId: String
+    var challengeId: String
+    var userId: String
+    var displayName: String
+    var userPhotoURL: String?
+    var checkInPhotoURL: String
+    var workoutEntryId: String
+    var workoutDurationMinutes: Int
+    @ServerTimestamp var createdAt: Timestamp?
+
+    init(from checkIn: CheckIn) {
+        self.id = checkIn.id
+        self.groupId = checkIn.groupId
+        self.challengeId = checkIn.challengeId
+        self.userId = checkIn.userId
+        self.displayName = checkIn.displayName
+        self.userPhotoURL = checkIn.userPhotoURL?.absoluteString
+        self.checkInPhotoURL = checkIn.checkInPhotoURL.absoluteString
+        self.workoutEntryId = checkIn.workoutEntryId.uuidString
+        self.workoutDurationMinutes = checkIn.workoutDurationMinutes
+        self.createdAt = Timestamp(date: checkIn.createdAt)
+    }
+
+    func toDomain() -> CheckIn? {
+        guard let id = id,
+              let checkInPhotoURL = URL(string: checkInPhotoURL),
+              let workoutEntryId = UUID(uuidString: workoutEntryId) else {
+            return nil
+        }
+
+        return CheckIn(
+            id: id,
+            groupId: groupId,
+            challengeId: challengeId,
+            userId: userId,
+            displayName: displayName,
+            userPhotoURL: userPhotoURL.flatMap(URL.init),
+            checkInPhotoURL: checkInPhotoURL,
+            workoutEntryId: workoutEntryId,
+            workoutDurationMinutes: workoutDurationMinutes,
+            createdAt: createdAt?.dateValue() ?? Date()
+        )
+    }
+}

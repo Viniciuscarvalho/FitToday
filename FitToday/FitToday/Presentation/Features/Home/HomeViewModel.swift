@@ -71,6 +71,19 @@ enum HomeJourneyState: Equatable {
         }
     }
 
+    // MARK: - User Info (from Social Auth)
+
+    var userName: String? {
+        UserDefaults.standard.string(forKey: "socialUserDisplayName")
+    }
+
+    var userPhotoURL: URL? {
+        guard let urlString = UserDefaults.standard.string(forKey: "socialUserPhotoURL") else {
+            return nil
+        }
+        return URL(string: urlString)
+    }
+
     var currentDateFormatted: String {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "pt_BR")

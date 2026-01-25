@@ -96,17 +96,37 @@ struct LocalWorkoutPlanComposer: WorkoutPlanComposing, Sendable {
             .sorted { $0.score > $1.score }
     }
     
+    // MARK: - Exercise/Duration Constraints
+
+    private enum PlanConstraints {
+        static let minExercises = 4
+        static let maxExercises = 10
+        static let minDurationMinutes = 30
+        static let maxDurationMinutes = 60
+    }
+
     private func selectBlocksForPhases(
         from candidates: [(block: WorkoutBlock, score: Int)],
         phases: SpecialistSessionRules.SessionPhases,
         checkIn: DailyCheckIn,
         profile: UserProfile
     ) -> [WorkoutBlock] {
+        // Calculate target block count based on phases but respect exercise limits
+        let phaseTarget = phases.mainExercises + phases.accessoryExercises
+
+        // Estimate exercises per block (typically 2-3 exercises per block)
+        // Select enough blocks to get 4-10 exercises total
+        // Warmup uses ~2 exercises, so main+accessory should target 4-8 more
+        let estimatedExercisesPerBlock = 2
+        let targetExercisesFromBlocks = PlanConstraints.maxExercises - 2 // Reserve 2 for warmup
+        let maxBlocksNeeded = max(2, targetExercisesFromBlocks / estimatedExercisesPerBlock)
+
         let targetCount = min(
-            phases.mainExercises + phases.accessoryExercises,
+            phaseTarget,
+            maxBlocksNeeded,
             max(2, candidates.count)
         )
-        
+
         // Selecionar os melhores blocos
         return Array(candidates.prefix(targetCount).map(\.block))
     }
@@ -138,20 +158,28 @@ struct LocalWorkoutPlanComposer: WorkoutPlanComposing, Sendable {
             usedExerciseIds: &usedExerciseIds
         )
 
-        // 2) Fase de força/principal: primeiros blocos
+        // Calculate remaining exercise slots after warmup (warmup uses ~2 exercises)
+        let warmupExerciseCount = warmupPhase.exercises.count
+        let remainingSlots = PlanConstraints.maxExercises - warmupExerciseCount
+
+        // 2) Fase de força/principal: primeiros blocos (limit to ~60% of remaining slots)
+        let mainExerciseLimit = max(2, Int(Double(remainingSlots) * 0.6))
         let mainBlocks = Array(blocks.prefix(2))
-        let mainItems: [WorkoutPlanItem] = mainBlocks
-            .flatMap { block in
-                prescriptions(
-                    from: block,
-                    basePrescription: mainPrescription,
-                    profile: profile,
-                    checkIn: checkIn,
-                    domsAdjustment: domsAdjustment,
-                    usedExerciseIds: &usedExerciseIds
-                )
-            }
-            .map { .exercise($0) }
+        var mainPrescriptions: [ExercisePrescription] = []
+        for block in mainBlocks {
+            guard mainPrescriptions.count < mainExerciseLimit else { break }
+            let blockPrescriptions = prescriptions(
+                from: block,
+                basePrescription: mainPrescription,
+                profile: profile,
+                checkIn: checkIn,
+                domsAdjustment: domsAdjustment,
+                usedExerciseIds: &usedExerciseIds
+            )
+            let slotsLeft = mainExerciseLimit - mainPrescriptions.count
+            mainPrescriptions.append(contentsOf: blockPrescriptions.prefix(slotsLeft))
+        }
+        let mainItems: [WorkoutPlanItem] = mainPrescriptions.map { .exercise($0) }
 
         let strengthPhase = WorkoutPlanPhase(
             kind: .strength,
@@ -160,20 +188,25 @@ struct LocalWorkoutPlanComposer: WorkoutPlanComposing, Sendable {
             items: mainItems
         )
 
-        // 3) Acessórios: blocos restantes
+        // 3) Acessórios: blocos restantes (fill remaining slots up to max)
+        let usedSoFar = warmupExerciseCount + mainPrescriptions.count
+        let accessoryExerciseLimit = max(0, PlanConstraints.maxExercises - usedSoFar)
         let accessoryBlocks = Array(blocks.dropFirst(min(2, blocks.count)))
-        let accessoryItems: [WorkoutPlanItem] = accessoryBlocks
-            .flatMap { block in
-                prescriptions(
-                    from: block,
-                    basePrescription: accessoryPrescription,
-                    profile: profile,
-                    checkIn: checkIn,
-                    domsAdjustment: domsAdjustment,
-                    usedExerciseIds: &usedExerciseIds
-                )
-            }
-            .map { .exercise($0) }
+        var accessoryPrescriptions: [ExercisePrescription] = []
+        for block in accessoryBlocks {
+            guard accessoryPrescriptions.count < accessoryExerciseLimit else { break }
+            let blockPrescriptions = prescriptions(
+                from: block,
+                basePrescription: accessoryPrescription,
+                profile: profile,
+                checkIn: checkIn,
+                domsAdjustment: domsAdjustment,
+                usedExerciseIds: &usedExerciseIds
+            )
+            let slotsLeft = accessoryExerciseLimit - accessoryPrescriptions.count
+            accessoryPrescriptions.append(contentsOf: blockPrescriptions.prefix(slotsLeft))
+        }
+        let accessoryItems: [WorkoutPlanItem] = accessoryPrescriptions.map { .exercise($0) }
 
         let accessoryPhase = WorkoutPlanPhase(
             kind: .accessory,
@@ -347,7 +380,9 @@ struct LocalWorkoutPlanComposer: WorkoutPlanComposing, Sendable {
         // Adicionar transições (~2min). Aquecimento guiado já entra via activityMinutes quando presente.
         let transitionsMinutes = 2
         let totalMinutes = Int(ceil(Double(seconds) / 60.0)) + activityMinutes + transitionsMinutes
-        return max(20, totalMinutes)
+
+        // Clamp duration to valid range (30-60 minutes)
+        return min(PlanConstraints.maxDurationMinutes, max(PlanConstraints.minDurationMinutes, totalMinutes))
     }
 
     // MARK: - Phase Builders

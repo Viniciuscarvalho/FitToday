@@ -16,10 +16,10 @@ enum AppTab: Hashable, CaseIterable {
 
     var title: String {
         switch self {
-        case .home: return "Home"
-        case .programs: return "Programs"
-        case .history: return "History"
-        case .settings: return "Settings"
+        case .home: return "tab.home".localized
+        case .programs: return "tab.programs".localized
+        case .history: return "tab.history".localized
+        case .settings: return "tab.settings".localized
         }
     }
 

@@ -142,6 +142,37 @@ actor FirebaseLeaderboardService {
         try await recomputeRanks(challengeId: challengeId)
     }
 
+    // MARK: - Update Member Weekly Stats
+
+    func updateMemberWeeklyStats(groupId: String, userId: String, workoutMinutes: Int) async throws {
+        let memberRef = db.collection("groups")
+            .document(groupId)
+            .collection("members")
+            .document(userId)
+
+        try await db.runTransaction { transaction, errorPointer in
+            let memberDoc: DocumentSnapshot
+            do {
+                memberDoc = try transaction.getDocument(memberRef)
+            } catch let error as NSError {
+                errorPointer?.pointee = error
+                return nil
+            }
+
+            // Get current stats
+            let currentWorkoutCount = memberDoc.data()?["weeklyWorkoutCount"] as? Int ?? 0
+            let currentWorkoutMinutes = memberDoc.data()?["weeklyWorkoutMinutes"] as? Int ?? 0
+
+            // Update with new workout
+            transaction.updateData([
+                "weeklyWorkoutCount": currentWorkoutCount + 1,
+                "weeklyWorkoutMinutes": currentWorkoutMinutes + workoutMinutes
+            ], forDocument: memberRef)
+
+            return nil
+        }
+    }
+
     // MARK: - Recompute Ranks
 
     private func recomputeRanks(challengeId: String) async throws {

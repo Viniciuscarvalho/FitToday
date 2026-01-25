@@ -171,13 +171,7 @@ struct AppContainer {
         container.register(HealthKitServicing.self) { _ in healthKitService }
             .inObjectScope(.container)
         
-        container.register(HealthKitHistorySyncService.self) { resolver in
-            HealthKitHistorySyncService(
-                healthKit: resolver.resolve(HealthKitServicing.self)!,
-                historyRepository: resolver.resolve(WorkoutHistoryRepository.self)!
-            )
-        }
-        .inObjectScope(.container)
+        // Note: HealthKitHistorySyncService is registered later after SyncWorkoutCompletionUseCase is available
 
         // HealthKit Workout Sync Use Case - auto-exports workouts and imports calories
         container.register(SyncWorkoutWithHealthKitUseCase.self) { resolver in
@@ -309,6 +303,49 @@ struct AppContainer {
                 historyRepository: resolver.resolve(WorkoutHistoryRepository.self)!,
                 pendingQueue: resolver.resolve(PendingSyncQueue.self),
                 analytics: resolver.resolve(AnalyticsTracking.self)
+            )
+        }
+        .inObjectScope(.container)
+
+        // ========== CHECK-IN SERVICES ==========
+
+        // Firebase Storage Service - uploads check-in photos
+        let firebaseStorageService = FirebaseStorageService()
+        container.register(StorageServicing.self) { _ in firebaseStorageService }
+            .inObjectScope(.container)
+
+        // Image Compressor - compresses photos before upload
+        let imageCompressor = ImageCompressor()
+        container.register(ImageCompressing.self) { _ in imageCompressor }
+            .inObjectScope(.container)
+
+        // Check-In Repository - manages check-in persistence
+        container.register(CheckInRepository.self) { resolver in
+            FirebaseCheckInRepository(
+                storageService: resolver.resolve(StorageServicing.self)!
+            )
+        }
+        .inObjectScope(.container)
+
+        // Check-In Use Case - handles check-in business logic
+        container.register(CheckInUseCase.self) { resolver in
+            CheckInUseCase(
+                checkInRepository: resolver.resolve(CheckInRepository.self)!,
+                authRepository: resolver.resolve(AuthenticationRepository.self)!,
+                leaderboardRepository: resolver.resolve(LeaderboardRepository.self)!,
+                imageCompressor: resolver.resolve(ImageCompressing.self)!
+            )
+        }
+        .inObjectScope(.container)
+
+        // ========== END CHECK-IN SERVICES ==========
+
+        // HealthKit History Sync - imports workouts from Apple Health and syncs to challenges
+        container.register(HealthKitHistorySyncService.self) { resolver in
+            HealthKitHistorySyncService(
+                healthKit: resolver.resolve(HealthKitServicing.self)!,
+                historyRepository: resolver.resolve(WorkoutHistoryRepository.self)!,
+                syncWorkoutUseCase: resolver.resolve(SyncWorkoutCompletionUseCase.self)
             )
         }
         .inObjectScope(.container)

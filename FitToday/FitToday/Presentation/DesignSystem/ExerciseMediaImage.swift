@@ -41,7 +41,7 @@ struct ExerciseMediaImageURL: View {
         case .success(let data, let mimeType):
           if data.isEmpty {
             placeholderView
-          } else if mimeType.lowercased().contains("gif") {
+          } else if isGIFContent(data: data, mimeType: mimeType, url: url) {
             ExerciseGIFWebView(
               data: data,
               contentMode: contentMode
@@ -85,6 +85,29 @@ struct ExerciseMediaImageURL: View {
         .font(.system(size: min(size.width, size.height) * 0.4))
         .foregroundStyle(FitTodayColor.textTertiary)
     }
+  }
+
+  /// Detects if content is a GIF by checking multiple sources:
+  /// 1. MIME type contains "gif"
+  /// 2. URL path ends with .gif
+  /// 3. Data starts with GIF magic bytes (GIF87a or GIF89a)
+  private func isGIFContent(data: Data, mimeType: String, url: URL?) -> Bool {
+    // Check MIME type
+    if mimeType.lowercased().contains("gif") {
+      return true
+    }
+
+    // Check URL extension
+    if let url = url, url.pathExtension.lowercased() == "gif" {
+      return true
+    }
+
+    // Check GIF magic bytes (GIF87a or GIF89a)
+    guard data.count >= 6 else { return false }
+    let gifMagic87a: [UInt8] = [0x47, 0x49, 0x46, 0x38, 0x37, 0x61] // "GIF87a"
+    let gifMagic89a: [UInt8] = [0x47, 0x49, 0x46, 0x38, 0x39, 0x61] // "GIF89a"
+    let header = Array(data.prefix(6))
+    return header == gifMagic87a || header == gifMagic89a
   }
 
   private func load(_ url: URL) async {

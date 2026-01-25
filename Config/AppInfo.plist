@@ -22,6 +22,20 @@
 	<string>public.app-category.lifestyle</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSHealthShareUsageDescription</key>
+	<string>O FitToday usa o Apple Health para importar dados de treino (duração e calorias) e melhorar seu histórico.</string>
+	<key>NSHealthUpdateUsageDescription</key>
+	<string>O FitToday usa o Apple Health para exportar seus treinos concluídos e manter seu histórico unificado.</string>
+	<key>UIAppFonts</key>
+	<array>
+		<string>Orbitron-Bold.ttf</string>
+		<string>Orbitron-ExtraBold.ttf</string>
+		<string>Orbitron-Black.ttf</string>
+		<string>Rajdhani-Medium.ttf</string>
+		<string>Rajdhani-SemiBold.ttf</string>
+		<string>Rajdhani-Bold.ttf</string>
+		<string>Bungee-Regular.ttf</string>
+	</array>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
@@ -50,19 +64,5 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
-	<key>UIAppFonts</key>
-	<array>
-		<string>Orbitron-Bold.ttf</string>
-		<string>Orbitron-ExtraBold.ttf</string>
-		<string>Orbitron-Black.ttf</string>
-		<string>Rajdhani-Medium.ttf</string>
-		<string>Rajdhani-SemiBold.ttf</string>
-		<string>Rajdhani-Bold.ttf</string>
-		<string>Bungee-Regular.ttf</string>
-	</array>
-	<key>NSHealthShareUsageDescription</key>
-	<string>O FitToday usa o Apple Health para importar dados de treino (duração e calorias) e melhorar seu histórico.</string>
-	<key>NSHealthUpdateUsageDescription</key>
-	<string>O FitToday usa o Apple Health para exportar seus treinos concluídos e manter seu histórico unificado.</string>
 </dict>
 </plist>

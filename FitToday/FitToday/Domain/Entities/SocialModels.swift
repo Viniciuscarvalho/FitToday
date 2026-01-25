@@ -52,6 +52,28 @@ struct GroupMember: Codable, Hashable, Sendable, Identifiable {
     let joinedAt: Date
     var role: GroupRole
     var isActive: Bool
+    var weeklyWorkoutCount: Int  // Number of valid workouts (30+ min) this week
+    var weeklyWorkoutMinutes: Int  // Total workout minutes this week
+
+    init(
+        id: String,
+        displayName: String,
+        photoURL: URL? = nil,
+        joinedAt: Date,
+        role: GroupRole,
+        isActive: Bool = true,
+        weeklyWorkoutCount: Int = 0,
+        weeklyWorkoutMinutes: Int = 0
+    ) {
+        self.id = id
+        self.displayName = displayName
+        self.photoURL = photoURL
+        self.joinedAt = joinedAt
+        self.role = role
+        self.isActive = isActive
+        self.weeklyWorkoutCount = weeklyWorkoutCount
+        self.weeklyWorkoutMinutes = weeklyWorkoutMinutes
+    }
 }
 
 enum GroupRole: String, Codable, Sendable {

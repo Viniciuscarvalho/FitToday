@@ -10,17 +10,20 @@ import Foundation
 actor HealthKitHistorySyncService {
     private let healthKit: any HealthKitServicing
     private let historyRepository: WorkoutHistoryRepository
+    private let syncWorkoutUseCase: SyncWorkoutCompletionUseCase?
     private let calendar: Calendar
     private let logger: (String) -> Void
-    
+
     init(
         healthKit: any HealthKitServicing,
         historyRepository: WorkoutHistoryRepository,
+        syncWorkoutUseCase: SyncWorkoutCompletionUseCase? = nil,
         calendar: Calendar = Calendar(identifier: .iso8601),
         logger: @escaping (String) -> Void = { print("[HealthKitSync]", $0) }
     ) {
         self.healthKit = healthKit
         self.historyRepository = historyRepository
+        self.syncWorkoutUseCase = syncWorkoutUseCase
         self.calendar = calendar
         self.logger = logger
     }
@@ -53,6 +56,12 @@ actor HealthKitHistorySyncService {
             do {
                 try await historyRepository.saveEntry(updated)
                 updatedCount += 1
+
+                // Sync to challenges if workout meets 30min minimum
+                if let syncUseCase = syncWorkoutUseCase, (updated.durationMinutes ?? 0) >= 30 {
+                    await syncUseCase.execute(entry: updated)
+                    logger("Synced HealthKit workout to challenges: \(updated.durationMinutes ?? 0) min")
+                }
             } catch {
                 logger("Falha ao salvar histórico para entry=\(entry.id): \(error.localizedDescription)")
             }

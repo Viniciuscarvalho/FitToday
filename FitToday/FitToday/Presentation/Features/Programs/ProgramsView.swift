@@ -174,7 +174,7 @@ struct ProgramsView: View {
             )
             .padding(.vertical, FitTodaySpacing.xl)
         } else {
-            LazyVStack(spacing: FitTodaySpacing.md) {
+            VStack(spacing: FitTodaySpacing.md) {
                 ForEach(filteredPrograms(viewModel.programs)) { program in
                     ProgramCategoryCard(
                         program: program,

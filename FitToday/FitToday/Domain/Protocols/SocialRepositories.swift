@@ -38,6 +38,7 @@ protocol LeaderboardRepository: Sendable {
     func observeLeaderboard(groupId: String, type: ChallengeType) -> AsyncStream<LeaderboardSnapshot>
     func incrementCheckIn(challengeId: String, userId: String) async throws
     func updateStreak(challengeId: String, userId: String, streakDays: Int) async throws
+    func updateMemberWeeklyStats(groupId: String, userId: String, workoutMinutes: Int) async throws
 }
 
 // MARK: - User Repository
@@ -56,4 +57,20 @@ protocol NotificationRepository: Sendable {
     func observeNotifications(userId: String) -> AsyncStream<[GroupNotification]>
     func markAsRead(_ notificationId: String) async throws
     func createNotification(_ notification: GroupNotification) async throws
+}
+
+// MARK: - Check-In Repository
+
+protocol CheckInRepository: Sendable {
+    /// Creates a new check-in in Firestore.
+    func createCheckIn(_ checkIn: CheckIn) async throws
+
+    /// Fetches check-ins for a group with pagination support.
+    func getCheckIns(groupId: String, limit: Int, after: Date?) async throws -> [CheckIn]
+
+    /// Observes check-ins for a group in real-time.
+    func observeCheckIns(groupId: String) -> AsyncStream<[CheckIn]>
+
+    /// Uploads a photo to Firebase Storage and returns the download URL.
+    func uploadPhoto(imageData: Data, groupId: String, userId: String) async throws -> URL
 }

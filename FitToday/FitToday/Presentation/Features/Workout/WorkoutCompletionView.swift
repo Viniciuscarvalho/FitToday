@@ -28,6 +28,12 @@ struct WorkoutCompletionView: View {
     @State private var hasRated = false
     @State private var isSavingRating = false
 
+    // Check-in state
+    @State private var showCheckInSheet = false
+    @State private var showCelebration = false
+    @State private var isInGroup = false
+    @State private var currentEntry: WorkoutHistoryEntry?
+
     var body: some View {
         VStack(spacing: FitTodaySpacing.lg) {
             Image(systemName: statusIcon)
@@ -57,6 +63,17 @@ struct WorkoutCompletionView: View {
                         hasRated = true
                     }
                 )
+                .padding(.horizontal)
+            }
+
+            // Check-in button (only for users in a group after rating)
+            if status == .completed && hasRated && isInGroup {
+                Button {
+                    showCheckInSheet = true
+                } label: {
+                    Label("Fazer Check-in com Foto", systemImage: "camera.fill")
+                }
+                .fitPrimaryStyle()
                 .padding(.horizontal)
             }
 
@@ -118,6 +135,8 @@ struct WorkoutCompletionView: View {
         .task {
             await checkProfileCompletion()
             await loadHealthKitAvailability()
+            await checkGroupMembership()
+            loadCurrentEntry()
         }
         .sheet(isPresented: $showProfilePrompt) {
             if let resolver = resolver as? Resolver {
@@ -134,6 +153,35 @@ struct WorkoutCompletionView: View {
             Button("Ok", role: .cancel) {}
         } message: {
             Text(errorMessage ?? "Ocorreu um erro ao gerar novo treino.")
+        }
+        .sheet(isPresented: $showCheckInSheet) {
+            if let entry = currentEntry,
+               let checkInUseCase = resolver.resolve(CheckInUseCase.self),
+               let networkMonitor = resolver.resolve(NetworkMonitor.self) {
+                CheckInPhotoView(
+                    viewModel: CheckInViewModel(
+                        checkInUseCase: checkInUseCase,
+                        workoutEntry: entry,
+                        networkMonitor: networkMonitor
+                    ),
+                    workoutEntry: entry,
+                    onSuccess: { _ in
+                        showCelebration = true
+                    }
+                )
+            }
+        }
+        .overlay {
+            if showCelebration {
+                CelebrationOverlay(type: .checkInComplete)
+                    .onTapGesture {
+                        showCelebration = false
+                    }
+                    .task {
+                        try? await Task.sleep(for: .seconds(3))
+                        showCelebration = false
+                    }
+            }
         }
     }
     
@@ -183,7 +231,44 @@ struct WorkoutCompletionView: View {
             // Silently fail - não é crítico
         }
     }
-    
+
+    /// Checks if user is in a group to enable check-in feature
+    private func checkGroupMembership() async {
+        guard let authRepo = resolver.resolve(AuthenticationRepository.self) else {
+            isInGroup = false
+            return
+        }
+
+        do {
+            if let user = try await authRepo.currentUser() {
+                isInGroup = user.currentGroupId != nil
+            }
+        } catch {
+            isInGroup = false
+        }
+    }
+
+    /// Loads the current workout entry for check-in
+    private func loadCurrentEntry() {
+        guard let planId = sessionStore.plan?.id,
+              let historyRepo = resolver.resolve(WorkoutHistoryRepository.self) else {
+            return
+        }
+
+        Task {
+            do {
+                let entries = try await historyRepo.listEntries(limit: 1, offset: 0)
+                if let entry = entries.first, entry.planId == planId {
+                    currentEntry = entry
+                }
+            } catch {
+                #if DEBUG
+                print("[WorkoutCompletion] Failed to load current entry: \(error)")
+                #endif
+            }
+        }
+    }
+
     private func loadHealthKitAvailability() async {
         guard status == .completed else { return }
         

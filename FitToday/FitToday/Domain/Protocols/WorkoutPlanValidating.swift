@@ -11,18 +11,27 @@ import Foundation
 enum WorkoutPlanValidationError: Error, LocalizedError {
     case emptyExercises
     case insufficientExercises(minimum: Int, actual: Int)
+    case tooManyExercises(maximum: Int, actual: Int)
+    case durationTooShort(minimum: Int, actual: Int)
+    case durationTooLong(maximum: Int, actual: Int)
     case invalidSets(exercise: String, sets: Int)
     case invalidReps(exercise: String, reps: IntRange)
     case invalidRestInterval(exercise: String, rest: TimeInterval)
     case missingMainExercises
     case inconsistentIntensity
-    
+
     var errorDescription: String? {
         switch self {
         case .emptyExercises:
             return "O plano não contém exercícios"
         case .insufficientExercises(let min, let actual):
             return "Plano deve ter pelo menos \(min) exercícios, mas tem \(actual)"
+        case .tooManyExercises(let max, let actual):
+            return "Plano deve ter no máximo \(max) exercícios, mas tem \(actual)"
+        case .durationTooShort(let min, let actual):
+            return "Duração mínima é \(min) minutos, mas o plano tem \(actual) minutos"
+        case .durationTooLong(let max, let actual):
+            return "Duração máxima é \(max) minutos, mas o plano tem \(actual) minutos"
         case .invalidSets(let exercise, let sets):
             return "Exercício '\(exercise)' tem séries inválidas: \(sets)"
         case .invalidReps(let exercise, let reps):

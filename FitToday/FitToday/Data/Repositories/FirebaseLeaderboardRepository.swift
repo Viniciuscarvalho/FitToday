@@ -49,4 +49,12 @@ final class FirebaseLeaderboardRepository: LeaderboardRepository, @unchecked Sen
             photoURL: nil
         )
     }
+
+    func updateMemberWeeklyStats(groupId: String, userId: String, workoutMinutes: Int) async throws {
+        try await leaderboardService.updateMemberWeeklyStats(
+            groupId: groupId,
+            userId: userId,
+            workoutMinutes: workoutMinutes
+        )
+    }
 }

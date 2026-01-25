@@ -98,11 +98,17 @@ struct CompleteWorkoutSessionUseCase {
         }
 
         let completedAt = Date()
+
+        // Compute workout duration from session start
+        let durationSeconds = completedAt.timeIntervalSince(session.startedAt)
+        let durationMinutes = Int(durationSeconds / 60)
+
         let entry = WorkoutHistoryEntry(
             planId: session.plan.id,
             title: session.plan.title,
             focus: session.plan.focus,
             status: status,
+            durationMinutes: durationMinutes,
             workoutPlan: session.plan // ← Salvar o plano completo para histórico de variação
         )
         try await historyRepository.saveEntry(entry)

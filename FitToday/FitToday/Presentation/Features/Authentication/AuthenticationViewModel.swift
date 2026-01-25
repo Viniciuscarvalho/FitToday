@@ -157,6 +157,13 @@ import Swinject
 
     private func saveUserSession(_ user: SocialUser) {
         UserDefaults.standard.set(user.id, forKey: "socialUserId")
+        UserDefaults.standard.set(user.displayName, forKey: "socialUserDisplayName")
+        if let photoURL = user.photoURL {
+            UserDefaults.standard.set(photoURL.absoluteString, forKey: "socialUserPhotoURL")
+        }
+
+        // Signal navigation that authentication succeeded
+        didAuthenticate = true
 
         #if DEBUG
         print("[Auth] ✅ User signed in: \(user.displayName) (\(user.id))")

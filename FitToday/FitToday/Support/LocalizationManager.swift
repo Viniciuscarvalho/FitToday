@@ -24,14 +24,14 @@ final class LocalizationManager {
         var displayName: String {
             switch self {
             case .english: return "English"
-            case .portuguese: return "Portugues"
+            case .portuguese: return "Português"
             }
         }
 
         var flagEmoji: String {
             switch self {
-            case .english: return "US"
-            case .portuguese: return "BR"
+            case .english: return "🇺🇸"
+            case .portuguese: return "🇧🇷"
             }
         }
     }
@@ -40,8 +40,12 @@ final class LocalizationManager {
     private(set) var selectedLanguage: Language {
         didSet {
             UserDefaults.standard.set(selectedLanguage.rawValue, forKey: "app_language")
+            updateBundle()
         }
     }
+
+    /// The bundle to use for localization (enables runtime switching)
+    private(set) var currentBundle: Bundle = .main
 
     private init() {
         // Load saved language or detect from device
@@ -57,13 +61,23 @@ final class LocalizationManager {
                 self.selectedLanguage = .english
             }
         }
+        updateBundle()
     }
 
-    /// Changes the app language.
+    /// Changes the app language with immediate effect.
     func setLanguage(_ language: Language) {
         selectedLanguage = language
-        // Note: Full runtime language switching requires app restart or Bundle swizzling
-        // For now, we save the preference and it will take effect on next launch
+    }
+
+    /// Updates the bundle to match the selected language.
+    private func updateBundle() {
+        if let path = Bundle.main.path(forResource: selectedLanguage.rawValue, ofType: "lproj"),
+           let bundle = Bundle(path: path) {
+            currentBundle = bundle
+        } else {
+            // Fallback to main bundle
+            currentBundle = .main
+        }
     }
 
     /// Returns true if the current language is Portuguese.

@@ -147,7 +147,10 @@ struct TabRootView: View {
         case .privacySettings:
             PrivacySettingsView(resolver: resolver)
         case .authentication(let inviteContext):
-            AuthenticationView(resolver: resolver, inviteContext: inviteContext)
+            AuthenticationView(resolver: resolver, inviteContext: inviteContext) {
+                // After authentication, pop back and stay on current tab
+                router.pop(on: router.selectedTab)
+            }
         case .groupInvite(let groupId):
             JoinGroupView(groupId: groupId, resolver: resolver) {
                 // After joining, refresh history tab (where challenges are shown)

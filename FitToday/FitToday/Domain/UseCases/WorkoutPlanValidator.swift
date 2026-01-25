@@ -14,17 +14,29 @@ struct WorkoutPlanValidator: WorkoutPlanValidating, Sendable {
     
     private struct ValidationRules {
         let minimumExercises: Int
+        let maximumExercises: Int
+        let minimumDurationMinutes: Int
+        let maximumDurationMinutes: Int
         let setsRange: ClosedRange<Int>
         let repsRange: ClosedRange<Int>
         let restRange: ClosedRange<TimeInterval>
         let minimumMainExercises: Int
-        
+
+        // Global constraints
+        static let globalMinExercises = 4
+        static let globalMaxExercises = 10
+        static let globalMinDuration = 30
+        static let globalMaxDuration = 60
+
         static func rules(for goal: FitnessGoal) -> ValidationRules {
             switch goal {
             case .hypertrophy:
                 // Força Pura: baixas reps, descanso longo
                 return ValidationRules(
-                    minimumExercises: 4,
+                    minimumExercises: globalMinExercises,
+                    maximumExercises: globalMaxExercises,
+                    minimumDurationMinutes: globalMinDuration,
+                    maximumDurationMinutes: globalMaxDuration,
                     setsRange: 1...8,
                     repsRange: 1...12,
                     restRange: 60...300,  // 1-5 min
@@ -33,7 +45,10 @@ struct WorkoutPlanValidator: WorkoutPlanValidating, Sendable {
             case .performance:
                 // Performance: força explosiva + condicionamento
                 return ValidationRules(
-                    minimumExercises: 4,
+                    minimumExercises: globalMinExercises,
+                    maximumExercises: globalMaxExercises,
+                    minimumDurationMinutes: globalMinDuration,
+                    maximumDurationMinutes: globalMaxDuration,
                     setsRange: 2...6,
                     repsRange: 3...15,
                     restRange: 45...180,  // 45s-3min
@@ -42,7 +57,10 @@ struct WorkoutPlanValidator: WorkoutPlanValidating, Sendable {
             case .weightLoss:
                 // Emagrecimento: circuitos, intervalos curtos
                 return ValidationRules(
-                    minimumExercises: 5,
+                    minimumExercises: globalMinExercises,
+                    maximumExercises: globalMaxExercises,
+                    minimumDurationMinutes: globalMinDuration,
+                    maximumDurationMinutes: globalMaxDuration,
                     setsRange: 2...5,
                     repsRange: 8...20,
                     restRange: 20...90,   // 20s-90s
@@ -51,7 +69,10 @@ struct WorkoutPlanValidator: WorkoutPlanValidating, Sendable {
             case .conditioning:
                 // Condicionamento: força + resistência
                 return ValidationRules(
-                    minimumExercises: 5,
+                    minimumExercises: globalMinExercises,
+                    maximumExercises: globalMaxExercises,
+                    minimumDurationMinutes: globalMinDuration,
+                    maximumDurationMinutes: globalMaxDuration,
                     setsRange: 2...5,
                     repsRange: 8...20,
                     restRange: 30...120,  // 30s-2min
@@ -60,7 +81,10 @@ struct WorkoutPlanValidator: WorkoutPlanValidating, Sendable {
             case .endurance:
                 // Resistência: volume alto, descanso curto
                 return ValidationRules(
-                    minimumExercises: 5,
+                    minimumExercises: globalMinExercises,
+                    maximumExercises: globalMaxExercises,
+                    minimumDurationMinutes: globalMinDuration,
+                    maximumDurationMinutes: globalMaxDuration,
                     setsRange: 2...5,
                     repsRange: 10...30,
                     restRange: 20...60,   // 20s-60s
@@ -74,12 +98,12 @@ struct WorkoutPlanValidator: WorkoutPlanValidating, Sendable {
     
     func validate(plan: WorkoutPlan, for goal: FitnessGoal) throws {
         let rules = ValidationRules.rules(for: goal)
-        
+
         // 1. Verificar lista não vazia
         guard !plan.exercises.isEmpty else {
             throw WorkoutPlanValidationError.emptyExercises
         }
-        
+
         // 2. Verificar número mínimo de exercícios
         guard plan.exercises.count >= rules.minimumExercises else {
             throw WorkoutPlanValidationError.insufficientExercises(
@@ -87,8 +111,32 @@ struct WorkoutPlanValidator: WorkoutPlanValidating, Sendable {
                 actual: plan.exercises.count
             )
         }
-        
-        // 3. Validar cada prescrição
+
+        // 3. Verificar número máximo de exercícios
+        guard plan.exercises.count <= rules.maximumExercises else {
+            throw WorkoutPlanValidationError.tooManyExercises(
+                maximum: rules.maximumExercises,
+                actual: plan.exercises.count
+            )
+        }
+
+        // 4. Verificar duração mínima
+        guard plan.estimatedDurationMinutes >= rules.minimumDurationMinutes else {
+            throw WorkoutPlanValidationError.durationTooShort(
+                minimum: rules.minimumDurationMinutes,
+                actual: plan.estimatedDurationMinutes
+            )
+        }
+
+        // 5. Verificar duração máxima
+        guard plan.estimatedDurationMinutes <= rules.maximumDurationMinutes else {
+            throw WorkoutPlanValidationError.durationTooLong(
+                maximum: rules.maximumDurationMinutes,
+                actual: plan.estimatedDurationMinutes
+            )
+        }
+
+        // 6. Validar cada prescrição
         for prescription in plan.exercises {
             // Sets
             guard rules.setsRange.contains(prescription.sets) else {
@@ -97,7 +145,7 @@ struct WorkoutPlanValidator: WorkoutPlanValidating, Sendable {
                     sets: prescription.sets
                 )
             }
-            
+
             // Reps
             guard rules.repsRange.contains(prescription.reps.lowerBound),
                   rules.repsRange.contains(prescription.reps.upperBound) else {
@@ -106,7 +154,7 @@ struct WorkoutPlanValidator: WorkoutPlanValidating, Sendable {
                     reps: prescription.reps
                 )
             }
-            
+
             // Rest
             guard rules.restRange.contains(prescription.restInterval) else {
                 throw WorkoutPlanValidationError.invalidRestInterval(
@@ -115,11 +163,11 @@ struct WorkoutPlanValidator: WorkoutPlanValidating, Sendable {
                 )
             }
         }
-        
-        // 4. Verificar exercícios principais (multiarticulares)
+
+        // 7. Verificar exercícios principais (multiarticulares)
         let mainMuscles: Set<MuscleGroup> = [.chest, .back, .quads, .quadriceps, .glutes, .shoulders]
         let mainExercisesCount = plan.exercises.filter { mainMuscles.contains($0.exercise.mainMuscle) }.count
-        
+
         guard mainExercisesCount >= rules.minimumMainExercises else {
             throw WorkoutPlanValidationError.missingMainExercises
         }
@@ -132,16 +180,23 @@ extension WorkoutPlanValidator {
     /// Tenta corrigir um plano inválido ajustando valores fora dos limites
     func sanitize(plan: WorkoutPlan, for goal: FitnessGoal) -> WorkoutPlan {
         let rules = ValidationRules.rules(for: goal)
-        
-        let sanitizedExercises = plan.exercises.map { prescription in
+
+        // 1. Limit exercise count (min 4, max 10)
+        var exercisesToSanitize = plan.exercises
+        if exercisesToSanitize.count > rules.maximumExercises {
+            exercisesToSanitize = Array(exercisesToSanitize.prefix(rules.maximumExercises))
+        }
+
+        // 2. Sanitize individual prescriptions
+        let sanitizedExercises = exercisesToSanitize.map { prescription in
             let sanitizedSets = min(max(prescription.sets, rules.setsRange.lowerBound), rules.setsRange.upperBound)
-            
+
             let sanitizedLower = min(max(prescription.reps.lowerBound, rules.repsRange.lowerBound), rules.repsRange.upperBound)
             let sanitizedUpper = min(max(prescription.reps.upperBound, rules.repsRange.lowerBound), rules.repsRange.upperBound)
             let sanitizedReps = IntRange(min(sanitizedLower, sanitizedUpper), max(sanitizedLower, sanitizedUpper))
-            
+
             let sanitizedRest = min(max(prescription.restInterval, rules.restRange.lowerBound), rules.restRange.upperBound)
-            
+
             return ExercisePrescription(
                 exercise: prescription.exercise,
                 sets: sanitizedSets,
@@ -150,12 +205,15 @@ extension WorkoutPlanValidator {
                 tip: prescription.tip
             )
         }
-        
+
+        // 3. Clamp duration (min 30, max 60)
+        let sanitizedDuration = min(max(plan.estimatedDurationMinutes, rules.minimumDurationMinutes), rules.maximumDurationMinutes)
+
         return WorkoutPlan(
             id: plan.id,
             title: plan.title,
             focus: plan.focus,
-            estimatedDurationMinutes: plan.estimatedDurationMinutes,
+            estimatedDurationMinutes: sanitizedDuration,
             intensity: plan.intensity,
             exercises: sanitizedExercises
         )

@@ -258,20 +258,20 @@ import UIKit
 
         // Sync to Firebase leaderboard in background (don't block UI)
         if status == .completed, let syncUseCase = syncWorkoutUseCase {
+            // Compute workout duration from session start
+            let completedAt = Date()
+            let durationSeconds = completedAt.timeIntervalSince(session.startedAt)
+            let durationMinutes = Int(durationSeconds / 60)
+
             let entry = WorkoutHistoryEntry(
                 planId: session.plan.id,
                 title: session.plan.title,
                 focus: session.plan.focus,
-                status: status
+                status: status,
+                durationMinutes: durationMinutes
             )
             Task.detached {
-                do {
-                    try await syncUseCase.execute(entry: entry)
-                } catch {
-                    #if DEBUG
-                    print("[WorkoutSync] Failed to sync to leaderboard: \(error)")
-                    #endif
-                }
+                await syncUseCase.execute(entry: entry)
             }
         }
 

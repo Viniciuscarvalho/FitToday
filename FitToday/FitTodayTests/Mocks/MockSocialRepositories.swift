@@ -147,8 +147,10 @@ final class MockLeaderboardRepository: LeaderboardRepository, @unchecked Sendabl
     var getCurrentWeekChallengesResult: [Challenge] = []
     var incrementCheckInCalled = false
     var updateStreakCalled = false
+    var updateMemberWeeklyStatsCalled = false
     var capturedStreakValue: Int?
     var capturedChallengeId: String?
+    var capturedWorkoutMinutes: Int?
 
     func getCurrentWeekChallenges(groupId: String) async throws -> [Challenge] {
         return getCurrentWeekChallengesResult
@@ -169,6 +171,11 @@ final class MockLeaderboardRepository: LeaderboardRepository, @unchecked Sendabl
         updateStreakCalled = true
         capturedChallengeId = challengeId
         capturedStreakValue = streakDays
+    }
+
+    func updateMemberWeeklyStats(groupId: String, userId: String, workoutMinutes: Int) async throws {
+        updateMemberWeeklyStatsCalled = true
+        capturedWorkoutMinutes = workoutMinutes
     }
 }
 
@@ -196,6 +203,69 @@ final class MockNotificationRepository: NotificationRepository, @unchecked Senda
 
     func createNotification(_ notification: GroupNotification) async throws {
         createNotificationCalled = true
+    }
+}
+
+// MARK: - MockCheckInRepository
+
+final class MockCheckInRepository: CheckInRepository, @unchecked Sendable {
+    var createCheckInCalled = false
+    var uploadPhotoCalled = false
+    var capturedCheckIn: CheckIn?
+    var capturedPhotoData: Data?
+    var capturedGroupId: String?
+    var capturedUserId: String?
+
+    var uploadPhotoResult: Result<URL, Error> = .success(URL(string: "https://example.com/photo.jpg")!)
+    var createCheckInError: Error?
+    var getCheckInsResult: [CheckIn] = []
+
+    func createCheckIn(_ checkIn: CheckIn) async throws {
+        createCheckInCalled = true
+        capturedCheckIn = checkIn
+        if let error = createCheckInError {
+            throw error
+        }
+    }
+
+    func getCheckIns(groupId: String, limit: Int, after: Date?) async throws -> [CheckIn] {
+        capturedGroupId = groupId
+        return getCheckInsResult
+    }
+
+    func observeCheckIns(groupId: String) -> AsyncStream<[CheckIn]> {
+        capturedGroupId = groupId
+        return AsyncStream { continuation in
+            continuation.yield(getCheckInsResult)
+            continuation.finish()
+        }
+    }
+
+    func uploadPhoto(imageData: Data, groupId: String, userId: String) async throws -> URL {
+        uploadPhotoCalled = true
+        capturedPhotoData = imageData
+        capturedGroupId = groupId
+        capturedUserId = userId
+        return try uploadPhotoResult.get()
+    }
+}
+
+// MARK: - MockImageCompressor
+
+final class MockImageCompressor: ImageCompressing, @unchecked Sendable {
+    var compressCalled = false
+    var capturedData: Data?
+    var capturedMaxBytes: Int?
+    var capturedQuality: CGFloat?
+
+    var compressResult: Result<Data, Error> = .success(Data([0x01, 0x02, 0x03]))
+
+    func compress(data: Data, maxBytes: Int, quality: CGFloat) throws -> Data {
+        compressCalled = true
+        capturedData = data
+        capturedMaxBytes = maxBytes
+        capturedQuality = quality
+        return try compressResult.get()
     }
 }
 

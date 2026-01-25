@@ -162,6 +162,72 @@ extension GroupNotification {
     }
 }
 
+// MARK: - CheckIn Fixtures
+
+extension CheckIn {
+    static func fixture(
+        id: String = "checkin1",
+        groupId: String = "group1",
+        challengeId: String = "challenge1",
+        userId: String = "user1",
+        displayName: String = "Test User",
+        userPhotoURL: URL? = nil,
+        checkInPhotoURL: URL = URL(string: "https://example.com/photo.jpg")!,
+        workoutEntryId: UUID = UUID(),
+        workoutDurationMinutes: Int = 45,
+        createdAt: Date = Date()
+    ) -> CheckIn {
+        CheckIn(
+            id: id,
+            groupId: groupId,
+            challengeId: challengeId,
+            userId: userId,
+            displayName: displayName,
+            userPhotoURL: userPhotoURL,
+            checkInPhotoURL: checkInPhotoURL,
+            workoutEntryId: workoutEntryId,
+            workoutDurationMinutes: workoutDurationMinutes,
+            createdAt: createdAt
+        )
+    }
+
+    static var validCheckIn: CheckIn {
+        .fixture(workoutDurationMinutes: 45)
+    }
+
+    static var shortWorkout: CheckIn {
+        .fixture(workoutDurationMinutes: 15)
+    }
+}
+
+// MARK: - WorkoutHistoryEntry Fixtures for Tests
+
+extension WorkoutHistoryEntry {
+    static func checkInFixture(
+        id: UUID = UUID(),
+        durationMinutes: Int = 45
+    ) -> WorkoutHistoryEntry {
+        WorkoutHistoryEntry(
+            id: id,
+            planId: UUID(),
+            workoutName: "Test Workout",
+            focus: .fullBody,
+            completedAt: Date(),
+            durationMinutes: durationMinutes,
+            status: .completed,
+            caloriesBurned: 300
+        )
+    }
+
+    static var validForCheckIn: WorkoutHistoryEntry {
+        .checkInFixture(durationMinutes: 45)
+    }
+
+    static var tooShortForCheckIn: WorkoutHistoryEntry {
+        .checkInFixture(durationMinutes: 20)
+    }
+}
+
 // MARK: - Calendar Helpers
 
 private extension Calendar {

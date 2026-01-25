@@ -12,6 +12,7 @@
 		EA07E6BD2F1A80EB00B08007 /* FirebaseRemoteConfig in Frameworks */ = {isa = PBXBuildFile; productRef = EA07E6BC2F1A80EB00B08007 /* FirebaseRemoteConfig */; };
 		EA07E6BF2F1A80EB00B08007 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = EA07E6BE2F1A80EB00B08007 /* FirebaseAuth */; };
 		EA07E6C12F1A80EB00B08007 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = EA07E6C02F1A80EB00B08007 /* FirebaseFirestore */; };
+		EA07E6C32F1A80EB00B08007 /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = EA07E6C22F1A80EB00B08007 /* FirebaseStorage */; };
 		EA5DDB022F0AEA4D005B7F4E /* Swinject in Frameworks */ = {isa = PBXBuildFile; productRef = EA5DDB012F0AEA4D005B7F4E /* Swinject */; };
 /* End PBXBuildFile section */
 
@@ -65,6 +66,7 @@
 				EA07E6B92F1A80EB00B08007 /* FirebaseAnalytics in Frameworks */,
 				EA07E6BF2F1A80EB00B08007 /* FirebaseAuth in Frameworks */,
 				EA07E6C12F1A80EB00B08007 /* FirebaseFirestore in Frameworks */,
+				EA07E6C32F1A80EB00B08007 /* FirebaseStorage in Frameworks */,
 				EA5DDB022F0AEA4D005B7F4E /* Swinject in Frameworks */,
 				EA07E6BD2F1A80EB00B08007 /* FirebaseRemoteConfig in Frameworks */,
 			);
@@ -141,6 +143,7 @@
 				EA07E6BC2F1A80EB00B08007 /* FirebaseRemoteConfig */,
 				EA07E6BE2F1A80EB00B08007 /* FirebaseAuth */,
 				EA07E6C02F1A80EB00B08007 /* FirebaseFirestore */,
+				EA07E6C22F1A80EB00B08007 /* FirebaseStorage */,
 			);
 			productName = FitToday;
 			productReference = EAF534E72F09A1AD00B64D8D /* FitToday.app */;
@@ -434,6 +437,7 @@
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = ../Config/AppInfo.plist;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
 				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
@@ -471,6 +475,7 @@
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = ../Config/AppInfo.plist;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
 				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
@@ -680,6 +685,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = EA07E6B72F1A80EB00B08007 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseFirestore;
+		};
+		EA07E6C22F1A80EB00B08007 /* FirebaseStorage */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = EA07E6B72F1A80EB00B08007 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseStorage;
 		};
 		EA5DDB012F0AEA4D005B7F4E /* Swinject */ = {
 			isa = XCSwiftPackageProductDependency;

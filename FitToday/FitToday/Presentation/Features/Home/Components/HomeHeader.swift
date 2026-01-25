@@ -13,29 +13,67 @@ struct HomeHeader: View {
     let dateFormatted: String
     let isPro: Bool
     let goalBadgeText: String?
+    var userName: String?
+    var userPhotoURL: URL?
+
+    // Computed: first name only for display (nil when no user name)
+    private var displayName: String? {
+        guard let name = userName, !name.isEmpty else { return nil }
+        return name.components(separatedBy: " ").first ?? name
+    }
+
+    // Check if user has a name to display
+    private var hasUserName: Bool {
+        guard let name = userName else { return false }
+        return !name.isEmpty
+    }
+
+    // Avatar initial from user name or greeting
+    private var avatarInitial: String {
+        if let name = userName, !name.isEmpty {
+            return String(name.prefix(1)).uppercased()
+        }
+        // For greeting, use first letter of first word
+        return String(greeting.prefix(1)).uppercased()
+    }
 
     var body: some View {
         HStack(spacing: 12) {
             // Avatar
-            ZStack {
-                Circle()
-                    .fill(FitTodayColor.gradientPrimary)
-                    .frame(width: 44, height: 44)
-
-                Text(String(greeting.prefix(1)).uppercased())
-                    .font(.system(size: 18, weight: .semibold))
-                    .foregroundStyle(.white)
+            if let photoURL = userPhotoURL {
+                AsyncImage(url: photoURL) { phase in
+                    switch phase {
+                    case .success(let image):
+                        image
+                            .resizable()
+                            .scaledToFill()
+                            .frame(width: 44, height: 44)
+                            .clipShape(Circle())
+                    default:
+                        avatarPlaceholder
+                    }
+                }
+            } else {
+                avatarPlaceholder
             }
 
             // Greeting Column
             VStack(alignment: .leading, spacing: 2) {
-                Text("Welcome back")
-                    .font(.system(size: 13, weight: .regular))
-                    .foregroundStyle(FitTodayColor.textSecondary)
+                if let name = displayName {
+                    // Show greeting + name when user is logged in
+                    Text(greeting)
+                        .font(.system(size: 13, weight: .regular))
+                        .foregroundStyle(FitTodayColor.textSecondary)
 
-                Text(greeting)
-                    .font(.system(size: 18, weight: .semibold))
-                    .foregroundStyle(FitTodayColor.textPrimary)
+                    Text(name)
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundStyle(FitTodayColor.textPrimary)
+                } else {
+                    // Show only greeting (larger) when no user name
+                    Text(greeting)
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundStyle(FitTodayColor.textPrimary)
+                }
             }
 
             Spacer()
@@ -54,6 +92,18 @@ struct HomeHeader: View {
         .padding(.horizontal)
         .padding(.top, FitTodaySpacing.sm)
     }
+
+    private var avatarPlaceholder: some View {
+        ZStack {
+            Circle()
+                .fill(FitTodayColor.gradientPrimary)
+                .frame(width: 44, height: 44)
+
+            Text(avatarInitial)
+                .font(.system(size: 18, weight: .semibold))
+                .foregroundStyle(.white)
+        }
+    }
 }
 
 // MARK: - Quick Stats Component
@@ -66,23 +116,23 @@ struct HomeQuickStats: View {
     var body: some View {
         HStack(spacing: 12) {
             statCard(
-                label: "This Week",
+                label: "home.stats.this_week".localized,
                 value: "\(workoutsThisWeek)",
-                unit: "workouts",
+                unit: "home.stats.workouts".localized,
                 valueColor: FitTodayColor.textPrimary
             )
 
             statCard(
-                label: "Calories",
+                label: "home.stats.calories".localized,
                 value: caloriesBurned,
-                unit: "burned",
+                unit: "home.stats.burned".localized,
                 valueColor: FitTodayColor.brandPrimary
             )
 
             statCard(
-                label: "Streak",
+                label: "home.stats.streak".localized,
                 value: "\(streakDays)",
-                unit: "days",
+                unit: "home.stats.days".localized,
                 valueColor: FitTodayColor.success
             )
         }

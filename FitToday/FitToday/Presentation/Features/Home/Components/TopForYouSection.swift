@@ -16,8 +16,8 @@ struct TopForYouSection: View {
     var body: some View {
         VStack(alignment: .leading, spacing: FitTodaySpacing.md) {
             SectionHeader(
-                title: "Top pra Você",
-                actionTitle: "Ver Todos",
+                title: "home.section.top_for_you".localized,
+                actionTitle: "common.see_all".localized,
                 action: nil  // TODO: Adicionar navegação para lista completa
             )
             .padding(.horizontal)

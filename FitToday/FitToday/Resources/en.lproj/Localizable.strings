@@ -18,10 +18,17 @@
 "common.retry" = "Retry";
 "common.see_all" = "See All";
 
+// MARK: - Tabs
+"tab.home" = "Home";
+"tab.programs" = "Programs";
+"tab.history" = "History";
+"tab.settings" = "Settings";
+
 // MARK: - Home
 "home.greeting.morning" = "Good morning";
 "home.greeting.afternoon" = "Good afternoon";
 "home.greeting.evening" = "Good evening";
+"home.greeting.default" = "Welcome back";
 "home.section.top_for_you" = "Top for You";
 "home.section.weeks_workouts" = "Week's Workouts";
 "home.cta.loading" = "Loading...";
@@ -57,6 +64,14 @@
 "stats.workouts_this_week" = "Workouts";
 "stats.calories_burned" = "Calories";
 "stats.streak_days" = "Streak";
+
+// Home Quick Stats
+"home.stats.this_week" = "This Week";
+"home.stats.workouts" = "workouts";
+"home.stats.calories" = "Calories";
+"home.stats.burned" = "burned";
+"home.stats.streak" = "Streak";
+"home.stats.days" = "days";
 
 // MARK: - Programs
 "programs.title" = "Programs";
@@ -163,11 +178,22 @@
 
 // MARK: - History
 "history.title" = "History";
+"history.header.title" = "Activity";
+"history.header.subtitle" = "Track your progress and join challenges";
+"history.tab.history" = "History";
+"history.tab.challenges" = "Challenges";
 "history.empty" = "No workouts yet";
+"history.empty.subtitle" = "Complete a workout to see your progress here";
 "history.completed" = "Completed";
 "history.skipped" = "Skipped";
 "history.duration" = "%d min";
 "history.calories" = "%d cal";
+"history.streak.current" = "Current Streak";
+"history.streak.best" = "Best Streak";
+"history.streak.days" = "days";
+"history.weekly_minutes" = "Weekly Minutes";
+"history.weekly_summary" = "Last %d weeks • %d sessions • %d min";
+"history.loading_more" = "Loading more...";
 
 // MARK: - Pro
 "pro.title" = "Go Pro";
@@ -180,6 +206,66 @@
 "pro.restore" = "Restore Purchase";
 "pro.price_per_month" = "%@ / month";
 "pro.price_per_year" = "%@ / year";
+
+// MARK: - Groups & Challenges
+"groups.active" = "Active Group";
+"groups.members" = "members";
+"groups.manage" = "Manage Group";
+"groups.leaderboard" = "Leaderboard";
+"groups.this_week" = "This Week";
+"groups.empty.title" = "No Group Yet";
+"groups.empty.subtitle" = "Create or join a group to compete with friends and stay motivated";
+"groups.create" = "Create Group";
+"groups.invite.subject" = "Join my FitToday group";
+"groups.invite.message" = "Join my group '%@' on FitToday and let's train together! 💪";
+"challenges.info.title" = "About Challenges";
+"challenges.info.subtitle" = "Sign in to create or join workout challenges with friends";
+"challenges.join.title" = "Join a Challenge";
+"challenges.join.subtitle" = "Compete with friends and stay motivated together";
+"challenges.join.button" = "Create or Join";
+"challenges.active" = "Active Challenge";
+"challenges.days_left" = "%d days left";
+"challenges.progress" = "Your Progress";
+"challenges.workouts_count" = "%d/%d workouts";
+"challenges.view_leaderboard" = "View Leaderboard";
+"challenges.more_members" = "+%d more";
+"leaderboard.workouts" = "workouts";
+"leaderboard.minutes" = "%d min this week";
+"leaderboard.min_duration" = "Min 30 min to count";
+
+// MARK: - Check-In
+"checkin.title" = "Check-in";
+"checkin.button.submit" = "Submit Check-in";
+"checkin.button.camera" = "Camera";
+"checkin.button.gallery" = "Gallery";
+"checkin.photo.placeholder" = "Add a photo of your workout";
+"checkin.photo.change" = "Change photo";
+"checkin.sending" = "Sending...";
+"checkin.success.title" = "Check-in Done!";
+"checkin.success.subtitle" = "Your workout was recorded";
+"checkin.error.photo_required" = "Photo is required for check-in";
+"checkin.error.workout_short" = "Workout must be at least 30 minutes (current: %d min)";
+"checkin.error.no_network" = "No internet connection";
+"checkin.error.not_in_group" = "You need to be in a group to check-in";
+"checkin.error.upload_failed" = "Upload failed: %@";
+
+// MARK: - Feed
+"feed.title" = "Feed";
+"feed.empty.title" = "No check-ins yet";
+"feed.empty.subtitle" = "Be the first to check-in!";
+"feed.duration" = "%d min";
+
+// MARK: - Celebration
+"celebration.checkin.title" = "Check-in Done!";
+"celebration.checkin.subtitle" = "Your workout was recorded";
+"celebration.rankup.title" = "You moved up to #%d!";
+"celebration.rankup.subtitle" = "Keep it up!";
+"celebration.topthree.title" = "Top 3!";
+"celebration.topthree.subtitle" = "You're among the best!";
+
+// MARK: - Group Tabs
+"group.tab.feed" = "Feed";
+"group.tab.leaderboard" = "Ranking";
 
 // MARK: - Errors
 "error.network" = "Network error. Please check your connection.";
