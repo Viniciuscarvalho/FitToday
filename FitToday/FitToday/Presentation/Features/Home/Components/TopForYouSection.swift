@@ -33,6 +33,5 @@ struct TopForYouSection: View {
                 .padding(.horizontal)
             }
         }
-        .padding(.top, FitTodaySpacing.lg)
     }
 }

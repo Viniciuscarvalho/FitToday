@@ -35,7 +35,8 @@ struct HomeView: View {
                     isPro: viewModel.entitlement.isPro,
                     goalBadgeText: viewModel.goalBadgeText,
                     userName: viewModel.userName,
-                    userPhotoURL: viewModel.userPhotoURL
+                    userPhotoURL: viewModel.userPhotoURL,
+                    onNotificationTap: { router.push(.notifications, on: .home) }
                 )
 
                 HomeHeroCard(

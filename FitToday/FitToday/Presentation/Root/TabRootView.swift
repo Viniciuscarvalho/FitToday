@@ -156,6 +156,8 @@ struct TabRootView: View {
                 // After joining, refresh history tab (where challenges are shown)
                 router.select(tab: .history)
             }
+        case .notifications:
+            NotificationsView(resolver: resolver)
         }
     }
 }

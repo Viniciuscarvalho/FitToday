@@ -175,13 +175,15 @@ struct ProgramsView: View {
             .padding(.vertical, FitTodaySpacing.xl)
         } else {
             VStack(spacing: FitTodaySpacing.md) {
-                ForEach(filteredPrograms(viewModel.programs)) { program in
+                ForEach(filteredPrograms(viewModel.programs), id: \.id) { program in
+                    let programId = program.id
                     ProgramCategoryCard(
                         program: program,
                         category: categoryForProgram(program)
                     ) {
-                        router.push(.programDetail(program.id), on: .programs)
+                        router.push(.programDetail(programId), on: .programs)
                     }
+                    .id(programId)
                 }
             }
             .padding(.horizontal)

@@ -146,6 +146,41 @@
 "settings.logout" = "Sair";
 "settings.delete_account" = "Excluir Conta";
 "settings.version" = "Versao %@";
+"settings.profile" = "Perfil";
+"settings.edit_profile" = "Editar Perfil de Treino";
+"settings.redo_questionnaire" = "Refazer Questionario Diario";
+"settings.privacy_settings" = "Configuracoes de Privacidade";
+"settings.restore_purchases" = "Restaurar Compras";
+"settings.help_support" = "Ajuda e Suporte";
+"settings.api_key" = "Configuracoes de Chave API";
+"settings.restore_success" = "Sua assinatura foi restaurada com sucesso!";
+"settings.restore_not_found" = "Nenhuma assinatura encontrada para restaurar.";
+
+// MARK: - Pro Settings
+"settings.pro.member" = "Membro Pro";
+"settings.pro.free" = "Plano Gratuito";
+"settings.pro.title" = "FitToday Pro";
+"settings.pro.access_all" = "Voce tem acesso a todos os recursos premium";
+"settings.pro.cloud_sync" = "Sincronizacao na Nuvem";
+"settings.pro.apple_health" = "Apple Health";
+"settings.pro.ai_workouts" = "Treinos com IA";
+"settings.pro.manage" = "Gerenciar Assinatura";
+"settings.pro.upgrade" = "Assinar Pro";
+"settings.pro.unlock_description" = "Desbloqueie treinos ilimitados com IA, sincronizacao na nuvem e integracao com Apple Health";
+"settings.pro.unlimited_ai" = "Treinos Ilimitados com IA";
+"settings.pro.cloud_devices" = "Sincronizacao Entre Dispositivos";
+"settings.pro.health_integration" = "Integracao com Apple Health";
+"settings.pro.try_free" = "Experimente Pro Gratis";
+"settings.pro.connected" = "Conectado";
+"settings.pro.connect_sync" = "Conecte para sincronizar treinos";
+
+// MARK: - Privacy Settings
+"privacy.title" = "Configuracoes de Privacidade";
+"privacy.share_workouts" = "Compartilhar treinos com grupos";
+"privacy.data_sharing" = "Compartilhamento de Dados";
+"privacy.sync_health" = "Sincronizar com Apple Health";
+"privacy.apple_health" = "Apple Health";
+"privacy.priority_message" = "Sua privacidade e nossa prioridade";
 
 // MARK: - Onboarding
 "onboarding.welcome.title" = "Bem-vindo ao FitToday";
@@ -272,3 +307,13 @@
 "error.generic" = "Algo deu errado. Tente novamente.";
 "error.no_profile" = "Perfil nao encontrado. Complete a configuracao.";
 "error.workout_generation" = "Nao foi possivel gerar o treino. Tente novamente.";
+
+// MARK: - Notifications
+"notifications.title" = "Notificacoes";
+"notifications.empty.title" = "Nenhuma notificacao ainda";
+"notifications.empty.subtitle" = "Voce vera atualizacoes de desafios e atividades do grupo aqui";
+"notifications.section.today" = "Hoje";
+"notifications.section.yesterday" = "Ontem";
+"notifications.section.earlier" = "Anteriores";
+"notifications.mark_all_read" = "Marcar todas como lidas";
+"notifications.error.config" = "Erro de configuracao: servicos de notificacao nao registrados.";
