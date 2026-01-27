@@ -28,8 +28,7 @@ final class PauseGroupStreakUseCaseTests: XCTestCase {
         sut = PauseGroupStreakUseCase(
             groupStreakRepository: mockStreakRepo,
             groupRepository: mockGroupRepo,
-            authRepository: mockAuthRepo,
-            analytics: nil
+            authRepository: mockAuthRepo
         )
     }
 

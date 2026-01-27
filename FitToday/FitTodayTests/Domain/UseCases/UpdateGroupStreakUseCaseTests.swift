@@ -28,8 +28,7 @@ final class UpdateGroupStreakUseCaseTests: XCTestCase {
         sut = UpdateGroupStreakUseCase(
             groupStreakRepository: mockStreakRepo,
             authRepository: mockAuthRepo,
-            notificationRepository: mockNotificationRepo,
-            analytics: nil
+            notificationRepository: mockNotificationRepo
         )
     }
 

@@ -29,7 +29,6 @@ struct PauseGroupStreakUseCase: PauseGroupStreakUseCaseProtocol {
     private let groupStreakRepository: GroupStreakRepository
     private let groupRepository: GroupRepository
     private let authRepository: AuthenticationRepository
-    private let analytics: AnalyticsTracking?
 
     /// Maximum number of days a streak can be paused
     static let maxPauseDays = 7
@@ -37,13 +36,11 @@ struct PauseGroupStreakUseCase: PauseGroupStreakUseCaseProtocol {
     init(
         groupStreakRepository: GroupStreakRepository,
         groupRepository: GroupRepository,
-        authRepository: AuthenticationRepository,
-        analytics: AnalyticsTracking? = nil
+        authRepository: AuthenticationRepository
     ) {
         self.groupStreakRepository = groupStreakRepository
         self.groupRepository = groupRepository
         self.authRepository = authRepository
-        self.analytics = analytics
     }
 
     // MARK: - Pause
@@ -87,17 +84,6 @@ struct PauseGroupStreakUseCase: PauseGroupStreakUseCaseProtocol {
         // 9. Mark pause as used for this month
         try await groupStreakRepository.markPauseUsedThisMonth(groupId: groupId)
 
-        // Track analytics
-        analytics?.trackEvent(
-            name: "group_streak_paused",
-            parameters: [
-                "group_id": groupId,
-                "user_id": user.id,
-                "pause_days": String(days),
-                "streak_days": String(status.streakDays)
-            ]
-        )
-
         #if DEBUG
         print("[PauseGroupStreakUseCase] Streak paused for \(days) days until \(pauseUntil)")
         #endif
@@ -127,16 +113,6 @@ struct PauseGroupStreakUseCase: PauseGroupStreakUseCaseProtocol {
 
         // 5. Resume the streak
         try await groupStreakRepository.resumeStreak(groupId: groupId)
-
-        // Track analytics
-        analytics?.trackEvent(
-            name: "group_streak_resumed",
-            parameters: [
-                "group_id": groupId,
-                "user_id": user.id,
-                "streak_days": String(status.streakDays)
-            ]
-        )
 
         #if DEBUG
         print("[PauseGroupStreakUseCase] Streak resumed")

@@ -28,13 +28,9 @@ import Swinject
     // MARK: - Computed Properties
 
     var currentUserStatus: MemberWeeklyStatus? {
-        guard let streakStatus,
-              let currentUserId = try? resolver.resolve(AuthenticationRepository.self)?.currentUser() else {
-            return nil
-        }
-        // Note: currentUser is async, so this is a simplification
-        // In a real implementation, we'd cache the user ID
-        return streakStatus.currentWeek?.memberCompliance.first
+        // Returns the first member's status as a simple implementation
+        // In a real app, we'd track the current user ID separately
+        streakStatus?.currentWeek?.memberCompliance.first
     }
 
     var membersAtRisk: [MemberWeeklyStatus] {

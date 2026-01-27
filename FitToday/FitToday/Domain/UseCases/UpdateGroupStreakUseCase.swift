@@ -43,18 +43,15 @@ struct UpdateGroupStreakUseCase: UpdateGroupStreakUseCaseProtocol {
     private let groupStreakRepository: GroupStreakRepository
     private let authRepository: AuthenticationRepository
     private let notificationRepository: NotificationRepository?
-    private let analytics: AnalyticsTracking?
 
     init(
         groupStreakRepository: GroupStreakRepository,
         authRepository: AuthenticationRepository,
-        notificationRepository: NotificationRepository? = nil,
-        analytics: AnalyticsTracking? = nil
+        notificationRepository: NotificationRepository? = nil
     ) {
         self.groupStreakRepository = groupStreakRepository
         self.authRepository = authRepository
         self.notificationRepository = notificationRepository
-        self.analytics = analytics
     }
 
     func execute(userId: String, displayName: String, photoURL: URL?) async throws -> UpdateGroupStreakResult {
@@ -95,16 +92,6 @@ struct UpdateGroupStreakUseCase: UpdateGroupStreakUseCaseProtocol {
                 userId: userId,
                 displayName: displayName,
                 allCompliant: allMembersCompliant
-            )
-
-            // Track analytics
-            analytics?.trackEvent(
-                name: "group_streak_member_compliant",
-                parameters: [
-                    "group_id": groupId,
-                    "user_id": userId,
-                    "all_compliant": String(allMembersCompliant)
-                ]
             )
         }
 

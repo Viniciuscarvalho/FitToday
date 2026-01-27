@@ -302,8 +302,7 @@ struct AppContainer {
             UpdateGroupStreakUseCase(
                 groupStreakRepository: resolver.resolve(GroupStreakRepository.self)!,
                 authRepository: resolver.resolve(AuthenticationRepository.self)!,
-                notificationRepository: resolver.resolve(NotificationRepository.self),
-                analytics: resolver.resolve(AnalyticsTracking.self)
+                notificationRepository: resolver.resolve(NotificationRepository.self)
             )
         }
         .inObjectScope(.container)
@@ -313,8 +312,7 @@ struct AppContainer {
             PauseGroupStreakUseCase(
                 groupStreakRepository: resolver.resolve(GroupStreakRepository.self)!,
                 groupRepository: resolver.resolve(GroupRepository.self)!,
-                authRepository: resolver.resolve(AuthenticationRepository.self)!,
-                analytics: resolver.resolve(AnalyticsTracking.self)
+                authRepository: resolver.resolve(AuthenticationRepository.self)!
             )
         }
         .inObjectScope(.container)
