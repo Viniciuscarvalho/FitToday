@@ -284,6 +284,41 @@ struct AppContainer {
         }
         .inObjectScope(.container)
 
+        // Firebase Group Streak
+        let firebaseGroupStreakService = FirebaseGroupStreakService()
+        container.register(FirebaseGroupStreakService.self) { _ in firebaseGroupStreakService }
+            .inObjectScope(.container)
+
+        container.register(GroupStreakRepository.self) { resolver in
+            FirebaseGroupStreakRepository(
+                streakService: resolver.resolve(FirebaseGroupStreakService.self)!,
+                groupService: resolver.resolve(FirebaseGroupService.self)!
+            )
+        }
+        .inObjectScope(.container)
+
+        // Update Group Streak Use Case
+        container.register(UpdateGroupStreakUseCaseProtocol.self) { resolver in
+            UpdateGroupStreakUseCase(
+                groupStreakRepository: resolver.resolve(GroupStreakRepository.self)!,
+                authRepository: resolver.resolve(AuthenticationRepository.self)!,
+                notificationRepository: resolver.resolve(NotificationRepository.self),
+                analytics: resolver.resolve(AnalyticsTracking.self)
+            )
+        }
+        .inObjectScope(.container)
+
+        // Pause Group Streak Use Case
+        container.register(PauseGroupStreakUseCaseProtocol.self) { resolver in
+            PauseGroupStreakUseCase(
+                groupStreakRepository: resolver.resolve(GroupStreakRepository.self)!,
+                groupRepository: resolver.resolve(GroupRepository.self)!,
+                authRepository: resolver.resolve(AuthenticationRepository.self)!,
+                analytics: resolver.resolve(AnalyticsTracking.self)
+            )
+        }
+        .inObjectScope(.container)
+
         // Offline Sync Queue - buffers workout completions when offline
         let pendingSyncQueue = PendingSyncQueue()
         container.register(PendingSyncQueue.self) { _ in pendingSyncQueue }
@@ -301,6 +336,7 @@ struct AppContainer {
                 userRepository: resolver.resolve(UserRepository.self)!,
                 authRepository: resolver.resolve(AuthenticationRepository.self)!,
                 historyRepository: resolver.resolve(WorkoutHistoryRepository.self)!,
+                updateGroupStreakUseCase: resolver.resolve(UpdateGroupStreakUseCaseProtocol.self),
                 pendingQueue: resolver.resolve(PendingSyncQueue.self),
                 analytics: resolver.resolve(AnalyticsTracking.self)
             )

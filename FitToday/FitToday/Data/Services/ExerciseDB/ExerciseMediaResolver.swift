@@ -71,6 +71,14 @@ protocol ExerciseMediaResolving: Sendable {
     for exerciseId: String,
     existingMedia: ExerciseMedia?
   ) -> ResolvedExerciseMedia
+
+  /// Resolve a mídia com timeout para evitar travamentos.
+  /// Retorna placeholder se o timeout for atingido.
+  func resolveMediaWithTimeout(
+    for exercise: WorkoutExercise,
+    context: MediaDisplayContext,
+    timeout: TimeInterval
+  ) async -> ResolvedExerciseMedia
 }
 
 /// Implementação do resolver de mídia que usa a API ExerciseDB.
@@ -364,6 +372,51 @@ actor ExerciseMediaResolver: ExerciseMediaResolving {
           _ = await self.resolveMedia(for: id, existingMedia: nil)
         }
       }
+    }
+  }
+
+  /// Resolve mídia com timeout para evitar travamentos.
+  /// Se o timeout for atingido, retorna placeholder sem travar o fluxo.
+  ///
+  /// - Parameters:
+  ///   - exercise: O exercício para resolver mídia
+  ///   - context: Contexto de exibição (thumbnail, card, detail)
+  ///   - timeout: Tempo máximo em segundos (padrão: 5s)
+  /// - Returns: Mídia resolvida ou placeholder em caso de timeout
+  func resolveMediaWithTimeout(
+    for exercise: WorkoutExercise,
+    context: MediaDisplayContext = .card,
+    timeout: TimeInterval = 5.0
+  ) async -> ResolvedExerciseMedia {
+    // Usar TaskGroup com race condition: resolução vs timeout
+    do {
+      return try await withThrowingTaskGroup(of: ResolvedExerciseMedia.self) { group in
+        // Task 1: Resolução real
+        group.addTask {
+          await self.resolveMedia(for: exercise, context: context)
+        }
+
+        // Task 2: Timeout
+        group.addTask {
+          try await Task.sleep(for: .seconds(timeout))
+          throw CancellationError()
+        }
+
+        // Retorna o primeiro resultado (resolução ou timeout)
+        if let result = try await group.next() {
+          // Cancelar a outra task
+          group.cancelAll()
+          return result
+        }
+
+        return .placeholder
+      }
+    } catch {
+      // Timeout ou cancelamento: retorna placeholder
+      #if DEBUG
+      print("[MediaResolver] ⏱️ Timeout (\(timeout)s) ao resolver mídia para '\(exercise.name)' - usando placeholder")
+      #endif
+      return .placeholder
     }
   }
 

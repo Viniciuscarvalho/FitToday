@@ -14,6 +14,7 @@ struct SyncWorkoutCompletionUseCase: Sendable {
     private let userRepository: UserRepository
     private let authRepository: AuthenticationRepository
     private let historyRepository: WorkoutHistoryRepository
+    private let updateGroupStreakUseCase: UpdateGroupStreakUseCaseProtocol?
     private let pendingQueue: PendingSyncQueue?
     private let analytics: AnalyticsTracking?
 
@@ -22,6 +23,7 @@ struct SyncWorkoutCompletionUseCase: Sendable {
         userRepository: UserRepository,
         authRepository: AuthenticationRepository,
         historyRepository: WorkoutHistoryRepository,
+        updateGroupStreakUseCase: UpdateGroupStreakUseCaseProtocol? = nil,
         pendingQueue: PendingSyncQueue? = nil,
         analytics: AnalyticsTracking? = nil
     ) {
@@ -29,6 +31,7 @@ struct SyncWorkoutCompletionUseCase: Sendable {
         self.userRepository = userRepository
         self.authRepository = authRepository
         self.historyRepository = historyRepository
+        self.updateGroupStreakUseCase = updateGroupStreakUseCase
         self.pendingQueue = pendingQueue
         self.analytics = analytics
     }
@@ -99,6 +102,31 @@ struct SyncWorkoutCompletionUseCase: Sendable {
             try await leaderboardRepository.updateStreak(challengeId: streakChallenge.id, userId: user.id, streakDays: streak)
             // Track streak sync event
             analytics?.trackWorkoutSynced(userId: user.id, groupId: groupId, challengeType: .streak, value: streak)
+        }
+
+        // 9. Update Group Streak (weekly 3-workout compliance)
+        if let updateGroupStreakUseCase {
+            do {
+                let result = try await updateGroupStreakUseCase.execute(
+                    userId: user.id,
+                    displayName: user.displayName,
+                    photoURL: user.photoURL
+                )
+
+                #if DEBUG
+                if result.userBecameCompliant {
+                    print("[SyncWorkoutCompletionUseCase] User became compliant for group streak")
+                }
+                if result.allMembersCompliant {
+                    print("[SyncWorkoutCompletionUseCase] All members are now compliant!")
+                }
+                #endif
+            } catch {
+                // Group streak update failure should not block the rest of the sync
+                #if DEBUG
+                print("[SyncWorkoutCompletionUseCase] Group streak update failed: \(error.localizedDescription)")
+                #endif
+            }
         }
     }
 
