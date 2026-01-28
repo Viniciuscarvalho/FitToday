@@ -64,6 +64,10 @@ private actor MockHealthKit: HealthKitServicing {
     func exportWorkout(plan: WorkoutPlan, completedAt: Date) async throws -> ExportedWorkoutReceipt {
         .init(workoutUUID: UUID(), exportedAt: Date())
     }
+
+    func fetchCaloriesForWorkout(workoutUUID: UUID, around date: Date) async throws -> Int? {
+        nil
+    }
 }
 
 private actor InMemoryHistoryRepo: WorkoutHistoryRepository {

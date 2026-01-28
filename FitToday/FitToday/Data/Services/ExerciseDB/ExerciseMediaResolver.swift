@@ -987,13 +987,63 @@ actor ExerciseMediaResolver: ExerciseMediaResolving {
     return commonTokens.count
   }
   
-  /// Tokeniza um nome removendo stopwords e normalizando.
+  /// Tokeniza um nome removendo stopwords, normalizando e aplicando stemming simples.
   private func tokenize(_ name: String) -> [String] {
     let stopwords = Set(["the", "a", "an", "of", "on", "with", "for", "and", "or"])
-    
+
     return name.lowercased()
       .components(separatedBy: CharacterSet.alphanumerics.inverted)
       .filter { $0.count >= 3 && !stopwords.contains($0) }
+      .map { stemWord($0) }
+  }
+
+  /// Stemming simples para normalizar singular/plural e variações comuns de exercícios.
+  /// Ex: "triceps" → "tricep", "dips" → "dip", "curls" → "curl"
+  private func stemWord(_ word: String) -> String {
+    // Mapeamentos específicos de exercícios (exceções)
+    let specificMappings: [String: String] = [
+      "triceps": "tricep",
+      "biceps": "bicep",
+      "glutes": "glute",
+      "quads": "quad",
+      "delts": "delt",
+      "lats": "lat",
+      "abs": "abs", // manter
+      "calves": "calf",
+      "lying": "lie",
+      "kneeling": "kneel",
+      "standing": "stand",
+      "seated": "seat",
+    ]
+
+    if let mapped = specificMappings[word] {
+      return mapped
+    }
+
+    // Regras gerais de stemming para inglês simples
+    var stemmed = word
+
+    // Remove sufixo "ing" (ex: "rowing" → "row")
+    if stemmed.hasSuffix("ing") && stemmed.count > 5 {
+      stemmed = String(stemmed.dropLast(3))
+      // Casos como "running" → "run" (remove duplicado final)
+      if stemmed.count >= 2 {
+        let last = stemmed.last!
+        let secondLast = stemmed[stemmed.index(stemmed.endIndex, offsetBy: -2)]
+        if last == secondLast && !"aeiou".contains(last) {
+          stemmed = String(stemmed.dropLast())
+        }
+      }
+    }
+    // Remove sufixo "s" ou "es" (ex: "dips" → "dip", "presses" → "press")
+    else if stemmed.hasSuffix("es") && stemmed.count > 4 {
+      stemmed = String(stemmed.dropLast(2))
+    }
+    else if stemmed.hasSuffix("s") && stemmed.count > 3 && !stemmed.hasSuffix("ss") {
+      stemmed = String(stemmed.dropLast())
+    }
+
+    return stemmed
   }
   
   /// Gera múltiplas queries de busca progressivas para aumentar as chances de encontrar o exercício.

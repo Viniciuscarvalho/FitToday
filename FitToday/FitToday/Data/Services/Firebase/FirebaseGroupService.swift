@@ -15,7 +15,7 @@ actor FirebaseGroupService {
 
     // MARK: - Create Group
 
-    func createGroup(name: String, ownerId: String) async throws -> FBGroup {
+    func createGroup(name: String, ownerId: String, ownerDisplayName: String = "", ownerPhotoURL: URL? = nil) async throws -> FBGroup {
         let groupRef = db.collection("groups").document()
 
         let group = FBGroup(
@@ -27,29 +27,81 @@ actor FirebaseGroupService {
             isActive: true
         )
 
-        // Use batch write to create group and add creator as first member atomically
+        // Calculate current week bounds for initial challenges
+        let (weekStart, weekEnd) = currentWeekBounds()
+
+        // Use batch write to create group, member, and initial challenges atomically
         let batch = db.batch()
 
         // Write group document
         try batch.setData(from: group, forDocument: groupRef)
 
-        // Add creator as admin member
+        // Add creator as admin member with their display name
         let memberRef = groupRef.collection("members").document(ownerId)
         let member = FBMember(
             id: ownerId,
-            displayName: "", // Will be updated when actual user info is available
-            photoURL: nil,
+            displayName: ownerDisplayName.isEmpty ? "User" : ownerDisplayName,
+            photoURL: ownerPhotoURL?.absoluteString,
             joinedAt: nil,
             role: GroupRole.admin.rawValue,
             isActive: true
         )
         try batch.setData(from: member, forDocument: memberRef)
 
+        // Create initial weekly challenges for the group
+        let checkInsRef = db.collection("challenges").document()
+        let checkInsChallenge = FBChallenge(
+            id: checkInsRef.documentID,
+            groupId: groupRef.documentID,
+            type: ChallengeType.checkIns.rawValue,
+            weekStartDate: weekStart,
+            weekEndDate: weekEnd,
+            isActive: true,
+            createdAt: nil
+        )
+        try batch.setData(from: checkInsChallenge, forDocument: checkInsRef)
+
+        let streakRef = db.collection("challenges").document()
+        let streakChallenge = FBChallenge(
+            id: streakRef.documentID,
+            groupId: groupRef.documentID,
+            type: ChallengeType.streak.rawValue,
+            weekStartDate: weekStart,
+            weekEndDate: weekEnd,
+            isActive: true,
+            createdAt: nil
+        )
+        try batch.setData(from: streakChallenge, forDocument: streakRef)
+
         try await batch.commit()
+
+        #if DEBUG
+        print("[GroupService] ✅ Created group '\(name)' with ID: \(groupRef.documentID)")
+        print("[GroupService]    Owner: \(ownerDisplayName) (\(ownerId))")
+        print("[GroupService]    Challenges created: checkIns, streak")
+        #endif
 
         // Fetch the created group to get server timestamps
         let snapshot = try await groupRef.getDocument()
         return try snapshot.data(as: FBGroup.self)
+    }
+
+    // MARK: - Week Bounds Helper
+
+    private func currentWeekBounds() -> (start: Timestamp, end: Timestamp) {
+        let calendar = Calendar.current
+        var components = calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: Date())
+        components.weekday = 2 // Monday (1 = Sunday, 2 = Monday)
+        components.hour = 0
+        components.minute = 0
+        components.second = 0
+
+        guard let start = calendar.date(from: components),
+              let end = calendar.date(byAdding: .day, value: 6, to: start) else {
+            return (Timestamp(date: Date()), Timestamp(date: Date()))
+        }
+
+        return (Timestamp(date: start), Timestamp(date: end))
     }
 
     // MARK: - Get Group

@@ -60,48 +60,138 @@ struct SyncWorkoutCompletionUseCase: Sendable {
     /// Internal sync method that can throw errors.
     /// Used by both execute() and queue processing.
     func performSync(entry: WorkoutHistoryEntry) async throws {
+        #if DEBUG
+        print("[SyncWorkoutCompletionUseCase] 🏋️ Starting sync for entry: \(entry.id)")
+        print("[SyncWorkoutCompletionUseCase]    Status: \(entry.status)")
+        print("[SyncWorkoutCompletionUseCase]    Duration: \(entry.durationMinutes ?? 0) min")
+        print("[SyncWorkoutCompletionUseCase]    Title: \(entry.title)")
+        #endif
+
         // 1. Skip if workout skipped (not completed)
-        guard entry.status == .completed else { return }
+        guard entry.status == .completed else {
+            #if DEBUG
+            print("[SyncWorkoutCompletionUseCase] ❌ Skipping: workout status is \(entry.status), not completed")
+            #endif
+            return
+        }
 
         // 2. Validate minimum duration (30 minutes)
         let workoutDuration = entry.durationMinutes ?? 0
         guard workoutDuration >= Self.minimumWorkoutMinutes else {
             #if DEBUG
-            print("[SyncWorkoutCompletionUseCase] Workout too short (\(workoutDuration) min), minimum is \(Self.minimumWorkoutMinutes) min")
+            print("[SyncWorkoutCompletionUseCase] ❌ Workout too short (\(workoutDuration) min), minimum is \(Self.minimumWorkoutMinutes) min")
             #endif
             return
         }
 
-        // 3. Verify authentication and group membership
-        guard let user = try await authRepository.currentUser(),
-              let groupId = user.currentGroupId else { return }
+        // 3. Verify authentication
+        guard let user = try await authRepository.currentUser() else {
+            #if DEBUG
+            print("[SyncWorkoutCompletionUseCase] ❌ Skipping: user not authenticated")
+            #endif
+            return
+        }
 
-        // 4. Respect privacy settings
-        guard user.privacySettings.shareWorkoutData else { return }
+        #if DEBUG
+        print("[SyncWorkoutCompletionUseCase] 👤 User authenticated: \(user.displayName) (\(user.id))")
+        print("[SyncWorkoutCompletionUseCase]    Photo URL: \(user.photoURL?.absoluteString ?? "nil")")
+        print("[SyncWorkoutCompletionUseCase]    Group ID: \(user.currentGroupId ?? "nil")")
+        print("[SyncWorkoutCompletionUseCase]    Privacy shareWorkoutData: \(user.privacySettings.shareWorkoutData)")
+        #endif
 
-        // 5. Update member weekly stats
+        // 4. Verify group membership
+        guard let groupId = user.currentGroupId else {
+            #if DEBUG
+            print("[SyncWorkoutCompletionUseCase] ❌ Skipping: user has no group (currentGroupId is nil)")
+            print("[SyncWorkoutCompletionUseCase] 💡 User needs to join or create a group to participate in challenges")
+            #endif
+            return
+        }
+
+        // 5. Respect privacy settings
+        guard user.privacySettings.shareWorkoutData else {
+            #if DEBUG
+            print("[SyncWorkoutCompletionUseCase] ❌ Skipping: user privacy settings block workout sharing")
+            #endif
+            return
+        }
+
+        #if DEBUG
+        print("[SyncWorkoutCompletionUseCase] ✅ All conditions met - syncing workout to group \(groupId)")
+        #endif
+
+        // 6. Update member weekly stats
         try await leaderboardRepository.updateMemberWeeklyStats(
             groupId: groupId,
             userId: user.id,
             workoutMinutes: workoutDuration
         )
 
+        #if DEBUG
+        print("[SyncWorkoutCompletionUseCase] 📊 Updated member weekly stats: +\(workoutDuration) min")
+        #endif
+
         // 6. Fetch current week's challenges
         let challenges = try await leaderboardRepository.getCurrentWeekChallenges(groupId: groupId)
 
+        #if DEBUG
+        print("[SyncWorkoutCompletionUseCase] 🏆 Found \(challenges.count) challenges for group \(groupId)")
+        for challenge in challenges {
+            print("[SyncWorkoutCompletionUseCase]    - \(challenge.type.rawValue) (id: \(challenge.id), active: \(challenge.isActive))")
+        }
+        #endif
+
         // 7. Update check-ins challenge
         if let checkInsChallenge = challenges.first(where: { $0.type == .checkIns }) {
-            try await leaderboardRepository.incrementCheckIn(challengeId: checkInsChallenge.id, userId: user.id)
+            #if DEBUG
+            print("[SyncWorkoutCompletionUseCase] 📝 Incrementing check-in for challenge \(checkInsChallenge.id)")
+            print("[SyncWorkoutCompletionUseCase]    User: \(user.displayName)")
+            print("[SyncWorkoutCompletionUseCase]    Photo: \(user.photoURL?.absoluteString ?? "nil")")
+            #endif
+
+            try await leaderboardRepository.incrementCheckIn(
+                challengeId: checkInsChallenge.id,
+                userId: user.id,
+                displayName: user.displayName,
+                photoURL: user.photoURL
+            )
             // Track check-ins sync event (value is incremented, so we don't have exact count here)
             analytics?.trackWorkoutSynced(userId: user.id, groupId: groupId, challengeType: .checkIns, value: 1)
+
+            #if DEBUG
+            print("[SyncWorkoutCompletionUseCase] ✅ Check-in incremented successfully")
+            #endif
+        } else {
+            #if DEBUG
+            print("[SyncWorkoutCompletionUseCase] ⚠️ No check-ins challenge found for this week")
+            #endif
         }
 
         // 8. Compute and update streak challenge
         if let streakChallenge = challenges.first(where: { $0.type == .streak }) {
             let streak = try await computeCurrentStreak(userId: user.id)
-            try await leaderboardRepository.updateStreak(challengeId: streakChallenge.id, userId: user.id, streakDays: streak)
+
+            #if DEBUG
+            print("[SyncWorkoutCompletionUseCase] 🔥 Updating streak to \(streak) days for challenge \(streakChallenge.id)")
+            #endif
+
+            try await leaderboardRepository.updateStreak(
+                challengeId: streakChallenge.id,
+                userId: user.id,
+                streakDays: streak,
+                displayName: user.displayName,
+                photoURL: user.photoURL
+            )
             // Track streak sync event
             analytics?.trackWorkoutSynced(userId: user.id, groupId: groupId, challengeType: .streak, value: streak)
+
+            #if DEBUG
+            print("[SyncWorkoutCompletionUseCase] ✅ Streak updated successfully")
+            #endif
+        } else {
+            #if DEBUG
+            print("[SyncWorkoutCompletionUseCase] ⚠️ No streak challenge found for this week")
+            #endif
         }
 
         // 9. Update Group Streak (weekly 3-workout compliance)

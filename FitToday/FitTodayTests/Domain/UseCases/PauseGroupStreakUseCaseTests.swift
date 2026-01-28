@@ -185,7 +185,7 @@ private class MockGroupRepository: GroupRepository {
     var groupToReturn: SocialGroup?
     var shouldThrowError: Error?
 
-    func createGroup(name: String, ownerId: String) async throws -> SocialGroup {
+    func createGroup(name: String, ownerId: String, ownerDisplayName: String, ownerPhotoURL: URL?) async throws -> SocialGroup {
         if let error = shouldThrowError { throw error }
         return groupToReturn ?? .fixture()
     }

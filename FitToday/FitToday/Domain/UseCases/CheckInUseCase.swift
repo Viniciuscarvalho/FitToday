@@ -119,7 +119,9 @@ struct CheckInUseCase: Sendable {
         // 8. Increment challenge counter
         try await leaderboardRepository.incrementCheckIn(
             challengeId: challenge.id,
-            userId: user.id
+            userId: user.id,
+            displayName: user.displayName,
+            photoURL: user.photoURL
         )
 
         return checkIn

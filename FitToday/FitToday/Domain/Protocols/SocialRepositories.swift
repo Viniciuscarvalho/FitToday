@@ -22,7 +22,7 @@ protocol AuthenticationRepository: Sendable {
 // MARK: - Group Repository
 
 protocol GroupRepository: Sendable {
-    func createGroup(name: String, ownerId: String) async throws -> SocialGroup
+    func createGroup(name: String, ownerId: String, ownerDisplayName: String, ownerPhotoURL: URL?) async throws -> SocialGroup
     func getGroup(_ groupId: String) async throws -> SocialGroup?
     func addMember(groupId: String, userId: String, displayName: String, photoURL: URL?) async throws
     func removeMember(groupId: String, userId: String) async throws
@@ -36,8 +36,8 @@ protocol GroupRepository: Sendable {
 protocol LeaderboardRepository: Sendable {
     func getCurrentWeekChallenges(groupId: String) async throws -> [Challenge]
     func observeLeaderboard(groupId: String, type: ChallengeType) -> AsyncStream<LeaderboardSnapshot>
-    func incrementCheckIn(challengeId: String, userId: String) async throws
-    func updateStreak(challengeId: String, userId: String, streakDays: Int) async throws
+    func incrementCheckIn(challengeId: String, userId: String, displayName: String, photoURL: URL?) async throws
+    func updateStreak(challengeId: String, userId: String, streakDays: Int, displayName: String, photoURL: URL?) async throws
     func updateMemberWeeklyStats(groupId: String, userId: String, workoutMinutes: Int) async throws
 }
 

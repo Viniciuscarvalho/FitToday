@@ -77,10 +77,15 @@ final class MockGroupRepository: GroupRepository, @unchecked Sendable {
     var capturedLeaveGroupId: String?
     var capturedDeleteGroupId: String?
 
-    func createGroup(name: String, ownerId: String) async throws -> SocialGroup {
+    var capturedOwnerDisplayName: String?
+    var capturedOwnerPhotoURL: URL?
+
+    func createGroup(name: String, ownerId: String, ownerDisplayName: String, ownerPhotoURL: URL?) async throws -> SocialGroup {
         createGroupCalled = true
         capturedGroupName = name
         capturedOwnerId = ownerId
+        capturedOwnerDisplayName = ownerDisplayName
+        capturedOwnerPhotoURL = ownerPhotoURL
         return try createGroupResult.get()
     }
 
@@ -162,12 +167,12 @@ final class MockLeaderboardRepository: LeaderboardRepository, @unchecked Sendabl
         }
     }
 
-    func incrementCheckIn(challengeId: String, userId: String) async throws {
+    func incrementCheckIn(challengeId: String, userId: String, displayName: String, photoURL: URL?) async throws {
         incrementCheckInCalled = true
         capturedChallengeId = challengeId
     }
 
-    func updateStreak(challengeId: String, userId: String, streakDays: Int) async throws {
+    func updateStreak(challengeId: String, userId: String, streakDays: Int, displayName: String, photoURL: URL?) async throws {
         updateStreakCalled = true
         capturedChallengeId = challengeId
         capturedStreakValue = streakDays

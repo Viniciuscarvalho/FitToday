@@ -209,13 +209,14 @@ extension WorkoutHistoryEntry {
     ) -> WorkoutHistoryEntry {
         WorkoutHistoryEntry(
             id: id,
+            date: Date(),
             planId: UUID(),
-            workoutName: "Test Workout",
+            title: "Test Workout",
             focus: .fullBody,
-            completedAt: Date(),
-            durationMinutes: durationMinutes,
             status: .completed,
-            caloriesBurned: 300
+            durationMinutes: durationMinutes,
+            caloriesBurned: 300,
+            source: .app
         )
     }
 

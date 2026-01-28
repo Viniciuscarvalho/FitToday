@@ -64,10 +64,8 @@ struct HomeView: View {
                         }
                     )
                 }
-
-                Spacer(minLength: FitTodaySpacing.xl)
             }
-            .padding(.bottom, FitTodaySpacing.xxl)
+            .padding(.bottom, FitTodaySpacing.md)
         }
         .background(FitTodayColor.background.ignoresSafeArea())
         .navigationBarHidden(true)

@@ -249,7 +249,9 @@ struct WorkoutPlanView: View {
             return
         }
 
-        let urls = plan.imageURLs
+        // OPTIMIZATION: Only prefetch first 3 images to save API requests
+        // Remaining images load on-demand when user views each exercise
+        let urls = Array(plan.imageURLs.prefix(3))
         guard !urls.isEmpty else { return }
 
         isPrefetchingImages = true

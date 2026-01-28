@@ -36,6 +36,10 @@ enum HomeJourneyState: Equatable {
     private(set) var historyEntries: [WorkoutHistoryEntry] = []
     var errorMessage: ErrorMessage? // ErrorPresenting protocol
 
+    // User info - stored properties for proper @Observable tracking
+    private(set) var userName: String?
+    private(set) var userPhotoURL: URL?
+
     private let resolver: Resolver
     private let dailyStateManager = DailyWorkoutStateManager.shared
 
@@ -69,19 +73,6 @@ enum HomeJourneyState: Equatable {
         default:
             return "home.greeting.evening".localized
         }
-    }
-
-    // MARK: - User Info (from Social Auth)
-
-    var userName: String? {
-        UserDefaults.standard.string(forKey: "socialUserDisplayName")
-    }
-
-    var userPhotoURL: URL? {
-        guard let urlString = UserDefaults.standard.string(forKey: "socialUserPhotoURL") else {
-            return nil
-        }
-        return URL(string: urlString)
     }
 
     var currentDateFormatted: String {
@@ -212,6 +203,9 @@ enum HomeJourneyState: Equatable {
     private func loadUserData() async {
         journeyState = .loading
 
+        // Load user info from UserDefaults or Firebase Auth
+        await loadUserInfo()
+
         guard let profileRepo = resolver.resolve(UserProfileRepository.self),
               let entitlementRepo = resolver.resolve(EntitlementRepository.self) else {
             journeyState = .error(message: "Erro de configuração do app.")
@@ -282,7 +276,7 @@ enum HomeJourneyState: Equatable {
                 #endif
             }
         }
-        
+
         // Carregar programas "Top for You" (até 4) usando o recomendador
         if let programRepo = resolver.resolve(ProgramRepository.self) {
             do {
@@ -298,6 +292,76 @@ enum HomeJourneyState: Equatable {
                 print("[Home] Erro ao carregar programas: \(error)")
                 #endif
             }
+        }
+    }
+
+    /// Loads user display name and photo from UserDefaults or Firebase Auth.
+    /// On app launch, syncs Firebase Auth user data to UserDefaults if not already cached.
+    /// Always refreshes from Firebase to ensure fresh data.
+    private func loadUserInfo() async {
+        // First, try to load from UserDefaults (fast path for immediate display)
+        let cachedName = UserDefaults.standard.string(forKey: "socialUserDisplayName")
+        let cachedPhotoURLString = UserDefaults.standard.string(forKey: "socialUserPhotoURL")
+
+        // Set cached values immediately for fast UI update
+        if let name = cachedName, !name.isEmpty {
+            userName = name
+            #if DEBUG
+            print("[Home] 👤 Loaded cached name: \(name)")
+            #endif
+        }
+        if let urlString = cachedPhotoURLString, let url = URL(string: urlString) {
+            userPhotoURL = url
+            #if DEBUG
+            print("[Home] 🖼️ Loaded cached photo URL: \(urlString)")
+            #endif
+        }
+
+        // Always try to refresh from Firebase to get latest data (photo might be updated)
+        guard let authRepo = resolver.resolve(AuthenticationRepository.self) else {
+            #if DEBUG
+            print("[Home] ⚠️ AuthenticationRepository not available")
+            #endif
+            return
+        }
+
+        do {
+            if let currentUser = try await authRepo.currentUser() {
+                // Update local state with fresh data from Firebase
+                let newName = currentUser.displayName
+                let newPhotoURL = currentUser.photoURL
+
+                // Only update if we got valid data (displayName is never empty from Firebase)
+                if !newName.isEmpty && newName != "User" {
+                    userName = newName
+                    UserDefaults.standard.set(newName, forKey: "socialUserDisplayName")
+                } else if userName == nil || userName?.isEmpty == true {
+                    // Fallback: use Firebase displayName even if "User"
+                    userName = newName
+                    UserDefaults.standard.set(newName, forKey: "socialUserDisplayName")
+                }
+
+                if let photoURL = newPhotoURL {
+                    userPhotoURL = photoURL
+                    UserDefaults.standard.set(photoURL.absoluteString, forKey: "socialUserPhotoURL")
+                }
+
+                #if DEBUG
+                print("[Home] ✅ User session loaded from Firebase:")
+                print("[Home]    Name: \(newName)")
+                print("[Home]    Photo: \(newPhotoURL?.absoluteString ?? "nil")")
+                print("[Home]    GroupId: \(currentUser.currentGroupId ?? "nil")")
+                #endif
+            } else {
+                #if DEBUG
+                print("[Home] ℹ️ No authenticated user found in Firebase")
+                #endif
+            }
+        } catch {
+            #if DEBUG
+            print("[Home] ❌ Failed to fetch current user from Firebase: \(error)")
+            #endif
+            // Keep using cached values if available
         }
     }
 

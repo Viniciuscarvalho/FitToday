@@ -297,17 +297,16 @@ actor ExerciseDBBlockEnricher: ExerciseDBBlockEnriching {
       "Respire adequadamente."
     ]
 
+    // NOTE: Não definimos media aqui - o ExerciseMediaResolver resolve
+    // as URLs corretas usando o endpoint /image da API quando necessário.
+    // URLs construídas manualmente (GitHub raw) não funcionam e retornam 404.
     return WorkoutExercise(
       id: apiExercise.id,
       name: apiExercise.name,
       mainMuscle: targetMuscle,
       equipment: equipment,
       instructions: instructions,
-      media: ExerciseMedia(
-        imageURL: URL(string: "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/images/\(apiExercise.name.replacingOccurrences(of: " ", with: "-")).png"),
-        gifURL: URL(string: "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/gifs/\(apiExercise.name.replacingOccurrences(of: " ", with: "-")).gif"),
-        source: "ExerciseDB"
-      )
+      media: nil
     )
   }
 
