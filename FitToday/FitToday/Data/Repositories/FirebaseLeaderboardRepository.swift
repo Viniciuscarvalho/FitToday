@@ -27,26 +27,22 @@ final class FirebaseLeaderboardRepository: LeaderboardRepository, @unchecked Sen
         leaderboardService.observeLeaderboard(groupId: groupId, type: type)
     }
 
-    func incrementCheckIn(challengeId: String, userId: String) async throws {
-        // Note: In a real implementation, we'd need to get user info from AuthRepository
-        // For MVP, using minimal info
+    func incrementCheckIn(challengeId: String, userId: String, displayName: String, photoURL: URL?) async throws {
         try await leaderboardService.incrementCheckIn(
             challengeId: challengeId,
             userId: userId,
-            displayName: "User", // TODO: Get from AuthRepository
-            photoURL: nil
+            displayName: displayName,
+            photoURL: photoURL
         )
     }
 
-    func updateStreak(challengeId: String, userId: String, streakDays: Int) async throws {
-        // Note: In a real implementation, we'd need to get user info from AuthRepository
-        // For MVP, using minimal info
+    func updateStreak(challengeId: String, userId: String, streakDays: Int, displayName: String, photoURL: URL?) async throws {
         try await leaderboardService.updateStreak(
             challengeId: challengeId,
             userId: userId,
             streakDays: streakDays,
-            displayName: "User", // TODO: Get from AuthRepository
-            photoURL: nil
+            displayName: displayName,
+            photoURL: photoURL
         )
     }
 

@@ -175,13 +175,15 @@ struct ProgramsView: View {
             .padding(.vertical, FitTodaySpacing.xl)
         } else {
             VStack(spacing: FitTodaySpacing.md) {
-                ForEach(filteredPrograms(viewModel.programs)) { program in
+                ForEach(filteredPrograms(viewModel.programs), id: \.id) { program in
+                    let programId = program.id
                     ProgramCategoryCard(
                         program: program,
                         category: categoryForProgram(program)
                     ) {
-                        router.push(.programDetail(program.id), on: .programs)
+                        router.push(.programDetail(programId), on: .programs)
                     }
+                    .id(programId)
                 }
             }
             .padding(.horizontal)
@@ -323,6 +325,7 @@ struct ProgramCategoryCard: View {
                 .background(FitTodayColor.surface)
             }
             .clipShape(RoundedRectangle(cornerRadius: 20))
+            .contentShape(RoundedRectangle(cornerRadius: 20))
             .overlay(
                 RoundedRectangle(cornerRadius: 20)
                     .stroke(FitTodayColor.outline.opacity(0.3), lineWidth: 1)

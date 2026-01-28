@@ -76,9 +76,10 @@ final class CreateGroupUseCaseTests: XCTestCase {
         XCTAssertEqual(mockUserRepo.capturedCurrentGroupId, "new-group-id")
     }
 
-    func test_execute_addsUserAsMember() async throws {
+    func test_execute_passesOwnerInfoToCreateGroup() async throws {
         // Given
         let authenticatedUser = SocialUser.fixture(id: "user1", displayName: "João", currentGroupId: nil)
+        authenticatedUser.photoURL = URL(string: "https://example.com/photo.jpg")
         mockAuthRepo.currentUserResult = authenticatedUser
 
         let createdGroup = SocialGroup.fixture(id: "group1", createdBy: "user1")
@@ -88,9 +89,9 @@ final class CreateGroupUseCaseTests: XCTestCase {
         _ = try await sut.execute(name: "Test Group")
 
         // Then
-        XCTAssertTrue(mockGroupRepo.addMemberCalled)
-        XCTAssertEqual(mockGroupRepo.capturedAddMemberGroupId, "group1")
-        XCTAssertEqual(mockGroupRepo.capturedAddMemberUserId, "user1")
+        XCTAssertTrue(mockGroupRepo.createGroupCalled)
+        XCTAssertEqual(mockGroupRepo.capturedOwnerDisplayName, "João")
+        // photoURL is passed to createGroup along with member creation
     }
 
     func test_execute_tracksAnalyticsEvent() async throws {

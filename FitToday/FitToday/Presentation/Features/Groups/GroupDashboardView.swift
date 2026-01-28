@@ -37,13 +37,25 @@ struct GroupDashboardView: View {
     @State private var showLeaveConfirmation = false
     @State private var selectedTab: GroupTab = .feed
     @State private var feedViewModel: CheckInFeedViewModel?
+    @State private var streakViewModel: GroupStreakViewModel?
+    @State private var showStreakDetail = false
 
     var body: some View {
-        VStack(spacing: 0) {
-            // Group Header
-            GroupHeaderView(group: group, membersCount: members.count)
+        ZStack {
+            VStack(spacing: 0) {
+                // Group Header
+                GroupHeaderView(group: group, membersCount: members.count)
 
-            // Tab selector
+                // Group Streak Card
+                if let streakVM = streakViewModel, let status = streakVM.streakStatus {
+                    GroupStreakCardView(status: status) {
+                        showStreakDetail = true
+                    }
+                    .padding(.horizontal)
+                    .padding(.vertical, 8)
+                }
+
+                // Tab selector
             HStack(spacing: 0) {
                 ForEach(GroupTab.allCases, id: \.self) { tab in
                     Button {
@@ -89,15 +101,44 @@ struct GroupDashboardView: View {
             .tabViewStyle(.page(indexDisplayMode: .never))
 
             // Action buttons
-            GroupActionsBar(
-                isAdmin: isAdmin,
-                onInviteTapped: onInviteTapped,
-                onManageTapped: onManageGroupTapped,
-                onLeaveTapped: { showLeaveConfirmation = true }
-            )
+                GroupActionsBar(
+                    isAdmin: isAdmin,
+                    onInviteTapped: onInviteTapped,
+                    onManageTapped: onManageGroupTapped,
+                    onLeaveTapped: { showLeaveConfirmation = true }
+                )
+            }
+
+            // Milestone Overlay
+            if let streakVM = streakViewModel, streakVM.showMilestoneOverlay,
+               let milestone = streakVM.reachedMilestone,
+               let status = streakVM.streakStatus {
+                MilestoneOverlayView(
+                    milestone: milestone,
+                    groupName: status.groupName,
+                    topPerformers: status.topPerformers,
+                    onShare: {
+                        // Share functionality
+                    },
+                    onDismiss: {
+                        streakVM.dismissMilestoneOverlay()
+                    }
+                )
+            }
         }
         .task {
             initializeFeedViewModel()
+            initializeStreakViewModel()
+        }
+        .sheet(isPresented: $showStreakDetail) {
+            if let streakVM = streakViewModel {
+                NavigationStack {
+                    GroupStreakDetailView(viewModel: streakVM)
+                }
+            }
+        }
+        .onDisappear {
+            streakViewModel?.stopObserving()
         }
         .confirmationDialog(
             "Sair do Grupo",
@@ -119,6 +160,11 @@ struct GroupDashboardView: View {
             checkInRepository: checkInRepo,
             groupId: group.id
         )
+    }
+
+    private func initializeStreakViewModel() {
+        streakViewModel = GroupStreakViewModel(resolver: resolver)
+        streakViewModel?.startObserving(groupId: group.id)
     }
 }
 

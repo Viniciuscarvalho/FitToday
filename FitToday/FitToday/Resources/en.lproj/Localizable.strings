@@ -146,6 +146,41 @@
 "settings.logout" = "Log Out";
 "settings.delete_account" = "Delete Account";
 "settings.version" = "Version %@";
+"settings.profile" = "Profile";
+"settings.edit_profile" = "Edit Training Profile";
+"settings.redo_questionnaire" = "Redo Daily Questionnaire";
+"settings.privacy_settings" = "Privacy Settings";
+"settings.restore_purchases" = "Restore Purchases";
+"settings.help_support" = "Help & Support";
+"settings.api_key" = "API Key Settings";
+"settings.restore_success" = "Your subscription has been restored successfully!";
+"settings.restore_not_found" = "No subscription found to restore.";
+
+// MARK: - Pro Settings
+"settings.pro.member" = "Pro Member";
+"settings.pro.free" = "Free Plan";
+"settings.pro.title" = "FitToday Pro";
+"settings.pro.access_all" = "You have access to all premium features";
+"settings.pro.cloud_sync" = "Cloud Sync";
+"settings.pro.apple_health" = "Apple Health";
+"settings.pro.ai_workouts" = "AI Workouts";
+"settings.pro.manage" = "Manage Subscription";
+"settings.pro.upgrade" = "Upgrade to Pro";
+"settings.pro.unlock_description" = "Unlock unlimited AI workouts, cloud sync, and Apple Health integration";
+"settings.pro.unlimited_ai" = "Unlimited AI Workouts";
+"settings.pro.cloud_devices" = "Cloud Sync Across Devices";
+"settings.pro.health_integration" = "Apple Health Integration";
+"settings.pro.try_free" = "Try Pro Free";
+"settings.pro.connected" = "Connected";
+"settings.pro.connect_sync" = "Connect to sync workouts";
+
+// MARK: - Privacy Settings
+"privacy.title" = "Privacy Settings";
+"privacy.share_workouts" = "Share workouts with groups";
+"privacy.data_sharing" = "Data Sharing";
+"privacy.sync_health" = "Sync with Apple Health";
+"privacy.apple_health" = "Apple Health";
+"privacy.priority_message" = "Your privacy is our priority";
 
 // MARK: - Onboarding
 "onboarding.welcome.title" = "Welcome to FitToday";
@@ -272,3 +307,13 @@
 "error.generic" = "Something went wrong. Please try again.";
 "error.no_profile" = "Profile not found. Please complete setup.";
 "error.workout_generation" = "Could not generate workout. Please try again.";
+
+// MARK: - Notifications
+"notifications.title" = "Notifications";
+"notifications.empty.title" = "No notifications yet";
+"notifications.empty.subtitle" = "You'll see challenge updates and group activity here";
+"notifications.section.today" = "Today";
+"notifications.section.yesterday" = "Yesterday";
+"notifications.section.earlier" = "Earlier";
+"notifications.mark_all_read" = "Mark all read";
+"notifications.error.config" = "Configuration error: notification services not registered.";

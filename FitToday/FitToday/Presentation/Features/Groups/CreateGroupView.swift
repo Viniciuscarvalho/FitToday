@@ -79,7 +79,7 @@ struct CreateGroupView: View {
 // MARK: - Preview Mocks
 
 private final class MockGroupRepository: GroupRepository, @unchecked Sendable {
-    func createGroup(name: String, ownerId: String) async throws -> SocialGroup {
+    func createGroup(name: String, ownerId: String, ownerDisplayName: String, ownerPhotoURL: URL?) async throws -> SocialGroup {
         SocialGroup(id: "test", name: name, createdAt: Date(), createdBy: ownerId, memberCount: 1, isActive: true)
     }
     func getGroup(_ groupId: String) async throws -> SocialGroup? { nil }

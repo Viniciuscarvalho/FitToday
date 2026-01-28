@@ -12,6 +12,14 @@ enum WorkoutStatus: String, Codable, CaseIterable, Sendable {
     case skipped
 }
 
+/// Fonte do registro de treino
+/// - app: Treino gerado e completado pelo FitToday
+/// - appleHealth: Treino importado do Apple Health (feito fora do app)
+enum WorkoutSource: String, Codable, CaseIterable, Sendable {
+    case app
+    case appleHealth = "apple_health"
+}
+
 struct WorkoutHistoryEntry: Codable, Hashable, Sendable, Identifiable {
     var id: UUID
     var date: Date
@@ -38,6 +46,9 @@ struct WorkoutHistoryEntry: Codable, Hashable, Sendable, Identifiable {
     // Lista de exercícios completados
     var completedExercises: [CompletedExercise]?
 
+    // Fonte do treino (app ou Apple Health)
+    var source: WorkoutSource
+
     init(
         id: UUID = .init(),
         date: Date = .init(),
@@ -52,7 +63,8 @@ struct WorkoutHistoryEntry: Codable, Hashable, Sendable, Identifiable {
         healthKitWorkoutUUID: UUID? = nil,
         workoutPlan: WorkoutPlan? = nil,
         userRating: WorkoutRating? = nil,
-        completedExercises: [CompletedExercise]? = nil
+        completedExercises: [CompletedExercise]? = nil,
+        source: WorkoutSource = .app
     ) {
         self.id = id
         self.date = date
@@ -68,6 +80,7 @@ struct WorkoutHistoryEntry: Codable, Hashable, Sendable, Identifiable {
         self.workoutPlan = workoutPlan
         self.userRating = userRating
         self.completedExercises = completedExercises
+        self.source = source
     }
 }
 

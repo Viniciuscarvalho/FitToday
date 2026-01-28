@@ -47,7 +47,8 @@ struct WorkoutPrompt: Sendable, Equatable {
       String(metadata.energyLevel),
       metadata.sorenessLevel.rawValue,
       metadata.blueprintVersion.rawValue,
-      metadata.feedbackHash  // NOVO: incluir hash do feedback para invalidar cache quando ajuste mudar
+      metadata.feedbackHash,  // Hash do feedback para invalidar cache quando ajuste mudar
+      metadata.historyHash    // NOVO: hash do histórico para variar com base em treinos recentes
     ]
     return Hashing.sha256(components.joined(separator: "|"))
   }
@@ -65,6 +66,7 @@ struct PromptMetadata: Sendable, Equatable {
   let blueprintVersion: BlueprintVersion
   let contextSource: String // "personal-active/emagrecimento.md" etc.
   let feedbackHash: String // Hash do ajuste de intensidade baseado em feedback
+  let historyHash: String  // Hash dos últimos treinos para diversificar cache
   let timestamp: Date
 
   var logDescription: String {
@@ -73,7 +75,7 @@ struct PromptMetadata: Sendable, Equatable {
     level=\(level.rawValue) focus=\(focus.rawValue) \
     energy=\(energyLevel) soreness=\(sorenessLevel.rawValue) \
     seed=\(variationSeed) version=\(blueprintVersion.rawValue) \
-    context=\(contextSource) feedback=\(feedbackHash)
+    context=\(contextSource) feedback=\(feedbackHash) history=\(historyHash)
     """
   }
 }
@@ -242,6 +244,9 @@ struct WorkoutPromptAssembler: WorkoutPromptAssembling, Sendable {
     // Generate feedback hash from adjustment values
     let feedbackHash = generateFeedbackHash(intensityAdjustment)
 
+    // Generate history hash from recent workouts for cache diversity
+    let historyHash = generateHistoryHash(previousWorkouts)
+
     let metadata = PromptMetadata(
       goal: profile.mainGoal,
       structure: profile.availableStructure,
@@ -253,6 +258,7 @@ struct WorkoutPromptAssembler: WorkoutPromptAssembling, Sendable {
       blueprintVersion: blueprint.version,
       contextSource: contextSource,
       feedbackHash: feedbackHash,
+      historyHash: historyHash,
       timestamp: Date()
     )
 
@@ -276,6 +282,20 @@ struct WorkoutPromptAssembler: WorkoutPromptAssembling, Sendable {
       String(adjustment.restAdjustment)
     ]
     return components.joined(separator: "-")
+  }
+
+  /// Gera hash dos últimos treinos para diversificar a cache key
+  /// Isso garante que mesmo com seed similar, históricos diferentes gerem cache keys diferentes
+  private func generateHistoryHash(_ workouts: [WorkoutPlan]) -> String {
+    guard !workouts.isEmpty else { return "no-history" }
+
+    // Usar IDs dos últimos 3 treinos para gerar hash
+    let recentIds = workouts.prefix(3)
+      .map { $0.id.uuidString }
+      .joined(separator: "-")
+
+    // Usar hash simples para não ter strings muito longas
+    return String(abs(recentIds.hashValue))
   }
   
   // MARK: - System Message
@@ -477,34 +497,34 @@ struct WorkoutPromptAssembler: WorkoutPromptAssembling, Sendable {
   }
   
   // MARK: - Catalog Formatting
-  
+
   private func formatCatalog(blocks: [WorkoutBlock], blueprint: WorkoutBlueprint) -> String {
     // Filtrar blocos compatíveis com equipamento
     let allowedEquipment = Set(blueprint.equipmentConstraints.allowedEquipment)
-    
+
     let compatibleBlocks = blocks.filter { block in
       block.equipmentOptions.contains { allowedEquipment.contains($0) }
     }
-    
+
     // USAR A SEED PARA VARIAR A SELEÇÃO E ORDEM DOS BLOCOS
     var generator = SeededRandomGenerator(seed: blueprint.variationSeed)
-    
+
     // Embaralhar blocos de forma determinística
     var shuffledBlocks = compatibleBlocks
     for i in (1..<shuffledBlocks.count).reversed() {
       let j = generator.nextInt(in: 0...i)
       shuffledBlocks.swapAt(i, j)
     }
-    
+
     // Selecionar blocos variados baseados na seed
     let selectedBlocks = generator.selectElements(
       from: shuffledBlocks,
       count: min(Self.maxBlocksInCatalog, shuffledBlocks.count)
     )
-    
+
     // Agrupar exercícios por grupo muscular para facilitar seleção
     var exercisesByMuscle: [MuscleGroup: [WorkoutExercise]] = [:]
-    
+
     for block in selectedBlocks {
       // EMBARALHAR EXERCÍCIOS DENTRO DO BLOCO USANDO A SEED
       var shuffledExercises = block.exercises
@@ -512,30 +532,81 @@ struct WorkoutPromptAssembler: WorkoutPromptAssembling, Sendable {
         let j = generator.nextInt(in: 0...i)
         shuffledExercises.swapAt(i, j)
       }
-      
+
       for exercise in shuffledExercises.prefix(Self.maxExercisesPerBlock) {
         exercisesByMuscle[exercise.mainMuscle, default: []].append(exercise)
       }
     }
-    
+
     var catalogLines: [String] = []
-    catalogLines.append("Use APENAS exercícios desta lista. Escolha exercícios VARIADOS para cada fase.")
+
+    // CRITICAL INSTRUCTION - Reforçar uso de nomes exatos
+    catalogLines.append("⚠️ CRITICAL: You MUST use EXACTLY these exercise names in your response.")
+    catalogLines.append("Any exercise name not in this list will be REJECTED.")
+    catalogLines.append("Copy the exercise names EXACTLY as written below (including capitalization).")
     catalogLines.append("")
-    
+    catalogLines.append("## AVAILABLE EXERCISES (use EXACT names)")
+    catalogLines.append("")
+
     // Ordenar grupos musculares para consistência
     let sortedMuscles = exercisesByMuscle.keys.sorted { $0.rawValue < $1.rawValue }
-    
+
+    // Limitar a 150 exercícios total no prompt
+    var totalExercises = 0
+    let maxTotalExercises = 150
+
     for muscle in sortedMuscles {
       guard let exercises = exercisesByMuscle[muscle], !exercises.isEmpty else { continue }
-      
-      catalogLines.append("[\(muscle.rawValue.uppercased())]")
-      for exercise in exercises {
-        catalogLines.append("• \(exercise.name) (\(exercise.equipment.rawValue))")
+      guard totalExercises < maxTotalExercises else { break }
+
+      catalogLines.append("### \(muscle.rawValue.capitalized)")
+
+      // Limitar exercícios por grupo para não exceder total
+      let remainingSlots = maxTotalExercises - totalExercises
+      let exercisesToInclude = exercises.prefix(min(20, remainingSlots))
+
+      for exercise in exercisesToInclude {
+        // Formato: "- Barbell Bench Press (barbell)" - mais claro e fácil de copiar
+        catalogLines.append("- \(exercise.name) (\(exercise.equipment.rawValue))")
+        totalExercises += 1
       }
       catalogLines.append("")
     }
-    
+
+    catalogLines.append("---")
+    catalogLines.append("Total: \(totalExercises) exercises available")
+    catalogLines.append("REMINDER: Use ONLY names from this list. Do NOT invent or modify exercise names.")
+
     return catalogLines.joined(separator: "\n")
+  }
+
+  // MARK: - Exercise Name Validation
+
+  /// Valida se todos os exercícios da resposta existem no catálogo
+  /// Retorna lista de exercícios não encontrados (para logging/debug)
+  static func validateExerciseNames(
+    response: OpenAIWorkoutResponse,
+    availableExercises: [WorkoutExercise]
+  ) -> [String] {
+    let availableNames = Set(availableExercises.map { $0.name.lowercased() })
+    var notFound: [String] = []
+
+    for phase in response.phases {
+      guard let exercises = phase.exercises else { continue }
+      for exercise in exercises {
+        let nameLower = exercise.name.lowercased()
+        // Verificar match exato ou parcial
+        let hasMatch = availableNames.contains(nameLower) ||
+          availableNames.contains { available in
+            available.contains(nameLower) || nameLower.contains(available)
+          }
+        if !hasMatch {
+          notFound.append(exercise.name)
+        }
+      }
+    }
+
+    return notFound
   }
   
   // MARK: - Guidelines Loading

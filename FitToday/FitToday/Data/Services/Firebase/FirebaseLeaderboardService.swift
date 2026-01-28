@@ -15,8 +15,15 @@ actor FirebaseLeaderboardService {
 
     // MARK: - Get Current Week Challenges
 
+    /// Fetches current week's challenges for a group.
+    /// If no challenges exist for this week, creates them automatically.
     func getCurrentWeekChallenges(groupId: String) async throws -> [FBChallenge] {
         let (weekStart, weekEnd) = currentWeekBounds()
+
+        #if DEBUG
+        print("[LeaderboardService] 🔍 Fetching challenges for group \(groupId)")
+        print("[LeaderboardService]    Week: \(weekStart.dateValue()) to \(weekEnd.dateValue())")
+        #endif
 
         let snapshot = try await db.collection("challenges")
             .whereField("groupId", isEqualTo: groupId)
@@ -24,9 +31,75 @@ actor FirebaseLeaderboardService {
             .whereField("isActive", isEqualTo: true)
             .getDocuments()
 
-        return try snapshot.documents.compactMap { doc in
+        var challenges = try snapshot.documents.compactMap { doc in
             try doc.data(as: FBChallenge.self)
         }
+
+        #if DEBUG
+        print("[LeaderboardService] 📊 Found \(challenges.count) existing challenges")
+        #endif
+
+        // If no challenges exist for this week, create them automatically
+        if challenges.isEmpty {
+            #if DEBUG
+            print("[LeaderboardService] ⚠️ No challenges found - creating weekly challenges")
+            #endif
+
+            challenges = try await ensureWeeklyChallengesExist(groupId: groupId, weekStart: weekStart, weekEnd: weekEnd)
+        }
+
+        return challenges
+    }
+
+    // MARK: - Ensure Weekly Challenges Exist
+
+    /// Creates check-ins and streak challenges for the current week if they don't exist.
+    /// This ensures challenges are always available for workout syncing.
+    private func ensureWeeklyChallengesExist(
+        groupId: String,
+        weekStart: Timestamp,
+        weekEnd: Timestamp
+    ) async throws -> [FBChallenge] {
+        let batch = db.batch()
+        var createdChallenges: [FBChallenge] = []
+
+        // Create check-ins challenge
+        let checkInsRef = db.collection("challenges").document()
+        let checkInsChallenge = FBChallenge(
+            id: checkInsRef.documentID,
+            groupId: groupId,
+            type: ChallengeType.checkIns.rawValue,
+            weekStartDate: weekStart,
+            weekEndDate: weekEnd,
+            isActive: true,
+            createdAt: nil // ServerTimestamp
+        )
+        try batch.setData(from: checkInsChallenge, forDocument: checkInsRef)
+        createdChallenges.append(checkInsChallenge)
+
+        // Create streak challenge
+        let streakRef = db.collection("challenges").document()
+        let streakChallenge = FBChallenge(
+            id: streakRef.documentID,
+            groupId: groupId,
+            type: ChallengeType.streak.rawValue,
+            weekStartDate: weekStart,
+            weekEndDate: weekEnd,
+            isActive: true,
+            createdAt: nil // ServerTimestamp
+        )
+        try batch.setData(from: streakChallenge, forDocument: streakRef)
+        createdChallenges.append(streakChallenge)
+
+        try await batch.commit()
+
+        #if DEBUG
+        print("[LeaderboardService] ✅ Created \(createdChallenges.count) weekly challenges:")
+        print("[LeaderboardService]    - checkIns: \(checkInsRef.documentID)")
+        print("[LeaderboardService]    - streak: \(streakRef.documentID)")
+        #endif
+
+        return createdChallenges
     }
 
     // MARK: - Observe Leaderboard (Real-Time)

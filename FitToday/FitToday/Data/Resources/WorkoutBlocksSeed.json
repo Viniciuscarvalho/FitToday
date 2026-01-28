@@ -3,10 +3,22 @@
     "id": "upper_push_basic",
     "group": "upper",
     "level": "beginner",
-    "compatibleStructures": ["fullGym", "basicGym"],
-    "equipmentOptions": ["machine", "dumbbell"],
-    "suggestedSets": [3, 4],
-    "suggestedReps": [10, 12],
+    "compatibleStructures": [
+      "fullGym",
+      "basicGym"
+    ],
+    "equipmentOptions": [
+      "machine",
+      "dumbbell"
+    ],
+    "suggestedSets": [
+      3,
+      4
+    ],
+    "suggestedReps": [
+      10,
+      12
+    ],
     "restInterval": 60,
     "exercises": [
       {
@@ -18,12 +30,7 @@
           "Sente-se com as costas apoiadas e antebraços nas almofadas.",
           "Una os braços controlando o movimento e contraindo o peito.",
           "Retorne lentamente à posição inicial."
-        ],
-        "media": {
-          "imageURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/images/Lever-Pec-Deck-Fly-Chest.png",
-          "gifURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/gifs/Lever-Pec-Deck-Fly-Chest.gif",
-          "source": "ExerciseDB"
-        }
+        ]
       },
       {
         "id": "exr_dumbbell_shoulder_press",
@@ -34,12 +41,7 @@
           "Pressione os halteres acima da cabeça mantendo o tronco estável.",
           "Desça controlando até formar 90° nos cotovelos.",
           "Evite estender completamente os braços para preservar as articulações."
-        ],
-        "media": {
-          "imageURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/images/Dumbbell-Shoulder-Press.png",
-          "gifURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/gifs/Dumbbell-Shoulder-Press.gif",
-          "source": "ExerciseDB"
-        }
+        ]
       },
       {
         "id": "exr_incline_dumbbell_press",
@@ -50,12 +52,7 @@
           "Ajuste o banco em 30-45 graus de inclinação.",
           "Pressione os halteres acima do peito superior.",
           "Controle a descida e mantenha cotovelos a 45 graus."
-        ],
-        "media": {
-          "imageURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/images/Incline-Dumbbell-Press.png",
-          "gifURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/gifs/Incline-Dumbbell-Press.gif",
-          "source": "ExerciseDB"
-        }
+        ]
       },
       {
         "id": "exr_tricep_dips_assisted",
@@ -66,12 +63,7 @@
           "Apoie-se nas barras paralelas com auxílio da máquina.",
           "Desça controlando até cotovelos formarem 90 graus.",
           "Empurre para cima focando nos tríceps."
-        ],
-        "media": {
-          "imageURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/images/Assisted-Tricep-Dips.png",
-          "gifURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/gifs/Assisted-Tricep-Dips.gif",
-          "source": "ExerciseDB"
-        }
+        ]
       }
     ]
   },
@@ -79,10 +71,21 @@
     "id": "upper_push_bodyweight",
     "group": "upper",
     "level": "beginner",
-    "compatibleStructures": ["bodyweight", "homeDumbbells"],
-    "equipmentOptions": ["bodyweight"],
-    "suggestedSets": [3, 4],
-    "suggestedReps": [8, 12],
+    "compatibleStructures": [
+      "bodyweight",
+      "homeDumbbells"
+    ],
+    "equipmentOptions": [
+      "bodyweight"
+    ],
+    "suggestedSets": [
+      3,
+      4
+    ],
+    "suggestedReps": [
+      8,
+      12
+    ],
     "restInterval": 60,
     "exercises": [
       {
@@ -94,12 +97,7 @@
           "Mãos na largura dos ombros, corpo reto.",
           "Desça até o peito quase tocar o chão.",
           "Empurre com força, mantendo core ativo."
-        ],
-        "media": {
-          "imageURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/images/Push-up.png",
-          "gifURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/gifs/Push-up.gif",
-          "source": "ExerciseDB"
-        }
+        ]
       },
       {
         "id": "exr_pike_pushup",
@@ -110,12 +108,7 @@
           "Forme um 'V' invertido com o corpo.",
           "Desça a cabeça em direção ao chão.",
           "Empurre de volta focando nos ombros."
-        ],
-        "media": {
-          "imageURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/images/Pike-Push-up.png",
-          "gifURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/gifs/Pike-Push-up.gif",
-          "source": "ExerciseDB"
-        }
+        ]
       },
       {
         "id": "exr_tricep_dips_bench",
@@ -126,12 +119,7 @@
           "Apoie as mãos no banco atrás de você.",
           "Desça flexionando os cotovelos.",
           "Empurre focando nos tríceps."
-        ],
-        "media": {
-          "imageURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/images/Bench-Dips.png",
-          "gifURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/gifs/Bench-Dips.gif",
-          "source": "ExerciseDB"
-        }
+        ]
       }
     ]
   },
@@ -139,10 +127,23 @@
     "id": "upper_push_intermediate",
     "group": "upper",
     "level": "intermediate",
-    "compatibleStructures": ["fullGym", "basicGym"],
-    "equipmentOptions": ["barbell", "dumbbell", "cable"],
-    "suggestedSets": [3, 5],
-    "suggestedReps": [6, 10],
+    "compatibleStructures": [
+      "fullGym",
+      "basicGym"
+    ],
+    "equipmentOptions": [
+      "barbell",
+      "dumbbell",
+      "cable"
+    ],
+    "suggestedSets": [
+      3,
+      5
+    ],
+    "suggestedReps": [
+      6,
+      10
+    ],
     "restInterval": 90,
     "exercises": [
       {
@@ -154,12 +155,7 @@
           "Deite-se no banco com pés firmes no chão.",
           "Desça a barra controlada até o peito.",
           "Empurre explosivamente mantendo escápulas retraídas."
-        ],
-        "media": {
-          "imageURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/images/Barbell-Bench-Press.png",
-          "gifURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/gifs/Barbell-Bench-Press.gif",
-          "source": "ExerciseDB"
-        }
+        ]
       },
       {
         "id": "exr_overhead_press",
@@ -170,12 +166,7 @@
           "Barra na altura dos ombros, pegada pronada.",
           "Pressione acima da cabeça mantendo core engajado.",
           "Controle a descida até posição inicial."
-        ],
-        "media": {
-          "imageURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/images/Overhead-Press.png",
-          "gifURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/gifs/Overhead-Press.gif",
-          "source": "ExerciseDB"
-        }
+        ]
       },
       {
         "id": "exr_cable_fly",
@@ -186,12 +177,7 @@
           "Polias altas, pegada neutra, leve inclinação frontal.",
           "Una as mãos à frente contraindo o peito.",
           "Retorne controlado mantendo tensão."
-        ],
-        "media": {
-          "imageURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/images/Cable-Fly.png",
-          "gifURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/gifs/Cable-Fly.gif",
-          "source": "ExerciseDB"
-        }
+        ]
       },
       {
         "id": "exr_cable_tricep_pushdown",
@@ -202,12 +188,7 @@
           "Polia alta, barra reta ou corda.",
           "Empurre para baixo estendendo cotovelos.",
           "Mantenha cotovelos fixos ao lado do corpo."
-        ],
-        "media": {
-          "imageURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/images/Cable-Tricep-Pushdown.png",
-          "gifURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/gifs/Cable-Tricep-Pushdown.gif",
-          "source": "ExerciseDB"
-        }
+        ]
       }
     ]
   },
@@ -215,10 +196,23 @@
     "id": "upper_pull_basic",
     "group": "upper",
     "level": "beginner",
-    "compatibleStructures": ["fullGym", "basicGym"],
-    "equipmentOptions": ["machine", "dumbbell", "cable"],
-    "suggestedSets": [3, 4],
-    "suggestedReps": [10, 12],
+    "compatibleStructures": [
+      "fullGym",
+      "basicGym"
+    ],
+    "equipmentOptions": [
+      "machine",
+      "dumbbell",
+      "cable"
+    ],
+    "suggestedSets": [
+      3,
+      4
+    ],
+    "suggestedReps": [
+      10,
+      12
+    ],
     "restInterval": 60,
     "exercises": [
       {
@@ -230,12 +224,7 @@
           "Sente-se na máquina, pegada larga.",
           "Puxe a barra em direção ao peito superior.",
           "Controle a subida, alongando os dorsais."
-        ],
-        "media": {
-          "imageURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/images/Lat-Pulldown.png",
-          "gifURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/gifs/Lat-Pulldown.gif",
-          "source": "ExerciseDB"
-        }
+        ]
       },
       {
         "id": "exr_seated_cable_row",
@@ -246,12 +235,7 @@
           "Sente-se com pés apoiados, tronco ereto.",
           "Puxe o cabo em direção ao abdômen.",
           "Aperte as escápulas ao final do movimento."
-        ],
-        "media": {
-          "imageURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/images/Seated-Cable-Row.png",
-          "gifURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/gifs/Seated-Cable-Row.gif",
-          "source": "ExerciseDB"
-        }
+        ]
       },
       {
         "id": "exr_dumbbell_row",
@@ -262,12 +246,7 @@
           "Apoie um joelho e mão no banco.",
           "Puxe o halter em direção ao quadril.",
           "Mantenha coluna neutra durante todo movimento."
-        ],
-        "media": {
-          "imageURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/images/Dumbbell-Row.png",
-          "gifURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/gifs/Dumbbell-Row.gif",
-          "source": "ExerciseDB"
-        }
+        ]
       },
       {
         "id": "exr_dumbbell_bicep_curl",
@@ -278,12 +257,7 @@
           "De pé, braços estendidos, pegada supinada.",
           "Flexione os cotovelos trazendo halteres aos ombros.",
           "Controle a descida, evite balançar o corpo."
-        ],
-        "media": {
-          "imageURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/images/Dumbbell-Bicep-Curl.png",
-          "gifURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/gifs/Dumbbell-Bicep-Curl.gif",
-          "source": "ExerciseDB"
-        }
+        ]
       }
     ]
   },
@@ -291,10 +265,22 @@
     "id": "upper_pull_bodyweight",
     "group": "upper",
     "level": "beginner",
-    "compatibleStructures": ["bodyweight", "homeDumbbells"],
-    "equipmentOptions": ["bodyweight", "pullupBar"],
-    "suggestedSets": [3, 4],
-    "suggestedReps": [6, 10],
+    "compatibleStructures": [
+      "bodyweight",
+      "homeDumbbells"
+    ],
+    "equipmentOptions": [
+      "bodyweight",
+      "pullupBar"
+    ],
+    "suggestedSets": [
+      3,
+      4
+    ],
+    "suggestedReps": [
+      6,
+      10
+    ],
     "restInterval": 90,
     "exercises": [
       {
@@ -306,12 +292,7 @@
           "Deite sob uma barra na altura da cintura.",
           "Puxe o corpo em direção à barra.",
           "Mantenha corpo reto, contraindo dorsais."
-        ],
-        "media": {
-          "imageURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/images/Inverted-Row.png",
-          "gifURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/gifs/Inverted-Row.gif",
-          "source": "ExerciseDB"
-        }
+        ]
       },
       {
         "id": "exr_assisted_pullup",
@@ -322,12 +303,7 @@
           "Use banda elástica ou máquina assistida.",
           "Puxe o corpo até o queixo ultrapassar a barra.",
           "Controle a descida completamente."
-        ],
-        "media": {
-          "imageURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/images/Assisted-Pull-up.png",
-          "gifURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/gifs/Assisted-Pull-up.gif",
-          "source": "ExerciseDB"
-        }
+        ]
       },
       {
         "id": "exr_supine_grip_pullup",
@@ -338,12 +314,7 @@
           "Pegada supinada (palmas para você).",
           "Puxe até queixo passar a barra.",
           "Ênfase maior em bíceps que dorsais."
-        ],
-        "media": {
-          "imageURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/images/Chin-up.png",
-          "gifURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/gifs/Chin-up.gif",
-          "source": "ExerciseDB"
-        }
+        ]
       }
     ]
   },
@@ -351,10 +322,23 @@
     "id": "upper_pull_intermediate",
     "group": "upper",
     "level": "intermediate",
-    "compatibleStructures": ["fullGym", "basicGym"],
-    "equipmentOptions": ["barbell", "cable", "pullupBar"],
-    "suggestedSets": [4, 5],
-    "suggestedReps": [6, 10],
+    "compatibleStructures": [
+      "fullGym",
+      "basicGym"
+    ],
+    "equipmentOptions": [
+      "barbell",
+      "cable",
+      "pullupBar"
+    ],
+    "suggestedSets": [
+      4,
+      5
+    ],
+    "suggestedReps": [
+      6,
+      10
+    ],
     "restInterval": 90,
     "exercises": [
       {
@@ -366,12 +350,7 @@
           "Incline o tronco a 45 graus, joelhos levemente flexionados.",
           "Puxe a barra em direção ao abdômen inferior.",
           "Mantenha coluna neutra, aperte escápulas no topo."
-        ],
-        "media": {
-          "imageURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/images/Barbell-Bent-Over-Row.png",
-          "gifURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/gifs/Barbell-Bent-Over-Row.gif",
-          "source": "ExerciseDB"
-        }
+        ]
       },
       {
         "id": "exr_pullup",
@@ -382,12 +361,7 @@
           "Pegada pronada, ligeiramente mais larga que ombros.",
           "Puxe até queixo passar a barra.",
           "Controle total na descida, full range."
-        ],
-        "media": {
-          "imageURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/images/Pull-up.png",
-          "gifURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/gifs/Pull-up.gif",
-          "source": "ExerciseDB"
-        }
+        ]
       },
       {
         "id": "exr_face_pull",
@@ -398,12 +372,7 @@
           "Polia alta com corda, pegada neutra.",
           "Puxe em direção ao rosto, cotovelos altos.",
           "Rotação externa no final, focando deltoide posterior."
-        ],
-        "media": {
-          "imageURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/images/Face-Pull.png",
-          "gifURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/gifs/Face-Pull.gif",
-          "source": "ExerciseDB"
-        }
+        ]
       },
       {
         "id": "exr_barbell_curl",
@@ -414,12 +383,7 @@
           "Barra EZ ou reta, pegada supinada.",
           "Flexione cotovelos sem balançar o tronco.",
           "Aperte bíceps no topo, desça controlado."
-        ],
-        "media": {
-          "imageURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/images/Barbell-Curl.png",
-          "gifURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/gifs/Barbell-Curl.gif",
-          "source": "ExerciseDB"
-        }
+        ]
       }
     ]
   },
@@ -427,10 +391,22 @@
     "id": "lower_strength_bodyweight",
     "group": "lower",
     "level": "beginner",
-    "compatibleStructures": ["bodyweight", "homeDumbbells"],
-    "equipmentOptions": ["bodyweight", "dumbbell"],
-    "suggestedSets": [3, 3],
-    "suggestedReps": [12, 15],
+    "compatibleStructures": [
+      "bodyweight",
+      "homeDumbbells"
+    ],
+    "equipmentOptions": [
+      "bodyweight",
+      "dumbbell"
+    ],
+    "suggestedSets": [
+      3,
+      3
+    ],
+    "suggestedReps": [
+      12,
+      15
+    ],
     "restInterval": 45,
     "exercises": [
       {
@@ -442,12 +418,7 @@
           "Afaste os pés na largura dos ombros.",
           "Desça levando o quadril para trás mantendo peito aberto.",
           "Suba empurrando o chão e contraindo glúteos."
-        ],
-        "media": {
-          "imageURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/images/Squat.png",
-          "gifURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/gifs/Squat.gif",
-          "source": "ExerciseDB"
-        }
+        ]
       },
       {
         "id": "exr_reverse_lunge",
@@ -458,12 +429,7 @@
           "Dê um passo para trás controlando o joelho.",
           "Desça até formar ângulo de 90° e retorne.",
           "Alterne as pernas mantendo o tronco ereto."
-        ],
-        "media": {
-          "imageURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/images/Reverse-Lunge.png",
-          "gifURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/gifs/Reverse-Lunge.gif",
-          "source": "ExerciseDB"
-        }
+        ]
       }
     ]
   },
@@ -471,10 +437,23 @@
     "id": "lower_strength_gym",
     "group": "lower",
     "level": "intermediate",
-    "compatibleStructures": ["fullGym", "basicGym"],
-    "equipmentOptions": ["barbell", "machine", "dumbbell"],
-    "suggestedSets": [4, 5],
-    "suggestedReps": [6, 10],
+    "compatibleStructures": [
+      "fullGym",
+      "basicGym"
+    ],
+    "equipmentOptions": [
+      "barbell",
+      "machine",
+      "dumbbell"
+    ],
+    "suggestedSets": [
+      4,
+      5
+    ],
+    "suggestedReps": [
+      6,
+      10
+    ],
     "restInterval": 120,
     "exercises": [
       {
@@ -486,12 +465,7 @@
           "Barra apoiada nas costas (trapézio superior).",
           "Desça mantendo coluna neutra até paralelo ou abaixo.",
           "Empurre o chão e suba com força."
-        ],
-        "media": {
-          "imageURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/images/Barbell-Squat.png",
-          "gifURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/gifs/Barbell-Squat.gif",
-          "source": "ExerciseDB"
-        }
+        ]
       },
       {
         "id": "exr_romanian_deadlift",
@@ -502,12 +476,7 @@
           "Barra na frente das coxas, joelhos levemente flexionados.",
           "Desça a barra próximo às pernas, empurrando quadril para trás.",
           "Suba contraindo glúteos e isquiotibiais."
-        ],
-        "media": {
-          "imageURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/images/Romanian-Deadlift.png",
-          "gifURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/gifs/Romanian-Deadlift.gif",
-          "source": "ExerciseDB"
-        }
+        ]
       },
       {
         "id": "exr_leg_press",
@@ -518,12 +487,7 @@
           "Pés na largura dos ombros na plataforma.",
           "Desça controlado até 90 graus nos joelhos.",
           "Empurre a plataforma sem travar os joelhos no topo."
-        ],
-        "media": {
-          "imageURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/images/Leg-Press.png",
-          "gifURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/gifs/Leg-Press.gif",
-          "source": "ExerciseDB"
-        }
+        ]
       },
       {
         "id": "exr_leg_curl",
@@ -534,12 +498,7 @@
           "Deite-se na máquina com almofadas nos tornozelos.",
           "Flexione os joelhos trazendo calcanhares aos glúteos.",
           "Controle a descida mantendo tensão."
-        ],
-        "media": {
-          "imageURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/images/Leg-Curl.png",
-          "gifURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/gifs/Leg-Curl.gif",
-          "source": "ExerciseDB"
-        }
+        ]
       }
     ]
   },
@@ -547,10 +506,21 @@
     "id": "lower_strength_dumbbells",
     "group": "lower",
     "level": "beginner",
-    "compatibleStructures": ["homeDumbbells", "basicGym"],
-    "equipmentOptions": ["dumbbell"],
-    "suggestedSets": [3, 4],
-    "suggestedReps": [10, 15],
+    "compatibleStructures": [
+      "homeDumbbells",
+      "basicGym"
+    ],
+    "equipmentOptions": [
+      "dumbbell"
+    ],
+    "suggestedSets": [
+      3,
+      4
+    ],
+    "suggestedReps": [
+      10,
+      15
+    ],
     "restInterval": 60,
     "exercises": [
       {
@@ -562,12 +532,7 @@
           "Segure um halter no peito com ambas as mãos.",
           "Desça em agachamento profundo, cotovelos entre joelhos.",
           "Suba mantendo peito aberto e core ativo."
-        ],
-        "media": {
-          "imageURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/images/Goblet-Squat.png",
-          "gifURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/gifs/Goblet-Squat.gif",
-          "source": "ExerciseDB"
-        }
+        ]
       },
       {
         "id": "exr_dumbbell_rdl",
@@ -578,12 +543,7 @@
           "Halteres à frente das coxas, joelhos levemente flexionados.",
           "Desça empurrando quadril para trás.",
           "Suba contraindo glúteos."
-        ],
-        "media": {
-          "imageURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/images/Dumbbell-RDL.png",
-          "gifURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/gifs/Dumbbell-RDL.gif",
-          "source": "ExerciseDB"
-        }
+        ]
       },
       {
         "id": "exr_bulgarian_split_squat",
@@ -594,12 +554,7 @@
           "Pé traseiro elevado em banco, halteres nas mãos.",
           "Desça flexionando joelho da frente.",
           "Suba empurrando o chão com perna da frente."
-        ],
-        "media": {
-          "imageURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/images/Bulgarian-Split-Squat.png",
-          "gifURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/gifs/Bulgarian-Split-Squat.gif",
-          "source": "ExerciseDB"
-        }
+        ]
       },
       {
         "id": "exr_calf_raise_dumbbell",
@@ -610,12 +565,7 @@
           "De pé com halteres nas mãos.",
           "Levante-se nas pontas dos pés.",
           "Desça controlado, alongando panturrilhas."
-        ],
-        "media": {
-          "imageURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/images/Calf-Raise.png",
-          "gifURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/gifs/Calf-Raise.gif",
-          "source": "ExerciseDB"
-        }
+        ]
       }
     ]
   },
@@ -623,10 +573,23 @@
     "id": "core_basic",
     "group": "core",
     "level": "beginner",
-    "compatibleStructures": ["bodyweight", "homeDumbbells", "basicGym", "fullGym"],
-    "equipmentOptions": ["bodyweight"],
-    "suggestedSets": [3, 3],
-    "suggestedReps": [12, 20],
+    "compatibleStructures": [
+      "bodyweight",
+      "homeDumbbells",
+      "basicGym",
+      "fullGym"
+    ],
+    "equipmentOptions": [
+      "bodyweight"
+    ],
+    "suggestedSets": [
+      3,
+      3
+    ],
+    "suggestedReps": [
+      12,
+      20
+    ],
     "restInterval": 45,
     "exercises": [
       {
@@ -638,12 +601,7 @@
           "Apoie antebraços e pés, corpo reto.",
           "Mantenha core ativo, evite arqueamento lombar.",
           "Respire naturalmente durante a sustentação."
-        ],
-        "media": {
-          "imageURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/images/Plank.png",
-          "gifURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/gifs/Plank.gif",
-          "source": "ExerciseDB"
-        }
+        ]
       },
       {
         "id": "exr_bicycle_crunch",
@@ -654,12 +612,7 @@
           "Deitado, mãos atrás da cabeça.",
           "Alterne cotovelo ao joelho oposto.",
           "Mantenha lombar no chão, movimento controlado."
-        ],
-        "media": {
-          "imageURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/images/Bicycle-Crunch.png",
-          "gifURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/gifs/Bicycle-Crunch.gif",
-          "source": "ExerciseDB"
-        }
+        ]
       },
       {
         "id": "exr_dead_bug",
@@ -670,12 +623,7 @@
           "Deitado, braços estendidos acima, joelhos a 90 graus.",
           "Estenda braço e perna opostos simultaneamente.",
           "Mantenha lombar pressionada no chão."
-        ],
-        "media": {
-          "imageURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/images/Dead-Bug.png",
-          "gifURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/gifs/Dead-Bug.gif",
-          "source": "ExerciseDB"
-        }
+        ]
       }
     ]
   },
@@ -683,10 +631,25 @@
     "id": "core_intermediate",
     "group": "core",
     "level": "intermediate",
-    "compatibleStructures": ["bodyweight", "homeDumbbells", "basicGym", "fullGym"],
-    "equipmentOptions": ["bodyweight", "dumbbell", "cable"],
-    "suggestedSets": [3, 4],
-    "suggestedReps": [10, 15],
+    "compatibleStructures": [
+      "bodyweight",
+      "homeDumbbells",
+      "basicGym",
+      "fullGym"
+    ],
+    "equipmentOptions": [
+      "bodyweight",
+      "dumbbell",
+      "cable"
+    ],
+    "suggestedSets": [
+      3,
+      4
+    ],
+    "suggestedReps": [
+      10,
+      15
+    ],
     "restInterval": 60,
     "exercises": [
       {
@@ -698,12 +661,7 @@
           "Pendure-se em barra fixa.",
           "Levante as pernas controlado até paralelo.",
           "Desça sem balançar o corpo."
-        ],
-        "media": {
-          "imageURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/images/Hanging-Leg-Raise.png",
-          "gifURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/gifs/Hanging-Leg-Raise.gif",
-          "source": "ExerciseDB"
-        }
+        ]
       },
       {
         "id": "exr_russian_twist",
@@ -714,12 +672,7 @@
           "Sentado, tronco inclinado, pés elevados.",
           "Gire o tronco alternando lados com halter.",
           "Mantenha movimento controlado."
-        ],
-        "media": {
-          "imageURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/images/Russian-Twist.png",
-          "gifURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/gifs/Russian-Twist.gif",
-          "source": "ExerciseDB"
-        }
+        ]
       },
       {
         "id": "exr_cable_woodchop",
@@ -730,12 +683,7 @@
           "Polia alta, pegue com ambas as mãos.",
           "Gire o tronco puxando diagonalmente para baixo.",
           "Movimento rotacional completo."
-        ],
-        "media": {
-          "imageURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/images/Cable-Woodchop.png",
-          "gifURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/gifs/Cable-Woodchop.gif",
-          "source": "ExerciseDB"
-        }
+        ]
       },
       {
         "id": "exr_ab_wheel_rollout",
@@ -746,12 +694,7 @@
           "De joelhos, segure a roda de abdominais.",
           "Role para frente estendendo o corpo.",
           "Puxe de volta contraindo o core."
-        ],
-        "media": {
-          "imageURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/images/Ab-Wheel-Rollout.png",
-          "gifURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/gifs/Ab-Wheel-Rollout.gif",
-          "source": "ExerciseDB"
-        }
+        ]
       }
     ]
   },
@@ -759,10 +702,22 @@
     "id": "fullbody_basic",
     "group": "fullBody",
     "level": "beginner",
-    "compatibleStructures": ["bodyweight", "homeDumbbells"],
-    "equipmentOptions": ["bodyweight", "dumbbell"],
-    "suggestedSets": [3, 3],
-    "suggestedReps": [10, 12],
+    "compatibleStructures": [
+      "bodyweight",
+      "homeDumbbells"
+    ],
+    "equipmentOptions": [
+      "bodyweight",
+      "dumbbell"
+    ],
+    "suggestedSets": [
+      3,
+      3
+    ],
+    "suggestedReps": [
+      10,
+      12
+    ],
     "restInterval": 60,
     "exercises": [
       {
@@ -774,12 +729,7 @@
           "Halteres nos ombros, agache profundo.",
           "Ao subir, pressione halteres acima da cabeça.",
           "Movimento fluido e coordenado."
-        ],
-        "media": {
-          "imageURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/images/Squat-to-Press.png",
-          "gifURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/gifs/Squat-to-Press.gif",
-          "source": "ExerciseDB"
-        }
+        ]
       },
       {
         "id": "exr_renegade_row",
@@ -790,12 +740,7 @@
           "Posição de prancha com mãos nos halteres.",
           "Reme um halter mantendo quadris estáveis.",
           "Alterne os lados, core ativo."
-        ],
-        "media": {
-          "imageURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/images/Renegade-Row.png",
-          "gifURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/gifs/Renegade-Row.gif",
-          "source": "ExerciseDB"
-        }
+        ]
       },
       {
         "id": "exr_devils_press",
@@ -806,12 +751,7 @@
           "Burpee com halteres, ao subir faça um snatch.",
           "Movimento explosivo e completo.",
           "Alta demanda cardiorrespiratória."
-        ],
-        "media": {
-          "imageURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/images/Devils-Press.png",
-          "gifURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/gifs/Devils-Press.gif",
-          "source": "ExerciseDB"
-        }
+        ]
       }
     ]
   },
@@ -819,10 +759,22 @@
     "id": "fullbody_intermediate",
     "group": "fullBody",
     "level": "intermediate",
-    "compatibleStructures": ["fullGym", "basicGym"],
-    "equipmentOptions": ["barbell", "kettlebell"],
-    "suggestedSets": [4, 5],
-    "suggestedReps": [6, 8],
+    "compatibleStructures": [
+      "fullGym",
+      "basicGym"
+    ],
+    "equipmentOptions": [
+      "barbell",
+      "kettlebell"
+    ],
+    "suggestedSets": [
+      4,
+      5
+    ],
+    "suggestedReps": [
+      6,
+      8
+    ],
     "restInterval": 120,
     "exercises": [
       {
@@ -834,12 +786,7 @@
           "Barra no chão, pegada pronada na largura dos ombros.",
           "Levante mantendo barra próxima ao corpo.",
           "Extensão completa de quadril no topo."
-        ],
-        "media": {
-          "imageURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/images/Deadlift.png",
-          "gifURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/gifs/Deadlift.gif",
-          "source": "ExerciseDB"
-        }
+        ]
       },
       {
         "id": "exr_clean_and_press",
@@ -850,12 +797,7 @@
           "Puxe a barra aos ombros (clean).",
           "Pressione acima da cabeça.",
           "Movimento olímpico completo."
-        ],
-        "media": {
-          "imageURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/images/Clean-and-Press.png",
-          "gifURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/gifs/Clean-and-Press.gif",
-          "source": "ExerciseDB"
-        }
+        ]
       },
       {
         "id": "exr_kettlebell_swing",
@@ -866,12 +808,7 @@
           "Kettlebell entre as pernas, pegada com ambas as mãos.",
           "Balanço explosivo até altura do peito.",
           "Impulsione com quadril, não com braços."
-        ],
-        "media": {
-          "imageURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/images/Kettlebell-Swing.png",
-          "gifURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/gifs/Kettlebell-Swing.gif",
-          "source": "ExerciseDB"
-        }
+        ]
       },
       {
         "id": "exr_thruster",
@@ -882,12 +819,7 @@
           "Front squat seguido de overhead press.",
           "Movimento fluido sem pausa.",
           "Explosão máxima."
-        ],
-        "media": {
-          "imageURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/images/Thruster.png",
-          "gifURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/gifs/Thruster.gif",
-          "source": "ExerciseDB"
-        }
+        ]
       }
     ]
   },
@@ -895,10 +827,23 @@
     "id": "cardio_express",
     "group": "cardio",
     "level": "intermediate",
-    "compatibleStructures": ["fullGym", "basicGym", "homeDumbbells"],
-    "equipmentOptions": ["bodyweight", "cardioMachine"],
-    "suggestedSets": [4, 4],
-    "suggestedReps": [30, 40],
+    "compatibleStructures": [
+      "fullGym",
+      "basicGym",
+      "homeDumbbells"
+    ],
+    "equipmentOptions": [
+      "bodyweight",
+      "cardioMachine"
+    ],
+    "suggestedSets": [
+      4,
+      4
+    ],
+    "suggestedReps": [
+      30,
+      40
+    ],
     "restInterval": 30,
     "exercises": [
       {
@@ -910,12 +855,7 @@
           "Apoie as mãos no chão e lance os pés para trás.",
           "Retorne com um salto explosivo.",
           "Mantenha o core ativo para proteger a lombar."
-        ],
-        "media": {
-          "imageURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/images/Burpee.png",
-          "gifURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/gifs/Burpee.gif",
-          "source": "ExerciseDB"
-        }
+        ]
       },
       {
         "id": "exr_mountain_climber",
@@ -926,12 +866,7 @@
           "Apoie as mãos alinhadas aos ombros.",
           "Traga os joelhos alternados em direção ao peito.",
           "Evite balançar os quadris para manter o core ativo."
-        ],
-        "media": {
-          "imageURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/images/Mountain-Climber.png",
-          "gifURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/gifs/Mountain-Climber.gif",
-          "source": "ExerciseDB"
-        }
+        ]
       },
       {
         "id": "exr_jumping_jacks",
@@ -942,12 +877,7 @@
           "Salte abrindo pernas e braços simultaneamente.",
           "Retorne à posição inicial com outro salto.",
           "Mantenha ritmo constante."
-        ],
-        "media": {
-          "imageURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/images/Jumping-Jacks.png",
-          "gifURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/gifs/Jumping-Jacks.gif",
-          "source": "ExerciseDB"
-        }
+        ]
       },
       {
         "id": "exr_high_knees",
@@ -958,12 +888,7 @@
           "Corra no lugar elevando joelhos até a cintura.",
           "Mantenha velocidade alta.",
           "Bombeie os braços para intensificar."
-        ],
-        "media": {
-          "imageURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/images/High-Knees.png",
-          "gifURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/gifs/High-Knees.gif",
-          "source": "ExerciseDB"
-        }
+        ]
       }
     ]
   },
@@ -971,10 +896,23 @@
     "id": "cardio_hiit",
     "group": "cardio",
     "level": "advanced",
-    "compatibleStructures": ["bodyweight", "homeDumbbells", "basicGym", "fullGym"],
-    "equipmentOptions": ["bodyweight"],
-    "suggestedSets": [5, 6],
-    "suggestedReps": [20, 30],
+    "compatibleStructures": [
+      "bodyweight",
+      "homeDumbbells",
+      "basicGym",
+      "fullGym"
+    ],
+    "equipmentOptions": [
+      "bodyweight"
+    ],
+    "suggestedSets": [
+      5,
+      6
+    ],
+    "suggestedReps": [
+      20,
+      30
+    ],
     "restInterval": 20,
     "exercises": [
       {
@@ -986,12 +924,7 @@
           "Burpee completo finalizando com salto e joelhos ao peito.",
           "Explosão máxima no salto.",
           "Aterrissagem controlada."
-        ],
-        "media": {
-          "imageURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/images/Burpee-Tuck-Jump.png",
-          "gifURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/gifs/Burpee-Tuck-Jump.gif",
-          "source": "ExerciseDB"
-        }
+        ]
       },
       {
         "id": "exr_squat_jump",
@@ -1002,12 +935,7 @@
           "Agachamento seguido de salto explosivo.",
           "Aterrisse suave voltando ao agachamento.",
           "Movimento contínuo."
-        ],
-        "media": {
-          "imageURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/images/Squat-Jump.png",
-          "gifURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/gifs/Squat-Jump.gif",
-          "source": "ExerciseDB"
-        }
+        ]
       },
       {
         "id": "exr_box_jump",
@@ -1018,12 +946,7 @@
           "Salte explosivamente sobre caixa ou banco.",
           "Aterrisse com ambos os pés simultaneamente.",
           "Desça com controle."
-        ],
-        "media": {
-          "imageURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/images/Box-Jump.png",
-          "gifURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/gifs/Box-Jump.gif",
-          "source": "ExerciseDB"
-        }
+        ]
       }
     ]
   },
@@ -1031,10 +954,24 @@
     "id": "hypertrophy_chest_volume",
     "group": "upper",
     "level": "intermediate",
-    "compatibleStructures": ["fullGym", "basicGym"],
-    "equipmentOptions": ["barbell", "dumbbell", "machine", "cable"],
-    "suggestedSets": [4, 5],
-    "suggestedReps": [8, 12],
+    "compatibleStructures": [
+      "fullGym",
+      "basicGym"
+    ],
+    "equipmentOptions": [
+      "barbell",
+      "dumbbell",
+      "machine",
+      "cable"
+    ],
+    "suggestedSets": [
+      4,
+      5
+    ],
+    "suggestedReps": [
+      8,
+      12
+    ],
     "restInterval": 90,
     "exercises": [
       {
@@ -1046,12 +983,7 @@
           "Banco em declínio de 15-30 graus.",
           "Desça a barra ao peito inferior controladamente.",
           "Empurre focando na contração do peitoral."
-        ],
-        "media": {
-          "imageURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/images/Decline-Bench-Press.png",
-          "gifURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/gifs/Decline-Bench-Press.gif",
-          "source": "ExerciseDB"
-        }
+        ]
       },
       {
         "id": "exr_cable_crossover",
@@ -1062,12 +994,7 @@
           "Polias altas, leve passo à frente.",
           "Una as mãos cruzando à frente do corpo.",
           "Contraia o peito no pico da contração."
-        ],
-        "media": {
-          "imageURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/images/Cable-Crossover.png",
-          "gifURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/gifs/Cable-Crossover.gif",
-          "source": "ExerciseDB"
-        }
+        ]
       },
       {
         "id": "exr_dumbbell_fly",
@@ -1078,12 +1005,7 @@
           "Banco plano, halteres acima do peito.",
           "Abra os braços em arco mantendo leve flexão.",
           "Una no topo contraindo o peito."
-        ],
-        "media": {
-          "imageURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/images/Dumbbell-Fly.png",
-          "gifURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/gifs/Dumbbell-Fly.gif",
-          "source": "ExerciseDB"
-        }
+        ]
       }
     ]
   },
@@ -1091,10 +1013,24 @@
     "id": "hypertrophy_back_volume",
     "group": "upper",
     "level": "intermediate",
-    "compatibleStructures": ["fullGym", "basicGym"],
-    "equipmentOptions": ["barbell", "dumbbell", "cable", "pullupBar"],
-    "suggestedSets": [4, 5],
-    "suggestedReps": [8, 12],
+    "compatibleStructures": [
+      "fullGym",
+      "basicGym"
+    ],
+    "equipmentOptions": [
+      "barbell",
+      "dumbbell",
+      "cable",
+      "pullupBar"
+    ],
+    "suggestedSets": [
+      4,
+      5
+    ],
+    "suggestedReps": [
+      8,
+      12
+    ],
     "restInterval": 90,
     "exercises": [
       {
@@ -1106,12 +1042,7 @@
           "Barra em T ou canto, tronco inclinado.",
           "Puxe a barra ao peito inferior.",
           "Aperte escápulas no topo."
-        ],
-        "media": {
-          "imageURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/images/T-Bar-Row.png",
-          "gifURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/gifs/T-Bar-Row.gif",
-          "source": "ExerciseDB"
-        }
+        ]
       },
       {
         "id": "exr_weighted_pullup",
@@ -1122,12 +1053,7 @@
           "Adicione peso com cinto ou colete.",
           "Puxe até queixo passar a barra.",
           "Controle total na descida."
-        ],
-        "media": {
-          "imageURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/images/Weighted-Pull-up.png",
-          "gifURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/gifs/Weighted-Pull-up.gif",
-          "source": "ExerciseDB"
-        }
+        ]
       },
       {
         "id": "exr_straight_arm_pulldown",
@@ -1138,12 +1064,7 @@
           "Polia alta, braços estendidos.",
           "Puxe para baixo mantendo braços retos.",
           "Focando isolamento dos dorsais."
-        ],
-        "media": {
-          "imageURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/images/Straight-Arm-Pulldown.png",
-          "gifURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/gifs/Straight-Arm-Pulldown.gif",
-          "source": "ExerciseDB"
-        }
+        ]
       }
     ]
   },
@@ -1151,10 +1072,22 @@
     "id": "hypertrophy_legs_quad",
     "group": "lower",
     "level": "intermediate",
-    "compatibleStructures": ["fullGym", "basicGym"],
-    "equipmentOptions": ["barbell", "machine"],
-    "suggestedSets": [4, 5],
-    "suggestedReps": [8, 12],
+    "compatibleStructures": [
+      "fullGym",
+      "basicGym"
+    ],
+    "equipmentOptions": [
+      "barbell",
+      "machine"
+    ],
+    "suggestedSets": [
+      4,
+      5
+    ],
+    "suggestedReps": [
+      8,
+      12
+    ],
     "restInterval": 120,
     "exercises": [
       {
@@ -1166,12 +1099,7 @@
           "Barra na frente dos ombros, cotovelos altos.",
           "Agache profundo mantendo tronco vertical.",
           "Suba com força focando nos quadríceps."
-        ],
-        "media": {
-          "imageURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/images/Front-Squat.png",
-          "gifURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/gifs/Front-Squat.gif",
-          "source": "ExerciseDB"
-        }
+        ]
       },
       {
         "id": "exr_leg_extension",
@@ -1182,12 +1110,7 @@
           "Sente-se na máquina, almofada nos tornozelos.",
           "Estenda as pernas completamente.",
           "Contraia quadríceps no topo."
-        ],
-        "media": {
-          "imageURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/images/Leg-Extension.png",
-          "gifURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/gifs/Leg-Extension.gif",
-          "source": "ExerciseDB"
-        }
+        ]
       },
       {
         "id": "exr_walking_lunge",
@@ -1198,12 +1121,7 @@
           "Barra nas costas ou halteres nas mãos.",
           "Dê passos longos, descendo até 90 graus.",
           "Alterne as pernas caminhando."
-        ],
-        "media": {
-          "imageURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/images/Walking-Lunge.png",
-          "gifURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/gifs/Walking-Lunge.gif",
-          "source": "ExerciseDB"
-        }
+        ]
       }
     ]
   },
@@ -1211,10 +1129,23 @@
     "id": "weightloss_circuit_hiit",
     "group": "fullBody",
     "level": "intermediate",
-    "compatibleStructures": ["bodyweight", "homeDumbbells", "basicGym"],
-    "equipmentOptions": ["bodyweight", "dumbbell"],
-    "suggestedSets": [4, 5],
-    "suggestedReps": [15, 20],
+    "compatibleStructures": [
+      "bodyweight",
+      "homeDumbbells",
+      "basicGym"
+    ],
+    "equipmentOptions": [
+      "bodyweight",
+      "dumbbell"
+    ],
+    "suggestedSets": [
+      4,
+      5
+    ],
+    "suggestedReps": [
+      15,
+      20
+    ],
     "restInterval": 30,
     "exercises": [
       {
@@ -1226,12 +1157,7 @@
           "Halteres nos ombros, agache profundo.",
           "Exploda para cima pressionando halteres overhead.",
           "Movimento completo e fluido."
-        ],
-        "media": {
-          "imageURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/images/Dumbbell-Thruster.png",
-          "gifURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/gifs/Dumbbell-Thruster.gif",
-          "source": "ExerciseDB"
-        }
+        ]
       },
       {
         "id": "exr_jump_lunge",
@@ -1242,12 +1168,7 @@
           "Posição de afundo, salte trocando as pernas no ar.",
           "Aterrisse suave em afundo do lado oposto.",
           "Movimento explosivo."
-        ],
-        "media": {
-          "imageURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/images/Jump-Lunge.png",
-          "gifURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/gifs/Jump-Lunge.gif",
-          "source": "ExerciseDB"
-        }
+        ]
       },
       {
         "id": "exr_plank_jack",
@@ -1258,12 +1179,7 @@
           "Posição de prancha, salte abrindo e fechando pernas.",
           "Mantenha quadris estáveis.",
           "Movimento rápido e controlado."
-        ],
-        "media": {
-          "imageURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/images/Plank-Jack.png",
-          "gifURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/gifs/Plank-Jack.gif",
-          "source": "ExerciseDB"
-        }
+        ]
       }
     ]
   },
@@ -1271,10 +1187,22 @@
     "id": "weightloss_metabolic",
     "group": "fullBody",
     "level": "beginner",
-    "compatibleStructures": ["bodyweight", "homeDumbbells"],
-    "equipmentOptions": ["bodyweight", "dumbbell"],
-    "suggestedSets": [3, 4],
-    "suggestedReps": [12, 18],
+    "compatibleStructures": [
+      "bodyweight",
+      "homeDumbbells"
+    ],
+    "equipmentOptions": [
+      "bodyweight",
+      "dumbbell"
+    ],
+    "suggestedSets": [
+      3,
+      4
+    ],
+    "suggestedReps": [
+      12,
+      18
+    ],
     "restInterval": 45,
     "exercises": [
       {
@@ -1286,12 +1214,7 @@
           "Halteres no chão, puxe explosivamente aos ombros.",
           "Agache ao receber os halteres.",
           "Movimento olímpico adaptado."
-        ],
-        "media": {
-          "imageURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/images/Dumbbell-Clean.png",
-          "gifURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/gifs/Dumbbell-Clean.gif",
-          "source": "ExerciseDB"
-        }
+        ]
       },
       {
         "id": "exr_skater_hop",
@@ -1302,12 +1225,7 @@
           "Salte lateralmente de uma perna para outra.",
           "Simule movimento de patinação.",
           "Aterrissagem controlada."
-        ],
-        "media": {
-          "imageURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/images/Skater-Hop.png",
-          "gifURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/gifs/Skater-Hop.gif",
-          "source": "ExerciseDB"
-        }
+        ]
       },
       {
         "id": "exr_inchworm",
@@ -1318,12 +1236,7 @@
           "Incline-se e caminhe com as mãos até prancha.",
           "Faça uma flexão opcional.",
           "Caminhe os pés de volta às mãos."
-        ],
-        "media": {
-          "imageURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/images/Inchworm.png",
-          "gifURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/gifs/Inchworm.gif",
-          "source": "ExerciseDB"
-        }
+        ]
       }
     ]
   },
@@ -1331,10 +1244,21 @@
     "id": "performance_power",
     "group": "fullBody",
     "level": "advanced",
-    "compatibleStructures": ["fullGym"],
-    "equipmentOptions": ["barbell", "kettlebell"],
-    "suggestedSets": [4, 6],
-    "suggestedReps": [3, 6],
+    "compatibleStructures": [
+      "fullGym"
+    ],
+    "equipmentOptions": [
+      "barbell",
+      "kettlebell"
+    ],
+    "suggestedSets": [
+      4,
+      6
+    ],
+    "suggestedReps": [
+      3,
+      6
+    ],
     "restInterval": 180,
     "exercises": [
       {
@@ -1346,12 +1270,7 @@
           "Barra no chão, puxe explosivamente aos ombros.",
           "Triple extension (tornozelos, joelhos, quadril).",
           "Movimento olímpico de potência."
-        ],
-        "media": {
-          "imageURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/images/Power-Clean.png",
-          "gifURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/gifs/Power-Clean.gif",
-          "source": "ExerciseDB"
-        }
+        ]
       },
       {
         "id": "exr_snatch_grip_deadlift",
@@ -1362,12 +1281,7 @@
           "Pegada larga, barra no chão.",
           "Levante mantendo barra próxima.",
           "Desenvolve força e mobilidade."
-        ],
-        "media": {
-          "imageURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/images/Snatch-Grip-Deadlift.png",
-          "gifURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/gifs/Snatch-Grip-Deadlift.gif",
-          "source": "ExerciseDB"
-        }
+        ]
       },
       {
         "id": "exr_kettlebell_snatch",
@@ -1378,12 +1292,7 @@
           "Kettlebell entre pernas, arremesse overhead em um movimento.",
           "Explosão total do quadril.",
           "Movimento balístico avançado."
-        ],
-        "media": {
-          "imageURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/images/Kettlebell-Snatch.png",
-          "gifURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/gifs/Kettlebell-Snatch.gif",
-          "source": "ExerciseDB"
-        }
+        ]
       }
     ]
   },
@@ -1391,10 +1300,24 @@
     "id": "conditioning_metabolic",
     "group": "fullBody",
     "level": "intermediate",
-    "compatibleStructures": ["bodyweight", "homeDumbbells", "basicGym"],
-    "equipmentOptions": ["bodyweight", "dumbbell", "kettlebell"],
-    "suggestedSets": [3, 4],
-    "suggestedReps": [10, 15],
+    "compatibleStructures": [
+      "bodyweight",
+      "homeDumbbells",
+      "basicGym"
+    ],
+    "equipmentOptions": [
+      "bodyweight",
+      "dumbbell",
+      "kettlebell"
+    ],
+    "suggestedSets": [
+      3,
+      4
+    ],
+    "suggestedReps": [
+      10,
+      15
+    ],
     "restInterval": 60,
     "exercises": [
       {
@@ -1406,12 +1329,7 @@
           "Deitado, kettlebell estendido acima.",
           "Levante-se progressivamente mantendo peso overhead.",
           "Movimento complexo de mobilidade e força."
-        ],
-        "media": {
-          "imageURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/images/Turkish-Get-Up.png",
-          "gifURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/gifs/Turkish-Get-Up.gif",
-          "source": "ExerciseDB"
-        }
+        ]
       },
       {
         "id": "exr_man_maker",
@@ -1422,12 +1340,7 @@
           "Burpee + remo bilateral + clean + press.",
           "Movimento complexo completo.",
           "Alta demanda metabólica."
-        ],
-        "media": {
-          "imageURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/images/Man-Maker.png",
-          "gifURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/gifs/Man-Maker.gif",
-          "source": "ExerciseDB"
-        }
+        ]
       },
       {
         "id": "exr_bear_crawl",
@@ -1438,12 +1351,7 @@
           "Posição quadrúpede, joelhos elevados.",
           "Caminhe para frente mantendo quadril baixo.",
           "Core e ombros ativos."
-        ],
-        "media": {
-          "imageURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/images/Bear-Crawl.png",
-          "gifURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/gifs/Bear-Crawl.gif",
-          "source": "ExerciseDB"
-        }
+        ]
       }
     ]
   },
@@ -1451,10 +1359,22 @@
     "id": "endurance_high_volume",
     "group": "fullBody",
     "level": "intermediate",
-    "compatibleStructures": ["bodyweight", "homeDumbbells"],
-    "equipmentOptions": ["bodyweight", "dumbbell"],
-    "suggestedSets": [3, 4],
-    "suggestedReps": [18, 25],
+    "compatibleStructures": [
+      "bodyweight",
+      "homeDumbbells"
+    ],
+    "equipmentOptions": [
+      "bodyweight",
+      "dumbbell"
+    ],
+    "suggestedSets": [
+      3,
+      4
+    ],
+    "suggestedReps": [
+      18,
+      25
+    ],
     "restInterval": 30,
     "exercises": [
       {
@@ -1466,12 +1386,7 @@
           "Suba em banco ou caixa alternando pernas.",
           "Mantenha ritmo constante.",
           "Foco em resistência."
-        ],
-        "media": {
-          "imageURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/images/Step-Up.png",
-          "gifURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/gifs/Step-Up.gif",
-          "source": "ExerciseDB"
-        }
+        ]
       },
       {
         "id": "exr_dumbbell_march",
@@ -1482,12 +1397,7 @@
           "Halteres overhead, marche no lugar.",
           "Levante joelhos alto.",
           "Desafio de estabilidade e resistência."
-        ],
-        "media": {
-          "imageURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/images/Overhead-March.png",
-          "gifURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/gifs/Overhead-March.gif",
-          "source": "ExerciseDB"
-        }
+        ]
       },
       {
         "id": "exr_wall_sit",
@@ -1498,17 +1408,8 @@
           "Costas na parede, agache até 90 graus.",
           "Mantenha posição isométrica.",
           "Foco em resistência muscular."
-        ],
-        "media": {
-          "imageURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/images/Wall-Sit.png",
-          "gifURL": "https://raw.githubusercontent.com/ExerciseDB/exercisedb-api/main/assets/gifs/Wall-Sit.gif",
-          "source": "ExerciseDB"
-        }
+        ]
       }
     ]
   }
 ]
-
-
-
-

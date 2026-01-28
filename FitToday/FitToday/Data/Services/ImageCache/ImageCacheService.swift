@@ -163,6 +163,10 @@ final class ImageCacheService: ImageCaching, @unchecked Sendable {
                         defer { }
                         do {
                             try await self?.cacheImage(from: url)
+                        } catch is CancellationError {
+                            // Task cancelled (user navigated away) - this is expected, don't log
+                        } catch let urlError as URLError where urlError.code == .cancelled {
+                            // URLSession cancelled - also expected during navigation
                         } catch {
                             #if DEBUG
                             print("[ImageCache] Prefetch failed for \(url.lastPathComponent): \(error)")

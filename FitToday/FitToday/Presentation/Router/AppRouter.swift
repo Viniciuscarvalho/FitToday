@@ -51,6 +51,7 @@ enum AppRoute: Hashable {
     case privacySettings  // Privacy settings for social features
     case authentication(inviteContext: String?)  // Authentication flow
     case groupInvite(groupId: String)  // Group invitation deep link
+    case notifications  // Notifications screen for challenges
 }
 
 struct DeepLink {

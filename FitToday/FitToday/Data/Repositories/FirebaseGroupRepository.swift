@@ -18,8 +18,13 @@ final class FirebaseGroupRepository: GroupRepository, @unchecked Sendable {
 
     // MARK: - GroupRepository
 
-    func createGroup(name: String, ownerId: String) async throws -> SocialGroup {
-        let fbGroup = try await groupService.createGroup(name: name, ownerId: ownerId)
+    func createGroup(name: String, ownerId: String, ownerDisplayName: String, ownerPhotoURL: URL?) async throws -> SocialGroup {
+        let fbGroup = try await groupService.createGroup(
+            name: name,
+            ownerId: ownerId,
+            ownerDisplayName: ownerDisplayName,
+            ownerPhotoURL: ownerPhotoURL
+        )
         return fbGroup.toDomain()
     }
 

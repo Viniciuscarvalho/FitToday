@@ -22,7 +22,7 @@ protocol AuthenticationRepository: Sendable {
 // MARK: - Group Repository
 
 protocol GroupRepository: Sendable {
-    func createGroup(name: String, ownerId: String) async throws -> SocialGroup
+    func createGroup(name: String, ownerId: String, ownerDisplayName: String, ownerPhotoURL: URL?) async throws -> SocialGroup
     func getGroup(_ groupId: String) async throws -> SocialGroup?
     func addMember(groupId: String, userId: String, displayName: String, photoURL: URL?) async throws
     func removeMember(groupId: String, userId: String) async throws
@@ -36,8 +36,8 @@ protocol GroupRepository: Sendable {
 protocol LeaderboardRepository: Sendable {
     func getCurrentWeekChallenges(groupId: String) async throws -> [Challenge]
     func observeLeaderboard(groupId: String, type: ChallengeType) -> AsyncStream<LeaderboardSnapshot>
-    func incrementCheckIn(challengeId: String, userId: String) async throws
-    func updateStreak(challengeId: String, userId: String, streakDays: Int) async throws
+    func incrementCheckIn(challengeId: String, userId: String, displayName: String, photoURL: URL?) async throws
+    func updateStreak(challengeId: String, userId: String, streakDays: Int, displayName: String, photoURL: URL?) async throws
     func updateMemberWeeklyStats(groupId: String, userId: String, workoutMinutes: Int) async throws
 }
 
@@ -73,4 +73,44 @@ protocol CheckInRepository: Sendable {
 
     /// Uploads a photo to Firebase Storage and returns the download URL.
     func uploadPhoto(imageData: Data, groupId: String, userId: String) async throws -> URL
+}
+
+// MARK: - Group Streak Repository
+
+protocol GroupStreakRepository: Sendable {
+    /// Gets the current streak status for a group
+    func getStreakStatus(groupId: String) async throws -> GroupStreakStatus
+
+    /// Observes the streak status for a group in real-time
+    func observeStreakStatus(groupId: String) -> AsyncStream<GroupStreakStatus>
+
+    /// Increments the workout count for a member in the current week
+    func incrementWorkoutCount(groupId: String, userId: String, displayName: String, photoURL: URL?) async throws
+
+    /// Creates a new week record for the group
+    func createWeekRecord(groupId: String, members: [GroupMember]) async throws -> GroupStreakWeek
+
+    /// Updates the streak days and optionally records a milestone
+    func updateStreakDays(groupId: String, days: Int, milestone: StreakMilestone?) async throws
+
+    /// Resets the streak to zero
+    func resetStreak(groupId: String) async throws
+
+    /// Pauses the streak until the specified date
+    func pauseStreak(groupId: String, until: Date) async throws
+
+    /// Resumes a paused streak
+    func resumeStreak(groupId: String) async throws
+
+    /// Gets the week history for a group
+    func getWeekHistory(groupId: String, limit: Int) async throws -> [GroupStreakWeek]
+
+    /// Gets the current week record for a group
+    func getCurrentWeek(groupId: String) async throws -> GroupStreakWeek?
+
+    /// Marks the pause as used for the current month
+    func markPauseUsedThisMonth(groupId: String) async throws
+
+    /// Resets the monthly pause flag (called at start of each month)
+    func resetMonthlyPauseFlag(groupId: String) async throws
 }

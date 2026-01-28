@@ -40,19 +40,16 @@ struct CreateGroupUseCase: Sendable {
             throw DomainError.alreadyInGroup
         }
 
-        // 3. Create group with user as owner
-        let group = try await groupRepository.createGroup(name: name, ownerId: user.id)
+        // 3. Create group with user as owner (includes creating weekly challenges)
+        let group = try await groupRepository.createGroup(
+            name: name,
+            ownerId: user.id,
+            ownerDisplayName: user.displayName,
+            ownerPhotoURL: user.photoURL
+        )
 
         // 4. Update user's currentGroupId
         try await userRepository.updateCurrentGroup(user.id, groupId: group.id)
-
-        // 5. Update group member with actual user info (display name and photo)
-        try await groupRepository.addMember(
-            groupId: group.id,
-            userId: user.id,
-            displayName: user.displayName,
-            photoURL: user.photoURL
-        )
 
         // 6. Track analytics event
         analytics?.trackGroupCreated(groupId: group.id, userId: user.id)

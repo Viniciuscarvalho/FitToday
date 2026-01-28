@@ -15,6 +15,7 @@ struct HomeHeader: View {
     let goalBadgeText: String?
     var userName: String?
     var userPhotoURL: URL?
+    var onNotificationTap: (() -> Void)?
 
     // Computed: first name only for display (nil when no user name)
     private var displayName: String? {
@@ -79,7 +80,7 @@ struct HomeHeader: View {
             Spacer()
 
             // Notification Button
-            Button(action: {}) {
+            Button(action: { onNotificationTap?() }) {
                 Image(systemName: "bell")
                     .font(.system(size: 20, weight: .medium))
                     .foregroundStyle(FitTodayColor.textSecondary)

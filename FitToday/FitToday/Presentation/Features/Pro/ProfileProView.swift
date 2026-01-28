@@ -101,7 +101,7 @@ struct ProfileProView: View {
                 HStack(spacing: 6) {
                     Image(systemName: entitlement.isPro ? "crown.fill" : "sparkles")
                         .font(.system(size: 12, weight: .semibold))
-                    Text(entitlement.isPro ? "Pro Member" : "Free Plan")
+                    Text(entitlement.isPro ? "settings.pro.member".localized : "settings.pro.free".localized)
                         .font(.system(size: 11, weight: .semibold))
                 }
                 .foregroundStyle(.white)
@@ -115,19 +115,19 @@ struct ProfileProView: View {
 
             if entitlement.isPro {
                 // Pro content
-                Text("FitToday Pro")
+                Text("settings.pro.title".localized)
                     .font(.system(size: 20, weight: .bold))
                     .foregroundStyle(FitTodayColor.textPrimary)
 
-                Text("You have access to all premium features")
+                Text("settings.pro.access_all".localized)
                     .font(.system(size: 14))
                     .foregroundStyle(FitTodayColor.textSecondary)
 
                 // Sync status
                 HStack(spacing: FitTodaySpacing.md) {
-                    syncStatusItem(icon: "checkmark.icloud.fill", label: "Cloud Sync", isActive: true)
-                    syncStatusItem(icon: "heart.fill", label: "Apple Health", isActive: true)
-                    syncStatusItem(icon: "bolt.fill", label: "AI Workouts", isActive: true)
+                    syncStatusItem(icon: "checkmark.icloud.fill", label: "settings.pro.cloud_sync".localized, isActive: true)
+                    syncStatusItem(icon: "heart.fill", label: "settings.pro.apple_health".localized, isActive: true)
+                    syncStatusItem(icon: "bolt.fill", label: "settings.pro.ai_workouts".localized, isActive: true)
                 }
                 .padding(.top, 4)
 
@@ -136,7 +136,7 @@ struct ProfileProView: View {
                 } label: {
                     HStack {
                         Spacer()
-                        Text("Manage Subscription")
+                        Text("settings.pro.manage".localized)
                             .font(.system(size: 14, weight: .semibold))
                         Spacer()
                     }
@@ -148,19 +148,19 @@ struct ProfileProView: View {
                 .buttonStyle(.plain)
             } else {
                 // Free plan upgrade prompt
-                Text("Upgrade to Pro")
+                Text("settings.pro.upgrade".localized)
                     .font(.system(size: 20, weight: .bold))
                     .foregroundStyle(FitTodayColor.textPrimary)
 
-                Text("Unlock unlimited AI workouts, cloud sync, and Apple Health integration")
+                Text("settings.pro.unlock_description".localized)
                     .font(.system(size: 14))
                     .foregroundStyle(FitTodayColor.textSecondary)
 
                 // Features preview
                 VStack(alignment: .leading, spacing: 8) {
-                    featureItem(icon: "sparkles", text: "Unlimited AI Workouts")
-                    featureItem(icon: "icloud.fill", text: "Cloud Sync Across Devices")
-                    featureItem(icon: "heart.fill", text: "Apple Health Integration")
+                    featureItem(icon: "sparkles", text: "settings.pro.unlimited_ai".localized)
+                    featureItem(icon: "icloud.fill", text: "settings.pro.cloud_devices".localized)
+                    featureItem(icon: "heart.fill", text: "settings.pro.health_integration".localized)
                 }
                 .padding(.top, 4)
 
@@ -169,7 +169,7 @@ struct ProfileProView: View {
                 } label: {
                     HStack {
                         Spacer()
-                        Text("Try Pro Free")
+                        Text("settings.pro.try_free".localized)
                             .font(.system(size: 14, weight: .semibold))
                         Image(systemName: "arrow.right")
                             .font(.system(size: 12, weight: .semibold))
@@ -229,10 +229,10 @@ struct ProfileProView: View {
                 }
 
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("Apple Health")
+                    Text("settings.pro.apple_health".localized)
                         .font(.system(size: 16, weight: .semibold))
                         .foregroundStyle(FitTodayColor.textPrimary)
-                    Text(entitlement.isPro ? "Connected" : "Connect to sync workouts")
+                    Text(entitlement.isPro ? "settings.pro.connected".localized : "settings.pro.connect_sync".localized)
                         .font(.system(size: 13))
                         .foregroundStyle(FitTodayColor.textSecondary)
                 }
@@ -268,25 +268,25 @@ struct ProfileProView: View {
 
     private var settingsSection: some View {
         VStack(alignment: .leading, spacing: FitTodaySpacing.sm) {
-            Text("Profile")
+            Text("settings.profile".localized)
                 .font(.system(size: 13, weight: .semibold))
                 .foregroundStyle(FitTodayColor.textSecondary)
                 .padding(.leading, 4)
 
             VStack(spacing: 0) {
-                SettingsRow(icon: "person.text.rectangle", title: "Edit Training Profile") {
+                SettingsRow(icon: "person.text.rectangle", title: "settings.edit_profile".localized) {
                     router.push(.editProfile, on: .settings)
                 }
 
                 Divider().padding(.leading, 56)
 
-                SettingsRow(icon: "flame", title: "Redo Daily Questionnaire") {
+                SettingsRow(icon: "flame", title: "settings.redo_questionnaire".localized) {
                     redoDailyQuestionnaire()
                 }
 
                 Divider().padding(.leading, 56)
 
-                SettingsRow(icon: "lock.shield", title: "Privacy Settings") {
+                SettingsRow(icon: "lock.shield", title: "settings.privacy_settings".localized) {
                     router.push(.privacySettings, on: .settings)
                 }
 
@@ -352,25 +352,25 @@ struct ProfileProView: View {
 
     private var accountSection: some View {
         VStack(alignment: .leading, spacing: FitTodaySpacing.sm) {
-            Text("Account")
+            Text("settings.account".localized)
                 .font(.system(size: 13, weight: .semibold))
                 .foregroundStyle(FitTodayColor.textSecondary)
                 .padding(.leading, 4)
 
             VStack(spacing: 0) {
-                SettingsRow(icon: "arrow.counterclockwise", title: "Restore Purchases") {
+                SettingsRow(icon: "arrow.counterclockwise", title: "settings.restore_purchases".localized) {
                     Task { await restorePurchases() }
                 }
 
                 Divider().padding(.leading, 56)
 
-                SettingsRow(icon: "questionmark.circle", title: "Help & Support") {
+                SettingsRow(icon: "questionmark.circle", title: "settings.help_support".localized) {
                     openSupportURL()
                 }
 
                 Divider().padding(.leading, 56)
 
-                SettingsRow(icon: "key", title: "API Key Settings") {
+                SettingsRow(icon: "key", title: "settings.api_key".localized) {
                     router.push(.apiKeySettings, on: .settings)
                 }
             }
@@ -427,9 +427,9 @@ struct ProfileProView: View {
         let restored = await repo.service.restorePurchases()
         if restored {
             await loadEntitlement()
-            restoreMessage = "Your subscription has been restored successfully!"
+            restoreMessage = "settings.restore_success".localized
         } else {
-            restoreMessage = "No subscription found to restore."
+            restoreMessage = "settings.restore_not_found".localized
         }
         showingRestoreAlert = true
     }

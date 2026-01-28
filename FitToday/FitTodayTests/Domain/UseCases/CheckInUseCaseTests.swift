@@ -307,7 +307,7 @@ final class CheckInUseCaseTests: XCTestCase {
 // MARK: - CheckInError Equatable
 
 extension CheckInError: Equatable {
-    static func == (lhs: CheckInError, rhs: CheckInError) -> Bool {
+    public static func == (lhs: CheckInError, rhs: CheckInError) -> Bool {
         switch (lhs, rhs) {
         case (.networkUnavailable, .networkUnavailable),
              (.notInGroup, .notInGroup),

@@ -50,8 +50,17 @@ import Swinject
             defer { isWorking = false }
 
             // HealthKit disponível para todos os usuários (free e PRO)
+            // 1. Sincronizar workouts existentes do FitToday com dados do HealthKit
             let updated = try await syncService.syncLastDays(30)
-            lastSyncResult = "\(updated) treinos atualizados com duração/calorias."
+
+            // 2. Importar workouts externos do Apple Health (feitos fora do app)
+            let imported = try await syncService.importExternalWorkouts(days: 30)
+
+            if imported > 0 {
+                lastSyncResult = "\(updated) treinos atualizados e \(imported) treinos do Apple Health importados."
+            } else {
+                lastSyncResult = "\(updated) treinos atualizados com duração/calorias."
+            }
         } catch {
             handleError(error)
         }

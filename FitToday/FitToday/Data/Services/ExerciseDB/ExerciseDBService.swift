@@ -71,6 +71,7 @@ enum ExerciseDBError: Error, LocalizedError {
   case networkError(Error)
   case invalidResponse
   case notFound
+  case rateLimited(retryAfter: TimeInterval?)
 
   var errorDescription: String? {
     switch self {
@@ -82,7 +83,116 @@ enum ExerciseDBError: Error, LocalizedError {
       return "Resposta inválida da API."
     case .notFound:
       return "Exercício não encontrado."
+    case .rateLimited(let retryAfter):
+      if let seconds = retryAfter {
+        return "Rate limit atingido. Tente novamente em \(Int(seconds)) segundos."
+      }
+      return "Rate limit atingido. Tente novamente mais tarde."
     }
+  }
+}
+
+// MARK: - Rate Limiter
+
+/// Rate limiter para controlar frequência de requisições à API ExerciseDB.
+/// Implementa exponential backoff quando recebe 429 (Too Many Requests).
+actor ExerciseDBRateLimiter {
+  /// Intervalo mínimo entre requisições (em segundos)
+  private let minInterval: TimeInterval = 0.5
+
+  /// Tempo do último request
+  private var lastRequestTime: Date?
+
+  /// Backoff atual em segundos (aumenta exponencialmente após 429)
+  private var currentBackoff: TimeInterval = 0
+
+  /// Backoff máximo em segundos
+  private let maxBackoff: TimeInterval = 60
+
+  /// Número de 429 consecutivos
+  private var consecutive429Count = 0
+
+  /// Tempo até o qual devemos esperar (após 429 com Retry-After)
+  private var blockedUntil: Date?
+
+  /// Verifica se está bloqueado por rate limiting
+  var isBlocked: Bool {
+    if let blockedUntil = blockedUntil {
+      return Date() < blockedUntil
+    }
+    return false
+  }
+
+  /// Tempo restante de bloqueio em segundos
+  var remainingBlockTime: TimeInterval {
+    guard let blockedUntil = blockedUntil else { return 0 }
+    return max(0, blockedUntil.timeIntervalSinceNow)
+  }
+
+  /// Aguarda até que seja seguro fazer uma requisição.
+  func waitForSlot() async {
+    // Se bloqueado por 429, aguarda
+    if let blockedUntil = blockedUntil, Date() < blockedUntil {
+      let waitTime = blockedUntil.timeIntervalSinceNow
+      #if DEBUG
+      print("[RateLimiter] 🚫 Bloqueado por 429 - aguardando \(Int(waitTime))s")
+      #endif
+      try? await Task.sleep(nanoseconds: UInt64(waitTime * 1_000_000_000))
+    }
+
+    // Aguarda intervalo mínimo + backoff
+    if let lastTime = lastRequestTime {
+      let elapsed = Date().timeIntervalSince(lastTime)
+      let requiredInterval = minInterval + currentBackoff
+
+      if elapsed < requiredInterval {
+        let waitTime = requiredInterval - elapsed
+        try? await Task.sleep(nanoseconds: UInt64(waitTime * 1_000_000_000))
+      }
+    }
+
+    lastRequestTime = Date()
+  }
+
+  /// Registra um erro 429 e aplica backoff exponencial.
+  func register429(retryAfter: TimeInterval?) {
+    consecutive429Count += 1
+
+    // Se tiver Retry-After do header, usa esse valor
+    if let retryAfter = retryAfter {
+      blockedUntil = Date().addingTimeInterval(retryAfter)
+      currentBackoff = retryAfter
+      #if DEBUG
+      print("[RateLimiter] ⚠️ 429 recebido - Retry-After: \(Int(retryAfter))s")
+      #endif
+    } else {
+      // Exponential backoff: 1s, 2s, 4s, 8s, 16s, 32s, max 60s
+      currentBackoff = min(maxBackoff, pow(2, Double(consecutive429Count)))
+      blockedUntil = Date().addingTimeInterval(currentBackoff)
+      #if DEBUG
+      print("[RateLimiter] ⚠️ 429 recebido - backoff exponencial: \(Int(currentBackoff))s (tentativa \(consecutive429Count))")
+      #endif
+    }
+  }
+
+  /// Registra uma requisição bem-sucedida e reseta o backoff gradualmente.
+  func registerSuccess() {
+    consecutive429Count = 0
+    // Reduz backoff gradualmente (não zera imediatamente para evitar bursts)
+    currentBackoff = max(0, currentBackoff / 2)
+
+    // Limpa bloqueio se passou do tempo
+    if let blockedUntil = blockedUntil, Date() >= blockedUntil {
+      self.blockedUntil = nil
+    }
+  }
+
+  /// Reseta completamente o rate limiter.
+  func reset() {
+    lastRequestTime = nil
+    currentBackoff = 0
+    consecutive429Count = 0
+    blockedUntil = nil
   }
 }
 
@@ -93,6 +203,12 @@ actor ExerciseDBService: ExerciseDBServicing {
   private var cache: [String: ExerciseDBExercise] = [:]
   private var targetListCache: [String]?
   private var targetListCachedAt: Date?
+
+  /// Rate limiter compartilhado para controlar frequência de requisições
+  private let rateLimiter = ExerciseDBRateLimiter()
+
+  /// Máximo de retries após 429
+  private let max429Retries = 3
 
   init(configuration: ExerciseDBConfiguration, session: URLSession = .shared) {
     self.configuration = configuration
@@ -402,14 +518,30 @@ actor ExerciseDBService: ExerciseDBServicing {
 
   /// Busca bytes da mídia (imagem/GIF) com headers RapidAPI.
   /// - Retorna: bytes + mimeType quando disponível.
+  /// - Note: Implementa rate limiting e retry com exponential backoff para 429.
   func fetchImageData(
     exerciseId: String,
     resolution: ExerciseImageResolution
   ) async throws -> (data: Data, mimeType: String)? {
     let cacheKey = "\(exerciseId)_\(resolution.rawValue)"
     if let cached = imageDataCache[cacheKey] {
+      #if DEBUG
+      print("[ExerciseDB] 📦 Cache hit para mídia \(exerciseId)")
+      #endif
       return cached
     }
+
+    // Verifica se está bloqueado por rate limiting
+    if await rateLimiter.isBlocked {
+      let remainingTime = await rateLimiter.remainingBlockTime
+      #if DEBUG
+      print("[ExerciseDB] 🚫 Rate limited - bloqueado por mais \(Int(remainingTime))s para exercício \(exerciseId)")
+      #endif
+      throw ExerciseDBError.rateLimited(retryAfter: remainingTime)
+    }
+
+    // Aguarda slot do rate limiter
+    await rateLimiter.waitForSlot()
 
     // Fonte de verdade: https://exercisedb.p.rapidapi.com/image?resolution={resolution}&exerciseId={exerciseId}
     var components = URLComponents(string: "\(configuration.baseURL.absoluteString)/image")
@@ -431,7 +563,7 @@ actor ExerciseDBService: ExerciseDBServicing {
     request.timeoutInterval = 15.0
     request.addValue(configuration.apiKey, forHTTPHeaderField: "x-rapidapi-key")
     request.addValue(configuration.host, forHTTPHeaderField: "x-rapidapi-host")
-    
+
     #if DEBUG
     print("[ExerciseDB] 📡 Iniciando requisição fetchImageData para exercício \(exerciseId)")
     print("[ExerciseDB]   URL: \(url.absoluteString)")
@@ -441,12 +573,30 @@ actor ExerciseDBService: ExerciseDBServicing {
 
     do {
       let (data, response) = try await session.data(for: request)
-      
+
       #if DEBUG
       print("[ExerciseDB] ✅ Resposta recebida para exercício \(exerciseId): \(data.count) bytes")
       #endif
       guard let httpResponse = response as? HTTPURLResponse else {
         throw ExerciseDBError.invalidResponse
+      }
+
+      // Tratamento de 429 (Too Many Requests)
+      if httpResponse.statusCode == 429 {
+        // Extrai Retry-After do header se disponível
+        let retryAfter: TimeInterval?
+        if let retryAfterHeader = httpResponse.value(forHTTPHeaderField: "Retry-After"),
+           let seconds = Double(retryAfterHeader) {
+          retryAfter = seconds
+        } else {
+          retryAfter = nil
+        }
+
+        await rateLimiter.register429(retryAfter: retryAfter)
+        #if DEBUG
+        print("[ExerciseDB] ⚠️ HTTP 429 (Too Many Requests) para mídia \(exerciseId)")
+        #endif
+        throw ExerciseDBError.rateLimited(retryAfter: retryAfter)
       }
 
       guard (200...299).contains(httpResponse.statusCode) else {
@@ -456,8 +606,11 @@ actor ExerciseDBService: ExerciseDBServicing {
         return nil
       }
 
+      // Registra sucesso no rate limiter
+      await rateLimiter.registerSuccess()
+
       var detectedMimeType = httpResponse.mimeType ?? "application/octet-stream"
-      
+
       // Se mimeType não for confiável, tenta detectar pelo conteúdo (magic bytes)
       if !detectedMimeType.hasPrefix("image/") && data.count >= 4 {
         let magicBytes = data.prefix(4)
@@ -471,7 +624,7 @@ actor ExerciseDBService: ExerciseDBServicing {
           detectedMimeType = "image/webp"
         }
       }
-      
+
       #if DEBUG
       print("[ExerciseDB] 📦 Resposta recebida: mimeType=\(detectedMimeType) (original: \(httpResponse.mimeType ?? "nil")), dataSize=\(data.count) bytes para exercício \(exerciseId)")
       #endif
@@ -539,6 +692,11 @@ actor ExerciseDBService: ExerciseDBServicing {
       #endif
       throw ExerciseDBError.networkError(error)
     }
+  }
+
+  /// Reseta o rate limiter (útil para testes ou após longo período)
+  func resetRateLimiter() async {
+    await rateLimiter.reset()
   }
 }
 

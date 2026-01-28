@@ -10,8 +10,25 @@ import Foundation
 /// Compositor local de planos de treino com regras de especialista
 /// Baseado nos guias de `personal-active/` para estrutura completa e ajuste por DOMS
 struct LocalWorkoutPlanComposer: WorkoutPlanComposing, Sendable {
-    
+
     private let validator = WorkoutPlanValidator()
+
+    /// Generates a variation seed based on current date/time for workout diversity
+    /// Changes every 15 minutes to provide fresh workouts throughout the day
+    private func generateVariationSeed() -> UInt64 {
+        let calendar = Calendar.current
+        let now = Date()
+        let dayOfYear = calendar.ordinality(of: .day, in: .year, for: now) ?? 1
+        let hour = calendar.component(.hour, from: now)
+        let minuteBucket = calendar.component(.minute, from: now) / 15 // 0, 1, 2, or 3
+
+        // Combine factors for seed
+        var hasher = Hasher()
+        hasher.combine(dayOfYear)
+        hasher.combine(hour)
+        hasher.combine(minuteBucket)
+        return UInt64(bitPattern: Int64(hasher.finalize()))
+    }
     
     // MARK: - WorkoutPlanComposing
     
@@ -127,8 +144,37 @@ struct LocalWorkoutPlanComposer: WorkoutPlanComposing, Sendable {
             max(2, candidates.count)
         )
 
-        // Selecionar os melhores blocos
-        return Array(candidates.prefix(targetCount).map(\.block))
+        // 💡 VARIATION: Use seeded random to shuffle among top candidates
+        // This ensures different workouts on different days/times while respecting quality scores
+        let seed = generateVariationSeed()
+        var generator = SeededRandomNumberGenerator(seed: seed)
+
+        // Take top 60% candidates (by score) and shuffle them for variety
+        let topCandidatesCount = max(targetCount, Int(Double(candidates.count) * 0.6))
+        var topCandidates = Array(candidates.prefix(topCandidatesCount))
+        topCandidates.shuffle(using: &generator)
+
+        #if DEBUG
+        print("[LocalComposer] Variation seed: \(seed), shuffling \(topCandidates.count) candidates")
+        #endif
+
+        // Selecionar os blocos shuffled
+        return Array(topCandidates.prefix(targetCount).map(\.block))
+    }
+
+    /// Simple seeded random number generator for deterministic shuffling
+    private struct SeededRandomNumberGenerator: RandomNumberGenerator {
+        private var state: UInt64
+
+        init(seed: UInt64) {
+            self.state = seed
+        }
+
+        mutating func next() -> UInt64 {
+            // Linear Congruential Generator
+            state = state &* 6364136223846793005 &+ 1442695040888963407
+            return state
+        }
     }
     
     // MARK: - Plan Assembly
@@ -258,7 +304,14 @@ struct LocalWorkoutPlanComposer: WorkoutPlanComposing, Sendable {
         usedExerciseIds: inout Set<String>
     ) -> [ExercisePrescription] {
         // Filter out already used exercises to prevent duplicates
-        let availableExercises = block.exercises.filter { !usedExerciseIds.contains($0.id) }
+        var availableExercises = block.exercises.filter { !usedExerciseIds.contains($0.id) }
+
+        // 💡 VARIATION: Shuffle exercises using seeded random for variety
+        let seed = generateVariationSeed()
+        // Use bitPattern conversion to safely handle negative hashValues
+        let blockSeed = UInt64(bitPattern: Int64(block.id.hashValue))
+        var generator = SeededRandomNumberGenerator(seed: seed &+ blockSeed)
+        availableExercises.shuffle(using: &generator)
 
         return availableExercises.map { exercise in
             // Mark exercise as used

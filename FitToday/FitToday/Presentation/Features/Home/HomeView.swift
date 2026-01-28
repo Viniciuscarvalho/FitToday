@@ -35,7 +35,8 @@ struct HomeView: View {
                     isPro: viewModel.entitlement.isPro,
                     goalBadgeText: viewModel.goalBadgeText,
                     userName: viewModel.userName,
-                    userPhotoURL: viewModel.userPhotoURL
+                    userPhotoURL: viewModel.userPhotoURL,
+                    onNotificationTap: { router.push(.notifications, on: .home) }
                 )
 
                 HomeHeroCard(
@@ -63,10 +64,8 @@ struct HomeView: View {
                         }
                     )
                 }
-
-                Spacer(minLength: FitTodaySpacing.xl)
             }
-            .padding(.bottom, FitTodaySpacing.xxl)
+            .padding(.bottom, FitTodaySpacing.md)
         }
         .background(FitTodayColor.background.ignoresSafeArea())
         .navigationBarHidden(true)
