@@ -3,21 +3,19 @@
 //  FitToday
 //
 //  Created by AI on 04/01/26.
+//  Simplified on 29/01/26 - Removed ExerciseDB dependencies
 //
 
 import Foundation
 
+/// Repository for loading library workouts from bundle.
+/// Note: Media is loaded directly from JSON, no external resolution.
 actor BundleLibraryWorkoutsRepository: LibraryWorkoutsRepository {
     private let loader: LibraryWorkoutsLoader
-    private let mediaResolver: ExerciseMediaResolving?
     private var cachedWorkouts: [LibraryWorkout]?
 
-    init(
-        loader: LibraryWorkoutsLoader = LibraryWorkoutsLoader(),
-        mediaResolver: ExerciseMediaResolving? = nil
-    ) {
+    init(loader: LibraryWorkoutsLoader = LibraryWorkoutsLoader()) {
         self.loader = loader
-        self.mediaResolver = mediaResolver
     }
 
     func loadWorkouts() async throws -> [LibraryWorkout] {
@@ -28,7 +26,7 @@ actor BundleLibraryWorkoutsRepository: LibraryWorkoutsRepository {
         let dtos = try loader.loadDTOs()
         var workouts: [LibraryWorkout] = []
         for dto in dtos {
-            if let workout = await dto.toDomain(mediaResolver: mediaResolver, normalizer: normalizeExerciseId(_:)) {
+            if let workout = dto.toDomain(normalizer: normalizeExerciseId(_:)) {
                 workouts.append(workout)
             }
         }
@@ -78,10 +76,7 @@ fileprivate struct LibraryWorkoutDTO: Codable {
     let intensity: String
     let exercises: [LibraryExercisePrescriptionDTO]
 
-    func toDomain(
-        mediaResolver: ExerciseMediaResolving?,
-        normalizer: (String) -> String
-    ) async -> LibraryWorkout? {
+    func toDomain(normalizer: (String) -> String) -> LibraryWorkout? {
         guard
             let goalEnum = FitnessGoal(rawValue: goal),
             let structureEnum = TrainingStructure(rawValue: structure),
@@ -90,7 +85,7 @@ fileprivate struct LibraryWorkoutDTO: Codable {
 
         var exercisePrescriptions: [ExercisePrescription] = []
         for exercise in exercises {
-            if let domain = await exercise.toDomain(mediaResolver: mediaResolver, normalizer: normalizer) {
+            if let domain = exercise.toDomain(normalizer: normalizer) {
                 exercisePrescriptions.append(domain)
             }
         }
@@ -117,11 +112,8 @@ private struct LibraryExercisePrescriptionDTO: Codable {
     let restInterval: TimeInterval
     let tip: String?
 
-    func toDomain(
-        mediaResolver: ExerciseMediaResolving?,
-        normalizer: (String) -> String
-    ) async -> ExercisePrescription? {
-        guard let exerciseDomain = await exercise.toDomain(mediaResolver: mediaResolver, normalizer: normalizer) else { return nil }
+    func toDomain(normalizer: (String) -> String) -> ExercisePrescription? {
+        guard let exerciseDomain = exercise.toDomain(normalizer: normalizer) else { return nil }
         return ExercisePrescription(
             exercise: exerciseDomain,
             sets: sets,
@@ -140,24 +132,13 @@ private struct LibraryExerciseDTO: Codable {
     let instructions: [String]
     let media: LibraryMediaDTO?
 
-    func toDomain(
-        mediaResolver: ExerciseMediaResolving?,
-        normalizer: (String) -> String
-    ) async -> WorkoutExercise? {
+    func toDomain(normalizer: (String) -> String) -> WorkoutExercise? {
         guard
             let muscle = MuscleGroup(rawValue: mainMuscle),
             let equipmentEnum = EquipmentType(rawValue: equipment)
         else { return nil }
 
         let normalizedId = normalizer(id)
-        let resolvedMedia = await resolveMedia(
-            using: mediaResolver,
-            normalizedId: normalizedId,
-            name: name,
-            muscle: muscle,
-            equipment: equipmentEnum,
-            instructions: instructions
-        )
 
         return WorkoutExercise(
             id: normalizedId,
@@ -165,46 +146,8 @@ private struct LibraryExerciseDTO: Codable {
             mainMuscle: muscle,
             equipment: equipmentEnum,
             instructions: instructions,
-            media: resolvedMedia
+            media: media?.toDomain()
         )
-    }
-
-    private func resolveMedia(
-        using mediaResolver: ExerciseMediaResolving?,
-        normalizedId: String,
-        name: String,
-        muscle: MuscleGroup,
-        equipment: EquipmentType,
-        instructions: [String]
-    ) async -> ExerciseMedia? {
-        let domainMedia = media?.toDomain()
-
-        // Se já houver mídia, retorna sem resolver.
-        if let media = domainMedia, (media.imageURL != nil || media.gifURL != nil) {
-            return media
-        }
-
-        // Tenta resolver via serviço (prioriza GIF)
-        if let resolver = mediaResolver {
-            let lookupExercise = WorkoutExercise(
-                id: normalizedId,
-                name: name,
-                mainMuscle: muscle,
-                equipment: equipment,
-                instructions: instructions,
-                media: domainMedia
-            )
-            let resolved = await resolver.resolveMedia(for: lookupExercise, context: .thumbnail)
-            if resolved.hasMedia {
-                return ExerciseMedia(
-                    imageURL: resolved.imageURL ?? resolved.gifURL,
-                    gifURL: resolved.gifURL ?? resolved.imageURL,
-                    source: resolved.source.rawValue
-                )
-            }
-        }
-
-        return domainMedia
     }
 }
 
@@ -220,4 +163,3 @@ private struct LibraryMediaDTO: Codable {
         )
     }
 }
-

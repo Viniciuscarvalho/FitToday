@@ -389,7 +389,7 @@ struct WorkoutCompletionView: View {
         router.pop(on: .home) // workout list
 
         if goToHistory {
-            router.select(tab: .history)
+            router.select(tab: .activity)
         }
     }
 

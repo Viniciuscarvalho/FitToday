@@ -56,6 +56,11 @@ struct HomeView: View {
                     streakDays: viewModel.streakDays
                 )
 
+                // Custom Workouts Section
+                CustomWorkoutsEntrySection {
+                    router.push(.customWorkouts, on: .home)
+                }
+
                 if !viewModel.topPrograms.isEmpty {
                     TopForYouSection(
                         programs: viewModel.topPrograms,
@@ -109,7 +114,7 @@ struct HomeView: View {
     container.register(EntitlementRepository.self) { _ in MockEntitlementRepository() }
     container.register(ProgramRepository.self) { _ in BundleProgramRepository() }
     container.register(LibraryWorkoutsRepository.self) { _ in
-        BundleLibraryWorkoutsRepository(mediaResolver: ExerciseMediaResolver(service: nil))
+        BundleLibraryWorkoutsRepository()
     }
 
     return NavigationStack {

@@ -15,9 +15,11 @@ enum WorkoutStatus: String, Codable, CaseIterable, Sendable {
 /// Fonte do registro de treino
 /// - app: Treino gerado e completado pelo FitToday
 /// - appleHealth: Treino importado do Apple Health (feito fora do app)
+/// - merged: Treino combinado de múltiplas fontes
 enum WorkoutSource: String, Codable, CaseIterable, Sendable {
     case app
     case appleHealth = "apple_health"
+    case merged
 }
 
 struct WorkoutHistoryEntry: Codable, Hashable, Sendable, Identifiable {

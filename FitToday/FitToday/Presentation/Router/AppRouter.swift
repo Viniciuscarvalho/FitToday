@@ -10,25 +10,28 @@ import SwiftUI
 
 enum AppTab: Hashable, CaseIterable {
     case home
-    case programs
-    case history
-    case settings
+    case workout
+    case create
+    case activity
+    case profile
 
     var title: String {
         switch self {
         case .home: return "tab.home".localized
-        case .programs: return "tab.programs".localized
-        case .history: return "tab.history".localized
-        case .settings: return "tab.settings".localized
+        case .workout: return "tab.workout".localized
+        case .create: return "tab.create".localized
+        case .activity: return "tab.activity".localized
+        case .profile: return "tab.profile".localized
         }
     }
 
     var systemImage: String {
         switch self {
         case .home: return "house.fill"
-        case .programs: return "square.grid.2x2.fill"
-        case .history: return "calendar"
-        case .settings: return "gearshape.fill"
+        case .workout: return "dumbbell.fill"
+        case .create: return "plus.circle.fill"
+        case .activity: return "chart.bar.fill"
+        case .profile: return "person.fill"
         }
     }
 }
@@ -52,6 +55,8 @@ enum AppRoute: Hashable {
     case authentication(inviteContext: String?)  // Authentication flow
     case groupInvite(groupId: String)  // Group invitation deep link
     case notifications  // Notifications screen for challenges
+    case customWorkouts  // Custom workout templates list
+    case customWorkoutBuilder(UUID?)  // Create or edit custom workout (nil = new)
 }
 
 struct DeepLink {

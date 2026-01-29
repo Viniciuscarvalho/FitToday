@@ -181,7 +181,7 @@ struct ProgramsView: View {
                         program: program,
                         category: categoryForProgram(program)
                     ) {
-                        router.push(.programDetail(programId), on: .programs)
+                        router.push(.programDetail(programId), on: .workout)
                     }
                     .id(programId)
                 }

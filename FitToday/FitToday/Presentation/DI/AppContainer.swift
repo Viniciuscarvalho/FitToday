@@ -79,58 +79,19 @@ struct AppContainer {
             )
         }.inObjectScope(.container)
 
-        // ExerciseDB Service e Media Resolver
-        // Usa chave do usuário (Keychain) se disponível, fallback para plist (legado)
-        let exerciseDBConfig = ExerciseDBConfiguration.loadFromUserKey() ?? ExerciseDBConfiguration.loadFromBundle()
-        container.register(ExerciseDBConfiguration?.self) { _ in exerciseDBConfig }
+        // Wger Exercise Service (Free API - no API key needed)
+        let wgerService = WgerAPIService()
+        container.register(ExerciseServiceProtocol.self) { _ in wgerService }
             .inObjectScope(.container)
 
-        if let config = exerciseDBConfig {
-            let exerciseDBService = ExerciseDBService(configuration: config)
-            container.register(ExerciseDBServicing.self) { _ in exerciseDBService }
-                .inObjectScope(.container)
+        // Workout Blocks Repository (simplified without ExerciseDB enrichment)
+        let blocksRepository = BundleWorkoutBlocksRepository()
+        container.register(WorkoutBlocksRepository.self) { _ in blocksRepository }
+            .inObjectScope(.container)
 
-            let targetCatalog = ExerciseDBTargetCatalog(service: exerciseDBService)
-            container.register(ExerciseDBTargetCataloging.self) { _ in targetCatalog }
-                .inObjectScope(.container)
-
-            // 💡 Learn: ExerciseNameNormalizer para normalização de nomes de exercícios
-            let exerciseNameNormalizer = ExerciseNameNormalizer(exerciseDBService: exerciseDBService)
-            container.register(ExerciseNameNormalizing.self) { _ in exerciseNameNormalizer }
-                .inObjectScope(.container)
-
-            let mediaResolver = ExerciseMediaResolver(
-                service: exerciseDBService,
-                targetCatalog: targetCatalog,
-                baseURL: config.baseURL
-            )
-            container.register(ExerciseMediaResolving.self) { _ in mediaResolver }
-                .inObjectScope(.container)
-
-            let blocksRepository = BundleWorkoutBlocksRepository(mediaResolver: mediaResolver, exerciseService: exerciseDBService)
-            container.register(WorkoutBlocksRepository.self) { _ in blocksRepository }
-                .inObjectScope(.container)
-
-            let libraryRepository = BundleLibraryWorkoutsRepository(mediaResolver: mediaResolver)
-            container.register(LibraryWorkoutsRepository.self) { _ in libraryRepository }
-                .inObjectScope(.container)
-        } else {
-            // Sem configuração, usa resolver sem serviço (apenas fallback/placeholder)
-            let mediaResolver = ExerciseMediaResolver(service: nil as (any ExerciseDBServicing)?)
-            container.register(ExerciseMediaResolving.self) { _ in mediaResolver }
-                .inObjectScope(.container)
-            #if DEBUG
-            print("[AppContainer] ExerciseDB não configurado - usando apenas fallback local")
-            #endif
-
-            let blocksRepository = BundleWorkoutBlocksRepository()
-            container.register(WorkoutBlocksRepository.self) { _ in blocksRepository }
-                .inObjectScope(.container)
-
-            let libraryRepository = BundleLibraryWorkoutsRepository(mediaResolver: mediaResolver)
-            container.register(LibraryWorkoutsRepository.self) { _ in libraryRepository }
-                .inObjectScope(.container)
-        }
+        let libraryRepository = BundleLibraryWorkoutsRepository()
+        container.register(LibraryWorkoutsRepository.self) { _ in libraryRepository }
+            .inObjectScope(.container)
 
         // ProgramRepository - carrega programas do bundle
         let programRepository = BundleProgramRepository()
@@ -151,13 +112,9 @@ struct AppContainer {
         container.register(WorkoutPlanComposing.self) { resolver in
             let entitlementRepo = resolver.resolve(EntitlementRepository.self)
             let historyRepo = resolver.resolve(WorkoutHistoryRepository.self)
-            let normalizer = resolver.resolve(ExerciseNameNormalizing.self)
-            let mediaResolver = resolver.resolve(ExerciseMediaResolving.self)
             return DynamicHybridWorkoutPlanComposer(
                 localComposer: localComposer,
                 usageLimiter: usageLimiter,
-                exerciseNameNormalizer: normalizer,
-                mediaResolver: mediaResolver,
                 entitlementProvider: {
                     return (try? await entitlementRepo?.currentEntitlement()) ?? .free
                 },
@@ -384,19 +341,6 @@ struct AppContainer {
         }
         .inObjectScope(.container)
 
-        // Feedback Analyzer - analyzes workout ratings for adaptive training
-        let feedbackAnalyzer = FeedbackAnalyzer()
-        container.register(FeedbackAnalyzing.self) { _ in feedbackAnalyzer }
-            .inObjectScope(.container)
-
-        // Fetch Recent Ratings Use Case
-        container.register(FetchRecentRatingsUseCase.self) { resolver in
-            FetchRecentRatingsUseCase(
-                historyRepository: resolver.resolve(WorkoutHistoryRepository.self)!
-            )
-        }
-        .inObjectScope(.container)
-
         // Save Workout Rating Use Case
         container.register(SaveWorkoutRatingUseCase.self) { resolver in
             SaveWorkoutRatingUseCase(
@@ -420,6 +364,32 @@ struct AppContainer {
         }
         .inObjectScope(.container)
 
+        // ========== CUSTOM WORKOUT (Treinos Dinâmicos) ==========
+
+        // Custom Workout Repository
+        container.register(CustomWorkoutRepository.self) { _ in
+            SwiftDataCustomWorkoutRepository(modelContainer: modelContainer)
+        }
+        .inObjectScope(.container)
+
+        // Save Custom Workout Use Case
+        container.register(SaveCustomWorkoutUseCase.self) { resolver in
+            SaveCustomWorkoutUseCase(
+                repository: resolver.resolve(CustomWorkoutRepository.self)!
+            )
+        }
+        .inObjectScope(.container)
+
+        // Complete Custom Workout Use Case
+        container.register(CompleteCustomWorkoutUseCase.self) { resolver in
+            CompleteCustomWorkoutUseCase(
+                repository: resolver.resolve(CustomWorkoutRepository.self)!,
+                historyRepository: resolver.resolve(WorkoutHistoryRepository.self)!,
+                syncWorkoutUseCase: resolver.resolve(SyncWorkoutCompletionUseCase.self)
+            )
+        }
+        .inObjectScope(.container)
+
         return AppContainer(container: container, router: router, modelContainer: modelContainer)
     }
 
@@ -429,7 +399,9 @@ struct AppContainer {
             SDWorkoutHistoryEntry.self,
             SDProEntitlementSnapshot.self,
             SDCachedWorkout.self,
-            SDUserStats.self
+            SDUserStats.self,
+            SDCustomWorkoutTemplate.self,
+            SDCustomWorkoutCompletion.self
         ])
         
         // Configuração com migração automática leve

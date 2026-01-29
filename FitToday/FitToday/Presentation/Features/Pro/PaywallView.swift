@@ -230,7 +230,7 @@ struct PaywallView: View {
     private var alternativeSection: some View {
         Button {
             onDismiss()
-            router.select(tab: .programs)
+            router.select(tab: .workout)
             dismiss()
         } label: {
             Text("Ver treinos gratuitos na Biblioteca")

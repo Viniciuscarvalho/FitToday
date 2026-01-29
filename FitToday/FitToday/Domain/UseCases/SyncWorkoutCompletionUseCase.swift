@@ -222,27 +222,41 @@ struct SyncWorkoutCompletionUseCase: Sendable {
 
     // MARK: - Private Methods
 
+    /// BUG FIX #7: Use consistent calendar with user's timezone for streak calculations
+    /// This prevents timezone-related issues when calculating consecutive days
+    private static var streakCalendar: Calendar {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone.current // Use user's timezone for local day boundaries
+        return calendar
+    }
+
     private func computeCurrentStreak(userId: String) async throws -> Int {
         let entries = try await historyRepository.listEntries()
+        let calendar = Self.streakCalendar
+
+        // BUG FIX #3: Only count workouts >= 30 minutes for streak calculation
         let completedDates = entries
-            .filter { $0.status == .completed }
-            .map { Calendar.current.startOfDay(for: $0.date) }
+            .filter { $0.status == .completed && ($0.durationMinutes ?? 0) >= Self.minimumWorkoutMinutes }
+            .map { calendar.startOfDay(for: $0.date) }
             .sorted(by: >)
 
-        guard let mostRecent = completedDates.first else { return 0 }
-        let today = Calendar.current.startOfDay(for: Date())
+        // Remove duplicates (multiple workouts on same day)
+        let uniqueDates = Array(Set(completedDates)).sorted(by: >)
+
+        guard let mostRecent = uniqueDates.first else { return 0 }
+        let today = calendar.startOfDay(for: Date())
 
         // Streak broken if most recent is not today or yesterday
-        guard mostRecent == today || Calendar.current.dateComponents([.day], from: mostRecent, to: today).day == 1 else {
+        guard mostRecent == today || calendar.dateComponents([.day], from: mostRecent, to: today).day == 1 else {
             return 0
         }
 
         // Count consecutive days
         var streak = 1
-        for i in 1..<completedDates.count {
-            let prev = completedDates[i-1]
-            let current = completedDates[i]
-            if Calendar.current.dateComponents([.day], from: current, to: prev).day == 1 {
+        for i in 1..<uniqueDates.count {
+            let prev = uniqueDates[i-1]
+            let current = uniqueDates[i]
+            if calendar.dateComponents([.day], from: current, to: prev).day == 1 {
                 streak += 1
             } else {
                 break

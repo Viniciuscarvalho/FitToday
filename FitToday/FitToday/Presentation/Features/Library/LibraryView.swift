@@ -125,7 +125,7 @@ struct LibraryView: View {
             LazyVStack(spacing: FitTodaySpacing.md) {
                 ForEach(viewModel.filteredWorkouts) { workout in
                     LibraryWorkoutCard(workout: workout) {
-                        router.push(.programWorkoutDetail(workout.id), on: .programs)
+                        router.push(.programWorkoutDetail(workout.id), on: .workout)
                     }
                     .accessibilityLabel("\(workout.title), \(workout.estimatedDurationMinutes) minutos, \(workout.exerciseCount) exercícios")
                     .accessibilityHint("Toque para ver detalhes e iniciar o treino")

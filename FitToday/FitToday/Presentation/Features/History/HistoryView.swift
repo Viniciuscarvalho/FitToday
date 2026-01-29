@@ -221,7 +221,7 @@ struct HistoryView: View {
             VStack(spacing: FitTodaySpacing.lg) {
                 JoinChallengeCard {
                     // Navigate to authentication
-                    router.push(.authentication(inviteContext: "Entre para criar ou participar de desafios com amigos"), on: .history)
+                    router.push(.authentication(inviteContext: "Entre para criar ou participar de desafios com amigos"), on: .activity)
                 }
 
                 // Info section

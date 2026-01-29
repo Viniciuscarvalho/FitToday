@@ -67,25 +67,13 @@ enum KeychainBootstrap {
             if !manager.hasAPIKey(for: .openAI) {
                 if manager.saveAPIKey(openAIKey, for: .openAI) {
                     keysPopulated += 1
-                    print("[KeychainBootstrap] ✅ OpenAI API Key populada no Keychain")
+                    print("[KeychainBootstrap] OpenAI API Key populada no Keychain")
                 }
             } else {
-                print("[KeychainBootstrap] ℹ️ OpenAI API Key já existe no Keychain")
+                print("[KeychainBootstrap] OpenAI API Key já existe no Keychain")
             }
         }
-        
-        // RapidAPI Key (ExerciseDB)
-        if let rapidAPIKey = secrets["RAPIDAPI_KEY"], !rapidAPIKey.isEmpty, rapidAPIKey != "YOUR_RAPIDAPI_KEY_HERE" {
-            if !manager.hasAPIKey(for: .exerciseDB) {
-                if manager.saveAPIKey(rapidAPIKey, for: .exerciseDB) {
-                    keysPopulated += 1
-                    print("[KeychainBootstrap] ✅ RapidAPI Key populada no Keychain")
-                }
-            } else {
-                print("[KeychainBootstrap] ℹ️ RapidAPI Key já existe no Keychain")
-            }
-        }
-        
+
         if keysPopulated > 0 {
             print("[KeychainBootstrap] 🎉 Bootstrap concluído: \(keysPopulated) chave(s) populada(s)")
         } else {

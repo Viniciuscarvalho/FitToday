@@ -7,17 +7,8 @@
 
 import Foundation
 
-struct ListWorkoutHistoryUseCase {
-    private let repository: WorkoutHistoryRepository
-
-    init(repository: WorkoutHistoryRepository) {
-        self.repository = repository
-    }
-
-    func execute() async throws -> [WorkoutHistoryEntry] {
-        try await repository.listEntries().sorted { $0.date > $1.date }
-    }
-}
+// NOTE: ListWorkoutHistoryUseCase was removed as it was never used in production.
+// History listing is done directly through the repository where needed.
 
 
 

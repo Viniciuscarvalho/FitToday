@@ -20,6 +20,10 @@
 
 // MARK: - Tabs
 "tab.home" = "Home";
+"tab.workout" = "Workout";
+"tab.create" = "Create";
+"tab.activity" = "Activity";
+"tab.profile" = "Profile";
 "tab.programs" = "Programs";
 "tab.history" = "History";
 "tab.settings" = "Settings";
@@ -317,3 +321,95 @@
 "notifications.section.earlier" = "Earlier";
 "notifications.mark_all_read" = "Mark all read";
 "notifications.error.config" = "Configuration error: notification services not registered.";
+
+// MARK: - Workout Tab
+"workout_tab.segment.my_workouts" = "My Workouts";
+"workout_tab.segment.programs" = "Programs";
+"workout_tab.empty.title" = "No workouts created";
+"workout_tab.empty.subtitle" = "Create your first custom workout";
+"workout_tab.create_first" = "Create First Workout";
+
+// MARK: - Create Workout
+"create_workout.title" = "Create New Workout";
+"create_workout.name.label" = "Workout name";
+"create_workout.name.placeholder" = "Ex: Chest Workout";
+"create_workout.icon.label" = "Icon";
+"create_workout.color.label" = "Color";
+"create_workout.exercises.label" = "Exercises";
+"create_workout.exercises.empty" = "No exercises added";
+"create_workout.add_exercise" = "Add Exercise";
+"create_workout.save" = "Save Workout";
+"create_workout.cancel" = "Cancel";
+
+// MARK: - Exercise Search
+"exercise_search.title" = "Search Exercise";
+"exercise_search.placeholder" = "Search exercises...";
+"exercise_search.filter.all" = "All";
+"exercise_search.filter.muscle" = "Muscle";
+"exercise_search.filter.equipment" = "Equipment";
+"exercise_search.filter.category" = "Category";
+"exercise_search.recent" = "Recent";
+"exercise_search.results" = "Results";
+"exercise_search.no_results" = "No exercises found";
+
+// MARK: - Exercise Config
+"exercise_config.title" = "Configure Exercise";
+"exercise_config.sets" = "Sets";
+"exercise_config.reps" = "Reps";
+"exercise_config.weight" = "Weight";
+"exercise_config.rest" = "Rest";
+"exercise_config.add_set" = "Add Set";
+"exercise_config.remove_set" = "Remove Set";
+"exercise_config.confirm" = "Confirm";
+"exercise_config.unit.kg" = "kg";
+"exercise_config.unit.sec" = "sec";
+
+// MARK: - Workout Execution
+"workout_execution.set_of" = "Set %d of %d";
+"workout_execution.next_exercise" = "Next";
+"workout_execution.previous" = "Previous";
+"workout_execution.complete_set" = "Complete Set";
+"workout_execution.finish" = "Finish Workout";
+"workout_execution.pause" = "Pause";
+"workout_execution.resume" = "Resume";
+"workout_execution.quit.title" = "Quit Workout?";
+"workout_execution.quit.message" = "Your progress will be lost";
+"workout_execution.quit.confirm" = "Quit";
+"workout_execution.quit.cancel" = "Continue Workout";
+
+// MARK: - Rest Timer
+"rest_timer.title" = "Rest";
+"rest_timer.skip" = "Skip";
+"rest_timer.add_time" = "+30s";
+"rest_timer.next_exercise" = "Next exercise:";
+
+// MARK: - Fatigue
+"fatigue.title" = "Fatigue Level";
+"fatigue.rested" = "Rested";
+"fatigue.light" = "Light";
+"fatigue.moderate" = "Moderate";
+"fatigue.tired" = "Tired";
+"fatigue.exhausted" = "Exhausted";
+"fatigue.description.rested" = "Ready for intense workout";
+"fatigue.description.light" = "Light fatigue, normal workout";
+"fatigue.description.moderate" = "Moderate fatigue, adjust volume";
+"fatigue.description.tired" = "Tired, reduce intensity";
+"fatigue.description.exhausted" = "Very tired, consider rest";
+
+// MARK: - Home AI Section
+"home.ai.title" = "Smart Workout";
+"home.ai.subtitle" = "Let AI create a personalized workout for you";
+"home.ai.generate" = "Generate Workout";
+"home.ai.muscles.title" = "Muscle Groups";
+"home.ai.muscles.subtitle" = "Select the muscles you want to train";
+"home.ai.duration.title" = "Duration";
+"home.ai.duration.subtitle" = "How much time do you have available?";
+"home.ai.generating" = "Generating your workout...";
+"home.ai.analyzing" = "Analyzing your preferences...";
+"home.ai.optimizing" = "Optimizing exercises...";
+"home.ai.ready" = "Workout ready!";
+
+// MARK: - Programs Filters
+"programs.filter.level" = "Level";
+"programs.filter.goal" = "Goal";
+"programs.filter.equipment" = "Equipment";

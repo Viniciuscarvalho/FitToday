@@ -13,6 +13,8 @@ struct TabRootView: View {
     @Environment(WorkoutSessionStore.self) private var sessionStore
     @Environment(\.dependencyResolver) private var resolver
 
+    @State private var showCreateWorkout = false
+
     var body: some View {
         // 💡 Learn: @Bindable wrapper permite binding de @Observable objects
         @Bindable var routerBinding = router
@@ -21,16 +23,31 @@ struct TabRootView: View {
                 HomeView(resolver: resolver)
             }
 
-            tabView(for: .programs) {
-                ProgramsView(resolver: resolver)
+            tabView(for: .workout) {
+                WorkoutTabView(resolver: resolver)
             }
 
-            tabView(for: .history) {
-                HistoryView(resolver: resolver)
+            // Create tab - center button that shows sheet
+            tabView(for: .create) {
+                Color.clear
+                    .onAppear {
+                        showCreateWorkout = true
+                        // Switch back to workout tab
+                        router.select(tab: .workout)
+                    }
             }
 
-            tabView(for: .settings) {
+            tabView(for: .activity) {
+                ActivityTabView()
+            }
+
+            tabView(for: .profile) {
                 ProfileProView()
+            }
+        }
+        .sheet(isPresented: $showCreateWorkout) {
+            CreateWorkoutView(resolver: resolver) {
+                showCreateWorkout = false
             }
         }
     }
@@ -43,7 +60,8 @@ struct TabRootView: View {
                 }
         }
         .tabItem {
-            Label(tab.title, systemImage: tab.systemImage)
+            // Icon-only tab items (no labels)
+            Image(systemName: tab.systemImage)
         }
         .tag(tab)
     }
@@ -153,11 +171,27 @@ struct TabRootView: View {
             }
         case .groupInvite(let groupId):
             JoinGroupView(groupId: groupId, resolver: resolver) {
-                // After joining, refresh history tab (where challenges are shown)
-                router.select(tab: .history)
+                // After joining, refresh activity tab (where challenges are shown)
+                router.select(tab: .activity)
             }
         case .notifications:
             NotificationsView(resolver: resolver)
+        case .customWorkouts:
+            CustomWorkoutTemplatesView(resolver: resolver)
+        case .customWorkoutBuilder(let templateId):
+            if let saveUseCase = resolver.resolve(SaveCustomWorkoutUseCase.self),
+               let exerciseService = resolver.resolve(ExerciseDBServicing.self) {
+                let viewModel = CustomWorkoutBuilderViewModel(
+                    saveUseCase: saveUseCase,
+                    existingTemplateId: templateId
+                )
+                CustomWorkoutBuilderView(viewModel: viewModel)
+            } else {
+                PlaceholderView(
+                    title: "Custom Workout",
+                    message: "Unable to load workout builder."
+                )
+            }
         }
     }
 }

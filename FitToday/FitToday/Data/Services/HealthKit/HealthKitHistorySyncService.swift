@@ -80,10 +80,24 @@ actor HealthKitHistorySyncService {
 
         // Janela de tolerância: 3 horas em relação ao endDate do workout
         let maxDelta: TimeInterval = 3 * 3600
+        // BUG FIX #1: 20% duration tolerance to avoid matching wrong workouts
+        let durationTolerancePercent = 0.20
 
         let scored = sameDay.compactMap { w -> (ImportedSessionMetric, TimeInterval)? in
             let delta = abs(w.endDate.timeIntervalSince(entry.date))
             guard delta <= maxDelta else { return nil }
+
+            // BUG FIX #1: Validate duration is within tolerance
+            if let entryDuration = entry.durationMinutes {
+                let hkDurationMinutes = w.durationMinutes
+                let tolerance = Double(entryDuration) * durationTolerancePercent
+                let durationDiff = abs(Double(hkDurationMinutes - entryDuration))
+                guard durationDiff <= tolerance else {
+                    logger("Duration mismatch: entry=\(entryDuration)min, HK=\(hkDurationMinutes)min, diff=\(durationDiff)min > tolerance=\(tolerance)min")
+                    return nil
+                }
+            }
+
             return (w, delta)
         }
 
@@ -97,6 +111,11 @@ actor HealthKitHistorySyncService {
     ///
     /// - Parameter days: Número de dias para buscar retroativamente (padrão: 7)
     /// - Returns: Número de workouts importados
+    /// Constant UUID used to identify all Apple Health imported workouts
+    /// BUG FIX #5: Use constant instead of random UUID for imported workout planId
+    private static let appleHealthImportPlanId = UUID(uuidString: "00000000-0000-0000-0000-APPLEHEALTH")
+        ?? UUID(uuidString: "00000000-0000-0000-0000-000000000001")!
+
     func importExternalWorkouts(days: Int = 7) async throws -> Int {
         let now = Date()
         let start = calendar.date(byAdding: .day, value: -max(1, days), to: now) ?? now
@@ -109,8 +128,14 @@ actor HealthKitHistorySyncService {
         let existingEntries = try await historyRepository.listEntries()
         let existingUUIDs = Set(existingEntries.compactMap { $0.healthKitWorkoutUUID })
 
-        // 3. Filtrar workouts que ainda não foram importados
-        let newWorkouts = hkWorkouts.filter { !existingUUIDs.contains($0.workoutUUID) }
+        // 3. Filtrar workouts que ainda não foram importados por UUID
+        var newWorkouts = hkWorkouts.filter { !existingUUIDs.contains($0.workoutUUID) }
+
+        // BUG FIX #4: Additional deduplication by date+duration
+        // Prevents importing duplicate workouts that might have different UUIDs
+        newWorkouts = newWorkouts.filter { workout in
+            !isDuplicateByDateAndDuration(workout, existingEntries: existingEntries)
+        }
 
         logger("Encontrados \(newWorkouts.count) workouts novos do Apple Health para importar")
 
@@ -119,10 +144,11 @@ actor HealthKitHistorySyncService {
         for workout in newWorkouts {
             // Criar WorkoutHistoryEntry para o workout do Apple Health
             // Workouts externos não têm planId, title nem focus - usamos placeholders
+            // BUG FIX #5: Use constant planId for all Apple Health imports
             let entry = WorkoutHistoryEntry(
                 id: UUID(),
                 date: workout.endDate,
-                planId: UUID(), // Placeholder - não há plano associado
+                planId: Self.appleHealthImportPlanId,
                 title: "Apple Health Workout",
                 focus: .fullBody, // Default para workouts importados
                 status: .completed,
@@ -149,6 +175,81 @@ actor HealthKitHistorySyncService {
 
         logger("Importação concluída: \(importedCount) workouts importados")
         return importedCount
+    }
+
+    // MARK: - BUG FIX #4: Duplicate Detection by Date and Duration
+
+    /// Checks if a HealthKit workout is a duplicate of an existing entry based on date and duration.
+    /// This prevents importing the same workout that might have a different UUID.
+    /// - Parameters:
+    ///   - workout: The HealthKit workout to check
+    ///   - existingEntries: Existing history entries to compare against
+    /// - Returns: True if a duplicate is found
+    private func isDuplicateByDateAndDuration(
+        _ workout: ImportedSessionMetric,
+        existingEntries: [WorkoutHistoryEntry]
+    ) -> Bool {
+        let workoutDate = calendar.startOfDay(for: workout.endDate)
+        let workoutDuration = workout.durationMinutes
+
+        return existingEntries.contains { entry in
+            let entryDate = calendar.startOfDay(for: entry.date)
+            guard entryDate == workoutDate else { return false }
+
+            // Check if duration matches within 5 minutes tolerance
+            if let entryDuration = entry.durationMinutes {
+                let durationDiff = abs(entryDuration - workoutDuration)
+                return durationDiff <= 5
+            }
+            return false
+        }
+    }
+
+    // MARK: - BUG FIX #6: Stale UUID Cleanup
+
+    /// Removes stale HealthKit UUIDs from entries where the UUID no longer exists in HealthKit.
+    /// This allows the entry to be re-matched with a valid HealthKit workout.
+    /// - Parameter days: Number of days to check (default: 30)
+    /// - Returns: Number of entries cleaned
+    func cleanupStaleUUIDs(days: Int = 30) async throws -> Int {
+        let now = Date()
+        let start = calendar.date(byAdding: .day, value: -max(1, days), to: now) ?? now
+        let range = DateInterval(start: start, end: now)
+
+        // Get current HealthKit workouts
+        let hkWorkouts = try await healthKit.fetchWorkouts(in: range)
+        let validUUIDs = Set(hkWorkouts.map { $0.workoutUUID })
+
+        // Get entries with HealthKit UUIDs
+        let entries = try await historyRepository.listEntries()
+        let entriesWithUUID = entries.filter {
+            $0.healthKitWorkoutUUID != nil &&
+            $0.date >= start && $0.date <= now
+        }
+
+        var cleanedCount = 0
+
+        for entry in entriesWithUUID {
+            guard let uuid = entry.healthKitWorkoutUUID else { continue }
+
+            // If UUID no longer exists in HealthKit, clear it
+            if !validUUIDs.contains(uuid) {
+                var updated = entry
+                updated.healthKitWorkoutUUID = nil
+                do {
+                    try await historyRepository.saveEntry(updated)
+                    cleanedCount += 1
+                    logger("🧹 Cleaned stale UUID for entry \(entry.id)")
+                } catch {
+                    logger("❌ Failed to clean stale UUID: \(error.localizedDescription)")
+                }
+            }
+        }
+
+        if cleanedCount > 0 {
+            logger("Cleanup complete: \(cleanedCount) stale UUIDs removed")
+        }
+        return cleanedCount
     }
 }
 

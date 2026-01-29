@@ -1,0 +1,46 @@
+{
+  "featureSlug": "prd-reestructure-plan-v2",
+  "currentPhase": "implementation_phase1_phase2_phase3",
+  "completedSteps": [
+    "prd_copied",
+    "techspec_generated",
+    "tasks_generated",
+    "analysis_complete",
+    "phase1_wger_models",
+    "phase1_wger_service",
+    "phase1_wger_cache",
+    "phase1_wger_adapter",
+    "phase2_workout_models",
+    "phase2_workout_tab_view",
+    "phase2_my_workouts_view",
+    "phase2_create_workout_view",
+    "phase2_exercise_search",
+    "phase3_programs_list_view"
+  ],
+  "pendingSteps": [
+    "phase4_activity_sync",
+    "phase5_home_ai",
+    "tests_validation",
+    "commit_pr"
+  ],
+  "createdAt": "2026-01-29T00:00:00Z",
+  "lastUpdatedAt": "2026-01-29T12:00:00Z",
+  "status": "implementation_in_progress",
+  "filesCreated": [
+    "Domain/Entities/WgerModels.swift",
+    "Data/Services/Wger/WgerConfiguration.swift",
+    "Data/Services/Wger/WgerAPIService.swift",
+    "Data/Services/Wger/WgerExerciseCacheManager.swift",
+    "Data/Services/Wger/WgerExerciseAdapter.swift",
+    "Presentation/DesignSystem/ExercisePlaceholderView.swift",
+    "Presentation/Features/Workout/Views/WorkoutTabView.swift",
+    "Presentation/Features/Workout/Views/MyWorkoutsView.swift",
+    "Presentation/Features/Workout/Views/CreateWorkoutView.swift",
+    "Presentation/Features/Workout/ViewModels/CreateWorkoutViewModel.swift",
+    "Presentation/Features/Workout/Components/ExerciseSearchSheet.swift",
+    "Presentation/Features/Programs/Views/ProgramsListView.swift"
+  ],
+  "filesModified": [
+    "Domain/Entities/CustomExerciseEntry.swift"
+  ]
+}

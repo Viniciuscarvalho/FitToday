@@ -20,6 +20,10 @@
 
 // MARK: - Tabs
 "tab.home" = "Inicio";
+"tab.workout" = "Treino";
+"tab.create" = "Criar";
+"tab.activity" = "Atividade";
+"tab.profile" = "Perfil";
 "tab.programs" = "Programas";
 "tab.history" = "Historico";
 "tab.settings" = "Config.";
@@ -317,3 +321,95 @@
 "notifications.section.earlier" = "Anteriores";
 "notifications.mark_all_read" = "Marcar todas como lidas";
 "notifications.error.config" = "Erro de configuracao: servicos de notificacao nao registrados.";
+
+// MARK: - Workout Tab
+"workout_tab.segment.my_workouts" = "Meus Treinos";
+"workout_tab.segment.programs" = "Programas";
+"workout_tab.empty.title" = "Nenhum treino criado";
+"workout_tab.empty.subtitle" = "Crie seu primeiro treino personalizado";
+"workout_tab.create_first" = "Criar Primeiro Treino";
+
+// MARK: - Create Workout
+"create_workout.title" = "Criar Novo Treino";
+"create_workout.name.label" = "Nome do treino";
+"create_workout.name.placeholder" = "Ex: Treino de Peito";
+"create_workout.icon.label" = "Icone";
+"create_workout.color.label" = "Cor";
+"create_workout.exercises.label" = "Exercicios";
+"create_workout.exercises.empty" = "Nenhum exercicio adicionado";
+"create_workout.add_exercise" = "Adicionar Exercicio";
+"create_workout.save" = "Salvar Treino";
+"create_workout.cancel" = "Cancelar";
+
+// MARK: - Exercise Search
+"exercise_search.title" = "Buscar Exercicio";
+"exercise_search.placeholder" = "Pesquisar exercicios...";
+"exercise_search.filter.all" = "Todos";
+"exercise_search.filter.muscle" = "Musculo";
+"exercise_search.filter.equipment" = "Equipamento";
+"exercise_search.filter.category" = "Categoria";
+"exercise_search.recent" = "Recentes";
+"exercise_search.results" = "Resultados";
+"exercise_search.no_results" = "Nenhum exercicio encontrado";
+
+// MARK: - Exercise Config
+"exercise_config.title" = "Configurar Exercicio";
+"exercise_config.sets" = "Series";
+"exercise_config.reps" = "Reps";
+"exercise_config.weight" = "Peso";
+"exercise_config.rest" = "Descanso";
+"exercise_config.add_set" = "Adicionar Serie";
+"exercise_config.remove_set" = "Remover Serie";
+"exercise_config.confirm" = "Confirmar";
+"exercise_config.unit.kg" = "kg";
+"exercise_config.unit.sec" = "seg";
+
+// MARK: - Workout Execution
+"workout_execution.set_of" = "Serie %d de %d";
+"workout_execution.next_exercise" = "Proximo";
+"workout_execution.previous" = "Anterior";
+"workout_execution.complete_set" = "Completar Serie";
+"workout_execution.finish" = "Finalizar Treino";
+"workout_execution.pause" = "Pausar";
+"workout_execution.resume" = "Continuar";
+"workout_execution.quit.title" = "Sair do Treino?";
+"workout_execution.quit.message" = "Seu progresso sera perdido";
+"workout_execution.quit.confirm" = "Sair";
+"workout_execution.quit.cancel" = "Continuar Treino";
+
+// MARK: - Rest Timer
+"rest_timer.title" = "Descanse";
+"rest_timer.skip" = "Pular";
+"rest_timer.add_time" = "+30s";
+"rest_timer.next_exercise" = "Proximo exercicio:";
+
+// MARK: - Fatigue
+"fatigue.title" = "Nivel de Fadiga";
+"fatigue.rested" = "Descansado";
+"fatigue.light" = "Leve";
+"fatigue.moderate" = "Moderado";
+"fatigue.tired" = "Cansado";
+"fatigue.exhausted" = "Exausto";
+"fatigue.description.rested" = "Pronto para treino intenso";
+"fatigue.description.light" = "Pequena fadiga, treino normal";
+"fatigue.description.moderate" = "Fadiga moderada, ajuste o volume";
+"fatigue.description.tired" = "Cansado, reduza a intensidade";
+"fatigue.description.exhausted" = "Muito cansado, considere descanso";
+
+// MARK: - Home AI Section
+"home.ai.title" = "Treino Inteligente";
+"home.ai.subtitle" = "Deixe a IA criar um treino personalizado para voce";
+"home.ai.generate" = "Gerar Treino";
+"home.ai.muscles.title" = "Grupos Musculares";
+"home.ai.muscles.subtitle" = "Selecione os musculos que deseja treinar";
+"home.ai.duration.title" = "Duracao";
+"home.ai.duration.subtitle" = "Quanto tempo voce tem disponivel?";
+"home.ai.generating" = "Gerando seu treino...";
+"home.ai.analyzing" = "Analisando suas preferencias...";
+"home.ai.optimizing" = "Otimizando exercicios...";
+"home.ai.ready" = "Treino pronto!";
+
+// MARK: - Programs Filters
+"programs.filter.level" = "Nivel";
+"programs.filter.goal" = "Objetivo";
+"programs.filter.equipment" = "Equipamento";

@@ -216,7 +216,7 @@ struct ProfileProView: View {
 
     private var appleHealthCard: some View {
         Button {
-            router.push(.healthKitSettings, on: .settings)
+            router.push(.healthKitSettings, on: .profile)
         } label: {
             HStack(spacing: FitTodaySpacing.md) {
                 ZStack {
@@ -275,7 +275,7 @@ struct ProfileProView: View {
 
             VStack(spacing: 0) {
                 SettingsRow(icon: "person.text.rectangle", title: "settings.edit_profile".localized) {
-                    router.push(.editProfile, on: .settings)
+                    router.push(.editProfile, on: .profile)
                 }
 
                 Divider().padding(.leading, 56)
@@ -287,7 +287,7 @@ struct ProfileProView: View {
                 Divider().padding(.leading, 56)
 
                 SettingsRow(icon: "lock.shield", title: "settings.privacy_settings".localized) {
-                    router.push(.privacySettings, on: .settings)
+                    router.push(.privacySettings, on: .profile)
                 }
 
                 Divider().padding(.leading, 56)
@@ -371,7 +371,7 @@ struct ProfileProView: View {
                 Divider().padding(.leading, 56)
 
                 SettingsRow(icon: "key", title: "settings.api_key".localized) {
-                    router.push(.apiKeySettings, on: .settings)
+                    router.push(.apiKeySettings, on: .profile)
                 }
             }
             .background(FitTodayColor.surface)
@@ -419,7 +419,7 @@ struct ProfileProView: View {
         UserDefaults.standard.removeObject(forKey: AppStorageKeys.lastDailyCheckInDate)
         UserDefaults.standard.removeObject(forKey: AppStorageKeys.lastDailyCheckInData)
         DailyWorkoutStateManager.shared.resetForNewDay()
-        router.push(.dailyQuestionnaire, on: .settings)
+        router.push(.dailyQuestionnaire, on: .profile)
     }
 
     private func restorePurchases() async {
