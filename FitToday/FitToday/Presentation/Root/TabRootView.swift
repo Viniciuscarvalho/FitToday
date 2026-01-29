@@ -38,7 +38,7 @@ struct TabRootView: View {
             }
 
             tabView(for: .activity) {
-                ActivityTabView()
+                ActivityTabView(resolver: resolver)
             }
 
             tabView(for: .profile) {
@@ -179,8 +179,7 @@ struct TabRootView: View {
         case .customWorkouts:
             CustomWorkoutTemplatesView(resolver: resolver)
         case .customWorkoutBuilder(let templateId):
-            if let saveUseCase = resolver.resolve(SaveCustomWorkoutUseCase.self),
-               let exerciseService = resolver.resolve(ExerciseDBServicing.self) {
+            if let saveUseCase = resolver.resolve(SaveCustomWorkoutUseCase.self) {
                 let viewModel = CustomWorkoutBuilderViewModel(
                     saveUseCase: saveUseCase,
                     existingTemplateId: templateId

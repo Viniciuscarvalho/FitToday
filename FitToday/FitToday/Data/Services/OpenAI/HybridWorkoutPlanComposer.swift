@@ -330,7 +330,7 @@ struct OpenAIWorkoutPlanComposer: WorkoutPlanComposing {
             // Adicionar exercícios
             if let exercises = openAIPhase.exercises {
                 for ex in exercises {
-                    // ✅ NOVA: Normalizar nome com ExerciseDB antes de fazer matching
+                    // Normalizar nome antes de fazer matching
                     let normalizedName: String
                     do {
                         normalizedName = try await exerciseNameNormalizer.normalize(
@@ -365,7 +365,7 @@ struct OpenAIWorkoutPlanComposer: WorkoutPlanComposing {
                         }
                     }
 
-                    // ✅ NOVA: Fallback para criar exercício com nome da OpenAI + buscar mídia no ExerciseDB
+                    // Fallback para criar exercício com nome da OpenAI + buscar mídia via Wger
                     let foundExercise: WorkoutExercise
                     if let catalogExercise = exercise {
                         foundExercise = catalogExercise
@@ -373,14 +373,14 @@ struct OpenAIWorkoutPlanComposer: WorkoutPlanComposing {
                         // Criar exercício temporário com nome normalizado
                         var newExercise = WorkoutExercise(
                             id: UUID().uuidString,
-                            name: normalizedName, // Usar nome normalizado (ExerciseDB) para buscar mídia
+                            name: normalizedName, // Usar nome normalizado para buscar mídia
                             mainMuscle: MuscleGroup(rawValue: ex.muscleGroup.lowercased()) ?? .chest,
                             equipment: EquipmentType(rawValue: ex.equipment.lowercased()) ?? .bodyweight,
                             instructions: [], // OpenAI não retorna instruções na resposta
                             media: nil
                         )
 
-                        // Buscar mídia do ExerciseDB usando o nome normalizado
+                        // Buscar mídia usando o nome normalizado
                         // 💡 Learn: Usar do-catch para não quebrar o fluxo se houver erro de rede
                         if let resolver = mediaResolver {
                             do {
@@ -408,7 +408,7 @@ struct OpenAIWorkoutPlanComposer: WorkoutPlanComposing {
                                         instructions: newExercise.instructions,
                                         media: nil
                                     )
-                                    logger("⚠️ Exercício '\(ex.name)' não encontrado no catálogo e sem mídia no ExerciseDB")
+                                    logger("⚠️ Exercício '\(ex.name)' não encontrado no catálogo e sem mídia na API Wger")
                                 }
                             } catch {
                                 // Se houver erro ao buscar mídia (ex: timeout), continuar sem mídia

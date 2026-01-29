@@ -46,7 +46,7 @@ enum EquipmentType: String, Codable, CaseIterable, Sendable {
 struct ExerciseMedia: Codable, Hashable, Sendable {
     var imageURL: URL?
     var gifURL: URL?
-    var source: String? // e.g. "ExerciseDB"
+    var source: String? // e.g. "wger"
 
     public init(imageURL: URL?, gifURL: URL?, source: String? = nil) {
         self.imageURL = imageURL

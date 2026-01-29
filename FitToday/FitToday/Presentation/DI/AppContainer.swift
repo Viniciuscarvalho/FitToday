@@ -55,7 +55,7 @@ struct AppContainer {
             SwiftDataWorkoutCompositionCacheRepository(modelContainer: modelContainer)
         }.inObjectScope(.container)
 
-        // WorkoutBlocksRepository é registrado após configurar ExerciseDB (para permitir enriquecimento de mídia/instruções).
+        // WorkoutBlocksRepository é registrado após configurar Wger (para permitir enriquecimento de mídia/instruções).
 
         // StoreKit Service e EntitlementRepository
         // Nota: StoreKitService é @MainActor, então precisa ser criado no main thread
@@ -83,8 +83,10 @@ struct AppContainer {
         let wgerService = WgerAPIService()
         container.register(ExerciseServiceProtocol.self) { _ in wgerService }
             .inObjectScope(.container)
+        container.register(WgerAPIService.self) { _ in wgerService }
+            .inObjectScope(.container)
 
-        // Workout Blocks Repository (simplified without ExerciseDB enrichment)
+        // Workout Blocks Repository
         let blocksRepository = BundleWorkoutBlocksRepository()
         container.register(WorkoutBlocksRepository.self) { _ in blocksRepository }
             .inObjectScope(.container)

@@ -47,7 +47,35 @@
 "home.cta.subtitle.completed" = "Voce ja treinou hoje! Descanse e volte amanha";
 "home.hero.error" = "Erro ao gerar treino";
 
-// MARK: - Home Hero Card
+// MARK: - Home Header
+"home.header.subtitle" = "Pronto para treinar?";
+
+// MARK: - Home AI Workout Generator
+"home.ai.section_title" = "GERAR TREINO COM IA";
+"home.ai.body_parts_question" = "O que voce quer treinar hoje?";
+"home.ai.fatigue_question" = "Como esta seu corpo?";
+"home.ai.fatigue_tired" = "Cansado";
+"home.ai.fatigue_rested" = "Descansado";
+"home.ai.time_question" = "Quanto tempo voce tem?";
+"home.ai.generate_button" = "GERAR MEU TREINO";
+
+// MARK: - Home Continue Workout
+"home.continue.section_title" = "CONTINUAR TREINO";
+"home.continue.button" = "CONTINUAR";
+"home.continue.workout_name" = "Treino A - Peito e Triceps";
+"home.continue.last_session" = "Ultimo: ontem • Proximo exercicio...";
+
+// MARK: - Home Streak
+"home.streak.banner" = "SEU STREAK: %d dias";
+
+// MARK: - Home Completed State
+"home.completed.title" = "Treino Concluido!";
+"home.completed.subtitle" = "Otimo trabalho hoje! Descanse e volte amanha.";
+
+// MARK: - Home Error State
+"home.error.title" = "Ops! Algo deu errado";
+
+// MARK: - Home Hero Card (Legacy)
 "home.hero.welcome.title" = "Bem-vindo ao FitToday!";
 "home.hero.welcome.subtitle" = "Crie seu perfil de treino para comecar sua jornada fitness personalizada";
 "home.hero.create_profile" = "Criar Perfil";
@@ -413,3 +441,28 @@
 "programs.filter.level" = "Nivel";
 "programs.filter.goal" = "Objetivo";
 "programs.filter.equipment" = "Equipamento";
+"programs.filter.all" = "Todos";
+"programs.loading" = "Carregando programas...";
+"programs.empty.clear_filters" = "Limpar filtros";
+
+// MARK: - Programs Levels
+"programs.level.beginner" = "Iniciante";
+"programs.level.intermediate" = "Intermediario";
+"programs.level.advanced" = "Avancado";
+
+// MARK: - Programs Equipment
+"programs.equipment.gym" = "Academia";
+"programs.equipment.home" = "Casa";
+"programs.equipment.dumbbell" = "Halteres";
+"programs.equipment.bodyweight" = "Peso Corporal";
+"programs.equipment.kettlebell" = "Kettlebell";
+"programs.equipment.bands" = "Elasticos";
+
+// MARK: - Programs Card Info
+"programs.card.days" = "%d Dias";
+"programs.card.days_per_week" = "%d dias/semana";
+"programs.card.exercises" = "%d exercicios";
+
+// MARK: - Programs Workout Preview
+"program.workout.exercises" = "exercicios";
+"program.workout.more_exercises" = "+ %d mais exercicios";

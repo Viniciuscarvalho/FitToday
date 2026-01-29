@@ -12,7 +12,7 @@ import Foundation
 struct CustomExerciseEntry: Identifiable, Codable, Sendable, Hashable {
     let id: UUID
 
-    // ExerciseDB reference
+    // Wger API reference
     var exerciseId: String
     var exerciseName: String
     var exerciseGifURL: String?
@@ -28,7 +28,7 @@ struct CustomExerciseEntry: Identifiable, Codable, Sendable, Hashable {
     // Optional notes
     var notes: String?
 
-    /// Creates a new exercise entry from ExerciseDB data
+    /// Creates a new exercise entry from Wger API data
     init(
         id: UUID = UUID(),
         exerciseId: String,
@@ -107,23 +107,3 @@ extension CustomExerciseEntry {
     }
 }
 
-// MARK: - Convenience initializer from ExerciseDBExercise (Compatibility)
-
-extension CustomExerciseEntry {
-    /// Creates a new entry from an ExerciseDBExercise (compatibility layer)
-    /// - Parameters:
-    ///   - exercise: The ExerciseDBExercise
-    ///   - orderIndex: Position in the workout
-    ///   - gifURL: Optional GIF URL
-    init(from exercise: ExerciseDBExercise, orderIndex: Int, gifURL: String? = nil) {
-        self.id = UUID()
-        self.exerciseId = exercise.id
-        self.exerciseName = exercise.name
-        self.exerciseGifURL = gifURL ?? exercise.gifUrl
-        self.bodyPart = exercise.bodyPart
-        self.equipment = exercise.equipment
-        self.orderIndex = orderIndex
-        self.sets = [WorkoutSet()]
-        self.notes = nil
-    }
-}

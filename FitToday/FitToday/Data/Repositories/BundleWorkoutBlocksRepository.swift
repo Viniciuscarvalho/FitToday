@@ -3,7 +3,7 @@
 //  FitToday
 //
 //  Created by AI on 04/01/26.
-//  Simplified on 29/01/26 - Removed ExerciseDB dependencies
+//  Simplified on 29/01/26 - Uses Wger API for exercise data
 //
 
 import Foundation
@@ -28,7 +28,7 @@ actor BundleWorkoutBlocksRepository: WorkoutBlocksRepository {
     }
 
     /// Carrega blocos específicos para um objetivo.
-    /// Note: Dynamic block creation was removed with ExerciseDB.
+    /// Note: Dynamic block creation was simplified - media loaded from Wger API.
     func loadBlocks(
         for goal: FitnessGoal,
         level: TrainingLevel,

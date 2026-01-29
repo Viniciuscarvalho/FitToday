@@ -35,11 +35,7 @@ struct DebugSection: View {
                     Divider().padding(.leading, 56)
                     resetAICounterButton
                     Divider().padding(.leading, 56)
-                    clearExerciseDBMappingButton
-                    Divider().padding(.leading, 56)
-                    clearExerciseDBTargetListButton
-                    Divider().padding(.leading, 56)
-                    clearAllExerciseDBCachesButton
+                    clearWgerCachesButton
                     Divider().padding(.leading, 56)
                     clearWorkoutCompositionCachesButton
                     Divider().padding(.leading, 56)
@@ -123,37 +119,15 @@ struct DebugSection: View {
         }
     }
 
-    private var clearExerciseDBMappingButton: some View {
-        DebugActionButton(
-            icon: "arrow.triangle.2.circlepath",
-            iconColor: .blue,
-            title: "Limpar mapping de exercícios",
-            subtitle: "Força re-match de exercícios locais → ExerciseDB"
-        ) {
-            clearExerciseDBMapping()
-        }
-    }
-
-    private var clearExerciseDBTargetListButton: some View {
-        DebugActionButton(
-            icon: "list.bullet.rectangle",
-            iconColor: .green,
-            title: "Limpar cache de targets",
-            subtitle: "Força nova busca da lista de músculos-alvo"
-        ) {
-            clearExerciseDBTargetList()
-        }
-    }
-
-    private var clearAllExerciseDBCachesButton: some View {
+    private var clearWgerCachesButton: some View {
         DebugActionButton(
             icon: "trash.fill",
             iconColor: .red,
-            title: "Limpar todos os caches ExerciseDB",
-            subtitle: "Mapping + TargetList + Mídias resolvidas",
+            title: "Limpar caches Wger",
+            subtitle: "Limpa cache de exercícios e imagens da API Wger",
             isBold: true
         ) {
-            clearAllExerciseDBCaches()
+            clearWgerCaches()
         }
     }
 
@@ -189,24 +163,12 @@ struct DebugSection: View {
         showingRestoreAlert = true
     }
 
-    private func clearExerciseDBMapping() {
-        UserDefaults.standard.removeObject(forKey: "exercisedb_id_mapping_v1")
-        restoreMessage = "Mapping de exercícios limpo! Os exercícios serão re-mapeados na próxima visualização."
-        showingRestoreAlert = true
-    }
-
-    private func clearExerciseDBTargetList() {
-        UserDefaults.standard.removeObject(forKey: "exercisedb_target_list_v1")
-        UserDefaults.standard.removeObject(forKey: "exercisedb_target_list_timestamp_v1")
-        restoreMessage = "Cache de targets limpo! A lista será recarregada na próxima busca."
-        showingRestoreAlert = true
-    }
-
-    private func clearAllExerciseDBCaches() {
-        UserDefaults.standard.removeObject(forKey: "exercisedb_id_mapping_v1")
-        UserDefaults.standard.removeObject(forKey: "exercisedb_target_list_v1")
-        UserDefaults.standard.removeObject(forKey: "exercisedb_target_list_timestamp_v1")
-        restoreMessage = "Todos os caches do ExerciseDB foram limpos! O app fará novas buscas na próxima visualização."
+    private func clearWgerCaches() {
+        // Limpa caches do Wger API
+        UserDefaults.standard.removeObject(forKey: "wger_exercise_cache_v1")
+        UserDefaults.standard.removeObject(forKey: "wger_categories_cache_v1")
+        UserDefaults.standard.removeObject(forKey: "wger_equipment_cache_v1")
+        restoreMessage = "Caches do Wger foram limpos! O app fará novas buscas na próxima visualização."
         showingRestoreAlert = true
     }
 

@@ -8,7 +8,7 @@
 import SwiftUI
 
 /// View para configuração da chave de API do usuário (OpenAI)
-/// A chave do ExerciseDB é gerenciada automaticamente pelo sistema
+/// A API do Wger é gratuita e não requer chave
 struct APIKeySettingsView: View {
     @StateObject private var keyStore = UserAPIKeyStore()
     @State private var apiKeyInput: String = ""

@@ -89,7 +89,7 @@ struct PaywallFeatureRow: View {
         PaywallFeatureRow(
             iconName: "sparkles",
             title: "IA personalizada",
-            subtitle: "Treinos combinados com dados da ExerciseDB e bloco curado"
+            subtitle: "Treinos combinados com dados do Wger e bloco curado"
         )
         PaywallFeatureRow(
             iconName: "bolt.heart",

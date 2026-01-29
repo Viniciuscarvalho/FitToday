@@ -47,7 +47,35 @@
 "home.cta.subtitle.completed" = "You already trained today! Rest and come back tomorrow";
 "home.hero.error" = "Error generating workout";
 
-// MARK: - Home Hero Card
+// MARK: - Home Header
+"home.header.subtitle" = "Ready to work out?";
+
+// MARK: - Home AI Workout Generator
+"home.ai.section_title" = "GENERATE AI WORKOUT";
+"home.ai.body_parts_question" = "What do you want to train today?";
+"home.ai.fatigue_question" = "How is your body feeling?";
+"home.ai.fatigue_tired" = "Tired";
+"home.ai.fatigue_rested" = "Rested";
+"home.ai.time_question" = "How much time do you have?";
+"home.ai.generate_button" = "GENERATE MY WORKOUT";
+
+// MARK: - Home Continue Workout
+"home.continue.section_title" = "CONTINUE WORKOUT";
+"home.continue.button" = "CONTINUE";
+"home.continue.workout_name" = "Workout A - Chest and Triceps";
+"home.continue.last_session" = "Last: yesterday • Next exercise...";
+
+// MARK: - Home Streak
+"home.streak.banner" = "YOUR STREAK: %d days";
+
+// MARK: - Home Completed State
+"home.completed.title" = "Workout Complete!";
+"home.completed.subtitle" = "Great job today! Rest up and come back tomorrow.";
+
+// MARK: - Home Error State
+"home.error.title" = "Oops! Something went wrong";
+
+// MARK: - Home Hero Card (Legacy)
 "home.hero.welcome.title" = "Welcome to FitToday!";
 "home.hero.welcome.subtitle" = "Create your training profile to start your personalized fitness journey";
 "home.hero.create_profile" = "Create Profile";
@@ -413,3 +441,28 @@
 "programs.filter.level" = "Level";
 "programs.filter.goal" = "Goal";
 "programs.filter.equipment" = "Equipment";
+"programs.filter.all" = "All";
+"programs.loading" = "Loading programs...";
+"programs.empty.clear_filters" = "Clear filters";
+
+// MARK: - Programs Levels
+"programs.level.beginner" = "Beginner";
+"programs.level.intermediate" = "Intermediate";
+"programs.level.advanced" = "Advanced";
+
+// MARK: - Programs Equipment
+"programs.equipment.gym" = "Gym";
+"programs.equipment.home" = "Home";
+"programs.equipment.dumbbell" = "Dumbbells";
+"programs.equipment.bodyweight" = "Bodyweight";
+"programs.equipment.kettlebell" = "Kettlebell";
+"programs.equipment.bands" = "Bands";
+
+// MARK: - Programs Card Info
+"programs.card.days" = "%d Days";
+"programs.card.days_per_week" = "%d days/week";
+"programs.card.exercises" = "%d exercises";
+
+// MARK: - Programs Workout Preview
+"program.workout.exercises" = "exercises";
+"program.workout.more_exercises" = "+ %d more exercises";

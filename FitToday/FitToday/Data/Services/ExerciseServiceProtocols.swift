@@ -3,7 +3,7 @@
 //  FitToday
 //
 //  Protocols for exercise name normalization and media resolution.
-//  Created on 29/01/26 - Simplified after ExerciseDB removal.
+//  Created on 29/01/26 - Uses Wger API for exercise data.
 //
 
 import Foundation

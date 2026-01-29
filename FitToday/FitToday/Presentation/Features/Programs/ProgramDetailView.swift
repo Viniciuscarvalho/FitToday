@@ -238,38 +238,77 @@ private struct WorkoutRowCard: View {
     let workout: LibraryWorkout
     let index: Int
     let onTap: () -> Void
-    
+
+    private let maxPreviewExercises = 3
+
+    private var previewExercises: [String] {
+        workout.exercises.prefix(maxPreviewExercises).map { $0.exercise.name }
+    }
+
+    private var remainingCount: Int {
+        max(0, workout.exerciseCount - maxPreviewExercises)
+    }
+
     var body: some View {
         Button(action: onTap) {
-            HStack(spacing: FitTodaySpacing.md) {
-                // Número do treino
-                Text("\(index)")
-                    .font(.system(.headline, weight: .bold))
-                    .foregroundStyle(FitTodayColor.brandPrimary)
-                    .frame(width: 32, height: 32)
-                    .background(FitTodayColor.brandPrimary.opacity(0.15))
-                    .clipShape(Circle())
-                
-                // Info
-                VStack(alignment: .leading, spacing: FitTodaySpacing.xs) {
-                    Text(workout.title)
-                        .font(.system(.subheadline, weight: .semibold))
-                        .foregroundStyle(FitTodayColor.textPrimary)
-                        .lineLimit(1)
-                    
-                    HStack(spacing: FitTodaySpacing.sm) {
-                        Label("\(workout.estimatedDurationMinutes) min", systemImage: "clock")
-                        Label("\(workout.exerciseCount) exercícios", systemImage: "figure.run")
+            VStack(alignment: .leading, spacing: 0) {
+                // Header row
+                HStack(spacing: FitTodaySpacing.md) {
+                    // Número do treino
+                    Text("\(index)")
+                        .font(.system(.headline, weight: .bold))
+                        .foregroundStyle(FitTodayColor.brandPrimary)
+                        .frame(width: 32, height: 32)
+                        .background(FitTodayColor.brandPrimary.opacity(0.15))
+                        .clipShape(Circle())
+
+                    // Info
+                    VStack(alignment: .leading, spacing: FitTodaySpacing.xs) {
+                        Text(workout.title)
+                            .font(.system(.subheadline, weight: .semibold))
+                            .foregroundStyle(FitTodayColor.textPrimary)
+                            .lineLimit(1)
+
+                        HStack(spacing: FitTodaySpacing.sm) {
+                            Label("\(workout.estimatedDurationMinutes) min", systemImage: "clock")
+                            Label("\(workout.exerciseCount) \("program.workout.exercises".localized)", systemImage: "figure.run")
+                        }
+                        .font(.system(.caption))
+                        .foregroundStyle(FitTodayColor.textSecondary)
                     }
-                    .font(.system(.caption))
-                    .foregroundStyle(FitTodayColor.textSecondary)
+
+                    Spacer()
+
+                    Image(systemName: "chevron.right")
+                        .font(.system(.caption, weight: .semibold))
+                        .foregroundStyle(FitTodayColor.textTertiary)
                 }
-                
-                Spacer()
-                
-                Image(systemName: "chevron.right")
-                    .font(.system(.caption, weight: .semibold))
-                    .foregroundStyle(FitTodayColor.textTertiary)
+
+                // Exercise preview section
+                if !workout.exercises.isEmpty {
+                    Divider()
+                        .padding(.vertical, FitTodaySpacing.sm)
+
+                    VStack(alignment: .leading, spacing: FitTodaySpacing.xs) {
+                        ForEach(previewExercises, id: \.self) { exerciseName in
+                            HStack(spacing: FitTodaySpacing.sm) {
+                                Circle()
+                                    .fill(FitTodayColor.brandPrimary)
+                                    .frame(width: 6, height: 6)
+                                Text(exerciseName)
+                                    .font(.system(.caption))
+                                    .foregroundStyle(FitTodayColor.textSecondary)
+                                    .lineLimit(1)
+                            }
+                        }
+
+                        if remainingCount > 0 {
+                            Text(String(format: "program.workout.more_exercises".localized, remainingCount))
+                                .font(.system(.caption, weight: .medium))
+                                .foregroundStyle(FitTodayColor.brandPrimary)
+                        }
+                    }
+                }
             }
             .padding(FitTodaySpacing.md)
             .background(FitTodayColor.surface)

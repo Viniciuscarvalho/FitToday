@@ -3,7 +3,7 @@
 //  FitToday
 //
 //  Created by AI on 04/01/26.
-//  Simplified on 29/01/26 - Removed ExerciseDB dependencies
+//  Simplified on 29/01/26 - Uses Wger API for exercise data
 //
 
 import Foundation
