@@ -8,6 +8,53 @@
 
 @preconcurrency import Foundation
 
+// MARK: - HTML Stripping Helper
+
+extension String {
+    /// Remove tags HTML e converte entidades HTML para texto limpo.
+    nonisolated var strippingHTML: String {
+        // Remove tags HTML
+        var result = self.replacingOccurrences(of: "<[^>]+>", with: "", options: .regularExpression)
+
+        // Converte entidades HTML comuns
+        let htmlEntities: [String: String] = [
+            "&nbsp;": " ",
+            "&amp;": "&",
+            "&lt;": "<",
+            "&gt;": ">",
+            "&quot;": "\"",
+            "&apos;": "'",
+            "&#39;": "'",
+            "&ndash;": "–",
+            "&mdash;": "—",
+            "&bull;": "•",
+            "&hellip;": "…",
+            "&copy;": "©",
+            "&reg;": "®",
+            "&trade;": "™",
+            "&euro;": "€",
+            "&pound;": "£",
+            "&yen;": "¥",
+            "&deg;": "°",
+            "&plusmn;": "±",
+            "&times;": "×",
+            "&divide;": "÷",
+            "&frac12;": "½",
+            "&frac14;": "¼",
+            "&frac34;": "¾"
+        ]
+
+        for (entity, replacement) in htmlEntities {
+            result = result.replacingOccurrences(of: entity, with: replacement)
+        }
+
+        // Remove múltiplos espaços e quebras de linha consecutivas
+        result = result.replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression)
+
+        return result.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+}
+
 // MARK: - Wger Exercise
 
 /// Exercise model from Wger API.
@@ -24,12 +71,51 @@ struct WgerExercise: Codable, Identifiable, Hashable, Sendable {
     let language: Int?
     let license: Int?
     let licenseAuthor: String?
+    /// URL da imagem principal do exercício
+    let mainImageURL: String?
+    /// URLs de todas as imagens do exercício
+    let imageURLs: [String]
 
     enum CodingKeys: String, CodingKey {
         case id, uuid, name, description, category, muscles, equipment, language, license
         case exerciseBaseId = "exercise_base"
         case musclesSecondary = "muscles_secondary"
         case licenseAuthor = "license_author"
+        case mainImageURL = "main_image"
+        case imageURLs = "images"
+    }
+
+    /// Memberwise initializer for manual construction.
+    nonisolated init(
+        id: Int,
+        uuid: String? = nil,
+        name: String,
+        exerciseBaseId: Int? = nil,
+        description: String? = nil,
+        category: Int? = nil,
+        muscles: [Int] = [],
+        musclesSecondary: [Int] = [],
+        equipment: [Int] = [],
+        language: Int? = nil,
+        license: Int? = nil,
+        licenseAuthor: String? = nil,
+        mainImageURL: String? = nil,
+        imageURLs: [String] = []
+    ) {
+        self.id = id
+        self.uuid = uuid
+        self.name = name
+        self.exerciseBaseId = exerciseBaseId
+        self.description = description
+        self.category = category
+        self.muscles = muscles
+        self.musclesSecondary = musclesSecondary
+        self.equipment = equipment
+        self.language = language
+        self.license = license
+        self.licenseAuthor = licenseAuthor
+        self.mainImageURL = mainImageURL
+        self.imageURLs = imageURLs
     }
 
     nonisolated init(from decoder: Decoder) throws {
@@ -46,6 +132,8 @@ struct WgerExercise: Codable, Identifiable, Hashable, Sendable {
         language = try container.decodeIfPresent(Int.self, forKey: .language)
         license = try container.decodeIfPresent(Int.self, forKey: .license)
         licenseAuthor = try container.decodeIfPresent(String.self, forKey: .licenseAuthor)
+        mainImageURL = try container.decodeIfPresent(String.self, forKey: .mainImageURL)
+        imageURLs = try container.decodeIfPresent([String].self, forKey: .imageURLs) ?? []
     }
 
     nonisolated func encode(to encoder: Encoder) throws {
@@ -62,6 +150,8 @@ struct WgerExercise: Codable, Identifiable, Hashable, Sendable {
         try container.encodeIfPresent(language, forKey: .language)
         try container.encodeIfPresent(license, forKey: .license)
         try container.encodeIfPresent(licenseAuthor, forKey: .licenseAuthor)
+        try container.encodeIfPresent(mainImageURL, forKey: .mainImageURL)
+        try container.encode(imageURLs, forKey: .imageURLs)
     }
 }
 
@@ -70,13 +160,14 @@ struct WgerExercise: Codable, Identifiable, Hashable, Sendable {
 /// Exercise image from Wger API.
 struct WgerExerciseImage: Codable, Identifiable, Hashable, Sendable {
     let id: Int
-    let exerciseBase: Int
+    let exercise: Int?
+    let exerciseBase: Int?
     let image: String
     let isMain: Bool
     let style: String?
 
     enum CodingKeys: String, CodingKey {
-        case id, image, style
+        case id, image, style, exercise
         case exerciseBase = "exercise_base"
         case isMain = "is_main"
     }
@@ -85,19 +176,26 @@ struct WgerExerciseImage: Codable, Identifiable, Hashable, Sendable {
         URL(string: image)
     }
 
+    /// The exercise ID (either from 'exercise' or 'exercise_base' field).
+    var exerciseId: Int {
+        exercise ?? exerciseBase ?? 0
+    }
+
     nonisolated init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         id = try container.decode(Int.self, forKey: .id)
-        exerciseBase = try container.decode(Int.self, forKey: .exerciseBase)
+        exercise = try container.decodeIfPresent(Int.self, forKey: .exercise)
+        exerciseBase = try container.decodeIfPresent(Int.self, forKey: .exerciseBase)
         image = try container.decode(String.self, forKey: .image)
-        isMain = try container.decode(Bool.self, forKey: .isMain)
+        isMain = try container.decodeIfPresent(Bool.self, forKey: .isMain) ?? false
         style = try container.decodeIfPresent(String.self, forKey: .style)
     }
 
     nonisolated func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(id, forKey: .id)
-        try container.encode(exerciseBase, forKey: .exerciseBase)
+        try container.encodeIfPresent(exercise, forKey: .exercise)
+        try container.encodeIfPresent(exerciseBase, forKey: .exerciseBase)
         try container.encode(image, forKey: .image)
         try container.encode(isMain, forKey: .isMain)
         try container.encodeIfPresent(style, forKey: .style)
@@ -442,51 +540,86 @@ enum WgerLanguageCode: Int, Sendable {
     }
 }
 
-// MARK: - Wger Detailed Exercise Info
+// MARK: - Wger Exercise Translation
 
-/// Complete exercise info with images, used for detailed views.
-struct WgerExerciseInfo: Codable, Identifiable, Hashable, Sendable {
+/// Translation of an exercise (name, description) in a specific language.
+struct WgerExerciseTranslation: Codable, Identifiable, Hashable, Sendable {
     let id: Int
     let uuid: String?
     let name: String
+    let description: String?
+    let language: Int
+
+    enum CodingKeys: String, CodingKey {
+        case id, uuid, name, description, language
+    }
+}
+
+// MARK: - Wger Detailed Exercise Info
+
+/// Complete exercise info from /exerciseinfo/ endpoint.
+/// Note: The name is inside translations[], not at root level.
+struct WgerExerciseInfo: Codable, Identifiable, Hashable, Sendable {
+    let id: Int
+    let uuid: String?
     let category: WgerCategory?
     let muscles: [WgerMuscle]
     let musclesSecondary: [WgerMuscle]
     let equipment: [WgerEquipment]
     let images: [WgerExerciseImage]
-    let description: String?
-    let language: WgerLanguage?
+    let translations: [WgerExerciseTranslation]
 
     enum CodingKeys: String, CodingKey {
-        case id, uuid, name, category, muscles, equipment, images, description, language
+        case id, uuid, category, muscles, equipment, images, translations
         case musclesSecondary = "muscles_secondary"
+    }
+
+    /// Gets the name in the preferred language (falls back to English, then first available).
+    nonisolated func name(for languageId: Int) -> String {
+        // Try preferred language first
+        if let translation = translations.first(where: { $0.language == languageId }) {
+            return translation.name
+        }
+        // Fall back to English (language ID 2)
+        if let english = translations.first(where: { $0.language == 2 }) {
+            return english.name
+        }
+        // Fall back to first available
+        return translations.first?.name ?? "Exercise \(id)"
+    }
+
+    /// Gets the description in the preferred language.
+    nonisolated func description(for languageId: Int) -> String? {
+        if let translation = translations.first(where: { $0.language == languageId }) {
+            return translation.description
+        }
+        if let english = translations.first(where: { $0.language == 2 }) {
+            return english.description
+        }
+        return translations.first?.description
     }
 
     nonisolated init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         id = try container.decode(Int.self, forKey: .id)
         uuid = try container.decodeIfPresent(String.self, forKey: .uuid)
-        name = try container.decode(String.self, forKey: .name)
         category = try container.decodeIfPresent(WgerCategory.self, forKey: .category)
         muscles = try container.decodeIfPresent([WgerMuscle].self, forKey: .muscles) ?? []
         musclesSecondary = try container.decodeIfPresent([WgerMuscle].self, forKey: .musclesSecondary) ?? []
         equipment = try container.decodeIfPresent([WgerEquipment].self, forKey: .equipment) ?? []
         images = try container.decodeIfPresent([WgerExerciseImage].self, forKey: .images) ?? []
-        description = try container.decodeIfPresent(String.self, forKey: .description)
-        language = try container.decodeIfPresent(WgerLanguage.self, forKey: .language)
+        translations = try container.decodeIfPresent([WgerExerciseTranslation].self, forKey: .translations) ?? []
     }
 
     nonisolated func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(id, forKey: .id)
         try container.encodeIfPresent(uuid, forKey: .uuid)
-        try container.encode(name, forKey: .name)
         try container.encodeIfPresent(category, forKey: .category)
         try container.encode(muscles, forKey: .muscles)
         try container.encode(musclesSecondary, forKey: .musclesSecondary)
         try container.encode(equipment, forKey: .equipment)
         try container.encode(images, forKey: .images)
-        try container.encodeIfPresent(description, forKey: .description)
-        try container.encodeIfPresent(language, forKey: .language)
+        try container.encode(translations, forKey: .translations)
     }
 }

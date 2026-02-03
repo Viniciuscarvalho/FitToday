@@ -22,9 +22,9 @@ actor OpenAIUsageLimiter: OpenAIUsageLimiting {
     private let dailyLimit: Int
     private var records: [UUID: Record] = [:]
 
-    /// Limite diário padrão: 10 gerações via IA para usuários PRO.
-    /// O limite é generoso para permitir experimentação, já que a API tem fallback local.
-    init(dailyLimit: Int = 10) {
+    /// Limite diário padrão: 2 gerações via IA para usuários PRO.
+    /// Limite reduzido para controlar custos de API; fallback local disponível após limite.
+    init(dailyLimit: Int = 2) {
         self.dailyLimit = dailyLimit
         load()
     }

@@ -2,7 +2,7 @@
 //  ProgramDetailView.swift
 //  FitToday
 //
-//  Tela de detalhe de um programa, listando os treinos que o compõem.
+//  Tela de detalhe de um programa, listando os treinos com exercícios da API Wger.
 //
 
 import SwiftUI
@@ -13,26 +13,43 @@ struct ProgramDetailView: View {
 
     @Environment(\.dependencyResolver) private var resolver
     @Environment(AppRouter.self) private var router
-    // 💡 Learn: Com @Observable, usamos @State em vez de @StateObject
     @State private var viewModel: ProgramDetailViewModel?
     @State private var dependencyError: String?
 
     init(programId: String, resolver: Resolver) {
         self.programId = programId
-        if let programRepo = resolver.resolve(ProgramRepository.self),
-           let workoutRepo = resolver.resolve(LibraryWorkoutsRepository.self) {
+
+        #if DEBUG
+        print("[ProgramDetailView] 🏗️ Init with programId: '\(programId)'")
+        #endif
+
+        let programRepo = resolver.resolve(ProgramRepository.self)
+        let loadWorkoutsUseCase = resolver.resolve(LoadProgramWorkoutsUseCase.self)
+
+        #if DEBUG
+        print("[ProgramDetailView] 📦 ProgramRepository resolved: \(programRepo != nil)")
+        print("[ProgramDetailView] 📦 LoadProgramWorkoutsUseCase resolved: \(loadWorkoutsUseCase != nil)")
+        #endif
+
+        if let programRepo, let loadWorkoutsUseCase {
             _viewModel = State(initialValue: ProgramDetailViewModel(
                 programId: programId,
                 programRepository: programRepo,
-                workoutRepository: workoutRepo
+                loadProgramWorkoutsUseCase: loadWorkoutsUseCase
             ))
             _dependencyError = State(initialValue: nil)
+            #if DEBUG
+            print("[ProgramDetailView] ✅ ViewModel created successfully")
+            #endif
         } else {
             _viewModel = State(initialValue: nil)
             _dependencyError = State(initialValue: "Erro de configuração: repositórios não estão registrados.")
+            #if DEBUG
+            print("[ProgramDetailView] ❌ Failed to create ViewModel - missing repositories")
+            #endif
         }
     }
-    
+
     var body: some View {
         Group {
             if let error = dependencyError {
@@ -57,11 +74,9 @@ struct ProgramDetailView: View {
                     heroSection(program)
                     workoutsSection(viewModel: viewModel)
                 } else if viewModel.isLoading {
-                    ProgressView()
-                        .frame(maxWidth: .infinity, minHeight: 300)
+                    loadingView
                 } else {
-                    Text("Programa não encontrado")
-                        .foregroundStyle(FitTodayColor.textSecondary)
+                    programNotFoundView
                 }
             }
         }
@@ -69,9 +84,40 @@ struct ProgramDetailView: View {
             await viewModel.load()
         }
     }
-    
+
+    // MARK: - Loading View
+
+    private var loadingView: some View {
+        VStack(spacing: FitTodaySpacing.md) {
+            ProgressView()
+                .progressViewStyle(.circular)
+                .tint(FitTodayColor.brandPrimary)
+            Text("Carregando programa...")
+                .font(.system(.subheadline))
+                .foregroundStyle(FitTodayColor.textSecondary)
+        }
+        .frame(maxWidth: .infinity, minHeight: 300)
+    }
+
+    // MARK: - Program Not Found View
+
+    private var programNotFoundView: some View {
+        VStack(spacing: FitTodaySpacing.md) {
+            Image(systemName: "exclamationmark.triangle")
+                .font(.system(.largeTitle))
+                .foregroundStyle(FitTodayColor.warning)
+            Text("Programa não encontrado")
+                .font(.system(.headline))
+                .foregroundStyle(FitTodayColor.textPrimary)
+            Text("O programa solicitado não está disponível.")
+                .font(.system(.subheadline))
+                .foregroundStyle(FitTodayColor.textSecondary)
+        }
+        .frame(maxWidth: .infinity, minHeight: 300)
+    }
+
     // MARK: - Hero Section
-    
+
     private func heroSection(_ program: Program) -> some View {
         ZStack(alignment: .bottomLeading) {
             // Background gradient
@@ -80,18 +126,18 @@ struct ProgramDetailView: View {
                 startPoint: .topTrailing,
                 endPoint: .bottomLeading
             )
-            
+
             // Overlay
             LinearGradient(
                 colors: [.clear, .black.opacity(0.6)],
                 startPoint: .top,
                 endPoint: .bottom
             )
-            
+
             // Conteúdo
             VStack(alignment: .leading, spacing: FitTodaySpacing.sm) {
                 Spacer()
-                
+
                 // Tag
                 HStack(spacing: FitTodaySpacing.xs) {
                     Image(systemName: program.goalTag.iconName)
@@ -102,14 +148,14 @@ struct ProgramDetailView: View {
                 .padding(.vertical, FitTodaySpacing.xs)
                 .background(.white.opacity(0.2))
                 .clipShape(Capsule())
-                
+
                 Text(program.name)
                     .font(.system(.title, weight: .bold))
-                
+
                 Text(program.subtitle)
                     .font(.system(.body))
                     .opacity(0.9)
-                
+
                 // Metadados
                 HStack(spacing: FitTodaySpacing.lg) {
                     VStack(alignment: .leading) {
@@ -119,7 +165,7 @@ struct ProgramDetailView: View {
                             .font(.system(.caption))
                             .opacity(0.7)
                     }
-                    
+
                     VStack(alignment: .leading) {
                         Text("\(program.totalWorkouts)")
                             .font(.system(.headline, weight: .bold))
@@ -127,7 +173,7 @@ struct ProgramDetailView: View {
                             .font(.system(.caption))
                             .opacity(0.7)
                     }
-                    
+
                     VStack(alignment: .leading) {
                         Text(program.sessionsDescription)
                             .font(.system(.headline, weight: .bold))
@@ -143,7 +189,7 @@ struct ProgramDetailView: View {
         }
         .frame(height: 280)
     }
-    
+
     // MARK: - Workouts Section
 
     @ViewBuilder
@@ -155,28 +201,73 @@ struct ProgramDetailView: View {
                 .padding(.horizontal)
 
             if viewModel.workouts.isEmpty && !viewModel.isLoading {
-                Text("Nenhum treino encontrado")
-                    .font(.system(.subheadline))
-                    .foregroundStyle(FitTodayColor.textSecondary)
-                    .padding(.horizontal)
+                emptyWorkoutsView
+            } else if viewModel.isLoading {
+                workoutsLoadingView
             } else {
                 LazyVStack(spacing: FitTodaySpacing.sm) {
                     ForEach(Array(viewModel.workouts.enumerated()), id: \.element.id) { index, workout in
-                        WorkoutRowCard(
+                        ProgramWorkoutRowCard(
                             workout: workout,
                             index: index + 1
                         ) {
-                            // Usa a tab atual para manter a navegação na mesma tab (home ou programs)
-                            router.push(.programWorkoutDetail(workout.id), on: router.selectedTab)
+                            router.push(.programWorkoutDetail(workout), on: router.selectedTab)
                         }
                         .padding(.horizontal)
                     }
                 }
             }
+
+            // Error message if any
+            if let error = viewModel.errorMessage {
+                errorView(error)
+            }
         }
         .padding(.top, FitTodaySpacing.md)
     }
-    
+
+    private var emptyWorkoutsView: some View {
+        VStack(spacing: FitTodaySpacing.md) {
+            Image(systemName: "exclamationmark.circle")
+                .font(.system(size: 40))
+                .foregroundStyle(FitTodayColor.textTertiary)
+
+            Text("Nenhum treino encontrado")
+                .font(.system(.subheadline))
+                .foregroundStyle(FitTodayColor.textSecondary)
+
+            Text("Não foi possível carregar os exercícios da API")
+                .font(.system(.caption))
+                .foregroundStyle(FitTodayColor.textTertiary)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(FitTodaySpacing.xl)
+    }
+
+    private var workoutsLoadingView: some View {
+        VStack(spacing: FitTodaySpacing.md) {
+            ProgressView()
+                .tint(FitTodayColor.brandPrimary)
+            Text("Carregando exercícios da API Wger...")
+                .font(.system(.caption))
+                .foregroundStyle(FitTodayColor.textSecondary)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(FitTodaySpacing.xl)
+    }
+
+    private func errorView(_ message: String) -> some View {
+        HStack(spacing: FitTodaySpacing.sm) {
+            Image(systemName: "exclamationmark.triangle.fill")
+                .foregroundStyle(FitTodayColor.warning)
+            Text(message)
+                .font(.system(.caption))
+                .foregroundStyle(FitTodayColor.textSecondary)
+        }
+        .padding(FitTodaySpacing.md)
+        .padding(.horizontal)
+    }
+
     private func gradientColors(for goalTag: ProgramGoalTag) -> [Color] {
         switch goalTag {
         case .strength: return [.blue, .purple]
@@ -190,59 +281,86 @@ struct ProgramDetailView: View {
 
 // MARK: - ViewModel
 
-// 💡 Learn: @Observable substitui ObservableObject para gerenciamento de estado moderno
 @MainActor
 @Observable final class ProgramDetailViewModel {
     private(set) var program: Program?
-    private(set) var workouts: [LibraryWorkout] = []
+    private(set) var workouts: [ProgramWorkout] = []
     private(set) var isLoading = false
+    private(set) var errorMessage: String?
 
     private let programId: String
     private let programRepository: ProgramRepository
-    private let workoutRepository: LibraryWorkoutsRepository
+    private let loadProgramWorkoutsUseCase: LoadProgramWorkoutsUseCase
 
     init(
         programId: String,
         programRepository: ProgramRepository,
-        workoutRepository: LibraryWorkoutsRepository
+        loadProgramWorkoutsUseCase: LoadProgramWorkoutsUseCase
     ) {
         self.programId = programId
         self.programRepository = programRepository
-        self.workoutRepository = workoutRepository
+        self.loadProgramWorkoutsUseCase = loadProgramWorkoutsUseCase
     }
-    
+
     func load() async {
         isLoading = true
+        errorMessage = nil
         defer { isLoading = false }
-        
+
+        #if DEBUG
+        print("══════════════════════════════════════════════════════")
+        print("[ProgramDetail] 🔍 Loading program: '\(programId)'")
+        #endif
+
         do {
+            // Load program metadata
             program = try await programRepository.getProgram(id: programId)
-            
-            if let program = program {
-                let allWorkouts = try await workoutRepository.loadWorkouts()
-                workouts = program.workoutTemplateIds.compactMap { templateId in
-                    allWorkouts.first { $0.id == templateId }
-                }
-            }
-        } catch {
+
             #if DEBUG
-            print("[ProgramDetail] Erro ao carregar: \(error)")
+            if let program {
+                print("[ProgramDetail] ✅ Program found: \(program.name)")
+                print("[ProgramDetail] 📋 Templates: \(program.workoutTemplateIds)")
+            } else {
+                print("[ProgramDetail] ❌ Program NOT FOUND")
+            }
+            #endif
+
+            guard program != nil else { return }
+
+            // Load workouts with Wger exercises
+            workouts = try await loadProgramWorkoutsUseCase.execute(programId: programId)
+
+            #if DEBUG
+            print("[ProgramDetail] ✅ Loaded \(workouts.count) workouts")
+            for workout in workouts {
+                print("[ProgramDetail]   - \(workout.title): \(workout.exercises.count) exercises")
+            }
+            #endif
+
+        } catch {
+            errorMessage = error.localizedDescription
+            #if DEBUG
+            print("[ProgramDetail] ❌ Error: \(error)")
             #endif
         }
+
+        #if DEBUG
+        print("══════════════════════════════════════════════════════")
+        #endif
     }
 }
 
 // MARK: - Workout Row Card
 
-private struct WorkoutRowCard: View {
-    let workout: LibraryWorkout
+private struct ProgramWorkoutRowCard: View {
+    let workout: ProgramWorkout
     let index: Int
     let onTap: () -> Void
 
     private let maxPreviewExercises = 3
 
     private var previewExercises: [String] {
-        workout.exercises.prefix(maxPreviewExercises).map { $0.exercise.name }
+        workout.exercises.prefix(maxPreviewExercises).map { $0.name }
     }
 
     private var remainingCount: Int {
@@ -271,7 +389,7 @@ private struct WorkoutRowCard: View {
 
                         HStack(spacing: FitTodaySpacing.sm) {
                             Label("\(workout.estimatedDurationMinutes) min", systemImage: "clock")
-                            Label("\(workout.exerciseCount) \("program.workout.exercises".localized)", systemImage: "figure.run")
+                            Label("\(workout.exerciseCount) exercícios", systemImage: "figure.run")
                         }
                         .font(.system(.caption))
                         .foregroundStyle(FitTodayColor.textSecondary)
@@ -303,7 +421,7 @@ private struct WorkoutRowCard: View {
                         }
 
                         if remainingCount > 0 {
-                            Text(String(format: "program.workout.more_exercises".localized, remainingCount))
+                            Text("+ \(remainingCount) mais exercícios")
                                 .font(.system(.caption, weight: .medium))
                                 .foregroundStyle(FitTodayColor.brandPrimary)
                         }
@@ -320,8 +438,7 @@ private struct WorkoutRowCard: View {
 
 #Preview {
     NavigationStack {
-        ProgramDetailView(programId: "prog_push_pull_legs", resolver: Container())
+        ProgramDetailView(programId: "ppl_beginner_muscle_gym", resolver: Container())
             .environment(AppRouter())
     }
 }
-

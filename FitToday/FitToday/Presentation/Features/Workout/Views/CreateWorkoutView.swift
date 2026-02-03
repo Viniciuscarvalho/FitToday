@@ -16,6 +16,7 @@ struct CreateWorkoutView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var viewModel = CreateWorkoutViewModel()
     @State private var showExerciseSearch = false
+    @State private var isEditMode = false
 
     var body: some View {
         NavigationStack {
@@ -53,6 +54,21 @@ struct CreateWorkoutView: View {
                     .foregroundStyle(FitTodayColor.textSecondary)
                 }
 
+                // Edit/Reorder toggle when exercises exist
+                if !viewModel.exercises.isEmpty {
+                    ToolbarItem(placement: .principal) {
+                        Button {
+                            withAnimation(.easeInOut(duration: 0.2)) {
+                                isEditMode.toggle()
+                            }
+                        } label: {
+                            Text(isEditMode ? "Concluído" : "Reordenar")
+                                .font(FitTodayFont.ui(size: 14, weight: .medium))
+                                .foregroundStyle(FitTodayColor.brandPrimary)
+                        }
+                    }
+                }
+
                 ToolbarItem(placement: .confirmationAction) {
                     Button("common.save".localized) {
                         Task {
@@ -66,9 +82,14 @@ struct CreateWorkoutView: View {
                 }
             }
             .sheet(isPresented: $showExerciseSearch) {
-                ExerciseSearchSheet(onSelect: { exercise in
-                    viewModel.addExercise(exercise)
-                })
+                if let exerciseService = resolver.resolve(ExerciseServiceProtocol.self) {
+                    ExerciseSearchSheet(
+                        exerciseService: exerciseService,
+                        onSelect: { exercise in
+                            viewModel.addExercise(exercise)
+                        }
+                    )
+                }
             }
         }
     }
@@ -228,20 +249,31 @@ struct CreateWorkoutView: View {
     }
 
     private var exercisesList: some View {
-        LazyVStack(spacing: FitTodaySpacing.sm) {
-            ForEach(viewModel.exercises) { exercise in
+        VStack(spacing: FitTodaySpacing.sm) {
+            ForEach(Array(viewModel.exercises.enumerated()), id: \.element.id) { index, exercise in
                 ExerciseEntryRow(
                     exercise: exercise,
+                    index: index + 1,
+                    isEditMode: isEditMode,
                     onDelete: {
-                        viewModel.removeExercise(exercise)
+                        withAnimation(.easeInOut(duration: 0.2)) {
+                            viewModel.removeExercise(exercise)
+                        }
                     },
+                    onMoveUp: index > 0 ? {
+                        withAnimation(.easeInOut(duration: 0.2)) {
+                            viewModel.moveExercise(from: IndexSet(integer: index), to: index - 1)
+                        }
+                    } : nil,
+                    onMoveDown: index < viewModel.exercises.count - 1 ? {
+                        withAnimation(.easeInOut(duration: 0.2)) {
+                            viewModel.moveExercise(from: IndexSet(integer: index), to: index + 2)
+                        }
+                    } : nil,
                     onConfigureSets: {
                         // TODO: Open sets configuration sheet
                     }
                 )
-            }
-            .onMove { source, destination in
-                viewModel.moveExercise(from: source, to: destination)
             }
         }
     }
@@ -265,15 +297,51 @@ struct CreateWorkoutView: View {
 
 struct ExerciseEntryRow: View {
     let exercise: CustomExerciseEntry
+    let index: Int
+    let isEditMode: Bool
     let onDelete: () -> Void
+    var onMoveUp: (() -> Void)?
+    var onMoveDown: (() -> Void)?
     let onConfigureSets: () -> Void
 
     var body: some View {
         HStack(spacing: FitTodaySpacing.md) {
-            // Drag handle
-            Image(systemName: "line.3.horizontal")
-                .font(.system(size: 14))
-                .foregroundStyle(FitTodayColor.textTertiary)
+            // Index number or drag handle based on edit mode
+            if isEditMode {
+                // Move buttons in edit mode
+                VStack(spacing: FitTodaySpacing.xs) {
+                    Button {
+                        onMoveUp?()
+                    } label: {
+                        Image(systemName: "chevron.up")
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundStyle(onMoveUp != nil ? FitTodayColor.brandPrimary : FitTodayColor.textTertiary.opacity(0.3))
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(onMoveUp == nil)
+
+                    Button {
+                        onMoveDown?()
+                    } label: {
+                        Image(systemName: "chevron.down")
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundStyle(onMoveDown != nil ? FitTodayColor.brandPrimary : FitTodayColor.textTertiary.opacity(0.3))
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(onMoveDown == nil)
+                }
+                .frame(width: 28)
+            } else {
+                // Index number in normal mode
+                Text("\(index)")
+                    .font(FitTodayFont.ui(size: 14, weight: .bold))
+                    .foregroundStyle(FitTodayColor.brandPrimary)
+                    .frame(width: 28, height: 28)
+                    .background(
+                        Circle()
+                            .fill(FitTodayColor.brandPrimary.opacity(0.15))
+                    )
+            }
 
             // Exercise info
             VStack(alignment: .leading, spacing: FitTodaySpacing.xs) {
@@ -297,15 +365,17 @@ struct ExerciseEntryRow: View {
 
             Spacer()
 
-            // Configure sets button
-            Button {
-                onConfigureSets()
-            } label: {
-                Image(systemName: "slider.horizontal.3")
-                    .font(.system(size: 16))
-                    .foregroundStyle(FitTodayColor.brandPrimary)
+            if !isEditMode {
+                // Configure sets button (only in normal mode)
+                Button {
+                    onConfigureSets()
+                } label: {
+                    Image(systemName: "slider.horizontal.3")
+                        .font(.system(size: 16))
+                        .foregroundStyle(FitTodayColor.brandPrimary)
+                }
+                .buttonStyle(.plain)
             }
-            .buttonStyle(.plain)
 
             // Delete button
             Button {
@@ -320,8 +390,13 @@ struct ExerciseEntryRow: View {
         .padding(FitTodaySpacing.md)
         .background(
             RoundedRectangle(cornerRadius: FitTodayRadius.sm)
-                .fill(FitTodayColor.surface)
+                .fill(isEditMode ? FitTodayColor.surface.opacity(0.8) : FitTodayColor.surface)
+                .overlay(
+                    RoundedRectangle(cornerRadius: FitTodayRadius.sm)
+                        .stroke(isEditMode ? FitTodayColor.brandPrimary.opacity(0.3) : Color.clear, lineWidth: 1)
+                )
         )
+        .animation(.easeInOut(duration: 0.2), value: isEditMode)
     }
 }
 

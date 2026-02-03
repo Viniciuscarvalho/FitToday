@@ -154,7 +154,9 @@ struct TabRootView: View {
             }
         case .programDetail(let programId):
             ProgramDetailView(programId: programId, resolver: resolver)
-        case .programWorkoutDetail(let workoutId):
+        case .programWorkoutDetail(let workout):
+            ProgramWorkoutDetailView(workout: workout, resolver: resolver)
+        case .libraryWorkoutDetail(let workoutId):
             LibraryDetailView(workoutId: workoutId, resolver: resolver)
         case .programExerciseDetail(let prescription):
             LibraryExerciseDetailView(prescription: prescription)

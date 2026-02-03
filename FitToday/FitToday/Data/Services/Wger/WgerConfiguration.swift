@@ -25,7 +25,7 @@ struct WgerConfiguration: Sendable {
     let cacheTTL: TimeInterval
 
     /// Default configuration for production.
-    static let `default` = WgerConfiguration(
+    nonisolated(unsafe) static let `default` = WgerConfiguration(
         baseURL: URL(string: "https://wger.de/api/v2")!,
         defaultLanguage: .portuguese,
         timeoutInterval: 15.0,
@@ -34,7 +34,7 @@ struct WgerConfiguration: Sendable {
     )
 
     /// Configuration for testing with shorter cache.
-    static let testing = WgerConfiguration(
+    nonisolated(unsafe) static let testing = WgerConfiguration(
         baseURL: URL(string: "https://wger.de/api/v2")!,
         defaultLanguage: .english,
         timeoutInterval: 5.0,

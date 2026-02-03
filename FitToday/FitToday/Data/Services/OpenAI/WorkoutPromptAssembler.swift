@@ -496,6 +496,27 @@ struct WorkoutPromptAssembler: WorkoutPromptAssembling, Sendable {
     return lines.joined(separator: "\n")
   }
   
+  // MARK: - Focus to Muscle Mapping
+
+  /// Returns the primary muscle groups for a given workout focus.
+  /// Used to prioritize relevant exercises in the catalog.
+  private func getMusclesForFocus(_ focus: DailyFocus) -> Set<MuscleGroup> {
+    switch focus {
+    case .upper:
+      return [.chest, .back, .shoulders, .biceps, .triceps, .forearms]
+    case .lower:
+      return [.quads, .hamstrings, .glutes, .calves]
+    case .fullBody:
+      return [] // No filtering for full body
+    case .core:
+      return [.core, .lowerBack]
+    case .cardio:
+      return [.cardioSystem]
+    case .surprise:
+      return [] // Surprise can be any muscle group
+    }
+  }
+
   // MARK: - Catalog Formatting
 
   private func formatCatalog(blocks: [WorkoutBlock], blueprint: WorkoutBlueprint) -> String {
@@ -505,6 +526,9 @@ struct WorkoutPromptAssembler: WorkoutPromptAssembling, Sendable {
     let compatibleBlocks = blocks.filter { block in
       block.equipmentOptions.contains { allowedEquipment.contains($0) }
     }
+
+    // Get muscles relevant to the focus type
+    let focusMuscles = getMusclesForFocus(blueprint.focus)
 
     // USAR A SEED PARA VARIAR A SELEÇÃO E ORDEM DOS BLOCOS
     var generator = SeededRandomGenerator(seed: blueprint.variationSeed)
@@ -548,25 +572,57 @@ struct WorkoutPromptAssembler: WorkoutPromptAssembling, Sendable {
     catalogLines.append("## AVAILABLE EXERCISES (use EXACT names)")
     catalogLines.append("")
 
-    // Ordenar grupos musculares para consistência
-    let sortedMuscles = exercisesByMuscle.keys.sorted { $0.rawValue < $1.rawValue }
+    // Prioritize muscles matching the focus type
+    let prioritizedMuscles: [MuscleGroup]
+    let secondaryMuscles: [MuscleGroup]
 
-    // Limitar a 150 exercícios total no prompt
+    if focusMuscles.isEmpty {
+      // No filtering - use all muscles sorted
+      prioritizedMuscles = exercisesByMuscle.keys.sorted { $0.rawValue < $1.rawValue }
+      secondaryMuscles = []
+    } else {
+      // Separate primary (matching focus) and secondary muscles
+      prioritizedMuscles = exercisesByMuscle.keys
+        .filter { focusMuscles.contains($0) }
+        .sorted { $0.rawValue < $1.rawValue }
+      secondaryMuscles = exercisesByMuscle.keys
+        .filter { !focusMuscles.contains($0) }
+        .sorted { $0.rawValue < $1.rawValue }
+    }
+
+    // Reduced limit to 80 exercises for better focus
     var totalExercises = 0
-    let maxTotalExercises = 150
+    let maxTotalExercises = 80
+    let maxPrimaryExercises = 60  // Reserve most slots for focus-relevant muscles
 
-    for muscle in sortedMuscles {
+    // First pass: prioritized muscles (up to 60)
+    for muscle in prioritizedMuscles {
+      guard let exercises = exercisesByMuscle[muscle], !exercises.isEmpty else { continue }
+      guard totalExercises < maxPrimaryExercises else { break }
+
+      catalogLines.append("### \(muscle.rawValue.capitalized) (PRIMARY)")
+
+      let remainingSlots = maxPrimaryExercises - totalExercises
+      let exercisesToInclude = exercises.prefix(min(15, remainingSlots))
+
+      for exercise in exercisesToInclude {
+        catalogLines.append("- \(exercise.name) (\(exercise.equipment.rawValue))")
+        totalExercises += 1
+      }
+      catalogLines.append("")
+    }
+
+    // Second pass: secondary muscles (up to remaining 20)
+    for muscle in secondaryMuscles {
       guard let exercises = exercisesByMuscle[muscle], !exercises.isEmpty else { continue }
       guard totalExercises < maxTotalExercises else { break }
 
       catalogLines.append("### \(muscle.rawValue.capitalized)")
 
-      // Limitar exercícios por grupo para não exceder total
       let remainingSlots = maxTotalExercises - totalExercises
-      let exercisesToInclude = exercises.prefix(min(20, remainingSlots))
+      let exercisesToInclude = exercises.prefix(min(5, remainingSlots))
 
       for exercise in exercisesToInclude {
-        // Formato: "- Barbell Bench Press (barbell)" - mais claro e fácil de copiar
         catalogLines.append("- \(exercise.name) (\(exercise.equipment.rawValue))")
         totalExercises += 1
       }
@@ -575,6 +631,7 @@ struct WorkoutPromptAssembler: WorkoutPromptAssembling, Sendable {
 
     catalogLines.append("---")
     catalogLines.append("Total: \(totalExercises) exercises available")
+    catalogLines.append("Focus: \(blueprint.focus.rawValue) - prioritize exercises from PRIMARY muscle groups")
     catalogLines.append("REMINDER: Use ONLY names from this list. Do NOT invent or modify exercise names.")
 
     return catalogLines.joined(separator: "\n")

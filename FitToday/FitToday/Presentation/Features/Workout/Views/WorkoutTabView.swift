@@ -28,40 +28,38 @@ struct WorkoutTabView: View {
     }
 
     var body: some View {
-        NavigationStack {
-            ZStack(alignment: .bottomTrailing) {
-                VStack(spacing: 0) {
-                    // Segmented Control
-                    segmentedControl
-                        .padding(.horizontal, FitTodaySpacing.md)
-                        .padding(.top, FitTodaySpacing.sm)
+        ZStack(alignment: .bottomTrailing) {
+            VStack(spacing: 0) {
+                // Segmented Control
+                segmentedControl
+                    .padding(.horizontal, FitTodaySpacing.md)
+                    .padding(.top, FitTodaySpacing.sm)
 
-                    // Content
-                    TabView(selection: $selectedSegment) {
-                        MyWorkoutsView(showCreateWorkout: $showCreateWorkout, resolver: resolver)
-                            .tag(WorkoutSegment.myWorkouts)
+                // Content
+                TabView(selection: $selectedSegment) {
+                    MyWorkoutsView(showCreateWorkout: $showCreateWorkout, resolver: resolver)
+                        .tag(WorkoutSegment.myWorkouts)
 
-                        ProgramsListView(resolver: resolver)
-                            .tag(WorkoutSegment.programs)
-                    }
-                    .tabViewStyle(.page(indexDisplayMode: .never))
-                    .animation(.easeInOut(duration: 0.2), value: selectedSegment)
+                    ProgramsListView()
+                        .tag(WorkoutSegment.programs)
                 }
-
-                // Floating Action Button (only on My Workouts)
-                if selectedSegment == .myWorkouts {
-                    createWorkoutButton
-                        .padding(.trailing, FitTodaySpacing.lg)
-                        .padding(.bottom, FitTodaySpacing.xl)
-                }
+                .tabViewStyle(.page(indexDisplayMode: .never))
+                .animation(.easeInOut(duration: 0.2), value: selectedSegment)
             }
-            .background(FitTodayColor.background)
-            .navigationTitle("workout.title".localized)
-            .navigationBarTitleDisplayMode(.large)
-            .sheet(isPresented: $showCreateWorkout) {
-                CreateWorkoutView(resolver: resolver) {
-                    showCreateWorkout = false
-                }
+
+            // Floating Action Button (only on My Workouts)
+            if selectedSegment == .myWorkouts {
+                createWorkoutButton
+                    .padding(.trailing, FitTodaySpacing.lg)
+                    .padding(.bottom, FitTodaySpacing.xl)
+            }
+        }
+        .background(FitTodayColor.background)
+        .navigationTitle("workout.title".localized)
+        .navigationBarTitleDisplayMode(.large)
+        .sheet(isPresented: $showCreateWorkout) {
+            CreateWorkoutView(resolver: resolver) {
+                showCreateWorkout = false
             }
         }
     }

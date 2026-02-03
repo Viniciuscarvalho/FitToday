@@ -91,14 +91,39 @@ struct AppContainer {
         container.register(WorkoutBlocksRepository.self) { _ in blocksRepository }
             .inObjectScope(.container)
 
-        let libraryRepository = BundleLibraryWorkoutsRepository()
-        container.register(LibraryWorkoutsRepository.self) { _ in libraryRepository }
+        // Library Workouts Repository - Using enriched repository for Wger media/images
+        let enrichedLibraryRepository = WgerEnrichedLibraryWorkoutsRepository(
+            baseRepository: BundleLibraryWorkoutsRepository(),
+            wgerService: wgerService
+        )
+        container.register(LibraryWorkoutsRepository.self) { _ in enrichedLibraryRepository }
+            .inObjectScope(.container)
+        container.register(WgerEnrichedLibraryWorkoutsRepository.self) { _ in enrichedLibraryRepository }
             .inObjectScope(.container)
 
         // ProgramRepository - carrega programas do bundle
         let programRepository = BundleProgramRepository()
         container.register(ProgramRepository.self) { _ in programRepository }
             .inObjectScope(.container)
+
+        // WgerProgramWorkoutRepository - carrega exercícios Wger para programas
+        let wgerProgramWorkoutRepository = DefaultWgerProgramWorkoutRepository(wgerService: wgerService)
+        container.register(WgerProgramWorkoutRepository.self) { _ in wgerProgramWorkoutRepository }
+            .inObjectScope(.container)
+
+        // ProgramWorkoutCustomizationRepository - salva customizações do usuário (ordem, exclusões)
+        let customizationRepository = UserDefaultsProgramWorkoutCustomizationRepository()
+        container.register(ProgramWorkoutCustomizationRepositoryProtocol.self) { _ in customizationRepository }
+            .inObjectScope(.container)
+
+        // LoadProgramWorkoutsUseCase - carrega treinos de programa com exercícios Wger
+        container.register(LoadProgramWorkoutsUseCase.self) { resolver in
+            LoadProgramWorkoutsUseCase(
+                programRepository: resolver.resolve(ProgramRepository.self)!,
+                workoutRepository: resolver.resolve(WgerProgramWorkoutRepository.self)!
+            )
+        }
+        .inObjectScope(.container)
 
         // OpenAI - Usa chave do usuário (armazenada no Keychain)
         // O cliente é criado sob demanda quando a chave estiver configurada

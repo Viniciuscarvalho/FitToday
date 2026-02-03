@@ -98,7 +98,8 @@ actor WgerAPIService: ExerciseServiceProtocol {
         equipment: [Int]? = nil,
         limit: Int = 50
     ) async throws -> [WgerExercise] {
-        var components = URLComponents(string: "\(configuration.baseURL)/exercise/")
+        // Use exerciseinfo endpoint for richer data (includes images)
+        var components = URLComponents(string: "\(configuration.baseURL)/exerciseinfo/")
         var queryItems = [
             URLQueryItem(name: "language", value: String(language.rawValue)),
             URLQueryItem(name: "limit", value: String(min(limit, configuration.pageLimit)))
@@ -120,14 +121,55 @@ actor WgerAPIService: ExerciseServiceProtocol {
             throw WgerAPIError.invalidURL
         }
 
-        let response: WgerPaginatedResponse<WgerExercise> = try await performRequest(url: url)
+        // Fetch from exerciseinfo endpoint
+        let response: WgerPaginatedResponse<WgerExerciseInfo> = try await performRequest(url: url)
 
-        // Cache results
-        for exercise in response.results {
+        // Convert to WgerExercise format and cache
+        // Note: exerciseinfo returns name inside translations[], not at root level
+        // Names stay in English (language 2), descriptions in Portuguese (language 4)
+        let descriptionLanguageId = WgerLanguageCode.portuguese.rawValue
+        let nameLanguageId = WgerLanguageCode.english.rawValue
+
+        let exercises = response.results.compactMap { info -> WgerExercise? in
+            // Get name in English (original naming convention)
+            let exerciseName = info.name(for: nameLanguageId)
+            guard !exerciseName.starts(with: "Exercise ") else {
+                // This means no translation was found, skip this exercise
+                return nil
+            }
+
+            // Get description in Portuguese, strip HTML, with fallback
+            let rawDescription = info.description(for: descriptionLanguageId)
+            let cleanDescription = rawDescription?.strippingHTML
+            let exerciseDescription = cleanDescription?.isEmpty == false
+                ? cleanDescription
+                : "Execute o exercício mantendo a postura correta e controlando o movimento."
+
+            // Extract images
+            let imageURLs = info.images.map { $0.image }
+            let mainImageURL = info.images.first(where: { $0.isMain })?.image ?? info.images.first?.image
+
+            let exercise = WgerExercise(
+                id: info.id,
+                uuid: info.uuid,
+                name: exerciseName,
+                exerciseBaseId: info.id,
+                description: exerciseDescription,
+                category: info.category?.id,
+                muscles: info.muscles.map { $0.id },
+                musclesSecondary: info.musclesSecondary.map { $0.id },
+                equipment: info.equipment.map { $0.id },
+                language: descriptionLanguageId,
+                license: nil,
+                licenseAuthor: nil,
+                mainImageURL: mainImageURL,
+                imageURLs: imageURLs
+            )
             exerciseCache[exercise.id] = exercise
+            return exercise
         }
 
-        return response.results
+        return exercises
     }
 
     func fetchExercise(id: Int) async throws -> WgerExercise? {
@@ -136,12 +178,48 @@ actor WgerAPIService: ExerciseServiceProtocol {
             return cached
         }
 
-        guard let url = URL(string: "\(configuration.baseURL)/exercise/\(id)/") else {
+        // Use exercisebaseinfo endpoint to get translations
+        guard let url = URL(string: "\(configuration.baseURL)/exercisebaseinfo/\(id)/") else {
             throw WgerAPIError.invalidURL
         }
 
         do {
-            let exercise: WgerExercise = try await performRequest(url: url)
+            let info: WgerExerciseInfo = try await performRequest(url: url)
+
+            // Names in English, descriptions in Portuguese
+            let nameLanguageId = WgerLanguageCode.english.rawValue
+            let descriptionLanguageId = WgerLanguageCode.portuguese.rawValue
+
+            let exerciseName = info.name(for: nameLanguageId)
+
+            // Get description in Portuguese, strip HTML, with fallback
+            let rawDescription = info.description(for: descriptionLanguageId)
+            let cleanDescription = rawDescription?.strippingHTML
+            let exerciseDescription = cleanDescription?.isEmpty == false
+                ? cleanDescription
+                : "Execute o exercício mantendo a postura correta e controlando o movimento."
+
+            // Extract images
+            let imageURLs = info.images.map { $0.image }
+            let mainImageURL = info.images.first(where: { $0.isMain })?.image ?? info.images.first?.image
+
+            let exercise = WgerExercise(
+                id: info.id,
+                uuid: info.uuid,
+                name: exerciseName,
+                exerciseBaseId: info.id,
+                description: exerciseDescription,
+                category: info.category?.id,
+                muscles: info.muscles.map { $0.id },
+                musclesSecondary: info.musclesSecondary.map { $0.id },
+                equipment: info.equipment.map { $0.id },
+                language: descriptionLanguageId,
+                license: nil,
+                licenseAuthor: nil,
+                mainImageURL: mainImageURL,
+                imageURLs: imageURLs
+            )
+
             exerciseCache[id] = exercise
             return exercise
         } catch WgerAPIError.notFound {

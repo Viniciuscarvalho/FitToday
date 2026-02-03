@@ -5,13 +5,46 @@
 //  Created by Claude on 17/01/26.
 //
 
+import FirebaseAuth
 import FirebaseFirestore
 import Foundation
+
+// MARK: - Leaderboard Errors
+
+enum LeaderboardError: LocalizedError {
+    case userNotAuthenticated
+    case firestoreError(Error)
+
+    var errorDescription: String? {
+        switch self {
+        case .userNotAuthenticated:
+            return "User must be authenticated to access leaderboard"
+        case .firestoreError(let error):
+            return "Firestore error: \(error.localizedDescription)"
+        }
+    }
+}
 
 // MARK: - FirebaseLeaderboardService
 
 actor FirebaseLeaderboardService {
     private let db = Firestore.firestore()
+
+    // MARK: - Auth Check
+
+    /// Verifies the user is authenticated before making Firestore calls.
+    private func verifyAuthentication() throws {
+        guard let user = Auth.auth().currentUser else {
+            #if DEBUG
+            print("[LeaderboardService] ❌ User not authenticated!")
+            #endif
+            throw LeaderboardError.userNotAuthenticated
+        }
+
+        #if DEBUG
+        print("[LeaderboardService] ✅ User authenticated: \(user.uid)")
+        #endif
+    }
 
     // MARK: - Get Current Week Challenges
 
@@ -20,6 +53,9 @@ actor FirebaseLeaderboardService {
     /// BUG FIX #2: Uses transaction to prevent race condition where multiple users
     /// could create duplicate challenges simultaneously.
     func getCurrentWeekChallenges(groupId: String) async throws -> [FBChallenge] {
+        // Verify user is authenticated
+        try verifyAuthentication()
+
         let (weekStart, weekEnd) = currentWeekBounds()
 
         #if DEBUG
@@ -183,31 +219,68 @@ actor FirebaseLeaderboardService {
 
     // MARK: - Observe Leaderboard (Real-Time)
 
-    func observeLeaderboard(groupId: String, type: ChallengeType) -> AsyncStream<LeaderboardSnapshot> {
+    nonisolated func observeLeaderboard(groupId: String, type: ChallengeType) -> AsyncStream<LeaderboardSnapshot> {
         AsyncStream { continuation in
-            let (weekStart, _) = currentWeekBounds()
+            // Verify user is authenticated before setting up listener
+            guard let currentUser = Auth.auth().currentUser else {
+                #if DEBUG
+                print("[LeaderboardService] ❌ Cannot observe leaderboard - user not authenticated")
+                #endif
+                continuation.finish()
+                return
+            }
+
+            #if DEBUG
+            print("[LeaderboardService] 👀 Starting leaderboard observation for group \(groupId), type: \(type.rawValue)")
+            print("[LeaderboardService]    Authenticated user: \(currentUser.uid)")
+            #endif
+
+            let (weekStart, _) = self.currentWeekBoundsSync()
 
             // Listen to challenge document
-            let challengeListener = db.collection("challenges")
+            let challengeListener = self.db.collection("challenges")
                 .whereField("groupId", isEqualTo: groupId)
                 .whereField("weekStartDate", isEqualTo: weekStart)
                 .whereField("type", isEqualTo: type.rawValue)
                 .whereField("isActive", isEqualTo: true)
                 .limit(to: 1)
                 .addSnapshotListener { snapshot, error in
+                    if let error {
+                        #if DEBUG
+                        print("[LeaderboardService] ❌ Snapshot listener error: \(error.localizedDescription)")
+                        #endif
+                        return
+                    }
+
                     guard let challengeDoc = snapshot?.documents.first else {
-                        // No challenge for this week yet, emit empty snapshot
+                        #if DEBUG
+                        print("[LeaderboardService] ⚠️ No challenge found for this week")
+                        #endif
                         return
                     }
 
                     guard let fbChallenge = try? challengeDoc.data(as: FBChallenge.self) else {
+                        #if DEBUG
+                        print("[LeaderboardService] ❌ Failed to decode challenge document")
+                        #endif
                         return
                     }
+
+                    #if DEBUG
+                    print("[LeaderboardService] ✅ Challenge found: \(challengeDoc.documentID)")
+                    #endif
 
                     // Listen to entries subcollection
                     challengeDoc.reference.collection("entries")
                         .order(by: "rank")
-                        .addSnapshotListener { entriesSnapshot, _ in
+                        .addSnapshotListener { entriesSnapshot, entriesError in
+                            if let entriesError {
+                                #if DEBUG
+                                print("[LeaderboardService] ❌ Entries listener error: \(entriesError.localizedDescription)")
+                                #endif
+                                return
+                            }
+
                             guard let entryDocs = entriesSnapshot?.documents else { return }
 
                             let entries = entryDocs.compactMap { try? $0.data(as: FBChallengeEntry.self).toDomain() }
@@ -225,13 +298,34 @@ actor FirebaseLeaderboardService {
 
             continuation.onTermination = { _ in
                 challengeListener.remove()
+                #if DEBUG
+                print("[LeaderboardService] 🛑 Stopped leaderboard observation")
+                #endif
             }
         }
+    }
+
+    /// Synchronous version of currentWeekBounds for use in nonisolated methods.
+    private nonisolated func currentWeekBoundsSync() -> (start: Timestamp, end: Timestamp) {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(identifier: "UTC")!
+        calendar.firstWeekday = 2 // Monday
+
+        let now = Date()
+        guard let startOfWeek = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: now)) else {
+            return (Timestamp(date: now), Timestamp(date: now))
+        }
+        guard let endOfWeek = calendar.date(byAdding: .day, value: 7, to: startOfWeek) else {
+            return (Timestamp(date: startOfWeek), Timestamp(date: startOfWeek))
+        }
+        return (Timestamp(date: startOfWeek), Timestamp(date: endOfWeek))
     }
 
     // MARK: - Increment Check-In
 
     func incrementCheckIn(challengeId: String, userId: String, displayName: String, photoURL: URL?) async throws {
+        try verifyAuthentication()
+
         let entryRef = db.collection("challenges")
             .document(challengeId)
             .collection("entries")
@@ -274,6 +368,8 @@ actor FirebaseLeaderboardService {
     // MARK: - Update Streak
 
     func updateStreak(challengeId: String, userId: String, streakDays: Int, displayName: String, photoURL: URL?) async throws {
+        try verifyAuthentication()
+
         let entryRef = db.collection("challenges")
             .document(challengeId)
             .collection("entries")
@@ -297,6 +393,8 @@ actor FirebaseLeaderboardService {
     // MARK: - Update Member Weekly Stats
 
     func updateMemberWeeklyStats(groupId: String, userId: String, workoutMinutes: Int) async throws {
+        try verifyAuthentication()
+
         let memberRef = db.collection("groups")
             .document(groupId)
             .collection("members")
@@ -345,19 +443,37 @@ actor FirebaseLeaderboardService {
     // MARK: - Week Bounds Helper
 
     private func currentWeekBounds() -> (start: Timestamp, end: Timestamp) {
-        let calendar = Calendar.current
-        var components = calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: Date())
-        components.weekday = 2 // Monday (1 = Sunday, 2 = Monday)
-        components.hour = 0
-        components.minute = 0
-        components.second = 0
+        // Use UTC calendar for consistent timestamps across timezones
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(identifier: "UTC")!
+        calendar.firstWeekday = 2 // Monday is first day of week
 
-        guard let start = calendar.date(from: components),
-              let end = calendar.date(byAdding: .day, value: 6, to: start) else {
-            // Fallback to current date if calculation fails
-            return (Timestamp(date: Date()), Timestamp(date: Date()))
+        let now = Date()
+
+        // Find the start of the current week (Monday at 00:00 UTC)
+        guard let startOfWeek = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: now)) else {
+            return (Timestamp(date: now), Timestamp(date: now))
         }
 
-        return (Timestamp(date: start), Timestamp(date: end))
+        // End of week is Sunday 23:59:59.999 UTC (or Monday 00:00 of next week)
+        guard let endOfWeek = calendar.date(byAdding: .day, value: 7, to: startOfWeek) else {
+            return (Timestamp(date: startOfWeek), Timestamp(date: startOfWeek))
+        }
+
+        #if DEBUG
+        print("[LeaderboardService] Week bounds (UTC): \(startOfWeek) to \(endOfWeek)")
+        #endif
+
+        return (Timestamp(date: startOfWeek), Timestamp(date: endOfWeek))
+    }
+
+    /// Converts a date to the start of its week for consistent comparisons.
+    private func weekStartDate(for date: Date) -> Date {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(identifier: "UTC")!
+        calendar.firstWeekday = 2 // Monday
+
+        let components = calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: date)
+        return calendar.date(from: components) ?? date
     }
 }

@@ -3,7 +3,7 @@
 //  FitToday
 //
 //  Created by AI on 15/01/26.
-//  Redesigned on 23/01/26 - New avatar-based design
+//  Redesigned on 29/01/26 - Simplified greeting design
 //
 
 import SwiftUI
@@ -23,87 +23,27 @@ struct HomeHeader: View {
         return name.components(separatedBy: " ").first ?? name
     }
 
-    // Check if user has a name to display
-    private var hasUserName: Bool {
-        guard let name = userName else { return false }
-        return !name.isEmpty
-    }
-
-    // Avatar initial from user name or greeting
-    private var avatarInitial: String {
-        if let name = userName, !name.isEmpty {
-            return String(name.prefix(1)).uppercased()
+    // Greeting text with name and emoji
+    private var greetingWithName: String {
+        if let name = displayName {
+            return "\(greeting), \(name)! 👋"
         }
-        // For greeting, use first letter of first word
-        return String(greeting.prefix(1)).uppercased()
+        return "\(greeting)! 👋"
     }
 
     var body: some View {
-        HStack(spacing: 12) {
-            // Avatar
-            if let photoURL = userPhotoURL {
-                AsyncImage(url: photoURL) { phase in
-                    switch phase {
-                    case .success(let image):
-                        image
-                            .resizable()
-                            .scaledToFill()
-                            .frame(width: 44, height: 44)
-                            .clipShape(Circle())
-                    default:
-                        avatarPlaceholder
-                    }
-                }
-            } else {
-                avatarPlaceholder
-            }
+        VStack(alignment: .leading, spacing: FitTodaySpacing.xs) {
+            Text(greetingWithName)
+                .font(.system(size: 24, weight: .bold))
+                .foregroundStyle(FitTodayColor.textPrimary)
 
-            // Greeting Column
-            VStack(alignment: .leading, spacing: 2) {
-                if let name = displayName {
-                    // Show greeting + name when user is logged in
-                    Text(greeting)
-                        .font(.system(size: 13, weight: .regular))
-                        .foregroundStyle(FitTodayColor.textSecondary)
-
-                    Text(name)
-                        .font(.system(size: 18, weight: .semibold))
-                        .foregroundStyle(FitTodayColor.textPrimary)
-                } else {
-                    // Show only greeting (larger) when no user name
-                    Text(greeting)
-                        .font(.system(size: 18, weight: .semibold))
-                        .foregroundStyle(FitTodayColor.textPrimary)
-                }
-            }
-
-            Spacer()
-
-            // Notification Button
-            Button(action: { onNotificationTap?() }) {
-                Image(systemName: "bell")
-                    .font(.system(size: 20, weight: .medium))
-                    .foregroundStyle(FitTodayColor.textSecondary)
-                    .frame(width: 44, height: 44)
-                    .background(FitTodayColor.surface)
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
-            }
-            .buttonStyle(.plain)
+            Text("home.header.subtitle".localized)
+                .font(FitTodayFont.ui(size: 15, weight: .medium))
+                .foregroundStyle(FitTodayColor.textSecondary)
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal)
-        .padding(.top, FitTodaySpacing.sm)
-    }
-
-    private var avatarPlaceholder: some View {
-        ZStack {
-            Circle()
-                .fill(FitTodayColor.gradientPrimary)
-                .frame(width: 44, height: 44)
-
-            Text(avatarInitial)
-                .font(.system(size: 18, weight: .semibold))
-                .foregroundStyle(.white)
-        }
+        .padding(.top, FitTodaySpacing.md)
     }
 }
 

@@ -26,7 +26,8 @@
     "workout_template_ids": [
       "lib_push_hypertrophy_gym",
       "lib_pull_hypertrophy_gym",
-      "lib_legs_hypertrophy_gym"
+      "lib_legs_hypertrophy_gym",
+      "lib_core_strength_home"
     ],
     "estimated_minutes_per_session": 55,
     "sessions_per_week": 6
@@ -40,6 +41,7 @@
     "duration_weeks": 12,
     "hero_image_name": "program_strength_03",
     "workout_template_ids": [
+      "lib_strength_compound_gym",
       "lib_push_hypertrophy_gym",
       "lib_pull_hypertrophy_gym",
       "lib_legs_hypertrophy_gym"
@@ -56,7 +58,7 @@
     "duration_weeks": 8,
     "hero_image_name": "program_fullbody_01",
     "workout_template_ids": [
-      "lib_fullbody_conditioning_home"
+      "lib_fullbody_beginner_gym"
     ],
     "estimated_minutes_per_session": 40,
     "sessions_per_week": 3
@@ -86,7 +88,7 @@
     "hero_image_name": "program_fullbody_03",
     "workout_template_ids": [
       "lib_hiit_weightloss_home",
-      "lib_fullbody_conditioning_home"
+      "lib_conditioning_circuit_gym"
     ],
     "estimated_minutes_per_session": 45,
     "sessions_per_week": 4
@@ -114,9 +116,8 @@
     "duration_weeks": 8,
     "hero_image_name": "program_strength_04",
     "workout_template_ids": [
-      "lib_push_beginner_gym",
-      "lib_pull_beginner_gym",
-      "lib_legs_beginner_gym"
+      "lib_upper_beginner_gym",
+      "lib_lower_beginner_gym"
     ],
     "estimated_minutes_per_session": 40,
     "sessions_per_week": 4
@@ -130,9 +131,8 @@
     "duration_weeks": 10,
     "hero_image_name": "program_strength_05",
     "workout_template_ids": [
-      "lib_push_hypertrophy_gym",
-      "lib_pull_hypertrophy_gym",
-      "lib_legs_hypertrophy_gym"
+      "lib_upper_strength_gym",
+      "lib_lower_strength_gym"
     ],
     "estimated_minutes_per_session": 50,
     "sessions_per_week": 4
@@ -146,9 +146,9 @@
     "duration_weeks": 12,
     "hero_image_name": "program_strength_06",
     "workout_template_ids": [
-      "lib_push_hypertrophy_gym",
-      "lib_pull_hypertrophy_gym",
-      "lib_legs_hypertrophy_gym"
+      "lib_upper_hypertrophy_gym",
+      "lib_lower_hypertrophy_gym",
+      "lib_arms_isolation_gym"
     ],
     "estimated_minutes_per_session": 60,
     "sessions_per_week": 5
@@ -163,7 +163,8 @@
     "hero_image_name": "program_fullbody_05",
     "workout_template_ids": [
       "lib_upper_dumbbells_home",
-      "lib_lower_dumbbells_home"
+      "lib_lower_dumbbells_home",
+      "lib_core_strength_home"
     ],
     "estimated_minutes_per_session": 40,
     "sessions_per_week": 4
@@ -177,8 +178,10 @@
     "duration_weeks": 8,
     "hero_image_name": "program_strength_07",
     "workout_template_ids": [
-      "lib_push_hypertrophy_gym",
-      "lib_pull_hypertrophy_gym",
+      "lib_chest_isolation_gym",
+      "lib_back_isolation_gym",
+      "lib_shoulders_isolation_gym",
+      "lib_arms_isolation_gym",
       "lib_legs_hypertrophy_gym"
     ],
     "estimated_minutes_per_session": 50,
@@ -193,9 +196,11 @@
     "duration_weeks": 10,
     "hero_image_name": "program_strength_08",
     "workout_template_ids": [
-      "lib_push_hypertrophy_gym",
-      "lib_pull_hypertrophy_gym",
-      "lib_legs_hypertrophy_gym"
+      "lib_chest_volume_gym",
+      "lib_back_volume_gym",
+      "lib_shoulders_volume_gym",
+      "lib_arms_volume_gym",
+      "lib_legs_volume_gym"
     ],
     "estimated_minutes_per_session": 60,
     "sessions_per_week": 5
@@ -209,9 +214,7 @@
     "duration_weeks": 12,
     "hero_image_name": "program_strength_09",
     "workout_template_ids": [
-      "lib_push_beginner_gym",
-      "lib_pull_beginner_gym",
-      "lib_legs_beginner_gym"
+      "lib_strength_compound_gym"
     ],
     "estimated_minutes_per_session": 40,
     "sessions_per_week": 3
@@ -225,9 +228,8 @@
     "duration_weeks": 12,
     "hero_image_name": "program_strength_10",
     "workout_template_ids": [
-      "lib_push_hypertrophy_gym",
-      "lib_pull_hypertrophy_gym",
-      "lib_legs_hypertrophy_gym"
+      "lib_strength_5x5_gym_a",
+      "lib_strength_5x5_gym_b"
     ],
     "estimated_minutes_per_session": 45,
     "sessions_per_week": 3
@@ -241,8 +243,8 @@
     "duration_weeks": 8,
     "hero_image_name": "program_conditioning_01",
     "workout_template_ids": [
-      "lib_hiit_weightloss_home",
-      "lib_fullbody_conditioning_home"
+      "lib_hiit_beginner_home",
+      "lib_conditioning_beginner_gym"
     ],
     "estimated_minutes_per_session": 35,
     "sessions_per_week": 4
@@ -257,7 +259,7 @@
     "hero_image_name": "program_conditioning_02",
     "workout_template_ids": [
       "lib_hiit_weightloss_home",
-      "lib_fullbody_conditioning_home"
+      "lib_hiit_tabata_home"
     ],
     "estimated_minutes_per_session": 30,
     "sessions_per_week": 5
@@ -271,8 +273,8 @@
     "duration_weeks": 8,
     "hero_image_name": "program_conditioning_03",
     "workout_template_ids": [
-      "lib_hiit_weightloss_home",
-      "lib_fullbody_conditioning_home",
+      "lib_hiit_advanced_gym",
+      "lib_conditioning_circuit_gym",
       "lib_core_strength_home"
     ],
     "estimated_minutes_per_session": 40,
@@ -287,8 +289,7 @@
     "duration_weeks": 8,
     "hero_image_name": "program_home_01",
     "workout_template_ids": [
-      "lib_upper_dumbbells_home",
-      "lib_lower_dumbbells_home",
+      "lib_fullbody_conditioning_home",
       "lib_core_strength_home"
     ],
     "estimated_minutes_per_session": 35,
@@ -305,7 +306,7 @@
     "workout_template_ids": [
       "lib_upper_dumbbells_home",
       "lib_lower_dumbbells_home",
-      "lib_fullbody_conditioning_home"
+      "lib_hiit_weightloss_home"
     ],
     "estimated_minutes_per_session": 45,
     "sessions_per_week": 4
@@ -319,9 +320,9 @@
     "duration_weeks": 12,
     "hero_image_name": "program_strength_11",
     "workout_template_ids": [
-      "lib_push_hypertrophy_gym",
-      "lib_pull_hypertrophy_gym",
-      "lib_legs_hypertrophy_gym"
+      "lib_chest_back_arnold_gym",
+      "lib_shoulders_arms_arnold_gym",
+      "lib_legs_arnold_gym"
     ],
     "estimated_minutes_per_session": 60,
     "sessions_per_week": 6
@@ -335,9 +336,10 @@
     "duration_weeks": 10,
     "hero_image_name": "program_strength_12",
     "workout_template_ids": [
-      "lib_push_hypertrophy_gym",
-      "lib_pull_hypertrophy_gym",
-      "lib_legs_hypertrophy_gym"
+      "lib_upper_strength_gym",
+      "lib_lower_strength_gym",
+      "lib_upper_hypertrophy_gym",
+      "lib_lower_hypertrophy_gym"
     ],
     "estimated_minutes_per_session": 55,
     "sessions_per_week": 4
@@ -351,7 +353,7 @@
     "duration_weeks": 12,
     "hero_image_name": "program_fullbody_06",
     "workout_template_ids": [
-      "lib_fullbody_conditioning_home"
+      "lib_fullbody_minimal_gym"
     ],
     "estimated_minutes_per_session": 45,
     "sessions_per_week": 2
@@ -365,8 +367,8 @@
     "duration_weeks": 8,
     "hero_image_name": "program_legs_01",
     "workout_template_ids": [
-      "lib_legs_hypertrophy_gym",
-      "lib_lower_dumbbells_home"
+      "lib_glutes_focused_gym",
+      "lib_legs_hypertrophy_gym"
     ],
     "estimated_minutes_per_session": 50,
     "sessions_per_week": 4
@@ -380,9 +382,9 @@
     "duration_weeks": 8,
     "hero_image_name": "program_functional_01",
     "workout_template_ids": [
-      "lib_fullbody_conditioning_home",
-      "lib_core_strength_home",
-      "lib_hiit_weightloss_home"
+      "lib_fullbody_functional_gym",
+      "lib_core_functional_gym",
+      "lib_conditioning_functional_gym"
     ],
     "estimated_minutes_per_session": 45,
     "sessions_per_week": 4
@@ -398,7 +400,8 @@
     "workout_template_ids": [
       "lib_push_beginner_gym",
       "lib_pull_beginner_gym",
-      "lib_legs_beginner_gym"
+      "lib_legs_beginner_gym",
+      "lib_core_beginner_gym"
     ],
     "estimated_minutes_per_session": 40,
     "sessions_per_week": 3

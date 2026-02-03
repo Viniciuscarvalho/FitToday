@@ -63,6 +63,7 @@ struct FitTodayApp: App {
             if newPhase == .active {
                 Task {
                     await processPendingQueue()
+                    await syncHealthKitWorkoutsIfAuthorized()
                 }
             }
         }
@@ -103,6 +104,51 @@ struct FitTodayApp: App {
         #endif
     }
     
+    // MARK: - HealthKit Auto-Sync
+
+    /// Syncs HealthKit workouts on app launch if authorized.
+    /// Imports external workouts and syncs existing app workouts.
+    private func syncHealthKitWorkoutsIfAuthorized() async {
+        guard let healthKitService = appContainer.container.resolve(HealthKitServicing.self),
+              let syncService = appContainer.container.resolve(HealthKitHistorySyncService.self) else {
+            #if DEBUG
+            print("[FitTodayApp] HealthKit services not available for auto-sync")
+            #endif
+            return
+        }
+
+        // Check if HealthKit is authorized
+        let authStatus = await healthKitService.authorizationState()
+        guard authStatus == .authorized else {
+            #if DEBUG
+            print("[FitTodayApp] HealthKit not authorized (status: \(authStatus)), skipping auto-sync")
+            #endif
+            return
+        }
+
+        #if DEBUG
+        print("[FitTodayApp] 🏃 Starting HealthKit auto-sync...")
+        #endif
+
+        do {
+            // Import external workouts from last 7 days
+            let importedCount = try await syncService.importExternalWorkouts(days: 7)
+            #if DEBUG
+            print("[FitTodayApp] ✅ Imported \(importedCount) external workouts from Apple Health")
+            #endif
+
+            // Sync existing app workouts with HealthKit data
+            let syncedCount = try await syncService.syncLastDays(7)
+            #if DEBUG
+            print("[FitTodayApp] ✅ Synced \(syncedCount) app workouts with Apple Health")
+            #endif
+        } catch {
+            #if DEBUG
+            print("[FitTodayApp] ❌ HealthKit sync failed: \(error.localizedDescription)")
+            #endif
+        }
+    }
+
     /// Configura a aparência global de UIKit components para tema escuro
     private func configureGlobalAppearance() {
         // Tab Bar

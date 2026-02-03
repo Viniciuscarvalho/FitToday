@@ -10,6 +10,8 @@ import SwiftUI
 /// Sheet for searching and adding exercises to a workout.
 struct ExerciseSearchSheet: View {
     @Environment(\.dismiss) private var dismiss
+
+    let exerciseService: ExerciseServiceProtocol
     let onSelect: (CustomExerciseEntry) -> Void
 
     @State private var searchText = ""
@@ -18,6 +20,7 @@ struct ExerciseSearchSheet: View {
     @State private var exercises: [WgerExercise] = []
     @State private var isLoading = false
     @State private var errorMessage: String?
+    @State private var searchTask: Task<Void, Never>?
 
     var body: some View {
         NavigationStack {
@@ -72,8 +75,13 @@ struct ExerciseSearchSheet: View {
                 .font(FitTodayFont.ui(size: 15, weight: .medium))
                 .foregroundStyle(FitTodayColor.textPrimary)
                 .submitLabel(.search)
-                .onSubmit {
-                    Task {
+                .onChange(of: searchText) { _, newValue in
+                    // Cancel previous search task
+                    searchTask?.cancel()
+                    // Debounce search
+                    searchTask = Task {
+                        try? await Task.sleep(for: .milliseconds(300))
+                        guard !Task.isCancelled else { return }
                         await searchExercises()
                     }
                 }
@@ -252,11 +260,20 @@ struct ExerciseSearchSheet: View {
         isLoading = true
         errorMessage = nil
 
-        // TODO: Use actual WgerAPIService
-        try? await Task.sleep(for: .milliseconds(500))
+        do {
+            let language = currentLanguage()
+            let results = try await exerciseService.fetchExercises(
+                language: language,
+                category: selectedCategory,
+                equipment: selectedEquipment != nil ? [selectedEquipment!] : nil,
+                limit: 50
+            )
+            exercises = results
+        } catch {
+            errorMessage = error.localizedDescription
+            exercises = []
+        }
 
-        // Mock data for now
-        exercises = []
         isLoading = false
     }
 
@@ -269,10 +286,19 @@ struct ExerciseSearchSheet: View {
         isLoading = true
         errorMessage = nil
 
-        // TODO: Use actual WgerAPIService
-        try? await Task.sleep(for: .milliseconds(300))
+        do {
+            let language = currentLanguage()
+            let results = try await exerciseService.searchExercises(
+                query: searchText,
+                language: language,
+                limit: 20
+            )
+            exercises = results
+        } catch {
+            errorMessage = error.localizedDescription
+            exercises = []
+        }
 
-        exercises = []
         isLoading = false
     }
 
@@ -280,11 +306,26 @@ struct ExerciseSearchSheet: View {
         isLoading = true
         errorMessage = nil
 
-        // TODO: Use actual WgerAPIService with filters
-        try? await Task.sleep(for: .milliseconds(300))
+        do {
+            let language = currentLanguage()
+            let results = try await exerciseService.fetchExercises(
+                language: language,
+                category: selectedCategory,
+                equipment: selectedEquipment != nil ? [selectedEquipment!] : nil,
+                limit: 50
+            )
+            exercises = results
+        } catch {
+            errorMessage = error.localizedDescription
+            exercises = []
+        }
 
-        exercises = []
         isLoading = false
+    }
+
+    private func currentLanguage() -> WgerLanguageCode {
+        let preferredLanguage = Locale.current.language.languageCode?.identifier ?? "en"
+        return WgerLanguageCode.from(code: preferredLanguage)
     }
 
     private func selectExercise(_ exercise: WgerExercise) {
@@ -354,7 +395,9 @@ struct ExerciseSearchResultRow: View {
 // MARK: - Preview
 
 #Preview {
-    ExerciseSearchSheet { exercise in
+    ExerciseSearchSheet(
+        exerciseService: WgerAPIService()
+    ) { exercise in
         print("Selected: \(exercise.exerciseName)")
     }
     .preferredColorScheme(.dark)

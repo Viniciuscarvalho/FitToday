@@ -20,16 +20,32 @@ actor BundleLibraryWorkoutsRepository: LibraryWorkoutsRepository {
 
     func loadWorkouts() async throws -> [LibraryWorkout] {
         if let cached = cachedWorkouts {
+            #if DEBUG
+            print("[LibraryWorkoutsRepository] Returning \(cached.count) cached workouts")
+            #endif
             return cached
         }
 
         let dtos = try loader.loadDTOs()
+        #if DEBUG
+        print("[LibraryWorkoutsRepository] Loaded \(dtos.count) DTOs from JSON")
+        #endif
+
         var workouts: [LibraryWorkout] = []
         for dto in dtos {
             if let workout = dto.toDomain(normalizer: normalizeExerciseId(_:)) {
                 workouts.append(workout)
+            } else {
+                #if DEBUG
+                print("[LibraryWorkoutsRepository] Failed to convert DTO: \(dto.id)")
+                #endif
             }
         }
+
+        #if DEBUG
+        print("[LibraryWorkoutsRepository] Successfully converted \(workouts.count) workouts")
+        #endif
+
         cachedWorkouts = workouts
         return workouts
     }
@@ -77,11 +93,24 @@ fileprivate struct LibraryWorkoutDTO: Codable {
     let exercises: [LibraryExercisePrescriptionDTO]
 
     func toDomain(normalizer: (String) -> String) -> LibraryWorkout? {
-        guard
-            let goalEnum = FitnessGoal(rawValue: goal),
-            let structureEnum = TrainingStructure(rawValue: structure),
-            let intensityEnum = WorkoutIntensity(rawValue: intensity)
-        else { return nil }
+        guard let goalEnum = FitnessGoal(rawValue: goal) else {
+            #if DEBUG
+            print("[DTO] Workout \(id): Invalid goal '\(goal)'")
+            #endif
+            return nil
+        }
+        guard let structureEnum = TrainingStructure(rawValue: structure) else {
+            #if DEBUG
+            print("[DTO] Workout \(id): Invalid structure '\(structure)'")
+            #endif
+            return nil
+        }
+        guard let intensityEnum = WorkoutIntensity(rawValue: intensity) else {
+            #if DEBUG
+            print("[DTO] Workout \(id): Invalid intensity '\(intensity)'")
+            #endif
+            return nil
+        }
 
         var exercisePrescriptions: [ExercisePrescription] = []
         for exercise in exercises {
@@ -89,7 +118,13 @@ fileprivate struct LibraryWorkoutDTO: Codable {
                 exercisePrescriptions.append(domain)
             }
         }
-        guard !exercisePrescriptions.isEmpty else { return nil }
+
+        guard !exercisePrescriptions.isEmpty else {
+            #if DEBUG
+            print("[DTO] Workout \(id): No valid exercises")
+            #endif
+            return nil
+        }
 
         return LibraryWorkout(
             id: id,
@@ -133,10 +168,18 @@ private struct LibraryExerciseDTO: Codable {
     let media: LibraryMediaDTO?
 
     func toDomain(normalizer: (String) -> String) -> WorkoutExercise? {
-        guard
-            let muscle = MuscleGroup(rawValue: mainMuscle),
-            let equipmentEnum = EquipmentType(rawValue: equipment)
-        else { return nil }
+        guard let muscle = MuscleGroup(rawValue: mainMuscle) else {
+            #if DEBUG
+            print("[DTO] Exercise \(id): Invalid mainMuscle '\(mainMuscle)'")
+            #endif
+            return nil
+        }
+        guard let equipmentEnum = EquipmentType(rawValue: equipment) else {
+            #if DEBUG
+            print("[DTO] Exercise \(id): Invalid equipment '\(equipment)'")
+            #endif
+            return nil
+        }
 
         let normalizedId = normalizer(id)
 

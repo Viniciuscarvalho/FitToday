@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Swinject
 
 // MARK: - Challenge Display Model
 
@@ -45,15 +46,31 @@ struct ChallengeDisplayModel: Identifiable, Sendable {
 
 /// Full list view for displaying active and completed challenges.
 struct ChallengesFullListView: View {
-    @State private var challenges: [ChallengeDisplayModel] = []
-    @State private var isLoading = true
+    @Environment(AppRouter.self) private var router
+    let resolver: Resolver
+
+    @State private var viewModel: ChallengesViewModel?
     @State private var selectedFilter: ChallengeFilter = .active
     @State private var selectedChallenge: ChallengeDisplayModel?
+    @State private var showCreateGroup = false
+    @State private var showJoinGroup = false
 
     enum ChallengeFilter: String, CaseIterable {
         case active = "Ativos"
         case completed = "Concluídos"
         case all = "Todos"
+    }
+
+    private var challenges: [ChallengeDisplayModel] {
+        viewModel?.challenges ?? []
+    }
+
+    private var isLoading: Bool {
+        viewModel?.isLoading ?? true
+    }
+
+    private var isInGroup: Bool {
+        viewModel?.isInGroup ?? false
     }
 
     private var filteredChallenges: [ChallengeDisplayModel] {
@@ -85,10 +102,27 @@ struct ChallengesFullListView: View {
         }
         .scrollIndicators(.hidden)
         .sheet(item: $selectedChallenge) { challenge in
-            ChallengeDetailView(challenge: challenge)
+            ChallengeDetailView(
+                challenge: challenge,
+                resolver: resolver,
+                onCheckInSubmitted: {
+                    Task {
+                        await viewModel?.refresh()
+                    }
+                }
+            )
         }
         .task {
-            await loadChallenges()
+            if viewModel == nil {
+                viewModel = ChallengesViewModel(resolver: resolver)
+            }
+            await viewModel?.onAppear()
+        }
+        .onDisappear {
+            viewModel?.stopObserving()
+        }
+        .refreshable {
+            await viewModel?.refresh()
         }
     }
 
@@ -206,80 +240,147 @@ struct ChallengesFullListView: View {
 
     private var emptyStateView: some View {
         VStack(spacing: FitTodaySpacing.md) {
-            Image(systemName: "trophy.circle")
+            Image(systemName: isInGroup ? "trophy.circle" : "person.2.circle")
                 .font(.system(size: 48))
                 .foregroundStyle(FitTodayColor.textTertiary)
 
-            Text("Nenhum desafio encontrado")
+            Text(isInGroup ? "Nenhum desafio encontrado" : "Entre em um grupo")
                 .font(FitTodayFont.ui(size: 17, weight: .semiBold))
                 .foregroundStyle(FitTodayColor.textPrimary)
 
-            Text("Participe de um grupo para acessar desafios")
+            Text(isInGroup
+                 ? "Os desafios semanais serão criados automaticamente"
+                 : "Participe de um grupo para acessar desafios e competir com amigos")
                 .font(FitTodayFont.ui(size: 14, weight: .medium))
                 .foregroundStyle(FitTodayColor.textSecondary)
                 .multilineTextAlignment(.center)
+
+            if let errorMessage = viewModel?.errorMessage {
+                Text(errorMessage)
+                    .font(FitTodayFont.ui(size: 12, weight: .medium))
+                    .foregroundStyle(FitTodayColor.error)
+                    .multilineTextAlignment(.center)
+            }
+
+            // Group creation/join buttons (only when not in a group)
+            if !isInGroup {
+                VStack(spacing: FitTodaySpacing.sm) {
+                    Button {
+                        showCreateGroup = true
+                    } label: {
+                        HStack(spacing: FitTodaySpacing.sm) {
+                            Image(systemName: "plus.circle.fill")
+                            Text("Criar Grupo")
+                        }
+                    }
+                    .fitPrimaryStyle()
+
+                    Button {
+                        showJoinGroup = true
+                    } label: {
+                        HStack(spacing: FitTodaySpacing.sm) {
+                            Image(systemName: "person.badge.plus")
+                            Text("Entrar em Grupo")
+                        }
+                    }
+                    .fitSecondaryStyle()
+                }
+                .padding(.top, FitTodaySpacing.md)
+            }
         }
         .frame(maxWidth: .infinity)
         .padding(FitTodaySpacing.xl)
+        .sheet(isPresented: $showCreateGroup) {
+            CreateGroupView(resolver: resolver) { group in
+                Task {
+                    await viewModel?.refresh()
+                }
+            }
+        }
+        .sheet(isPresented: $showJoinGroup) {
+            JoinGroupSheet(resolver: resolver) {
+                Task {
+                    await viewModel?.refresh()
+                }
+            }
+        }
+    }
+}
+
+// MARK: - Join Group Sheet
+
+struct JoinGroupSheet: View {
+    @Environment(\.dismiss) private var dismiss
+    let resolver: Resolver
+    let onJoined: () -> Void
+
+    @State private var inviteCode = ""
+    @State private var isLoading = false
+    @State private var errorMessage: String?
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section {
+                    TextField("Código de convite", text: $inviteCode)
+                        .autocorrectionDisabled()
+                        .textInputAutocapitalization(.characters)
+                } header: {
+                    Text("Código de Convite")
+                } footer: {
+                    Text("Peça o código de convite para o administrador do grupo")
+                }
+
+                if let error = errorMessage {
+                    Section {
+                        Text(error)
+                            .foregroundStyle(FitTodayColor.error)
+                            .font(FitTodayFont.ui(size: 14, weight: .medium))
+                    }
+                }
+            }
+            .navigationTitle("Entrar em Grupo")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancelar") {
+                        dismiss()
+                    }
+                }
+
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Entrar") {
+                        Task {
+                            await joinGroup()
+                        }
+                    }
+                    .disabled(inviteCode.isEmpty || isLoading)
+                }
+            }
+            .disabled(isLoading)
+        }
     }
 
-    // MARK: - Data Loading
+    private func joinGroup() async {
+        guard !inviteCode.isEmpty else { return }
 
-    private func loadChallenges() async {
-        try? await Task.sleep(for: .milliseconds(500))
+        isLoading = true
+        errorMessage = nil
 
-        // Mock data
-        challenges = [
-            ChallengeDisplayModel(
-                id: "1",
-                title: "30 Dias de Treino",
-                description: "Complete 30 treinos em 30 dias para ganhar medalha de ouro",
-                type: .checkIns,
-                iconName: "flame.fill",
-                progress: 0.6,
-                currentValue: 18,
-                targetValue: 30,
-                unit: "treinos",
-                daysRemaining: 12,
-                participants: 24,
-                isActive: true,
-                startDate: Date().addingTimeInterval(-18 * 86400),
-                endDate: Date().addingTimeInterval(12 * 86400)
-            ),
-            ChallengeDisplayModel(
-                id: "2",
-                title: "Streak Semanal",
-                description: "Mantenha uma sequência de 7 dias consecutivos de treino",
-                type: .streak,
-                iconName: "bolt.fill",
-                progress: 0.71,
-                currentValue: 5,
-                targetValue: 7,
-                unit: "dias",
-                daysRemaining: 2,
-                participants: 15,
-                isActive: true,
-                startDate: Date().addingTimeInterval(-5 * 86400),
-                endDate: Date().addingTimeInterval(2 * 86400)
-            ),
-            ChallengeDisplayModel(
-                id: "3",
-                title: "Desafio Volume",
-                description: "Levante 50.000kg de volume total no mês",
-                type: .checkIns,
-                iconName: "scalemass.fill",
-                progress: 1.0,
-                currentValue: 52340,
-                targetValue: 50000,
-                unit: "kg",
-                daysRemaining: 0,
-                participants: 8,
-                isActive: false,
-                startDate: Date().addingTimeInterval(-30 * 86400),
-                endDate: Date().addingTimeInterval(-1 * 86400)
-            )
-        ]
-        isLoading = false
+        defer { isLoading = false }
+
+        guard let joinUseCase = resolver.resolve(JoinGroupUseCase.self) else {
+            errorMessage = "Serviço não disponível"
+            return
+        }
+
+        do {
+            try await joinUseCase.execute(groupId: inviteCode)
+            dismiss()
+            onJoined()
+        } catch {
+            errorMessage = "Não foi possível entrar no grupo: \(error.localizedDescription)"
+        }
     }
 }
 
@@ -378,7 +479,11 @@ struct ChallengeCard: View {
 
 struct ChallengeDetailView: View {
     let challenge: ChallengeDisplayModel
+    var resolver: Resolver?
+    var onCheckInSubmitted: (() -> Void)?
+
     @Environment(\.dismiss) private var dismiss
+    @State private var showCheckInSheet = false
 
     var body: some View {
         NavigationStack {
@@ -389,6 +494,11 @@ struct ChallengeDetailView: View {
 
                     // Progress Section
                     progressSection
+
+                    // Check-in Button (only for check-in type challenges)
+                    if challenge.type == .checkIns && challenge.progress < 1.0 {
+                        checkInButtonSection
+                    }
 
                     // Stats Section
                     statsSection
@@ -420,7 +530,45 @@ struct ChallengeDetailView: View {
                     }
                 }
             }
+            .sheet(isPresented: $showCheckInSheet) {
+                if let resolver = resolver {
+                    CheckInSheet(
+                        resolver: resolver,
+                        challengeId: challenge.id
+                    ) {
+                        onCheckInSubmitted?()
+                    }
+                }
+            }
         }
+    }
+
+    // MARK: - Check-in Button Section
+
+    private var checkInButtonSection: some View {
+        Button {
+            showCheckInSheet = true
+        } label: {
+            HStack(spacing: FitTodaySpacing.sm) {
+                Image(systemName: "camera.fill")
+                    .font(.system(size: 18))
+                Text("Fazer Check-In")
+                    .font(FitTodayFont.ui(size: 16, weight: .bold))
+            }
+            .foregroundStyle(.white)
+            .frame(maxWidth: .infinity)
+            .padding(FitTodaySpacing.md)
+            .background(
+                LinearGradient(
+                    colors: [FitTodayColor.brandPrimary, FitTodayColor.brandPrimary.opacity(0.8)],
+                    startPoint: .leading,
+                    endPoint: .trailing
+                )
+            )
+            .clipShape(RoundedRectangle(cornerRadius: FitTodayRadius.md))
+        }
+        .buttonStyle(.plain)
+        .disabled(resolver == nil)
     }
 
     // MARK: - Hero Section
@@ -624,7 +772,8 @@ struct ChallengeDetailView: View {
 // MARK: - Previews
 
 #Preview("Challenges List") {
-    ChallengesFullListView()
+    let container = Container()
+    return ChallengesFullListView(resolver: container)
         .preferredColorScheme(.dark)
 }
 

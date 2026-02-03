@@ -52,6 +52,29 @@ actor OpenAIResponseCache {
         print("[OpenAICache] 🗑️ Cache limpo: \(count) entradas removidas")
         #endif
     }
+
+    /// Clears cache entries for a specific workout type/focus.
+    /// Used when user swaps a workout to force new generation.
+    /// - Parameter focus: The DailyFocus to clear from cache
+    func clearForWorkoutFocus(_ focus: String) {
+        let keysToRemove = storage.keys.filter { $0.contains(focus) }
+        for key in keysToRemove {
+            storage.removeValue(forKey: key)
+        }
+        #if DEBUG
+        print("[OpenAICache] 🔄 Cleared \(keysToRemove.count) entries for focus: \(focus)")
+        #endif
+    }
+
+    /// Invalidates cache when user requests a workout swap.
+    /// Clears all entries to ensure fresh generation.
+    func invalidateOnSwap() {
+        let count = storage.count
+        storage.removeAll()
+        #if DEBUG
+        print("[OpenAICache] 🔄 Cache invalidated for swap: \(count) entries cleared")
+        #endif
+    }
 }
 
 

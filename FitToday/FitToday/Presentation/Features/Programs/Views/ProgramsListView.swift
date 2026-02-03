@@ -2,7 +2,7 @@
 //  ProgramsListView.swift
 //  FitToday
 //
-//  Grid view of pre-made workout programs.
+//  Grid view of pre-made workout programs with filters.
 //
 
 import SwiftUI
@@ -10,155 +10,118 @@ import Swinject
 
 /// View displaying the catalog of workout programs.
 struct ProgramsListView: View {
-    let resolver: Resolver
-
     @Environment(AppRouter.self) private var router
+    @Environment(\.dependencyResolver) private var resolver
 
-    @State private var programs: [Program] = []
-    @State private var isLoading = true
-    @State private var selectedGoal: ProgramGoalTag?
-    @State private var selectedLevel: ProgramLevel?
-    @State private var searchText = ""
+    @State private var viewModel: ProgramsListViewModel?
+    @State private var dependencyError: String?
+    @State private var hasInitialized = false
 
-    private var filteredPrograms: [Program] {
-        programs.filter { program in
-            // Search filter
-            let matchesSearch = searchText.isEmpty ||
-                program.name.localizedStandardContains(searchText) ||
-                program.subtitle.localizedStandardContains(searchText)
-
-            // Goal filter
-            let matchesGoal = selectedGoal == nil || program.goalTag == selectedGoal
-
-            // Level filter
-            let matchesLevel = selectedLevel == nil || program.level == selectedLevel
-
-            return matchesSearch && matchesGoal && matchesLevel
+    var body: some View {
+        Group {
+            if let error = dependencyError {
+                DependencyErrorView(message: error)
+            } else if let viewModel {
+                contentView(viewModel: viewModel)
+            } else {
+                ProgressView()
+            }
+        }
+        .background(FitTodayColor.background)
+        .task {
+            guard !hasInitialized else { return }
+            hasInitialized = true
+            initializeViewModel()
         }
     }
 
-    private let columns = [
-        GridItem(.flexible(), spacing: FitTodaySpacing.md),
-        GridItem(.flexible(), spacing: FitTodaySpacing.md)
-    ]
+    private func initializeViewModel() {
+        if let repository = resolver.resolve(ProgramRepository.self) {
+            viewModel = ProgramsListViewModel(repository: repository)
+        } else {
+            dependencyError = NSLocalizedString("error.generic", comment: "Generic error")
+        }
+    }
 
-    var body: some View {
+    @ViewBuilder
+    private func contentView(viewModel: ProgramsListViewModel) -> some View {
         VStack(spacing: 0) {
             // Filters
-            filtersSection
+            filtersSection(viewModel: viewModel)
                 .padding(.horizontal, FitTodaySpacing.md)
                 .padding(.vertical, FitTodaySpacing.sm)
 
             // Content
-            if isLoading {
+            if viewModel.isLoading {
                 loadingView
-            } else if filteredPrograms.isEmpty {
-                emptyView
+            } else if viewModel.filteredPrograms.isEmpty {
+                emptyView(viewModel: viewModel)
             } else {
-                programsGrid
+                programsScrollView(viewModel: viewModel)
             }
         }
         .task {
-            await loadPrograms()
+            await viewModel.loadPrograms()
         }
     }
 
     // MARK: - Filters Section
 
-    private var filtersSection: some View {
-        VStack(spacing: FitTodaySpacing.sm) {
-            // Search bar (only if many programs)
-            if programs.count > 6 {
-                searchBar
-            }
-
-            // Filter chips
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: FitTodaySpacing.sm) {
-                    // Goal filters
-                    ForEach(ProgramGoalTag.allCases, id: \.self) { goal in
-                        filterChip(
-                            title: goal.displayName,
-                            icon: goal.iconName,
-                            isSelected: selectedGoal == goal
-                        ) {
-                            selectedGoal = selectedGoal == goal ? nil : goal
+    private func filtersSection(viewModel: ProgramsListViewModel) -> some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: FitTodaySpacing.sm) {
+                // Level Filter
+                FilterDropdown(
+                    title: "programs.filter.level".localized,
+                    selection: Binding(
+                        get: { viewModel.selectedLevel?.displayName },
+                        set: { newValue in
+                            if let newValue {
+                                viewModel.selectedLevel = ProgramLevel.allCases.first { $0.displayName == newValue }
+                            } else {
+                                viewModel.selectedLevel = nil
+                            }
                         }
-                    }
+                    ),
+                    options: ProgramLevel.allCases.map { $0.displayName },
+                    allLabel: "programs.filter.all".localized
+                )
 
-                    Divider()
-                        .frame(height: 20)
-                        .background(FitTodayColor.outline)
-
-                    // Level filters
-                    ForEach(ProgramLevel.allCases, id: \.self) { level in
-                        filterChip(
-                            title: level.displayName,
-                            isSelected: selectedLevel == level
-                        ) {
-                            selectedLevel = selectedLevel == level ? nil : level
+                // Goal Filter
+                FilterDropdown(
+                    title: "programs.filter.goal".localized,
+                    selection: Binding(
+                        get: { viewModel.selectedGoal?.displayName },
+                        set: { newValue in
+                            if let newValue {
+                                viewModel.selectedGoal = ProgramGoalTag.allCases.first { $0.displayName == newValue }
+                            } else {
+                                viewModel.selectedGoal = nil
+                            }
                         }
-                    }
-                }
+                    ),
+                    options: ProgramGoalTag.allCases.map { $0.displayName },
+                    allLabel: "programs.filter.all".localized
+                )
+
+                // Equipment Filter
+                FilterDropdown(
+                    title: "programs.filter.equipment".localized,
+                    selection: Binding(
+                        get: { viewModel.selectedEquipment?.displayName },
+                        set: { newValue in
+                            if let newValue {
+                                viewModel.selectedEquipment = ProgramEquipment.allCases.first { $0.displayName == newValue }
+                            } else {
+                                viewModel.selectedEquipment = nil
+                            }
+                        }
+                    ),
+                    options: ProgramEquipment.allCases.map { $0.displayName },
+                    allLabel: "programs.filter.all".localized
+                )
             }
         }
-    }
-
-    private var searchBar: some View {
-        HStack(spacing: FitTodaySpacing.sm) {
-            Image(systemName: "magnifyingglass")
-                .font(.system(size: 14))
-                .foregroundStyle(FitTodayColor.textTertiary)
-
-            TextField("Buscar programas...", text: $searchText)
-                .font(FitTodayFont.ui(size: 14, weight: .medium))
-                .foregroundStyle(FitTodayColor.textPrimary)
-
-            if !searchText.isEmpty {
-                Button {
-                    searchText = ""
-                } label: {
-                    Image(systemName: "xmark.circle.fill")
-                        .font(.system(size: 14))
-                        .foregroundStyle(FitTodayColor.textTertiary)
-                }
-            }
-        }
-        .padding(FitTodaySpacing.sm)
-        .background(
-            RoundedRectangle(cornerRadius: FitTodayRadius.sm)
-                .fill(FitTodayColor.surface)
-        )
-    }
-
-    private func filterChip(
-        title: String,
-        icon: String? = nil,
-        isSelected: Bool,
-        action: @escaping () -> Void
-    ) -> some View {
-        Button(action: action) {
-            HStack(spacing: FitTodaySpacing.xs) {
-                if let icon {
-                    Image(systemName: icon)
-                        .font(.system(size: 12))
-                }
-                Text(title)
-                    .font(FitTodayFont.ui(size: 13, weight: isSelected ? .bold : .medium))
-            }
-            .foregroundStyle(isSelected ? FitTodayColor.textPrimary : FitTodayColor.textSecondary)
-            .padding(.horizontal, FitTodaySpacing.sm)
-            .padding(.vertical, FitTodaySpacing.xs)
-            .background(
-                Capsule()
-                    .fill(isSelected ? FitTodayColor.brandPrimary.opacity(0.2) : FitTodayColor.surface)
-            )
-            .overlay(
-                Capsule()
-                    .stroke(isSelected ? FitTodayColor.brandPrimary : FitTodayColor.outline, lineWidth: 1)
-            )
-        }
-        .buttonStyle(.plain)
     }
 
     // MARK: - Loading View
@@ -167,7 +130,7 @@ struct ProgramsListView: View {
         VStack(spacing: FitTodaySpacing.md) {
             ProgressView()
                 .tint(FitTodayColor.brandPrimary)
-            Text("Carregando programas...")
+            Text("programs.loading".localized)
                 .font(FitTodayFont.ui(size: 15, weight: .medium))
                 .foregroundStyle(FitTodayColor.textSecondary)
         }
@@ -176,44 +139,46 @@ struct ProgramsListView: View {
 
     // MARK: - Empty View
 
-    private var emptyView: some View {
+    private func emptyView(viewModel: ProgramsListViewModel) -> some View {
         VStack(spacing: FitTodaySpacing.md) {
             Image(systemName: "doc.text.magnifyingglass")
                 .font(.system(size: 48))
                 .foregroundStyle(FitTodayColor.textTertiary)
 
-            Text("Nenhum programa encontrado")
+            Text("programs.empty.title".localized)
                 .font(FitTodayFont.ui(size: 17, weight: .semiBold))
                 .foregroundStyle(FitTodayColor.textPrimary)
 
-            Text("Tente ajustar os filtros para ver mais opções")
+            Text("programs.empty.message".localized)
                 .font(FitTodayFont.ui(size: 14, weight: .medium))
                 .foregroundStyle(FitTodayColor.textSecondary)
                 .multilineTextAlignment(.center)
 
-            if selectedGoal != nil || selectedLevel != nil {
-                Button("Limpar filtros") {
-                    selectedGoal = nil
-                    selectedLevel = nil
+            if viewModel.hasActiveFilters {
+                Button("programs.empty.clear_filters".localized) {
+                    viewModel.clearFilters()
                 }
                 .fitSecondaryStyle()
-                .frame(width: 140)
+                .frame(width: 160)
             }
         }
         .padding()
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
-    // MARK: - Programs Grid
+    // MARK: - Programs Scroll View
 
-    private var programsGrid: some View {
+    private func programsScrollView(viewModel: ProgramsListViewModel) -> some View {
         ScrollView {
-            LazyVGrid(columns: columns, spacing: FitTodaySpacing.md) {
-                ForEach(filteredPrograms) { program in
+            LazyVStack(spacing: FitTodaySpacing.md) {
+                ForEach(viewModel.filteredPrograms) { program in
                     Button {
+                        #if DEBUG
+                        print("[ProgramsListView] 👆 Tapped program: '\(program.id)' - '\(program.name)'")
+                        #endif
                         router.push(.programDetail(program.id), on: .workout)
                     } label: {
-                        ProgramCard(program: program)
+                        ProgramListCard(program: program)
                     }
                     .buttonStyle(.plain)
                 }
@@ -222,70 +187,133 @@ struct ProgramsListView: View {
         }
         .scrollIndicators(.hidden)
     }
+}
 
-    // MARK: - Data Loading
+// MARK: - Filter Dropdown
 
-    private func loadPrograms() async {
-        // Simulate loading
-        try? await Task.sleep(for: .milliseconds(500))
+struct FilterDropdown: View {
+    let title: String
+    @Binding var selection: String?
+    let options: [String]
+    var allLabel: String = "Todos"
 
-        // TODO: Load from catalog
-        programs = ProgramsCatalog.allPrograms
-        isLoading = false
+    var body: some View {
+        Menu {
+            Button(allLabel) {
+                selection = nil
+            }
+
+            ForEach(options, id: \.self) { option in
+                Button(option) {
+                    selection = option
+                }
+            }
+        } label: {
+            HStack(spacing: 4) {
+                Text(selection ?? title)
+                    .font(FitTodayFont.ui(size: 13, weight: selection != nil ? .bold : .medium))
+                    .foregroundStyle(selection != nil ? FitTodayColor.brandPrimary : FitTodayColor.textSecondary)
+
+                Image(systemName: "chevron.down")
+                    .font(.system(size: 10, weight: .semibold))
+                    .foregroundStyle(selection != nil ? FitTodayColor.brandPrimary : FitTodayColor.textTertiary)
+            }
+            .padding(.horizontal, FitTodaySpacing.sm)
+            .padding(.vertical, FitTodaySpacing.xs)
+            .background(
+                Capsule()
+                    .fill(selection != nil ? FitTodayColor.brandPrimary.opacity(0.15) : FitTodayColor.surface)
+            )
+            .overlay(
+                Capsule()
+                    .stroke(selection != nil ? FitTodayColor.brandPrimary : FitTodayColor.outline, lineWidth: 1)
+            )
+        }
     }
 }
 
-// MARK: - Program Card
+// MARK: - Program List Card
 
-struct ProgramCard: View {
+struct ProgramListCard: View {
     let program: Program
 
+    private var durationText: String {
+        String(format: NSLocalizedString("programs.card.days", comment: "Days duration"), program.durationWeeks * 7)
+    }
+
+    private var sessionsText: String {
+        let daysPerWeek = String(format: NSLocalizedString("programs.card.days_per_week", comment: "Days per week"), program.sessionsPerWeek)
+        let exercises = String(format: NSLocalizedString("programs.card.exercises", comment: "Exercises count"), program.totalWorkouts)
+        return "\(daysPerWeek) • \(exercises)"
+    }
+
     var body: some View {
-        VStack(alignment: .leading, spacing: FitTodaySpacing.sm) {
-            // Hero image/gradient
-            ZStack(alignment: .bottomLeading) {
+        VStack(alignment: .leading, spacing: 0) {
+            // Hero image section
+            ZStack(alignment: .topLeading) {
                 // Background gradient based on goal
                 gradientForGoal(program.goalTag)
-                    .frame(height: 100)
-                    .clipShape(RoundedRectangle(cornerRadius: FitTodayRadius.sm))
+                    .frame(height: 120)
 
-                // Goal icon
-                Image(systemName: program.goalTag.iconName)
-                    .font(.system(size: 32, weight: .semibold))
-                    .foregroundStyle(.white.opacity(0.3))
-                    .padding(FitTodaySpacing.sm)
+                // Duration badge
+                HStack(spacing: 4) {
+                    Text(durationText)
+                        .font(FitTodayFont.ui(size: 11, weight: .bold))
+                        .foregroundStyle(.white)
+                }
+                .padding(.horizontal, 10)
+                .padding(.vertical, 5)
+                .background(Color.black.opacity(0.3))
+                .clipShape(Capsule())
+                .padding(FitTodaySpacing.sm)
             }
+            .clipShape(
+                .rect(
+                    topLeadingRadius: FitTodayRadius.md,
+                    bottomLeadingRadius: 0,
+                    bottomTrailingRadius: 0,
+                    topTrailingRadius: FitTodayRadius.md
+                )
+            )
 
-            // Content
+            // Content section
             VStack(alignment: .leading, spacing: FitTodaySpacing.xs) {
                 Text(program.name)
-                    .font(FitTodayFont.ui(size: 15, weight: .bold))
+                    .font(FitTodayFont.ui(size: 17, weight: .bold))
                     .foregroundStyle(FitTodayColor.textPrimary)
-                    .lineLimit(2)
-
-                Text(program.subtitle)
-                    .font(FitTodayFont.ui(size: 12, weight: .medium))
-                    .foregroundStyle(FitTodayColor.textSecondary)
                     .lineLimit(1)
 
-                // Tags
+                // Tags row
                 HStack(spacing: FitTodaySpacing.xs) {
-                    FitBadge(text: program.level.displayName, style: levelStyle(program.level))
+                    Text(program.level.displayName)
+                        .font(FitTodayFont.ui(size: 12, weight: .medium))
+                        .foregroundStyle(FitTodayColor.textSecondary)
 
-                    Spacer()
-
-                    Text(program.sessionsDescription)
-                        .font(FitTodayFont.ui(size: 11, weight: .medium))
+                    Text("•")
                         .foregroundStyle(FitTodayColor.textTertiary)
+
+                    Text(program.goalTag.displayName)
+                        .font(FitTodayFont.ui(size: 12, weight: .medium))
+                        .foregroundStyle(FitTodayColor.textSecondary)
+
+                    Text("•")
+                        .foregroundStyle(FitTodayColor.textTertiary)
+
+                    Text(program.equipment.displayName)
+                        .font(FitTodayFont.ui(size: 12, weight: .medium))
+                        .foregroundStyle(FitTodayColor.textSecondary)
                 }
+
+                // Sessions info
+                Text(sessionsText)
+                    .font(FitTodayFont.ui(size: 11, weight: .medium))
+                    .foregroundStyle(FitTodayColor.textTertiary)
             }
-            .padding(.horizontal, FitTodaySpacing.sm)
-            .padding(.bottom, FitTodaySpacing.sm)
+            .padding(FitTodaySpacing.md)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(FitTodayColor.surface)
         }
-        .background(
-            RoundedRectangle(cornerRadius: FitTodayRadius.md)
-                .fill(FitTodayColor.surface)
-        )
+        .clipShape(RoundedRectangle(cornerRadius: FitTodayRadius.md))
         .overlay(
             RoundedRectangle(cornerRadius: FitTodayRadius.md)
                 .stroke(FitTodayColor.outline.opacity(0.3), lineWidth: 1)
@@ -306,104 +334,73 @@ struct ProgramCard: View {
             return FitTodayColor.gradientEndurance
         }
     }
-
-    private func levelStyle(_ level: ProgramLevel) -> FitBadge.Style {
-        switch level {
-        case .beginner:
-            return .success
-        case .intermediate:
-            return .warning
-        case .advanced:
-            return .error
-        }
-    }
 }
 
-// MARK: - Programs Catalog (Mock Data)
+// MARK: - ViewModel
 
-enum ProgramsCatalog {
-    static let allPrograms: [Program] = [
-        Program(
-            id: "ppl-beginner",
-            name: "Push Pull Legs",
-            subtitle: "Divisão clássica para iniciantes",
-            goalTag: .strength,
-            level: .beginner,
-            durationWeeks: 8,
-            heroImageName: "ppl",
-            workoutTemplateIds: ["push-1", "pull-1", "legs-1"],
-            estimatedMinutesPerSession: 45,
-            sessionsPerWeek: 3
-        ),
-        Program(
-            id: "full-body-3x",
-            name: "Full Body 3x",
-            subtitle: "Treino completo 3x por semana",
-            goalTag: .strength,
-            level: .beginner,
-            durationWeeks: 6,
-            heroImageName: "fullbody",
-            workoutTemplateIds: ["fb-a", "fb-b", "fb-c"],
-            estimatedMinutesPerSession: 50,
-            sessionsPerWeek: 3
-        ),
-        Program(
-            id: "hiit-fat-burn",
-            name: "HIIT Fat Burn",
-            subtitle: "Queima de gordura intensa",
-            goalTag: .conditioning,
-            level: .intermediate,
-            durationWeeks: 4,
-            heroImageName: "hiit",
-            workoutTemplateIds: ["hiit-1", "hiit-2"],
-            estimatedMinutesPerSession: 30,
-            sessionsPerWeek: 4
-        ),
-        Program(
-            id: "cardio-runner",
-            name: "Cardio Runner",
-            subtitle: "Melhore seu cardio e resistência",
-            goalTag: .aerobic,
-            level: .beginner,
-            durationWeeks: 6,
-            heroImageName: "cardio",
-            workoutTemplateIds: ["run-1", "run-2", "run-3"],
-            estimatedMinutesPerSession: 35,
-            sessionsPerWeek: 3
-        ),
-        Program(
-            id: "core-strength",
-            name: "Core Strength",
-            subtitle: "Fortaleça o abdômen e core",
-            goalTag: .core,
-            level: .beginner,
-            durationWeeks: 4,
-            heroImageName: "core",
-            workoutTemplateIds: ["core-1", "core-2"],
-            estimatedMinutesPerSession: 20,
-            sessionsPerWeek: 3
-        ),
-        Program(
-            id: "endurance-builder",
-            name: "Endurance Builder",
-            subtitle: "Aumente sua resistência muscular",
-            goalTag: .endurance,
-            level: .intermediate,
-            durationWeeks: 8,
-            heroImageName: "endurance",
-            workoutTemplateIds: ["end-1", "end-2", "end-3"],
-            estimatedMinutesPerSession: 40,
-            sessionsPerWeek: 4
-        )
-    ]
+@MainActor
+@Observable final class ProgramsListViewModel {
+    private(set) var programs: [Program] = []
+    private(set) var isLoading = false
+    var errorMessage: String?
+
+    var selectedLevel: ProgramLevel?
+    var selectedGoal: ProgramGoalTag?
+    var selectedEquipment: ProgramEquipment?
+
+    private let repository: ProgramRepository
+
+    init(repository: ProgramRepository) {
+        self.repository = repository
+    }
+
+    var filteredPrograms: [Program] {
+        programs.filter { program in
+            let matchesLevel = selectedLevel == nil || program.level == selectedLevel
+            let matchesGoal = selectedGoal == nil || program.goalTag == selectedGoal
+            let matchesEquipment = selectedEquipment == nil || program.equipment == selectedEquipment
+            return matchesLevel && matchesGoal && matchesEquipment
+        }
+    }
+
+    var hasActiveFilters: Bool {
+        selectedLevel != nil || selectedGoal != nil || selectedEquipment != nil
+    }
+
+    func loadPrograms() async {
+        isLoading = true
+        defer { isLoading = false }
+
+        do {
+            programs = try await repository.listPrograms()
+            #if DEBUG
+            print("[ProgramsListViewModel] ✅ Loaded \(programs.count) programs")
+            #endif
+        } catch {
+            errorMessage = "Não foi possível carregar os programas: \(error.localizedDescription)"
+            #if DEBUG
+            print("[ProgramsListViewModel] ❌ Error loading programs: \(error)")
+            #endif
+        }
+    }
+
+    func clearFilters() {
+        selectedLevel = nil
+        selectedGoal = nil
+        selectedEquipment = nil
+    }
 }
 
 // MARK: - Preview
 
 #Preview {
     let container = Container()
+    container.register(ProgramRepository.self) { _ in BundleProgramRepository() }
+
     return NavigationStack {
-        ProgramsListView(resolver: container)
+        ProgramsListView()
+            .environment(AppRouter())
+            .environment(\.dependencyResolver, container)
     }
     .preferredColorScheme(.dark)
 }

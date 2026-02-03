@@ -22,12 +22,44 @@ public enum ProgramLevel: String, Sendable, Codable, CaseIterable {
     case beginner
     case intermediate
     case advanced
-    
+
     var displayName: String {
         switch self {
-        case .beginner: return "Iniciante"
-        case .intermediate: return "Intermediário"
-        case .advanced: return "Avançado"
+        case .beginner: return NSLocalizedString("programs.level.beginner", comment: "Beginner level")
+        case .intermediate: return NSLocalizedString("programs.level.intermediate", comment: "Intermediate level")
+        case .advanced: return NSLocalizedString("programs.level.advanced", comment: "Advanced level")
+        }
+    }
+}
+
+/// Tipo de equipamento necessário para o programa.
+public enum ProgramEquipment: String, Sendable, Codable, CaseIterable {
+    case gym        // Academia completa
+    case home       // Casa (equipamentos básicos)
+    case dumbbell   // Apenas halteres
+    case bodyweight // Sem equipamento (peso corporal)
+    case kettlebell // Kettlebell
+    case bands      // Elásticos
+
+    var displayName: String {
+        switch self {
+        case .gym: return NSLocalizedString("programs.equipment.gym", comment: "Gym equipment")
+        case .home: return NSLocalizedString("programs.equipment.home", comment: "Home equipment")
+        case .dumbbell: return NSLocalizedString("programs.equipment.dumbbell", comment: "Dumbbell equipment")
+        case .bodyweight: return NSLocalizedString("programs.equipment.bodyweight", comment: "Bodyweight")
+        case .kettlebell: return NSLocalizedString("programs.equipment.kettlebell", comment: "Kettlebell")
+        case .bands: return NSLocalizedString("programs.equipment.bands", comment: "Bands")
+        }
+    }
+
+    var iconName: String {
+        switch self {
+        case .gym: return "building.2.fill"
+        case .home: return "house.fill"
+        case .dumbbell: return "dumbbell.fill"
+        case .bodyweight: return "figure.stand"
+        case .kettlebell: return "figure.strengthtraining.functional"
+        case .bands: return "figure.flexibility"
         }
     }
 }
@@ -39,18 +71,20 @@ public struct Program: Identifiable, Hashable, Sendable {
     public let subtitle: String
     public let goalTag: ProgramGoalTag
     public let level: ProgramLevel
+    public let equipment: ProgramEquipment
     public let durationWeeks: Int
     public let heroImageName: String       // Nome do asset no bundle para imagem de fundo
     public let workoutTemplateIds: [String] // IDs dos LibraryWorkout que compõem o programa
     public let estimatedMinutesPerSession: Int
     public let sessionsPerWeek: Int
-    
+
     public init(
         id: String,
         name: String,
         subtitle: String,
         goalTag: ProgramGoalTag,
         level: ProgramLevel,
+        equipment: ProgramEquipment = .gym,
         durationWeeks: Int,
         heroImageName: String,
         workoutTemplateIds: [String],
@@ -62,6 +96,7 @@ public struct Program: Identifiable, Hashable, Sendable {
         self.subtitle = subtitle
         self.goalTag = goalTag
         self.level = level
+        self.equipment = equipment
         self.durationWeeks = durationWeeks
         self.heroImageName = heroImageName
         self.workoutTemplateIds = workoutTemplateIds
@@ -93,11 +128,11 @@ public struct Program: Identifiable, Hashable, Sendable {
 extension ProgramGoalTag {
     var displayName: String {
         switch self {
-        case .strength: return "programs.category.strength".localized
-        case .conditioning: return "programs.category.conditioning".localized
-        case .aerobic: return "programs.category.aerobic".localized
-        case .core: return "programs.category.wellness".localized
-        case .endurance: return "programs.category.endurance".localized
+        case .strength: return NSLocalizedString("programs.category.strength", comment: "Strength goal")
+        case .conditioning: return NSLocalizedString("programs.category.conditioning", comment: "Conditioning goal")
+        case .aerobic: return NSLocalizedString("programs.category.aerobic", comment: "Aerobic goal")
+        case .core: return NSLocalizedString("programs.category.wellness", comment: "Core/wellness goal")
+        case .endurance: return NSLocalizedString("programs.category.endurance", comment: "Endurance goal")
         }
     }
 

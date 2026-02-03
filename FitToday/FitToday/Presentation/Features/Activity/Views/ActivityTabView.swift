@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Swinject
 
 /// Segments available in the Activity tab.
 enum ActivitySegment: String, CaseIterable {
@@ -16,6 +17,8 @@ enum ActivitySegment: String, CaseIterable {
 
 /// Main view for the Activity tab.
 struct ActivityTabView: View {
+    let resolver: Resolver
+
     @State private var selectedSegment: ActivitySegment = .history
 
     var body: some View {
@@ -28,13 +31,13 @@ struct ActivityTabView: View {
 
                 // Content
                 TabView(selection: $selectedSegment) {
-                    WorkoutHistoryView()
+                    WorkoutHistoryView(resolver: resolver)
                         .tag(ActivitySegment.history)
 
-                    ChallengesFullListView()
+                    ChallengesFullListView(resolver: resolver)
                         .tag(ActivitySegment.challenges)
 
-                    ActivityStatsView()
+                    ActivityStatsView(resolver: resolver)
                         .tag(ActivitySegment.stats)
                 }
                 .tabViewStyle(.page(indexDisplayMode: .never))
@@ -79,6 +82,8 @@ struct ActivityTabView: View {
 // MARK: - Workout History View
 
 struct WorkoutHistoryView: View {
+    let resolver: Resolver
+
     @State private var selectedDate = Date()
     @State private var workouts: [UnifiedWorkoutSession] = []
     @State private var isLoading = true
@@ -420,6 +425,8 @@ struct WorkoutSessionCard: View {
 // MARK: - Activity Stats View (Placeholder)
 
 struct ActivityStatsView: View {
+    let resolver: Resolver
+
     var body: some View {
         ScrollView {
             VStack(spacing: FitTodaySpacing.lg) {
@@ -514,6 +521,7 @@ enum MockWorkoutData {
 // MARK: - Preview
 
 #Preview {
-    ActivityTabView()
+    let container = Container()
+    return ActivityTabView(resolver: container)
         .preferredColorScheme(.dark)
 }

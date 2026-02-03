@@ -24,7 +24,7 @@ struct OpenAIConfiguration: Sendable {
         let baseURL = URL(string: "https://api.openai.com/v1/chat/completions")!
         let timeout: TimeInterval = 60 // Aumentado para 60s (treino completo)
         let maxTokens = 2000 // Aumentado para suportar resposta JSON completa
-        let temperature = 0.7 // Aumentado para mais variação nos exercícios
+        let temperature = 0.3 // Reduced for more consistent/predictable exercise selection
         let cacheTTL: TimeInterval = 900 // 15 minutos - alinha com variation buckets de 15min
     }
     

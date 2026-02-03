@@ -121,18 +121,36 @@ struct ExerciseMediaImageURL: View {
 }
 
 /// Versão com tamanho fixo para thumbnails em listas.
-/// NÃO carrega mídia (apenas placeholder) para melhor performance em listas.
-/// A mídia será carregada apenas na tela de detalhe.
+/// Agora carrega imagens reais do Wger API quando disponível.
 struct ExerciseThumbnail: View {
   let media: ExerciseMedia?
   var size: CGFloat = 50
 
+  private var mediaURL: URL? {
+    media?.imageURL ?? media?.gifURL
+  }
+
   var body: some View {
+    Group {
+      if let url = mediaURL {
+        ExerciseMediaImageURL(
+          url: url,
+          size: CGSize(width: size, height: size),
+          contentMode: .fill,
+          cornerRadius: FitTodayRadius.sm
+        )
+      } else {
+        placeholderView
+      }
+    }
+    .frame(width: size, height: size)
+  }
+
+  private var placeholderView: some View {
     ZStack {
       RoundedRectangle(cornerRadius: FitTodayRadius.sm)
         .fill(FitTodayColor.surface)
-        .frame(width: size, height: size)
-      
+
       Image(systemName: "figure.strengthtraining.traditional")
         .font(.system(size: size * 0.4))
         .foregroundStyle(FitTodayColor.textTertiary)

@@ -99,11 +99,13 @@ struct SyncWorkoutCompletionUseCase: Sendable {
         print("[SyncWorkoutCompletionUseCase]    Privacy shareWorkoutData: \(user.privacySettings.shareWorkoutData)")
         #endif
 
-        // 4. Verify group membership
+        // 4. Track personal stats for solo users (no group required)
+        await trackPersonalStats(entry: entry, userId: user.id)
+
+        // 5. Verify group membership for group challenges
         guard let groupId = user.currentGroupId else {
             #if DEBUG
-            print("[SyncWorkoutCompletionUseCase] ❌ Skipping: user has no group (currentGroupId is nil)")
-            print("[SyncWorkoutCompletionUseCase] 💡 User needs to join or create a group to participate in challenges")
+            print("[SyncWorkoutCompletionUseCase] ℹ️ User has no group - personal stats tracked, skipping group challenges")
             #endif
             return
         }
@@ -263,5 +265,29 @@ struct SyncWorkoutCompletionUseCase: Sendable {
             }
         }
         return streak
+    }
+
+    // MARK: - Personal Stats Tracking (Solo Users)
+
+    /// Tracks personal stats for the user regardless of group membership.
+    /// This allows solo users to still track their workouts and maintain streaks.
+    private func trackPersonalStats(entry: WorkoutHistoryEntry, userId: String) async {
+        #if DEBUG
+        print("[SyncWorkoutCompletionUseCase] 📊 Tracking personal stats for user \(userId)")
+        print("[SyncWorkoutCompletionUseCase]    Duration: \(entry.durationMinutes ?? 0) min")
+        print("[SyncWorkoutCompletionUseCase]    Calories: \(entry.caloriesBurned ?? 0)")
+        #endif
+
+        // Compute and log current streak
+        do {
+            let streak = try await computeCurrentStreak(userId: userId)
+            #if DEBUG
+            print("[SyncWorkoutCompletionUseCase] 🔥 Personal streak: \(streak) days")
+            #endif
+        } catch {
+            #if DEBUG
+            print("[SyncWorkoutCompletionUseCase] ❌ Failed to compute personal streak: \(error.localizedDescription)")
+            #endif
+        }
     }
 }

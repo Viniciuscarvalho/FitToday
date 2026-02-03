@@ -38,8 +38,15 @@ struct LibraryDetailView: View {
             } else {
                 ScrollView {
                     if isLoading {
-                        ProgressView()
-                            .frame(maxWidth: .infinity, minHeight: 300)
+                        VStack(spacing: FitTodaySpacing.md) {
+                            ProgressView()
+                                .progressViewStyle(.circular)
+                                .tint(FitTodayColor.brandPrimary)
+                            Text("Carregando treino...")
+                                .font(.system(.subheadline))
+                                .foregroundStyle(FitTodayColor.textSecondary)
+                        }
+                        .frame(maxWidth: .infinity, minHeight: 300)
                     } else if let workout = workout {
                         content(for: workout)
                     } else {
@@ -84,18 +91,63 @@ struct LibraryDetailView: View {
     // MARK: - Header
 
     private func headerSection(_ workout: LibraryWorkout) -> some View {
-        VStack(alignment: .leading, spacing: FitTodaySpacing.sm) {
-            Text(workout.title)
-                .font(.system(.title, weight: .bold))
-                .foregroundStyle(FitTodayColor.textPrimary)
-            Text(workout.subtitle)
-                .font(.system(.body))
-                .foregroundStyle(FitTodayColor.textSecondary)
+        VStack(alignment: .leading, spacing: FitTodaySpacing.md) {
+            // Title and subtitle
+            VStack(alignment: .leading, spacing: FitTodaySpacing.xs) {
+                Text(workout.title)
+                    .font(.system(.title, weight: .bold))
+                    .foregroundStyle(FitTodayColor.textPrimary)
+                Text(workout.subtitle)
+                    .font(.system(.body))
+                    .foregroundStyle(FitTodayColor.textSecondary)
+            }
+
+            // Badges
             HStack(spacing: FitTodaySpacing.sm) {
                 FitBadge(text: workout.goal.displayName, style: .info)
                 FitBadge(text: workout.structure.displayName, style: .success)
             }
+
+            // Quick stats row
+            HStack(spacing: FitTodaySpacing.lg) {
+                quickStatItem(
+                    icon: "figure.strengthtraining.traditional",
+                    value: "\(workout.exerciseCount)",
+                    label: "Exercícios"
+                )
+                quickStatItem(
+                    icon: "number.square",
+                    value: "\(totalSets(workout))",
+                    label: "Séries"
+                )
+                quickStatItem(
+                    icon: "clock",
+                    value: "\(workout.estimatedDurationMinutes)",
+                    label: "Minutos"
+                )
+            }
+            .padding(.top, FitTodaySpacing.xs)
         }
+    }
+
+    private func quickStatItem(icon: String, value: String, label: String) -> some View {
+        VStack(spacing: 2) {
+            HStack(spacing: 4) {
+                Image(systemName: icon)
+                    .font(.system(size: 12))
+                    .foregroundStyle(FitTodayColor.brandPrimary)
+                Text(value)
+                    .font(.system(.headline, weight: .bold))
+                    .foregroundStyle(FitTodayColor.textPrimary)
+            }
+            Text(label)
+                .font(.system(.caption2))
+                .foregroundStyle(FitTodayColor.textTertiary)
+        }
+    }
+
+    private func totalSets(_ workout: LibraryWorkout) -> Int {
+        workout.exercises.reduce(0) { $0 + $1.sets }
     }
 
     // MARK: - Info Cards
@@ -144,15 +196,38 @@ struct LibraryDetailView: View {
 
     private func loadWorkout() async {
         guard let repository = repository else {
+            #if DEBUG
+            print("[LibraryDetail] Repository is nil")
+            #endif
             isLoading = false
             return
         }
 
+        #if DEBUG
+        print("[LibraryDetail] Starting load for workoutId: \(workoutId)")
+        #endif
+
         isLoading = true
         do {
             let workouts = try await repository.loadWorkouts()
+            #if DEBUG
+            print("[LibraryDetail] Total workouts loaded: \(workouts.count)")
+            print("[LibraryDetail] Available IDs: \(workouts.map { $0.id })")
+            #endif
+
             workout = workouts.first { $0.id == workoutId }
+
+            #if DEBUG
+            if let found = workout {
+                print("[LibraryDetail] Found workout: \(found.title) with \(found.exerciseCount) exercises")
+            } else {
+                print("[LibraryDetail] Workout not found for id: \(workoutId)")
+            }
+            #endif
         } catch {
+            #if DEBUG
+            print("[LibraryDetail] Error: \(error)")
+            #endif
             errorMessage = "Erro ao carregar treino: \(error.localizedDescription)"
         }
         isLoading = false

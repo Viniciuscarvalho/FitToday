@@ -355,87 +355,40 @@ struct OpenAIWorkoutPlanComposer: WorkoutPlanComposing {
                         }
                     }
 
-                    // Se ainda não encontrar, tentar buscar por grupo muscular
+                    // Se ainda não encontrar, tentar buscar substituto do mesmo grupo muscular
                     if exercise == nil {
                         if let muscleGroup = MuscleGroup(rawValue: ex.muscleGroup.lowercased()) {
-                            exercise = allExercises.first { $0.mainMuscle == muscleGroup }
-                            if let foundExercise = exercise {
-                                logger("⚠️ Substituindo '\(ex.name)' por '\(foundExercise.name)' (mesmo grupo muscular)")
+                            // Find a substitute from the same muscle group that we haven't used yet
+                            let usedExerciseNames = Set(items.compactMap { item -> String? in
+                                if case .exercise(let prescription) = item {
+                                    return prescription.exercise.name.lowercased()
+                                }
+                                return nil
+                            })
+
+                            exercise = allExercises.first { catalogExercise in
+                                catalogExercise.mainMuscle == muscleGroup &&
+                                !usedExerciseNames.contains(catalogExercise.name.lowercased())
                             }
+
+                            if let foundExercise = exercise {
+                                logger("⚠️ HALLUCINATION DETECTED: '\(ex.name)' not in catalog - substituting with '\(foundExercise.name)' (same muscle group: \(muscleGroup.rawValue))")
+                            } else {
+                                // No substitute found - skip this exercise entirely
+                                logger("❌ HALLUCINATION REJECTED: '\(ex.name)' not in catalog, no substitute available for \(muscleGroup.rawValue) - SKIPPING")
+                                continue // Skip to next exercise
+                            }
+                        } else {
+                            // Invalid muscle group - skip exercise
+                            logger("❌ HALLUCINATION REJECTED: '\(ex.name)' has invalid muscle group '\(ex.muscleGroup)' - SKIPPING")
+                            continue // Skip to next exercise
                         }
                     }
 
-                    // Fallback para criar exercício com nome da OpenAI + buscar mídia via Wger
-                    let foundExercise: WorkoutExercise
-                    if let catalogExercise = exercise {
-                        foundExercise = catalogExercise
-                    } else {
-                        // Criar exercício temporário com nome normalizado
-                        var newExercise = WorkoutExercise(
-                            id: UUID().uuidString,
-                            name: normalizedName, // Usar nome normalizado para buscar mídia
-                            mainMuscle: MuscleGroup(rawValue: ex.muscleGroup.lowercased()) ?? .chest,
-                            equipment: EquipmentType(rawValue: ex.equipment.lowercased()) ?? .bodyweight,
-                            instructions: [], // OpenAI não retorna instruções na resposta
-                            media: nil
-                        )
-
-                        // Buscar mídia usando o nome normalizado
-                        // 💡 Learn: Usar do-catch para não quebrar o fluxo se houver erro de rede
-                        if let resolver = mediaResolver {
-                            do {
-                                let resolvedMedia = await resolver.resolveMedia(for: newExercise, context: .card)
-                                if resolvedMedia.hasMedia {
-                                    newExercise = WorkoutExercise(
-                                        id: newExercise.id,
-                                        name: ex.name, // Mostrar nome original da OpenAI ao usuário
-                                        mainMuscle: newExercise.mainMuscle,
-                                        equipment: newExercise.equipment,
-                                        instructions: newExercise.instructions,
-                                        media: ExerciseMedia(
-                                            imageURL: resolvedMedia.imageURL,
-                                            gifURL: resolvedMedia.gifURL
-                                        )
-                                    )
-                                    logger("✅ Mídia encontrada para '\(ex.name)' via nome normalizado '\(normalizedName)'")
-                                } else {
-                                    // Usar nome original da OpenAI se não encontrar mídia
-                                    newExercise = WorkoutExercise(
-                                        id: newExercise.id,
-                                        name: ex.name,
-                                        mainMuscle: newExercise.mainMuscle,
-                                        equipment: newExercise.equipment,
-                                        instructions: newExercise.instructions,
-                                        media: nil
-                                    )
-                                    logger("⚠️ Exercício '\(ex.name)' não encontrado no catálogo e sem mídia na API Wger")
-                                }
-                            } catch {
-                                // Se houver erro ao buscar mídia (ex: timeout), continuar sem mídia
-                                newExercise = WorkoutExercise(
-                                    id: newExercise.id,
-                                    name: ex.name,
-                                    mainMuscle: newExercise.mainMuscle,
-                                    equipment: newExercise.equipment,
-                                    instructions: newExercise.instructions,
-                                    media: nil
-                                )
-                                logger("⚠️ Erro ao buscar mídia para '\(ex.name)': \(error.localizedDescription) - continuando sem mídia")
-                            }
-                        } else {
-                            // Sem media resolver, usar nome original
-                            newExercise = WorkoutExercise(
-                                id: newExercise.id,
-                                name: ex.name,
-                                mainMuscle: newExercise.mainMuscle,
-                                equipment: newExercise.equipment,
-                                instructions: newExercise.instructions,
-                                media: nil
-                            )
-                            logger("⚠️ Exercício '\(ex.name)' não encontrado no catálogo - usando nome da OpenAI")
-                        }
-
-                        foundExercise = newExercise
+                    // At this point we either have a valid catalog exercise or a substitute
+                    guard let foundExercise = exercise else {
+                        logger("❌ HALLUCINATION REJECTED: '\(ex.name)' - no valid exercise found, SKIPPING")
+                        continue
                     }
 
                     // Parsear reps
