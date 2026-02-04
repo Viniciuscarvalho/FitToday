@@ -2,18 +2,19 @@
 //  MyWorkoutsView.swift
 //  FitToday
 //
-//  Displays user's custom workout templates.
+//  Displays user's custom workout templates and saved routines.
 //
 
 import SwiftUI
 import Swinject
 
-/// View displaying the user's saved workout templates.
+/// View displaying the user's saved workout templates and routines.
 struct MyWorkoutsView: View {
     @Binding var showCreateWorkout: Bool
     let resolver: Resolver
 
     @State private var workouts: [CustomWorkoutTemplate] = []
+    @State private var savedRoutines: [SavedRoutine] = []
     @State private var isLoading = true
     @State private var searchText = ""
 
@@ -26,18 +27,22 @@ struct MyWorkoutsView: View {
         }
     }
 
+    private var hasContent: Bool {
+        !workouts.isEmpty || !savedRoutines.isEmpty
+    }
+
     var body: some View {
         Group {
             if isLoading {
                 loadingView
-            } else if workouts.isEmpty {
+            } else if !hasContent {
                 emptyStateView
             } else {
-                workoutsList
+                contentList
             }
         }
         .task {
-            await loadWorkouts()
+            await loadData()
         }
     }
 
@@ -89,27 +94,26 @@ struct MyWorkoutsView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
-    // MARK: - Workouts List
+    // MARK: - Content List
 
-    private var workoutsList: some View {
+    private var contentList: some View {
         ScrollView {
-            LazyVStack(spacing: FitTodaySpacing.md) {
-                // Search bar
+            LazyVStack(spacing: FitTodaySpacing.lg) {
+                // Search bar (only if many workouts)
                 if workouts.count > 3 {
                     searchBar
                         .padding(.horizontal, FitTodaySpacing.md)
                 }
 
-                // Workout cards
-                ForEach(filteredWorkouts) { workout in
-                    NavigationLink {
-                        WorkoutDetailView(workout: workout)
-                    } label: {
-                        WorkoutTemplateCard(workout: workout)
-                    }
-                    .buttonStyle(.plain)
+                // Minhas Rotinas Section
+                if !savedRoutines.isEmpty {
+                    savedRoutinesSection
                 }
-                .padding(.horizontal, FitTodaySpacing.md)
+
+                // Treinos Personalizados Section
+                if !filteredWorkouts.isEmpty {
+                    customWorkoutsSection
+                }
 
                 // Bottom padding for FAB
                 Spacer()
@@ -118,6 +122,60 @@ struct MyWorkoutsView: View {
             .padding(.top, FitTodaySpacing.md)
         }
         .scrollIndicators(.hidden)
+    }
+
+    // MARK: - Saved Routines Section
+
+    private var savedRoutinesSection: some View {
+        VStack(alignment: .leading, spacing: FitTodaySpacing.md) {
+            // Section Header
+            HStack {
+                Text("workout.my_routines".localized)
+                    .font(FitTodayFont.display(size: 18, weight: .bold))
+                    .foregroundStyle(FitTodayColor.textPrimary)
+
+                Spacer()
+
+                Text("\(savedRoutines.count)/\(SavedRoutine.maxSavedRoutines)")
+                    .font(FitTodayFont.ui(size: 13, weight: .medium))
+                    .foregroundStyle(FitTodayColor.textSecondary)
+            }
+            .padding(.horizontal, FitTodaySpacing.md)
+
+            // Routine Cards
+            ForEach(savedRoutines) { routine in
+                SavedRoutineCard(
+                    routine: routine,
+                    onDelete: { await deleteRoutine(routine.id) }
+                )
+                .padding(.horizontal, FitTodaySpacing.md)
+            }
+        }
+    }
+
+    // MARK: - Custom Workouts Section
+
+    private var customWorkoutsSection: some View {
+        VStack(alignment: .leading, spacing: FitTodaySpacing.md) {
+            // Section Header
+            if !savedRoutines.isEmpty {
+                Text("workout.custom_workouts".localized)
+                    .font(FitTodayFont.display(size: 18, weight: .bold))
+                    .foregroundStyle(FitTodayColor.textPrimary)
+                    .padding(.horizontal, FitTodaySpacing.md)
+            }
+
+            // Workout cards
+            ForEach(filteredWorkouts) { workout in
+                NavigationLink {
+                    WorkoutDetailView(workout: workout)
+                } label: {
+                    WorkoutTemplateCard(workout: workout)
+                }
+                .buttonStyle(.plain)
+                .padding(.horizontal, FitTodaySpacing.md)
+            }
+        }
     }
 
     // MARK: - Search Bar
@@ -151,14 +209,48 @@ struct MyWorkoutsView: View {
 
     // MARK: - Data Loading
 
-    private func loadWorkouts() async {
-        // Simulate loading
-        try? await Task.sleep(for: .milliseconds(500))
+    private func loadData() async {
+        isLoading = true
 
-        // TODO: Load from repository
-        // For now, use mock data
-        workouts = []
+        // Load saved routines
+        if let routineRepo = resolver.resolve(SavedRoutineRepository.self) {
+            do {
+                savedRoutines = try await routineRepo.listRoutines()
+            } catch {
+                #if DEBUG
+                print("[MyWorkouts] Error loading routines: \(error)")
+                #endif
+                savedRoutines = []
+            }
+        }
+
+        // Load custom workouts
+        if let workoutRepo = resolver.resolve(CustomWorkoutRepository.self) {
+            do {
+                workouts = try await workoutRepo.listTemplates()
+            } catch {
+                #if DEBUG
+                print("[MyWorkouts] Error loading workouts: \(error)")
+                #endif
+                workouts = []
+            }
+        }
+
         isLoading = false
+    }
+
+    private func deleteRoutine(_ id: UUID) async {
+        guard let routineRepo = resolver.resolve(SavedRoutineRepository.self) else { return }
+
+        do {
+            try await routineRepo.deleteRoutine(id)
+            // Reload to refresh the list
+            savedRoutines = try await routineRepo.listRoutines()
+        } catch {
+            #if DEBUG
+            print("[MyWorkouts] Error deleting routine: \(error)")
+            #endif
+        }
     }
 }
 

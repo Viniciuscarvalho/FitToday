@@ -82,17 +82,12 @@ struct CheckInUseCase: Sendable {
             throw CheckInError.uploadFailed(underlying: error)
         }
 
-        // 5. Upload photo
-        let photoURL: URL
-        do {
-            photoURL = try await checkInRepository.uploadPhoto(
-                imageData: compressed,
-                groupId: groupId,
-                userId: user.id
-            )
-        } catch {
-            throw CheckInError.uploadFailed(underlying: error)
-        }
+        // 5. Upload photo with retry logic
+        let photoURL = try await uploadPhotoWithRetry(
+            imageData: compressed,
+            groupId: groupId,
+            userId: user.id
+        )
 
         // 6. Get current challenge
         let challenges = try await leaderboardRepository.getCurrentWeekChallenges(groupId: groupId)
@@ -125,5 +120,45 @@ struct CheckInUseCase: Sendable {
         )
 
         return checkIn
+    }
+
+    // MARK: - Private Methods
+
+    /// Uploads a photo with exponential backoff retry logic.
+    /// - Parameters:
+    ///   - imageData: Compressed image data
+    ///   - groupId: Group identifier
+    ///   - userId: User identifier
+    /// - Returns: The URL of the uploaded photo
+    /// - Throws: CheckInError if all retries fail
+    private func uploadPhotoWithRetry(
+        imageData: Data,
+        groupId: String,
+        userId: String
+    ) async throws -> URL {
+        let maxRetries = 3
+        var lastError: Error?
+
+        for attempt in 1...maxRetries {
+            do {
+                return try await checkInRepository.uploadPhoto(
+                    imageData: imageData,
+                    groupId: groupId,
+                    userId: userId
+                )
+            } catch {
+                lastError = error
+                #if DEBUG
+                print("[CheckIn] Upload attempt \(attempt)/\(maxRetries) failed: \(error.localizedDescription)")
+                #endif
+                if attempt < maxRetries {
+                    // Exponential backoff: 1s, 2s, 4s
+                    let delayNanoseconds = UInt64(pow(2.0, Double(attempt - 1)) * 1_000_000_000)
+                    try? await Task.sleep(nanoseconds: delayNanoseconds)
+                }
+            }
+        }
+
+        throw CheckInError.uploadFailed(underlying: lastError!)
     }
 }

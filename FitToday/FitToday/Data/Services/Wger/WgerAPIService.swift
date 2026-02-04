@@ -76,6 +76,7 @@ actor WgerAPIService: ExerciseServiceProtocol {
     private let configuration: WgerConfiguration
     private let session: URLSession
     private let decoder: JSONDecoder
+    private let translationService: ExerciseTranslationService
 
     // In-memory caches
     private var exerciseCache: [Int: WgerExercise] = [:]
@@ -88,6 +89,7 @@ actor WgerAPIService: ExerciseServiceProtocol {
         self.configuration = configuration
         self.session = session
         self.decoder = JSONDecoder()
+        self.translationService = ExerciseTranslationService()
     }
 
     // MARK: - Exercises
@@ -130,24 +132,35 @@ actor WgerAPIService: ExerciseServiceProtocol {
         let descriptionLanguageId = WgerLanguageCode.portuguese.rawValue
         let nameLanguageId = WgerLanguageCode.english.rawValue
 
-        let exercises = response.results.compactMap { info -> WgerExercise? in
+        var exercises: [WgerExercise] = []
+        for info in response.results {
             // Get name in English (original naming convention)
             let exerciseName = info.name(for: nameLanguageId)
             guard !exerciseName.starts(with: "Exercise ") else {
                 // This means no translation was found, skip this exercise
-                return nil
+                continue
             }
 
-            // Get description in Portuguese, strip HTML, with fallback
+            // Get description in Portuguese, strip HTML, filter non-supported languages
             let rawDescription = info.description(for: descriptionLanguageId)
             let cleanDescription = rawDescription?.strippingHTML
-            let exerciseDescription = cleanDescription?.isEmpty == false
-                ? cleanDescription
-                : "Execute o exercício mantendo a postura correta e controlando o movimento."
+            var exerciseDescription: String
+            if let clean = cleanDescription, !clean.isEmpty {
+                // Use translation service to ensure proper language (filter Spanish, etc.)
+                exerciseDescription = await translationService.ensureLocalizedDescription(clean)
+            } else {
+                exerciseDescription = String(localized: "exercise.description.fallback")
+            }
 
             // Extract images
             let imageURLs = info.images.map { $0.image }
             let mainImageURL = info.images.first(where: { $0.isMain })?.image ?? info.images.first?.image
+
+            #if DEBUG
+            if !imageURLs.isEmpty {
+                print("[WgerAPI] 🖼️ Exercise '\(exerciseName)' has \(imageURLs.count) images, main: \(mainImageURL ?? "none")")
+            }
+            #endif
 
             let exercise = WgerExercise(
                 id: info.id,
@@ -166,7 +179,7 @@ actor WgerAPIService: ExerciseServiceProtocol {
                 imageURLs: imageURLs
             )
             exerciseCache[exercise.id] = exercise
-            return exercise
+            exercises.append(exercise)
         }
 
         return exercises
@@ -192,12 +205,15 @@ actor WgerAPIService: ExerciseServiceProtocol {
 
             let exerciseName = info.name(for: nameLanguageId)
 
-            // Get description in Portuguese, strip HTML, with fallback
+            // Get description in Portuguese, strip HTML, filter non-supported languages
             let rawDescription = info.description(for: descriptionLanguageId)
             let cleanDescription = rawDescription?.strippingHTML
-            let exerciseDescription = cleanDescription?.isEmpty == false
-                ? cleanDescription
-                : "Execute o exercício mantendo a postura correta e controlando o movimento."
+            var exerciseDescription: String?
+            if let clean = cleanDescription, !clean.isEmpty {
+                exerciseDescription = await translationService.ensureLocalizedDescription(clean)
+            } else {
+                exerciseDescription = String(localized: "exercise.description.fallback")
+            }
 
             // Extract images
             let imageURLs = info.images.map { $0.image }

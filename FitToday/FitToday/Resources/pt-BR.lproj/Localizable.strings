@@ -102,18 +102,26 @@
 "home.stats.workouts" = "treinos";
 "home.stats.calories" = "Calorias";
 "home.stats.burned" = "queimadas";
-"home.stats.streak" = "Sequencia";
+"home.stats.streak" = "Sequência";
 "home.stats.days" = "dias";
 
 // MARK: - Programs
 "programs.title" = "Programas";
 "programs.subtitle" = "Encontre o programa perfeito para seus objetivos";
 "programs.category.all" = "Todos";
-"programs.category.strength" = "Forca";
+"programs.category.strength" = "Força";
 "programs.category.conditioning" = "Condicionamento";
-"programs.category.aerobic" = "Aerobico";
-"programs.category.endurance" = "Resistencia";
+"programs.category.aerobic" = "Aeróbico";
+"programs.category.endurance" = "Resistência";
 "programs.category.wellness" = "Bem-estar";
+
+// Program Goals (ProgramGoalTag)
+"programs.goal.strength" = "Força";
+"programs.goal.conditioning" = "Condicionamento";
+"programs.goal.aerobic" = "Aeróbico";
+"programs.goal.core" = "Core";
+"programs.goal.endurance" = "Resistência";
+
 "programs.card.start" = "Iniciar Programa";
 "programs.card.duration" = "%d semanas";
 "programs.card.sessions" = "%dx por semana";
@@ -334,6 +342,16 @@
 "group.tab.feed" = "Feed";
 "group.tab.leaderboard" = "Ranking";
 
+// MARK: - Group Streaks
+"streak.header.title" = "SEQUENCIA DO GRUPO";
+"streak.day.singular" = "dia";
+"streak.days.plural" = "dias";
+"streak.paused" = "Pausado";
+"streak.next.milestone" = "Proximo: %@";
+"streak.days.remaining" = "%d dias para alcancar";
+"streak.this.week" = "Esta Semana";
+"streak.compliant.count" = "%d/%d em dia";
+
 // MARK: - Errors
 "error.network" = "Erro de rede. Verifique sua conexao.";
 "error.generic" = "Algo deu errado. Tente novamente.";
@@ -466,3 +484,29 @@
 // MARK: - Programs Workout Preview
 "program.workout.exercises" = "exercicios";
 "program.workout.more_exercises" = "+ %d mais exercicios";
+
+// MARK: - Saved Routines
+"workout.my_routines" = "Minhas Rotinas";
+"workout.custom_workouts" = "Treinos Personalizados";
+"routine.save" = "Salvar como Rotina";
+"routine.saved" = "Rotina Salva";
+"routine.error.limit_reached" = "Voce atingiu o limite de 5 rotinas salvas. Remova uma para adicionar outra.";
+"routine.error.already_saved" = "Este programa ja esta salvo nas suas rotinas.";
+"routine.error.not_found" = "Rotina nao encontrada.";
+"routine.delete.confirm" = "Remover esta rotina?";
+
+// MARK: - Check-in Errors (Extended)
+"checkin.error.network" = "Sem conexao com a internet.";
+"checkin.error.not_in_group" = "Voce precisa estar em um grupo para fazer check-in.";
+"checkin.error.too_short" = "Treino deve ter pelo menos 30 minutos. Atual: %d min.";
+"checkin.error.compression" = "Erro ao processar a imagem.";
+"checkin.error.upload" = "Erro ao enviar a foto. Tente novamente.";
+"checkin.error.no_challenge" = "Nenhum desafio ativo esta semana.";
+"checkin.error.no_image" = "Selecione uma foto para continuar.";
+"checkin.success.title" = "Check-in Realizado!";
+"checkin.success.message" = "Seu treino foi registrado com sucesso.";
+"checkin.title" = "Fazer Check-in";
+"checkin.submit" = "Enviar Check-in";
+
+// MARK: - Exercise Fallback
+"exercise.description.fallback" = "Execute o exercicio mantendo a postura correta e controlando o movimento.";
