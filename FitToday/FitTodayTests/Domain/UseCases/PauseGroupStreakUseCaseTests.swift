@@ -15,7 +15,7 @@ final class PauseGroupStreakUseCaseTests: XCTestCase {
     private var sut: PauseGroupStreakUseCase!
     private var mockStreakRepo: MockGroupStreakRepository!
     private var mockGroupRepo: MockGroupRepository!
-    private var mockAuthRepo: MockAuthRepository!
+    private var mockAuthRepo: MockAuthenticationRepository!
 
     // MARK: - Setup
 
@@ -23,7 +23,7 @@ final class PauseGroupStreakUseCaseTests: XCTestCase {
         super.setUp()
         mockStreakRepo = MockGroupStreakRepository()
         mockGroupRepo = MockGroupRepository()
-        mockAuthRepo = MockAuthRepository()
+        mockAuthRepo = MockAuthenticationRepository()
 
         sut = PauseGroupStreakUseCase(
             groupStreakRepository: mockStreakRepo,
@@ -44,8 +44,8 @@ final class PauseGroupStreakUseCaseTests: XCTestCase {
 
     func testPause_WhenValidAdmin_PausesSuccessfully() async throws {
         // Given
-        mockAuthRepo.currentUserToReturn = .fixture(id: "admin1")
-        mockGroupRepo.membersToReturn = [.fixture(id: "admin1", role: .admin)]
+        mockAuthRepo.currentUserResult = .fixture(id: "admin1")
+        mockGroupRepo.getMembersResult = [.fixture(id: "admin1", role: .admin)]
         mockStreakRepo.streakStatusToReturn = .fixture(streakDays: 14, pauseUsedThisMonth: false)
 
         // When
@@ -57,8 +57,8 @@ final class PauseGroupStreakUseCaseTests: XCTestCase {
 
     func testPause_WhenNotAdmin_ThrowsError() async {
         // Given
-        mockAuthRepo.currentUserToReturn = .fixture(id: "member1")
-        mockGroupRepo.membersToReturn = [.fixture(id: "member1", role: .member)]
+        mockAuthRepo.currentUserResult = .fixture(id: "member1")
+        mockGroupRepo.getMembersResult = [.fixture(id: "member1", role: .member)]
 
         // When/Then
         do {
@@ -77,8 +77,8 @@ final class PauseGroupStreakUseCaseTests: XCTestCase {
 
     func testPause_WhenPauseAlreadyUsed_ThrowsError() async {
         // Given
-        mockAuthRepo.currentUserToReturn = .fixture(id: "admin1")
-        mockGroupRepo.membersToReturn = [.fixture(id: "admin1", role: .admin)]
+        mockAuthRepo.currentUserResult = .fixture(id: "admin1")
+        mockGroupRepo.getMembersResult = [.fixture(id: "admin1", role: .admin)]
         mockStreakRepo.streakStatusToReturn = .fixture(
             streakDays: 14,
             pauseUsedThisMonth: true
@@ -101,8 +101,8 @@ final class PauseGroupStreakUseCaseTests: XCTestCase {
 
     func testPause_WhenNoActiveStreak_ThrowsError() async {
         // Given
-        mockAuthRepo.currentUserToReturn = .fixture(id: "admin1")
-        mockGroupRepo.membersToReturn = [.fixture(id: "admin1", role: .admin)]
+        mockAuthRepo.currentUserResult = .fixture(id: "admin1")
+        mockGroupRepo.getMembersResult = [.fixture(id: "admin1", role: .admin)]
         mockStreakRepo.streakStatusToReturn = .fixture(streakDays: 0)
 
         // When/Then
@@ -122,8 +122,8 @@ final class PauseGroupStreakUseCaseTests: XCTestCase {
 
     func testPause_WhenDaysTooLong_ThrowsError() async {
         // Given
-        mockAuthRepo.currentUserToReturn = .fixture(id: "admin1")
-        mockGroupRepo.membersToReturn = [.fixture(id: "admin1", role: .admin)]
+        mockAuthRepo.currentUserResult = .fixture(id: "admin1")
+        mockGroupRepo.getMembersResult = [.fixture(id: "admin1", role: .admin)]
         mockStreakRepo.streakStatusToReturn = .fixture(streakDays: 14)
 
         // When/Then
@@ -145,8 +145,8 @@ final class PauseGroupStreakUseCaseTests: XCTestCase {
 
     func testResume_WhenValidAdmin_ResumesSuccessfully() async throws {
         // Given
-        mockAuthRepo.currentUserToReturn = .fixture(id: "admin1")
-        mockGroupRepo.membersToReturn = [.fixture(id: "admin1", role: .admin)]
+        mockAuthRepo.currentUserResult = .fixture(id: "admin1")
+        mockGroupRepo.getMembersResult = [.fixture(id: "admin1", role: .admin)]
         mockStreakRepo.streakStatusToReturn = .pausedStreak
 
         // When
@@ -158,8 +158,8 @@ final class PauseGroupStreakUseCaseTests: XCTestCase {
 
     func testResume_WhenNotPaused_ThrowsError() async {
         // Given
-        mockAuthRepo.currentUserToReturn = .fixture(id: "admin1")
-        mockGroupRepo.membersToReturn = [.fixture(id: "admin1", role: .admin)]
+        mockAuthRepo.currentUserResult = .fixture(id: "admin1")
+        mockGroupRepo.getMembersResult = [.fixture(id: "admin1", role: .admin)]
         mockStreakRepo.streakStatusToReturn = .fixture(streakDays: 14, pausedUntil: nil)
 
         // When/Then
@@ -174,79 +174,6 @@ final class PauseGroupStreakUseCaseTests: XCTestCase {
             }
         } catch {
             XCTFail("Wrong error type: \(error)")
-        }
-    }
-}
-
-// MARK: - Mock Group Repository
-
-private class MockGroupRepository: GroupRepository {
-    var membersToReturn: [GroupMember] = []
-    var groupToReturn: SocialGroup?
-    var shouldThrowError: Error?
-
-    func createGroup(name: String, ownerId: String, ownerDisplayName: String, ownerPhotoURL: URL?) async throws -> SocialGroup {
-        if let error = shouldThrowError { throw error }
-        return groupToReturn ?? .fixture()
-    }
-
-    func getGroup(_ groupId: String) async throws -> SocialGroup? {
-        if let error = shouldThrowError { throw error }
-        return groupToReturn
-    }
-
-    func addMember(groupId: String, userId: String, displayName: String, photoURL: URL?) async throws {
-        if let error = shouldThrowError { throw error }
-    }
-
-    func removeMember(groupId: String, userId: String) async throws {
-        if let error = shouldThrowError { throw error }
-    }
-
-    func leaveGroup(groupId: String, userId: String) async throws {
-        if let error = shouldThrowError { throw error }
-    }
-
-    func deleteGroup(_ groupId: String) async throws {
-        if let error = shouldThrowError { throw error }
-    }
-
-    func getMembers(groupId: String) async throws -> [GroupMember] {
-        if let error = shouldThrowError { throw error }
-        return membersToReturn
-    }
-}
-
-// MARK: - Mock Auth Repository
-
-private class MockAuthRepository: AuthenticationRepository {
-    var currentUserToReturn: SocialUser?
-
-    func currentUser() async throws -> SocialUser? {
-        currentUserToReturn
-    }
-
-    func signInWithApple() async throws -> SocialUser {
-        currentUserToReturn ?? .fixture()
-    }
-
-    func signInWithGoogle() async throws -> SocialUser {
-        currentUserToReturn ?? .fixture()
-    }
-
-    func signInWithEmail(_ email: String, password: String) async throws -> SocialUser {
-        currentUserToReturn ?? .fixture()
-    }
-
-    func createAccount(email: String, password: String, displayName: String) async throws -> SocialUser {
-        currentUserToReturn ?? .fixture()
-    }
-
-    func signOut() async throws {}
-
-    func observeAuthState() -> AsyncStream<SocialUser?> {
-        AsyncStream { continuation in
-            continuation.yield(currentUserToReturn)
         }
     }
 }

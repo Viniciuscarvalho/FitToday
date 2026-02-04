@@ -9,9 +9,9 @@
 import SwiftUI
 import Swinject
 
-// MARK: - Program Category
+// MARK: - Program Filter
 
-enum ProgramCategory: String, CaseIterable, Identifiable {
+enum ProgramFilter: String, CaseIterable, Identifiable {
     case all
     case strength
     case conditioning
@@ -71,7 +71,7 @@ struct ProgramsView: View {
     @Environment(AppRouter.self) private var router
     @State private var viewModel: ProgramsViewModel?
     @State private var dependencyError: String?
-    @State private var selectedCategory: ProgramCategory = .all
+    @State private var selectedFilter: ProgramFilter = .all
 
     init(resolver: Resolver) {
         if let repository = resolver.resolve(ProgramRepository.self) {
@@ -144,13 +144,13 @@ struct ProgramsView: View {
     private var categorySelector: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 10) {
-                ForEach(ProgramCategory.allCases) { category in
-                    CategoryPill(
-                        category: category,
-                        isSelected: selectedCategory == category
+                ForEach(ProgramFilter.allCases) { filter in
+                    FilterPill(
+                        filter: filter,
+                        isSelected: selectedFilter == filter
                     ) {
                         withAnimation(.easeInOut(duration: 0.2)) {
-                            selectedCategory = category
+                            selectedFilter = filter
                         }
                     }
                 }
@@ -177,9 +177,9 @@ struct ProgramsView: View {
             VStack(spacing: FitTodaySpacing.md) {
                 ForEach(filteredPrograms(viewModel.programs), id: \.id) { program in
                     let programId = program.id
-                    ProgramCategoryCard(
+                    ProgramFilterCard(
                         program: program,
-                        category: categoryForProgram(program)
+                        filter: filterForProgram(program)
                     ) {
                         router.push(.programDetail(programId), on: .workout)
                     }
@@ -191,12 +191,12 @@ struct ProgramsView: View {
     }
 
     private func filteredPrograms(_ programs: [Program]) -> [Program] {
-        guard selectedCategory != .all else { return programs }
-        return programs.filter { categoryForProgram($0) == selectedCategory }
+        guard selectedFilter != .all else { return programs }
+        return programs.filter { filterForProgram($0) == selectedFilter }
     }
 
-    private func categoryForProgram(_ program: Program) -> ProgramCategory {
-        // Map program goal to category
+    private func filterForProgram(_ program: Program) -> ProgramFilter {
+        // Map program goal to filter
         switch program.goalTag {
         case .strength:
             return .strength
@@ -212,19 +212,19 @@ struct ProgramsView: View {
     }
 }
 
-// MARK: - Category Pill
+// MARK: - Filter Pill
 
-struct CategoryPill: View {
-    let category: ProgramCategory
+struct FilterPill: View {
+    let filter: ProgramFilter
     let isSelected: Bool
     let action: () -> Void
 
     var body: some View {
         Button(action: action) {
             HStack(spacing: 6) {
-                Image(systemName: category.icon)
+                Image(systemName: filter.icon)
                     .font(.system(size: 12, weight: .semibold))
-                Text(category.displayName)
+                Text(filter.displayName)
                     .font(.system(size: 13, weight: .semibold))
             }
             .foregroundStyle(isSelected ? .white : FitTodayColor.textSecondary)
@@ -233,7 +233,7 @@ struct CategoryPill: View {
             .background(
                 Group {
                     if isSelected {
-                        category.gradient
+                        filter.gradient
                     } else {
                         FitTodayColor.surface
                     }
@@ -245,11 +245,11 @@ struct CategoryPill: View {
     }
 }
 
-// MARK: - Program Category Card
+// MARK: - Program Filter Card
 
-struct ProgramCategoryCard: View {
+struct ProgramFilterCard: View {
     let program: Program
-    let category: ProgramCategory
+    let filter: ProgramFilter
     let onTap: () -> Void
 
     var body: some View {
@@ -270,17 +270,17 @@ struct ProgramCategoryCard: View {
                         endPoint: .bottom
                     )
 
-                    // Category badge
+                    // Filter badge
                     HStack(spacing: 4) {
-                        Image(systemName: category.icon)
+                        Image(systemName: filter.icon)
                             .font(.system(size: 10, weight: .bold))
-                        Text(category.displayName)
+                        Text(filter.displayName)
                             .font(.system(size: 10, weight: .bold))
                     }
                     .foregroundStyle(.white)
                     .padding(.horizontal, 10)
                     .padding(.vertical, 6)
-                    .background(category.accentColor)
+                    .background(filter.accentColor)
                     .clipShape(Capsule())
                     .padding(12)
                 }
@@ -317,7 +317,7 @@ struct ProgramCategoryCard: View {
                         Spacer()
                     }
                     .padding(.vertical, 12)
-                    .background(category.gradient)
+                    .background(filter.gradient)
                     .clipShape(RoundedRectangle(cornerRadius: 12))
                     .padding(.top, 8)
                 }

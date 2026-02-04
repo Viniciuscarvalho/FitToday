@@ -78,8 +78,12 @@ final class CreateGroupUseCaseTests: XCTestCase {
 
     func test_execute_passesOwnerInfoToCreateGroup() async throws {
         // Given
-        let authenticatedUser = SocialUser.fixture(id: "user1", displayName: "João", currentGroupId: nil)
-        authenticatedUser.photoURL = URL(string: "https://example.com/photo.jpg")
+        let authenticatedUser = SocialUser.fixture(
+            id: "user1",
+            displayName: "João",
+            photoURL: URL(string: "https://example.com/photo.jpg"),
+            currentGroupId: nil
+        )
         mockAuthRepo.currentUserResult = authenticatedUser
 
         let createdGroup = SocialGroup.fixture(id: "group1", createdBy: "user1")
