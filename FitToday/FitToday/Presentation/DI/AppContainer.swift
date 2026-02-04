@@ -79,6 +79,32 @@ struct AppContainer {
             )
         }.inObjectScope(.container)
 
+        // ========== REMOTE CONFIG & FEATURE FLAGS ==========
+
+        // Remote Config Service - wraps Firebase Remote Config
+        let remoteConfigService = RemoteConfigService()
+        container.register(RemoteConfigServicing.self) { _ in remoteConfigService }
+            .inObjectScope(.container)
+
+        // Feature Flag Repository - provides feature flag access with caching
+        container.register(FeatureFlagRepository.self) { resolver in
+            RemoteConfigFeatureFlagRepository(
+                remoteConfigService: resolver.resolve(RemoteConfigServicing.self)!
+            )
+        }
+        .inObjectScope(.container)
+
+        // Feature Flag Use Case - combines feature flags with entitlement
+        container.register(FeatureFlagChecking.self) { resolver in
+            FeatureFlagUseCase(
+                featureFlagRepository: resolver.resolve(FeatureFlagRepository.self)!,
+                featureGating: resolver.resolve(FeatureGating.self)!
+            )
+        }
+        .inObjectScope(.container)
+
+        // ========== END REMOTE CONFIG & FEATURE FLAGS ==========
+
         // Wger Exercise Service (Free API - no API key needed)
         let wgerService = WgerAPIService()
         container.register(ExerciseServiceProtocol.self) { _ in wgerService }
@@ -424,6 +450,90 @@ struct AppContainer {
             SwiftDataSavedRoutineRepository(modelContainer: modelContainer)
         }
         .inObjectScope(.container)
+
+        // ========== PERSONAL TRAINER CMS INTEGRATION ==========
+
+        // Personal Trainer Firebase Service
+        let personalTrainerService = FirebasePersonalTrainerService()
+        container.register(FirebasePersonalTrainerService.self) { _ in personalTrainerService }
+            .inObjectScope(.container)
+
+        // Personal Trainer Repository
+        container.register(PersonalTrainerRepository.self) { resolver in
+            FirebasePersonalTrainerRepository(
+                service: resolver.resolve(FirebasePersonalTrainerService.self)!
+            )
+        }
+        .inObjectScope(.container)
+
+        // Trainer Student Repository (same implementation, different protocol)
+        container.register(TrainerStudentRepository.self) { resolver in
+            FirebasePersonalTrainerRepository(
+                service: resolver.resolve(FirebasePersonalTrainerService.self)!
+            )
+        }
+        .inObjectScope(.container)
+
+        // Trainer Workout Firebase Service
+        let trainerWorkoutService = FirebaseTrainerWorkoutService()
+        container.register(FirebaseTrainerWorkoutService.self) { _ in trainerWorkoutService }
+            .inObjectScope(.container)
+
+        // Trainer Workout Repository
+        container.register(TrainerWorkoutRepository.self) { resolver in
+            FirebaseTrainerWorkoutRepository(
+                service: resolver.resolve(FirebaseTrainerWorkoutService.self)!
+            )
+        }
+        .inObjectScope(.container)
+
+        // Personal Trainer Use Cases (registered as protocols for ViewModel resolution)
+        container.register(DiscoverTrainersUseCaseProtocol.self) { resolver in
+            DiscoverTrainersUseCase(
+                repository: resolver.resolve(PersonalTrainerRepository.self)!,
+                featureFlagChecker: resolver.resolve(FeatureFlagChecking.self)!
+            )
+        }
+        .inObjectScope(.container)
+
+        container.register(RequestTrainerConnectionUseCaseProtocol.self) { resolver in
+            RequestTrainerConnectionUseCase(
+                trainerStudentRepository: resolver.resolve(TrainerStudentRepository.self)!,
+                authRepository: resolver.resolve(AuthenticationRepository.self)!,
+                featureFlagChecker: resolver.resolve(FeatureFlagChecking.self)!
+            )
+        }
+        .inObjectScope(.container)
+
+        container.register(CancelTrainerConnectionUseCaseProtocol.self) { resolver in
+            CancelTrainerConnectionUseCase(
+                trainerStudentRepository: resolver.resolve(TrainerStudentRepository.self)!,
+                authRepository: resolver.resolve(AuthenticationRepository.self)!,
+                featureFlagChecker: resolver.resolve(FeatureFlagChecking.self)!
+            )
+        }
+        .inObjectScope(.container)
+
+        container.register(GetCurrentTrainerUseCaseProtocol.self) { resolver in
+            GetCurrentTrainerUseCase(
+                trainerRepository: resolver.resolve(PersonalTrainerRepository.self)!,
+                trainerStudentRepository: resolver.resolve(TrainerStudentRepository.self)!,
+                authRepository: resolver.resolve(AuthenticationRepository.self)!,
+                featureFlagChecker: resolver.resolve(FeatureFlagChecking.self)!
+            )
+        }
+        .inObjectScope(.container)
+
+        container.register(FetchAssignedWorkoutsUseCaseProtocol.self) { resolver in
+            FetchAssignedWorkoutsUseCase(
+                trainerWorkoutRepository: resolver.resolve(TrainerWorkoutRepository.self)!,
+                authRepository: resolver.resolve(AuthenticationRepository.self)!,
+                featureFlagChecker: resolver.resolve(FeatureFlagChecking.self)!
+            )
+        }
+        .inObjectScope(.container)
+
+        // ========== END PERSONAL TRAINER CMS INTEGRATION ==========
 
         return AppContainer(container: container, router: router, modelContainer: modelContainer)
     }

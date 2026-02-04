@@ -45,12 +45,19 @@ enum FeatureAccessResult {
     case limitReached(remaining: Int, limit: Int)
     case requiresPro(feature: ProFeature)
     case trialExpired
-    
+    case featureDisabled(reason: String)
+
     var isAllowed: Bool {
         if case .allowed = self { return true }
         return false
     }
-    
+
+    /// Indicates if the result is due to a disabled feature flag.
+    var isFeatureDisabled: Bool {
+        if case .featureDisabled = self { return true }
+        return false
+    }
+
     var message: String {
         switch self {
         case .allowed:
@@ -61,6 +68,8 @@ enum FeatureAccessResult {
             return "\(feature.displayName) é um recurso Pro. Assine para desbloquear."
         case .trialExpired:
             return "Seu período de teste terminou. Assine para continuar."
+        case .featureDisabled(let reason):
+            return reason
         }
     }
 }
