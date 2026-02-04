@@ -8,7 +8,7 @@
 import Foundation
 
 protocol OpenAIClienting: Sendable {
-    func sendJSONPrompt(prompt: String, cachedKey: String?) async throws -> Data
+    func sendJSONPrompt(prompt: String, cachedKey: String?, focus: String?) async throws -> Data
 }
 
 enum OpenAIClientError: Error, LocalizedError {
@@ -51,8 +51,8 @@ actor OpenAIClient: OpenAIClienting {
         self.metricsHandler = metricsHandler
     }
 
-    func sendJSONPrompt(prompt: String, cachedKey: String?) async throws -> Data {
-        if let key = cachedKey, let cached = await cache.value(for: key) {
+    func sendJSONPrompt(prompt: String, cachedKey: String?, focus: String?) async throws -> Data {
+        if let key = cachedKey, let cached = await cache.value(for: key, focus: focus) {
             metricsHandler(Metrics(duration: 0, cacheHit: true, bytesIn: cached.count))
             return cached
         }
@@ -96,7 +96,7 @@ actor OpenAIClient: OpenAIClienting {
         }
 
         if let key = cachedKey {
-            await cache.insert(data, for: key)
+            await cache.insert(data, for: key, focus: focus)
         }
 
         return data

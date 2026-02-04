@@ -1,0 +1,18 @@
+{
+  "featureName": "fix-flow-generate",
+  "currentPhase": "implementation",
+  "taskIndex": 0,
+  "startedAt": "2026-02-04T00:00:00Z",
+  "lastUpdatedAt": "2026-02-04T00:00:00Z",
+  "status": "in_progress",
+  "completedTasks": [],
+  "pendingTasks": [
+    "Task 1.1: Update WorkoutBlueprint variationSeed",
+    "Task 1.2: Add Cache Invalidation on Focus Change",
+    "Task 1.3: Update Cache Key Generation",
+    "Task 2.1: Restore Navigation Title",
+    "Task 2.2-2.8: Minhas Rotinas implementation",
+    "Task 3.1-3.4: Translation implementation",
+    "Task 4.1-4.7: Streaks and Check-in fixes"
+  ]
+}

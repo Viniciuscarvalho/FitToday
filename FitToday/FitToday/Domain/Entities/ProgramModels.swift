@@ -17,6 +17,38 @@ public enum ProgramGoalTag: String, Sendable, Codable, CaseIterable {
     case endurance    // Foco em resistência muscular e stamina
 }
 
+/// Categoria de agrupamento visual de programas.
+public enum ProgramCategory: String, CaseIterable, Sendable {
+    case pushPullLegs
+    case fullBody
+    case upperLower
+    case specialized
+    case fatLoss
+    case homeWorkout
+
+    var displayName: String {
+        switch self {
+        case .pushPullLegs: return "Push Pull Legs"
+        case .fullBody: return "Full Body"
+        case .upperLower: return "Upper Lower"
+        case .specialized: return "Especializados"
+        case .fatLoss: return "Emagrecimento"
+        case .homeWorkout: return "Treino em Casa"
+        }
+    }
+
+    var sortOrder: Int {
+        switch self {
+        case .pushPullLegs: return 0
+        case .fullBody: return 1
+        case .upperLower: return 2
+        case .specialized: return 3
+        case .fatLoss: return 4
+        case .homeWorkout: return 5
+        }
+    }
+}
+
 /// Nível de dificuldade do programa.
 public enum ProgramLevel: String, Sendable, Codable, CaseIterable {
     case beginner
@@ -121,6 +153,69 @@ public struct Program: Identifiable, Hashable, Sendable {
     public var sessionsDescription: String {
         "\(sessionsPerWeek)x por semana"
     }
+
+    /// Categoria visual inferida do ID e nome do programa.
+    public var category: ProgramCategory {
+        let lowerId = id.lowercased()
+        let lowerName = name.lowercased()
+
+        // Push Pull Legs
+        if lowerId.contains("ppl") || lowerName.contains("push pull") {
+            return .pushPullLegs
+        }
+
+        // Home workout
+        if lowerId.contains("home") || equipment == .bodyweight || lowerName.contains("calistenia") {
+            return .homeWorkout
+        }
+
+        // Fat loss / conditioning programs
+        if lowerId.contains("weightloss") || lowerId.contains("hiit") ||
+           lowerName.contains("hiit") || lowerName.contains("queima") ||
+           lowerName.contains("metabolic") || lowerName.contains("fat burn") {
+            return .fatLoss
+        }
+
+        // Upper Lower
+        if lowerId.contains("upperlower") || lowerName.contains("upper lower") {
+            return .upperLower
+        }
+
+        // Full Body
+        if lowerId.contains("fullbody") || lowerName.contains("full body") ||
+           lowerName.contains("minimalista") || lowerId.contains("beginner_complete") {
+            return .fullBody
+        }
+
+        // Specialized (Arnold, PHUL, Bro Split, Functional, Glute-focused, Strength-focused)
+        if lowerId.contains("arnold") || lowerId.contains("phul") ||
+           lowerId.contains("brosplit") || lowerId.contains("strength_") ||
+           lowerId.contains("glute") || lowerId.contains("functional") ||
+           lowerName.contains("arnold") || lowerName.contains("phul") ||
+           lowerName.contains("bro split") || lowerName.contains("5x5") ||
+           lowerName.contains("fundamentos") || lowerName.contains("glúteos") ||
+           lowerName.contains("funcional") {
+            return .specialized
+        }
+
+        // Default to full body for general programs
+        return .fullBody
+    }
+
+    /// Nome curto para exibição em cards.
+    public var shortName: String {
+        // Remove prefixes comuns para deixar o nome mais curto
+        let cleanName = name
+            .replacingOccurrences(of: "Push Pull Legs", with: "PPL")
+            .replacingOccurrences(of: "Upper Lower", with: "UL")
+            .replacingOccurrences(of: "Full Body", with: "FB")
+
+        // Limita a 15 caracteres se ainda for muito longo
+        if cleanName.count > 15 {
+            return String(cleanName.prefix(12)) + "..."
+        }
+        return cleanName
+    }
 }
 
 // MARK: - Display Names
@@ -128,11 +223,11 @@ public struct Program: Identifiable, Hashable, Sendable {
 extension ProgramGoalTag {
     var displayName: String {
         switch self {
-        case .strength: return NSLocalizedString("programs.category.strength", comment: "Strength goal")
-        case .conditioning: return NSLocalizedString("programs.category.conditioning", comment: "Conditioning goal")
-        case .aerobic: return NSLocalizedString("programs.category.aerobic", comment: "Aerobic goal")
-        case .core: return NSLocalizedString("programs.category.wellness", comment: "Core/wellness goal")
-        case .endurance: return NSLocalizedString("programs.category.endurance", comment: "Endurance goal")
+        case .strength: return NSLocalizedString("programs.goal.strength", comment: "Strength goal")
+        case .conditioning: return NSLocalizedString("programs.goal.conditioning", comment: "Conditioning goal")
+        case .aerobic: return NSLocalizedString("programs.goal.aerobic", comment: "Aerobic goal")
+        case .core: return NSLocalizedString("programs.goal.core", comment: "Core/wellness goal")
+        case .endurance: return NSLocalizedString("programs.goal.endurance", comment: "Endurance goal")
         }
     }
 

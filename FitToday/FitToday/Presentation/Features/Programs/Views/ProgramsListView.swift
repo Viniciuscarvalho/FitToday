@@ -2,13 +2,13 @@
 //  ProgramsListView.swift
 //  FitToday
 //
-//  Grid view of pre-made workout programs with filters.
+//  Catalog view of workout programs grouped by category.
 //
 
 import SwiftUI
 import Swinject
 
-/// View displaying the catalog of workout programs.
+/// View displaying the catalog of workout programs grouped by category.
 struct ProgramsListView: View {
     @Environment(AppRouter.self) private var router
     @Environment(\.dependencyResolver) private var resolver
@@ -28,6 +28,9 @@ struct ProgramsListView: View {
             }
         }
         .background(FitTodayColor.background)
+        .navigationTitle("Catálogo de Programas")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar(.hidden, for: .tabBar)
         .task {
             guard !hasInitialized else { return }
             hasInitialized = true
@@ -45,293 +48,165 @@ struct ProgramsListView: View {
 
     @ViewBuilder
     private func contentView(viewModel: ProgramsListViewModel) -> some View {
-        VStack(spacing: 0) {
-            // Filters
-            filtersSection(viewModel: viewModel)
-                .padding(.horizontal, FitTodaySpacing.md)
-                .padding(.vertical, FitTodaySpacing.sm)
+        ScrollView {
+            VStack(spacing: FitTodaySpacing.lg) {
+                // Stats Banner
+                statsBanner(viewModel: viewModel)
+                    .padding(.horizontal, FitTodaySpacing.md)
 
-            // Content
-            if viewModel.isLoading {
-                loadingView
-            } else if viewModel.filteredPrograms.isEmpty {
-                emptyView(viewModel: viewModel)
-            } else {
-                programsScrollView(viewModel: viewModel)
+                // Grouped Programs
+                ForEach(viewModel.groupedPrograms, id: \.category) { group in
+                    categorySection(
+                        category: group.category,
+                        programs: group.programs,
+                        viewModel: viewModel
+                    )
+                }
             }
+            .padding(.vertical, FitTodaySpacing.md)
         }
+        .scrollIndicators(.hidden)
         .task {
             await viewModel.loadPrograms()
         }
     }
 
-    // MARK: - Filters Section
+    // MARK: - Stats Banner
 
-    private func filtersSection(viewModel: ProgramsListViewModel) -> some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: FitTodaySpacing.sm) {
-                // Level Filter
-                FilterDropdown(
-                    title: "programs.filter.level".localized,
-                    selection: Binding(
-                        get: { viewModel.selectedLevel?.displayName },
-                        set: { newValue in
-                            if let newValue {
-                                viewModel.selectedLevel = ProgramLevel.allCases.first { $0.displayName == newValue }
-                            } else {
-                                viewModel.selectedLevel = nil
-                            }
-                        }
-                    ),
-                    options: ProgramLevel.allCases.map { $0.displayName },
-                    allLabel: "programs.filter.all".localized
-                )
-
-                // Goal Filter
-                FilterDropdown(
-                    title: "programs.filter.goal".localized,
-                    selection: Binding(
-                        get: { viewModel.selectedGoal?.displayName },
-                        set: { newValue in
-                            if let newValue {
-                                viewModel.selectedGoal = ProgramGoalTag.allCases.first { $0.displayName == newValue }
-                            } else {
-                                viewModel.selectedGoal = nil
-                            }
-                        }
-                    ),
-                    options: ProgramGoalTag.allCases.map { $0.displayName },
-                    allLabel: "programs.filter.all".localized
-                )
-
-                // Equipment Filter
-                FilterDropdown(
-                    title: "programs.filter.equipment".localized,
-                    selection: Binding(
-                        get: { viewModel.selectedEquipment?.displayName },
-                        set: { newValue in
-                            if let newValue {
-                                viewModel.selectedEquipment = ProgramEquipment.allCases.first { $0.displayName == newValue }
-                            } else {
-                                viewModel.selectedEquipment = nil
-                            }
-                        }
-                    ),
-                    options: ProgramEquipment.allCases.map { $0.displayName },
-                    allLabel: "programs.filter.all".localized
-                )
-            }
-        }
-    }
-
-    // MARK: - Loading View
-
-    private var loadingView: some View {
+    private func statsBanner(viewModel: ProgramsListViewModel) -> some View {
         VStack(spacing: FitTodaySpacing.md) {
-            ProgressView()
-                .tint(FitTodayColor.brandPrimary)
-            Text("programs.loading".localized)
-                .font(FitTodayFont.ui(size: 15, weight: .medium))
-                .foregroundStyle(FitTodayColor.textSecondary)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-    }
+            Text("\(viewModel.programs.count) Programas Disponíveis")
+                .font(FitTodayFont.ui(size: 18, weight: .bold))
+                .foregroundStyle(.white)
 
-    // MARK: - Empty View
-
-    private func emptyView(viewModel: ProgramsListViewModel) -> some View {
-        VStack(spacing: FitTodaySpacing.md) {
-            Image(systemName: "doc.text.magnifyingglass")
-                .font(.system(size: 48))
-                .foregroundStyle(FitTodayColor.textTertiary)
-
-            Text("programs.empty.title".localized)
-                .font(FitTodayFont.ui(size: 17, weight: .semiBold))
-                .foregroundStyle(FitTodayColor.textPrimary)
-
-            Text("programs.empty.message".localized)
-                .font(FitTodayFont.ui(size: 14, weight: .medium))
-                .foregroundStyle(FitTodayColor.textSecondary)
-                .multilineTextAlignment(.center)
-
-            if viewModel.hasActiveFilters {
-                Button("programs.empty.clear_filters".localized) {
-                    viewModel.clearFilters()
-                }
-                .fitSecondaryStyle()
-                .frame(width: 160)
+            HStack(spacing: FitTodaySpacing.lg) {
+                levelStat(count: viewModel.beginnerCount, label: "Iniciante")
+                levelStat(count: viewModel.intermediateCount, label: "Intermed.")
+                levelStat(count: viewModel.advancedCount, label: "Avançado")
             }
         }
-        .padding()
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-    }
-
-    // MARK: - Programs Scroll View
-
-    private func programsScrollView(viewModel: ProgramsListViewModel) -> some View {
-        ScrollView {
-            LazyVStack(spacing: FitTodaySpacing.md) {
-                ForEach(viewModel.filteredPrograms) { program in
-                    Button {
-                        #if DEBUG
-                        print("[ProgramsListView] 👆 Tapped program: '\(program.id)' - '\(program.name)'")
-                        #endif
-                        router.push(.programDetail(program.id), on: .workout)
-                    } label: {
-                        ProgramListCard(program: program)
-                    }
-                    .buttonStyle(.plain)
-                }
-            }
-            .padding(FitTodaySpacing.md)
-        }
-        .scrollIndicators(.hidden)
-    }
-}
-
-// MARK: - Filter Dropdown
-
-struct FilterDropdown: View {
-    let title: String
-    @Binding var selection: String?
-    let options: [String]
-    var allLabel: String = "Todos"
-
-    var body: some View {
-        Menu {
-            Button(allLabel) {
-                selection = nil
-            }
-
-            ForEach(options, id: \.self) { option in
-                Button(option) {
-                    selection = option
-                }
-            }
-        } label: {
-            HStack(spacing: 4) {
-                Text(selection ?? title)
-                    .font(FitTodayFont.ui(size: 13, weight: selection != nil ? .bold : .medium))
-                    .foregroundStyle(selection != nil ? FitTodayColor.brandPrimary : FitTodayColor.textSecondary)
-
-                Image(systemName: "chevron.down")
-                    .font(.system(size: 10, weight: .semibold))
-                    .foregroundStyle(selection != nil ? FitTodayColor.brandPrimary : FitTodayColor.textTertiary)
-            }
-            .padding(.horizontal, FitTodaySpacing.sm)
-            .padding(.vertical, FitTodaySpacing.xs)
-            .background(
-                Capsule()
-                    .fill(selection != nil ? FitTodayColor.brandPrimary.opacity(0.15) : FitTodayColor.surface)
+        .padding(FitTodaySpacing.lg)
+        .frame(maxWidth: .infinity)
+        .background(
+            LinearGradient(
+                colors: [FitTodayColor.brandPrimary, FitTodayColor.brandPrimary.opacity(0.8)],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
             )
-            .overlay(
-                Capsule()
-                    .stroke(selection != nil ? FitTodayColor.brandPrimary : FitTodayColor.outline, lineWidth: 1)
-            )
+        )
+        .clipShape(RoundedRectangle(cornerRadius: FitTodayRadius.lg))
+    }
+
+    private func levelStat(count: Int, label: String) -> some View {
+        VStack(spacing: FitTodaySpacing.xs) {
+            Text("\(count)")
+                .font(FitTodayFont.ui(size: 24, weight: .bold))
+                .foregroundStyle(.white)
+
+            Text(label)
+                .font(FitTodayFont.ui(size: 12, weight: .medium))
+                .foregroundStyle(.white.opacity(0.8))
         }
-    }
-}
-
-// MARK: - Program List Card
-
-struct ProgramListCard: View {
-    let program: Program
-
-    private var durationText: String {
-        String(format: NSLocalizedString("programs.card.days", comment: "Days duration"), program.durationWeeks * 7)
+        .frame(width: 70)
+        .padding(.vertical, FitTodaySpacing.sm)
+        .background(.white.opacity(0.15))
+        .clipShape(RoundedRectangle(cornerRadius: FitTodayRadius.md))
     }
 
-    private var sessionsText: String {
-        let daysPerWeek = String(format: NSLocalizedString("programs.card.days_per_week", comment: "Days per week"), program.sessionsPerWeek)
-        let exercises = String(format: NSLocalizedString("programs.card.exercises", comment: "Exercises count"), program.totalWorkouts)
-        return "\(daysPerWeek) • \(exercises)"
-    }
+    // MARK: - Category Section
 
-    var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            // Hero image section
-            ZStack(alignment: .topLeading) {
-                // Background gradient based on goal
-                gradientForGoal(program.goalTag)
-                    .frame(height: 120)
-
-                // Duration badge
-                HStack(spacing: 4) {
-                    Text(durationText)
-                        .font(FitTodayFont.ui(size: 11, weight: .bold))
-                        .foregroundStyle(.white)
-                }
-                .padding(.horizontal, 10)
-                .padding(.vertical, 5)
-                .background(Color.black.opacity(0.3))
-                .clipShape(Capsule())
-                .padding(FitTodaySpacing.sm)
-            }
-            .clipShape(
-                .rect(
-                    topLeadingRadius: FitTodayRadius.md,
-                    bottomLeadingRadius: 0,
-                    bottomTrailingRadius: 0,
-                    topTrailingRadius: FitTodayRadius.md
-                )
-            )
-
-            // Content section
-            VStack(alignment: .leading, spacing: FitTodaySpacing.xs) {
-                Text(program.name)
-                    .font(FitTodayFont.ui(size: 17, weight: .bold))
+    private func categorySection(
+        category: ProgramCategory,
+        programs: [Program],
+        viewModel: ProgramsListViewModel
+    ) -> some View {
+        VStack(alignment: .leading, spacing: FitTodaySpacing.sm) {
+            // Category Header
+            HStack {
+                Text(category.displayName)
+                    .font(FitTodayFont.ui(size: 17, weight: .semiBold))
                     .foregroundStyle(FitTodayColor.textPrimary)
-                    .lineLimit(1)
 
-                // Tags row
-                HStack(spacing: FitTodaySpacing.xs) {
-                    Text(program.level.displayName)
-                        .font(FitTodayFont.ui(size: 12, weight: .medium))
-                        .foregroundStyle(FitTodayColor.textSecondary)
+                Spacer()
 
-                    Text("•")
-                        .foregroundStyle(FitTodayColor.textTertiary)
-
-                    Text(program.goalTag.displayName)
-                        .font(FitTodayFont.ui(size: 12, weight: .medium))
-                        .foregroundStyle(FitTodayColor.textSecondary)
-
-                    Text("•")
-                        .foregroundStyle(FitTodayColor.textTertiary)
-
-                    Text(program.equipment.displayName)
-                        .font(FitTodayFont.ui(size: 12, weight: .medium))
-                        .foregroundStyle(FitTodayColor.textSecondary)
-                }
-
-                // Sessions info
-                Text(sessionsText)
-                    .font(FitTodayFont.ui(size: 11, weight: .medium))
+                Text("\(programs.count) variações")
+                    .font(FitTodayFont.ui(size: 13, weight: .medium))
                     .foregroundStyle(FitTodayColor.textTertiary)
             }
-            .padding(FitTodaySpacing.md)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(FitTodayColor.surface)
+            .padding(.horizontal, FitTodaySpacing.md)
+
+            // Programs horizontal scroll
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: FitTodaySpacing.sm) {
+                    ForEach(programs) { program in
+                        Button {
+                            router.push(.programDetail(program.id), on: .workout)
+                        } label: {
+                            CompactProgramCard(program: program)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                .padding(.horizontal, FitTodaySpacing.md)
+            }
         }
+    }
+}
+
+// MARK: - Compact Program Card
+
+private struct CompactProgramCard: View {
+    let program: Program
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: FitTodaySpacing.xs) {
+            // Level Badge
+            levelBadge
+
+            // Program Name
+            Text(program.shortName)
+                .font(FitTodayFont.ui(size: 14, weight: .semiBold))
+                .foregroundStyle(FitTodayColor.textPrimary)
+                .lineLimit(1)
+
+            // Equipment
+            Text(program.equipment.displayName)
+                .font(FitTodayFont.ui(size: 12, weight: .medium))
+                .foregroundStyle(FitTodayColor.textTertiary)
+        }
+        .frame(width: 100, alignment: .leading)
+        .padding(FitTodaySpacing.sm)
+        .background(FitTodayColor.surface)
         .clipShape(RoundedRectangle(cornerRadius: FitTodayRadius.md))
         .overlay(
             RoundedRectangle(cornerRadius: FitTodayRadius.md)
-                .stroke(FitTodayColor.outline.opacity(0.3), lineWidth: 1)
+                .stroke(FitTodayColor.outline.opacity(0.2), lineWidth: 1)
         )
     }
 
-    private func gradientForGoal(_ goal: ProgramGoalTag) -> LinearGradient {
-        switch goal {
-        case .strength:
-            return FitTodayColor.gradientStrength
-        case .conditioning:
-            return FitTodayColor.gradientConditioning
-        case .aerobic:
-            return FitTodayColor.gradientAerobic
-        case .core:
-            return FitTodayColor.gradientWellness
-        case .endurance:
-            return FitTodayColor.gradientEndurance
+    private var levelBadge: some View {
+        Text(levelText)
+            .font(FitTodayFont.ui(size: 10, weight: .bold))
+            .foregroundStyle(.white)
+            .padding(.horizontal, FitTodaySpacing.sm)
+            .padding(.vertical, 4)
+            .background(levelColor)
+            .clipShape(Capsule())
+    }
+
+    private var levelText: String {
+        switch program.level {
+        case .beginner: return "Iniciante"
+        case .intermediate: return "Intermed."
+        case .advanced: return "Avançado"
+        }
+    }
+
+    private var levelColor: Color {
+        switch program.level {
+        case .beginner: return .green
+        case .intermediate: return .orange
+        case .advanced: return .red
         }
     }
 }
@@ -344,28 +219,50 @@ struct ProgramListCard: View {
     private(set) var isLoading = false
     var errorMessage: String?
 
-    var selectedLevel: ProgramLevel?
-    var selectedGoal: ProgramGoalTag?
-    var selectedEquipment: ProgramEquipment?
-
     private let repository: ProgramRepository
 
     init(repository: ProgramRepository) {
         self.repository = repository
     }
 
-    var filteredPrograms: [Program] {
-        programs.filter { program in
-            let matchesLevel = selectedLevel == nil || program.level == selectedLevel
-            let matchesGoal = selectedGoal == nil || program.goalTag == selectedGoal
-            let matchesEquipment = selectedEquipment == nil || program.equipment == selectedEquipment
-            return matchesLevel && matchesGoal && matchesEquipment
-        }
+    // MARK: - Computed Properties
+
+    var beginnerCount: Int {
+        programs.filter { $0.level == .beginner }.count
     }
 
-    var hasActiveFilters: Bool {
-        selectedLevel != nil || selectedGoal != nil || selectedEquipment != nil
+    var intermediateCount: Int {
+        programs.filter { $0.level == .intermediate }.count
     }
+
+    var advancedCount: Int {
+        programs.filter { $0.level == .advanced }.count
+    }
+
+    struct ProgramGroup {
+        let category: ProgramCategory
+        let programs: [Program]
+    }
+
+    var groupedPrograms: [ProgramGroup] {
+        let grouped = Dictionary(grouping: programs) { $0.category }
+
+        return ProgramCategory.allCases
+            .compactMap { category -> ProgramGroup? in
+                guard let programs = grouped[category], !programs.isEmpty else {
+                    return nil
+                }
+                // Sort programs within category by level
+                let sortedPrograms = programs.sorted { p1, p2 in
+                    let levelOrder: [ProgramLevel: Int] = [.beginner: 0, .intermediate: 1, .advanced: 2]
+                    return (levelOrder[p1.level] ?? 0) < (levelOrder[p2.level] ?? 0)
+                }
+                return ProgramGroup(category: category, programs: sortedPrograms)
+            }
+            .sorted { $0.category.sortOrder < $1.category.sortOrder }
+    }
+
+    // MARK: - Methods
 
     func loadPrograms() async {
         isLoading = true
@@ -374,20 +271,20 @@ struct ProgramListCard: View {
         do {
             programs = try await repository.listPrograms()
             #if DEBUG
-            print("[ProgramsListViewModel] ✅ Loaded \(programs.count) programs")
+            print("[ProgramsListViewModel] Loaded \(programs.count) programs")
+            for category in ProgramCategory.allCases {
+                let count = programs.filter { $0.category == category }.count
+                if count > 0 {
+                    print("  - \(category.displayName): \(count) programs")
+                }
+            }
             #endif
         } catch {
             errorMessage = "Não foi possível carregar os programas: \(error.localizedDescription)"
             #if DEBUG
-            print("[ProgramsListViewModel] ❌ Error loading programs: \(error)")
+            print("[ProgramsListViewModel] Error: \(error)")
             #endif
         }
-    }
-
-    func clearFilters() {
-        selectedLevel = nil
-        selectedGoal = nil
-        selectedEquipment = nil
     }
 }
 
@@ -402,5 +299,4 @@ struct ProgramListCard: View {
             .environment(AppRouter())
             .environment(\.dependencyResolver, container)
     }
-    .preferredColorScheme(.dark)
 }

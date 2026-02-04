@@ -73,17 +73,17 @@ enum CheckInError: Error, LocalizedError {
     var errorDescription: String? {
         switch self {
         case .workoutTooShort(let minutes):
-            return "Workout must be at least 30 minutes (current: \(minutes) min)"
+            return String(localized: "O treino deve ter pelo menos 30 minutos (atual: \(minutes) min)")
         case .photoRequired:
-            return "Photo is required for check-in"
-        case .uploadFailed(let error):
-            return "Upload failed: \(error.localizedDescription)"
+            return String(localized: "Foto é obrigatória para o check-in")
+        case .uploadFailed:
+            return String(localized: "Falha ao enviar foto. Verifique sua conexão e tente novamente.")
         case .networkUnavailable:
-            return "No internet connection"
+            return String(localized: "Sem conexão com a internet")
         case .notInGroup:
-            return "You need to be in a group to check-in"
+            return String(localized: "Você precisa estar em um grupo para fazer check-in")
         case .noActiveChallenge:
-            return "No active challenge found"
+            return String(localized: "Nenhum desafio ativo encontrado")
         }
     }
 }

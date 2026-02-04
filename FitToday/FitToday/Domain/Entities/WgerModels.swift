@@ -589,14 +589,23 @@ struct WgerExerciseInfo: Codable, Identifiable, Hashable, Sendable {
     }
 
     /// Gets the description in the preferred language.
+    /// Falls back to English only, returns nil if neither Portuguese nor English is available.
+    /// This prevents returning descriptions in other languages like Spanish.
     nonisolated func description(for languageId: Int) -> String? {
-        if let translation = translations.first(where: { $0.language == languageId }) {
-            return translation.description
+        // Try preferred language first (Portuguese)
+        if let translation = translations.first(where: { $0.language == languageId }),
+           let description = translation.description,
+           !description.isEmpty {
+            return description
         }
-        if let english = translations.first(where: { $0.language == 2 }) {
-            return english.description
+        // Fall back to English only (language ID 2) - NOT any other language
+        if let english = translations.first(where: { $0.language == 2 }),
+           let description = english.description,
+           !description.isEmpty {
+            return description
         }
-        return translations.first?.description
+        // Return nil to trigger the Portuguese fallback message in WgerAPIService
+        return nil
     }
 
     nonisolated init(from decoder: Decoder) throws {

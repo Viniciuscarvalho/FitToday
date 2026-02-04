@@ -417,6 +417,14 @@ struct AppContainer {
         }
         .inObjectScope(.container)
 
+        // ========== SAVED ROUTINES (Minhas Rotinas) ==========
+
+        // Saved Routine Repository - persists user's saved program routines
+        container.register(SavedRoutineRepository.self) { _ in
+            SwiftDataSavedRoutineRepository(modelContainer: modelContainer)
+        }
+        .inObjectScope(.container)
+
         return AppContainer(container: container, router: router, modelContainer: modelContainer)
     }
 
@@ -428,7 +436,8 @@ struct AppContainer {
             SDCachedWorkout.self,
             SDUserStats.self,
             SDCustomWorkoutTemplate.self,
-            SDCustomWorkoutCompletion.self
+            SDCustomWorkoutCompletion.self,
+            SDSavedRoutine.self
         ])
         
         // Configuração com migração automática leve

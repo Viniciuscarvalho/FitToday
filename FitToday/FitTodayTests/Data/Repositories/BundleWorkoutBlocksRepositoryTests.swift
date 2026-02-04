@@ -15,10 +15,8 @@ final class BundleWorkoutBlocksRepositoryTests: XCTestCase {
     var sut: BundleWorkoutBlocksRepository!
 
     override func setUp() async throws {
-        // Cria repositório sem enriquecimento para testes mais rápidos
-        sut = BundleWorkoutBlocksRepository(
-            enableDynamicEnrichment: false
-        )
+        // Cria repositório - enrichment agora é feito via Wger API separadamente
+        sut = BundleWorkoutBlocksRepository()
     }
 
     override func tearDown() async throws {

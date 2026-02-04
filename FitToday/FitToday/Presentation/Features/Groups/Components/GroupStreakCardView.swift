@@ -47,7 +47,7 @@ struct GroupStreakCardView: View {
                 .font(.title2)
                 .foregroundStyle(.orange)
 
-            Text("GROUP STREAK")
+            Text("streak.header.title".localized)
                 .font(.caption)
                 .fontWeight(.bold)
                 .foregroundStyle(.secondary)
@@ -55,7 +55,7 @@ struct GroupStreakCardView: View {
             Spacer()
 
             if status.isPaused {
-                Label("Paused", systemImage: "pause.circle.fill")
+                Label("streak.paused".localized, systemImage: "pause.circle.fill")
                     .font(.caption)
                     .foregroundStyle(.yellow)
             }
@@ -70,7 +70,7 @@ struct GroupStreakCardView: View {
                 .font(.system(size: 48, weight: .bold, design: .rounded))
                 .foregroundStyle(status.hasActiveStreak ? .primary : .secondary)
 
-            Text(status.streakDays == 1 ? "day" : "days")
+            Text(status.streakDays == 1 ? "streak.day.singular".localized : "streak.days.plural".localized)
                 .font(.title3)
                 .foregroundStyle(.secondary)
 
@@ -94,14 +94,14 @@ struct GroupStreakCardView: View {
     private func milestoneProgressSection(_ milestone: StreakMilestone) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             HStack {
-                Text("Next: \(milestone.localizedDescription)")
+                Text(String(format: "streak.next.milestone".localized, milestone.localizedDescription))
                     .font(.caption)
                     .foregroundStyle(.secondary)
 
                 Spacer()
 
                 if let daysRemaining = status.daysToNextMilestone {
-                    Text("\(daysRemaining) days to go")
+                    Text(String(format: "streak.days.remaining".localized, daysRemaining))
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
@@ -127,14 +127,14 @@ struct GroupStreakCardView: View {
     private var membersSection: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
-                Text("This Week")
+                Text("streak.this.week".localized)
                     .font(.caption)
                     .foregroundStyle(.secondary)
 
                 Spacer()
 
                 if let week = status.currentWeek {
-                    Text("\(week.compliantMemberCount)/\(week.memberCompliance.count) compliant")
+                    Text(String(format: "streak.compliant.count".localized, week.compliantMemberCount, week.memberCompliance.count))
                         .font(.caption)
                         .foregroundStyle(week.isAllCurrentlyCompliant ? .green : .orange)
                 }

@@ -90,7 +90,8 @@ struct OpenAIWorkoutPlanComposer: WorkoutPlanComposing {
         logger("Chamando OpenAI... (timeout: 60s)")
         
         do {
-            let data = try await client.sendJSONPrompt(prompt: promptText, cachedKey: cacheKey)
+            let currentFocus = checkIn.focus.rawValue
+            let data = try await client.sendJSONPrompt(prompt: promptText, cachedKey: cacheKey, focus: currentFocus)
             
             logger("✅ Resposta recebida: \(data.count) bytes")
             
@@ -250,8 +251,8 @@ struct OpenAIWorkoutPlanComposer: WorkoutPlanComposing {
         previousWorkouts: [WorkoutPlan]
     ) async throws -> WorkoutPlan? {
         let retryPrompt = basePromptText + "\n\n# FEEDBACK DE CORREÇÃO\n" + feedback + "\n\nRetorne APENAS o JSON final."
-        
-        let data = try await client.sendJSONPrompt(prompt: retryPrompt, cachedKey: nil)
+
+        let data = try await client.sendJSONPrompt(prompt: retryPrompt, cachedKey: nil, focus: nil)
         logger("🔁 Retry: resposta recebida: \(data.count) bytes")
         
         let chatResponse = try JSONDecoder().decode(ChatCompletionResponse.self, from: data)

@@ -91,3 +91,24 @@ protocol UserStatsRepository: Sendable {
     /// Reset all statistics (for testing/debug)
     func resetStats() async throws
 }
+
+// MARK: - Saved Routine Repository
+
+/// Repository for managing user's saved routines (up to 5).
+/// Routines are programs saved for quick access in "Minhas Rotinas" section.
+protocol SavedRoutineRepository: Sendable {
+    /// List all saved routines sorted by saved date (most recent first).
+    func listRoutines() async throws -> [SavedRoutine]
+
+    /// Save a new routine. Throws if limit is reached.
+    func saveRoutine(_ routine: SavedRoutine) async throws
+
+    /// Delete a routine by ID.
+    func deleteRoutine(_ id: UUID) async throws
+
+    /// Check if user can save more routines (under the limit).
+    func canSaveMore() async -> Bool
+
+    /// Check if a program is already saved as a routine.
+    func isRoutineSaved(programId: String) async -> Bool
+}

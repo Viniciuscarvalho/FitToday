@@ -114,6 +114,14 @@
 "programs.category.aerobic" = "Aerobic";
 "programs.category.endurance" = "Endurance";
 "programs.category.wellness" = "Wellness";
+
+// Program Goals (ProgramGoalTag)
+"programs.goal.strength" = "Strength";
+"programs.goal.conditioning" = "Conditioning";
+"programs.goal.aerobic" = "Aerobic";
+"programs.goal.core" = "Core";
+"programs.goal.endurance" = "Endurance";
+
 "programs.card.start" = "Start Program";
 "programs.card.duration" = "%d weeks";
 "programs.card.sessions" = "%dx per week";
@@ -334,6 +342,16 @@
 "group.tab.feed" = "Feed";
 "group.tab.leaderboard" = "Ranking";
 
+// MARK: - Group Streaks
+"streak.header.title" = "GROUP STREAK";
+"streak.day.singular" = "day";
+"streak.days.plural" = "days";
+"streak.paused" = "Paused";
+"streak.next.milestone" = "Next: %@";
+"streak.days.remaining" = "%d days to go";
+"streak.this.week" = "This Week";
+"streak.compliant.count" = "%d/%d compliant";
+
 // MARK: - Errors
 "error.network" = "Network error. Please check your connection.";
 "error.generic" = "Something went wrong. Please try again.";
@@ -466,3 +484,29 @@
 // MARK: - Programs Workout Preview
 "program.workout.exercises" = "exercises";
 "program.workout.more_exercises" = "+ %d more exercises";
+
+// MARK: - Saved Routines
+"workout.my_routines" = "My Routines";
+"workout.custom_workouts" = "Custom Workouts";
+"routine.save" = "Save as Routine";
+"routine.saved" = "Routine Saved";
+"routine.error.limit_reached" = "You've reached the limit of 5 saved routines. Remove one to add another.";
+"routine.error.already_saved" = "This program is already saved in your routines.";
+"routine.error.not_found" = "Routine not found.";
+"routine.delete.confirm" = "Remove this routine?";
+
+// MARK: - Check-in Errors (Extended)
+"checkin.error.network" = "No internet connection.";
+"checkin.error.not_in_group" = "You need to be in a group to check in.";
+"checkin.error.too_short" = "Workout must be at least 30 minutes. Current: %d min.";
+"checkin.error.compression" = "Error processing image.";
+"checkin.error.upload" = "Error uploading photo. Please try again.";
+"checkin.error.no_challenge" = "No active challenge this week.";
+"checkin.error.no_image" = "Select a photo to continue.";
+"checkin.success.title" = "Check-in Complete!";
+"checkin.success.message" = "Your workout has been recorded.";
+"checkin.title" = "Check In";
+"checkin.submit" = "Submit Check-in";
+
+// MARK: - Exercise Fallback
+"exercise.description.fallback" = "Perform the exercise maintaining proper form and controlling the movement.";

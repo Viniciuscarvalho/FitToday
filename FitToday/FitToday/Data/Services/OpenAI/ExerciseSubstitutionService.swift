@@ -100,7 +100,7 @@ actor ExerciseSubstitutionService: ExerciseSubstituting {
         
         logger("Buscando alternativas para: \(exercise.name)")
         
-        let data = try await client.sendJSONPrompt(prompt: prompt, cachedKey: cacheKey)
+        let data = try await client.sendJSONPrompt(prompt: prompt, cachedKey: cacheKey, focus: nil)
         
         // Decodificar resposta do Chat Completions
         let chatResponse = try JSONDecoder().decode(SubstitutionChatResponse.self, from: data)

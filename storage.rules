@@ -1,0 +1,69 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // Helper function to check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Helper function to check file size (max 5MB)
+    function isValidFileSize() {
+      return request.resource.size < 5 * 1024 * 1024;
+    }
+
+    // Helper function to check if file is an image
+    function isImage() {
+      return request.resource.contentType.matches('image/.*');
+    }
+
+    // Check-in photos: /checkIns/{groupId}/{odUserId}/{filename}
+    match /checkIns/{groupId}/{userId}/{fileName} {
+      // Allow read if authenticated
+      allow read: if isAuthenticated();
+
+      // Allow write if user is authenticated, uploading their own file,
+      // file is an image, and size is under 5MB
+      allow write: if isAuthenticated()
+                   && request.auth.uid == userId
+                   && isImage()
+                   && isValidFileSize();
+
+      // Allow delete if user owns the file
+      allow delete: if isAuthenticated()
+                    && request.auth.uid == userId;
+    }
+
+    // Profile photos: /profilePhotos/{userId}/{filename}
+    match /profilePhotos/{userId}/{fileName} {
+      // Allow read if authenticated
+      allow read: if isAuthenticated();
+
+      // Allow write if user is uploading their own photo
+      allow write: if isAuthenticated()
+                   && request.auth.uid == userId
+                   && isImage()
+                   && isValidFileSize();
+
+      // Allow delete if user owns the file
+      allow delete: if isAuthenticated()
+                    && request.auth.uid == userId;
+    }
+
+    // Group photos: /groupPhotos/{groupId}/{filename}
+    match /groupPhotos/{groupId}/{fileName} {
+      // Allow read if authenticated
+      allow read: if isAuthenticated();
+
+      // Allow write if authenticated (group membership check would require Firestore access)
+      allow write: if isAuthenticated()
+                   && isImage()
+                   && isValidFileSize();
+    }
+
+    // Deny all other access by default
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}
