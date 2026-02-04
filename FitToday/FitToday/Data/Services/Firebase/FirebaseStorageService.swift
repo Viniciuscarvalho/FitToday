@@ -36,8 +36,30 @@ actor FirebaseStorageService: StorageServicing {
         let metadata = StorageMetadata()
         metadata.contentType = "image/jpeg"
 
-        _ = try await ref.putDataAsync(data, metadata: metadata)
-        return try await ref.downloadURL()
+        #if DEBUG
+        print("[Storage] 📤 Uploading image to: \(path) (\(data.count / 1024) KB)")
+        #endif
+
+        do {
+            _ = try await ref.putDataAsync(data, metadata: metadata)
+            let url = try await ref.downloadURL()
+            #if DEBUG
+            print("[Storage] ✅ Upload successful: \(url.absoluteString.prefix(80))...")
+            #endif
+            return url
+        } catch {
+            #if DEBUG
+            print("[Storage] ❌ Upload failed: \(error.localizedDescription)")
+            if let storageError = error as NSError? {
+                print("[Storage] Error code: \(storageError.code)")
+                print("[Storage] Error domain: \(storageError.domain)")
+                if let reason = storageError.userInfo[NSLocalizedFailureReasonErrorKey] as? String {
+                    print("[Storage] Reason: \(reason)")
+                }
+            }
+            #endif
+            throw error
+        }
     }
 
     func deleteImage(path: String) async throws {

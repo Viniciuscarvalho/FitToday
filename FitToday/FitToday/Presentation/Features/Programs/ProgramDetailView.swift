@@ -15,6 +15,11 @@ struct ProgramDetailView: View {
     @Environment(AppRouter.self) private var router
     @State private var viewModel: ProgramDetailViewModel?
     @State private var dependencyError: String?
+    @State private var isSaved = false
+    @State private var canSave = true
+    @State private var isSaving = false
+    @State private var showSaveError: String?
+    @State private var showSaveSuccess = false
 
     init(programId: String, resolver: Resolver) {
         self.programId = programId
@@ -64,6 +69,86 @@ struct ProgramDetailView: View {
         .navigationTitle(viewModel?.program?.name ?? "Programa")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar(.hidden, for: .tabBar)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                saveButton
+            }
+        }
+        .task {
+            await checkSavedStatus()
+        }
+        .alert("Rotina Salva!", isPresented: $showSaveSuccess) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text("O programa foi adicionado às suas rotinas.")
+        }
+        .alert("Erro", isPresented: .init(
+            get: { showSaveError != nil },
+            set: { if !$0 { showSaveError = nil } }
+        )) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            if let error = showSaveError {
+                Text(error)
+            }
+        }
+    }
+
+    // MARK: - Save Button
+
+    @ViewBuilder
+    private var saveButton: some View {
+        if let program = viewModel?.program {
+            Button {
+                Task {
+                    await saveRoutine(program)
+                }
+            } label: {
+                if isSaving {
+                    ProgressView()
+                        .tint(.white)
+                } else {
+                    Image(systemName: isSaved ? "bookmark.fill" : "bookmark")
+                        .font(.system(.body, weight: .semibold))
+                }
+            }
+            .disabled(isSaved || !canSave || isSaving)
+            .foregroundStyle(isSaved ? FitTodayColor.brandPrimary : .white)
+        }
+    }
+
+    // MARK: - Save Actions
+
+    private func checkSavedStatus() async {
+        guard let routineRepo = resolver.resolve(SavedRoutineRepository.self) else { return }
+
+        isSaved = await routineRepo.isRoutineSaved(programId: programId)
+        canSave = await routineRepo.canSaveMore()
+    }
+
+    private func saveRoutine(_ program: Program) async {
+        guard let routineRepo = resolver.resolve(SavedRoutineRepository.self) else {
+            showSaveError = "Erro de configuração"
+            return
+        }
+
+        isSaving = true
+        defer { isSaving = false }
+
+        do {
+            let routine = SavedRoutine(from: program)
+            try await routineRepo.saveRoutine(routine)
+            isSaved = true
+            showSaveSuccess = true
+
+            #if DEBUG
+            print("[ProgramDetail] ✅ Routine saved: \(program.name)")
+            #endif
+        } catch let error as SavedRoutineError {
+            showSaveError = error.localizedDescription
+        } catch {
+            showSaveError = error.localizedDescription
+        }
     }
 
     @ViewBuilder
