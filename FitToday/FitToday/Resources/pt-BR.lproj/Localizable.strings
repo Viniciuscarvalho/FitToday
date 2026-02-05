@@ -213,6 +213,8 @@
 "settings.pro.try_free" = "Experimente Pro Gratis";
 "settings.pro.connected" = "Conectado";
 "settings.pro.connect_sync" = "Conecte para sincronizar treinos";
+"settings.personal_trainer" = "Personal Trainer";
+"settings.personal_trainer_desc" = "Conecte-se ao seu personal";
 
 // MARK: - Privacy Settings
 "privacy.title" = "Configuracoes de Privacidade";

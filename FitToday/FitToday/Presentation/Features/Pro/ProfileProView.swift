@@ -41,6 +41,9 @@ struct ProfileProView: View {
                 // Apple Health Integration
                 appleHealthCard
 
+                // Personal Trainer
+                personalTrainerCard
+
                 // Profile Settings
                 settingsSection
 
@@ -256,6 +259,58 @@ struct ProfileProView: View {
                 Image(systemName: "chevron.right")
                     .font(.system(size: 14))
                     .foregroundStyle(FitTodayColor.textTertiary)
+            }
+            .padding(FitTodaySpacing.md)
+            .background(FitTodayColor.surface)
+            .clipShape(RoundedRectangle(cornerRadius: 16))
+        }
+        .buttonStyle(.plain)
+    }
+
+    // MARK: - Personal Trainer Card
+
+    private var personalTrainerCard: some View {
+        Button {
+            router.push(.personalTrainer, on: .profile)
+        } label: {
+            HStack(spacing: FitTodaySpacing.md) {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(FitTodayColor.brandPrimary.opacity(0.15))
+                        .frame(width: 44, height: 44)
+                    Image(systemName: "figure.strengthtraining.traditional")
+                        .font(.system(size: 20))
+                        .foregroundStyle(FitTodayColor.brandPrimary)
+                }
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("settings.personal_trainer".localized)
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundStyle(FitTodayColor.textPrimary)
+                    Text("settings.personal_trainer_desc".localized)
+                        .font(.system(size: 13))
+                        .foregroundStyle(FitTodayColor.textSecondary)
+                }
+
+                Spacer()
+
+                if entitlement.isPro {
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 14))
+                        .foregroundStyle(FitTodayColor.textTertiary)
+                } else {
+                    Text("PRO")
+                        .font(.system(size: 10, weight: .bold))
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(FitTodayColor.brandPrimary)
+                        .clipShape(Capsule())
+
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 14))
+                        .foregroundStyle(FitTodayColor.textTertiary)
+                }
             }
             .padding(FitTodaySpacing.md)
             .background(FitTodayColor.surface)

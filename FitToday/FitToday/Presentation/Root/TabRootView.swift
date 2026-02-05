@@ -193,6 +193,11 @@ struct TabRootView: View {
                     message: "Unable to load workout builder."
                 )
             }
+        case .personalTrainer:
+            PersonalTrainerView(resolver: resolver)
+        case .trainerSearch:
+            let viewModel = PersonalTrainerViewModel(resolver: resolver)
+            TrainerSearchView(viewModel: viewModel)
         }
     }
 }

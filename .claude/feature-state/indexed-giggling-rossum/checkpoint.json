@@ -1,0 +1,41 @@
+{
+  "version": "1.0",
+  "feature_name": "indexed-giggling-rossum",
+  "feature_display_name": "CMS Personal Trainer Integration",
+  "project_path": "/Users/viniciuscarvalho/Documents/FitToday",
+  "current_phase": 2,
+  "phase_status": "pending",
+  "phases": {
+    "0": {
+      "name": "Inputs Gate",
+      "status": "completed",
+      "started_at": "2026-02-04T21:30:00Z",
+      "completed_at": "2026-02-04T21:45:00Z",
+      "outputs": ["prd.md", "techspec.md", "tasks.md"]
+    },
+    "1": {
+      "name": "Analysis & Planning",
+      "status": "completed",
+      "started_at": "2026-02-04T21:45:00Z",
+      "completed_at": "2026-02-04T22:00:00Z",
+      "outputs": ["analysis.md", "plan.md"]
+    },
+    "2": {
+      "name": "Implementation",
+      "status": "pending",
+      "total_tasks": 15,
+      "completed_tasks": []
+    },
+    "3": {
+      "name": "Tests & Validation",
+      "status": "pending"
+    },
+    "4": {
+      "name": "Commit & PR",
+      "status": "pending"
+    }
+  },
+  "last_updated": "2026-02-04T22:00:00Z",
+  "paused": false,
+  "error_state": null
+}

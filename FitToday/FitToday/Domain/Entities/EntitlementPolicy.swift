@@ -24,7 +24,11 @@ enum ProFeature: String, CaseIterable {
     
     // Configurações
     case customizableSettings = "customizable_settings"
-    
+
+    // Personal Trainer
+    case personalTrainer = "personal_trainer"
+    case trainerWorkouts = "trainer_workouts"
+
     var displayName: String {
         switch self {
         case .aiWorkoutGeneration: return "Treinos personalizados por IA"
@@ -33,6 +37,8 @@ enum ProFeature: String, CaseIterable {
         case .advancedDOMSAdjustment: return "Ajuste por dor muscular"
         case .premiumPrograms: return "Programas premium"
         case .customizableSettings: return "Configurações avançadas"
+        case .personalTrainer: return "Personal Trainer"
+        case .trainerWorkouts: return "Treinos do Personal"
         }
     }
 }
@@ -138,9 +144,13 @@ struct EntitlementPolicy {
         case .customizableSettings:
             // Configurações avançadas requerem Pro
             return .requiresPro(feature: feature)
+
+        case .personalTrainer, .trainerWorkouts:
+            // Personal Trainer features requerem Pro
+            return .requiresPro(feature: feature)
         }
     }
-    
+
     /// Verifica se uma feature é totalmente bloqueada para Free
     static func isProOnly(_ feature: ProFeature) -> Bool {
         switch feature {
@@ -150,7 +160,9 @@ struct EntitlementPolicy {
              .unlimitedHistory,
              .advancedDOMSAdjustment,
              .premiumPrograms,
-             .customizableSettings:
+             .customizableSettings,
+             .personalTrainer,
+             .trainerWorkouts:
             return true
         }
     }

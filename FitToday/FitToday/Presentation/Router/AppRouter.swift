@@ -58,6 +58,8 @@ enum AppRoute: Hashable {
     case notifications  // Notifications screen for challenges
     case customWorkouts  // Custom workout templates list
     case customWorkoutBuilder(UUID?)  // Create or edit custom workout (nil = new)
+    case personalTrainer  // Personal Trainer connection and workouts
+    case trainerSearch  // Search for personal trainers
 }
 
 struct DeepLink {
