@@ -535,6 +535,74 @@ struct AppContainer {
 
         // ========== END PERSONAL TRAINER CMS INTEGRATION ==========
 
+        // ========== CMS WORKOUT API INTEGRATION ==========
+
+        // CMS Workout Service - REST API client
+        let cmsWorkoutService = CMSWorkoutService()
+        container.register(CMSWorkoutService.self) { _ in cmsWorkoutService }
+            .inObjectScope(.container)
+
+        // CMS Workout Repository
+        container.register(CMSWorkoutRepository.self) { resolver in
+            CMSWorkoutRepositoryImpl(
+                service: resolver.resolve(CMSWorkoutService.self)!
+            )
+        }
+        .inObjectScope(.container)
+
+        // CMS Workout Use Cases
+        container.register(FetchCMSWorkoutsUseCase.self) { resolver in
+            FetchCMSWorkoutsUseCase(
+                repository: resolver.resolve(CMSWorkoutRepository.self)!,
+                authRepository: resolver.resolve(AuthenticationRepository.self)!
+            )
+        }
+        .inObjectScope(.container)
+
+        container.register(FetchCMSWorkoutDetailUseCase.self) { resolver in
+            FetchCMSWorkoutDetailUseCase(
+                repository: resolver.resolve(CMSWorkoutRepository.self)!
+            )
+        }
+        .inObjectScope(.container)
+
+        container.register(FetchWorkoutProgressUseCase.self) { resolver in
+            FetchWorkoutProgressUseCase(
+                repository: resolver.resolve(CMSWorkoutRepository.self)!
+            )
+        }
+        .inObjectScope(.container)
+
+        container.register(FetchWorkoutFeedbackUseCase.self) { resolver in
+            FetchWorkoutFeedbackUseCase(
+                repository: resolver.resolve(CMSWorkoutRepository.self)!
+            )
+        }
+        .inObjectScope(.container)
+
+        container.register(PostWorkoutFeedbackUseCase.self) { resolver in
+            PostWorkoutFeedbackUseCase(
+                repository: resolver.resolve(CMSWorkoutRepository.self)!
+            )
+        }
+        .inObjectScope(.container)
+
+        container.register(CompleteCMSWorkoutUseCase.self) { resolver in
+            CompleteCMSWorkoutUseCase(
+                repository: resolver.resolve(CMSWorkoutRepository.self)!
+            )
+        }
+        .inObjectScope(.container)
+
+        container.register(ArchiveCMSWorkoutUseCase.self) { resolver in
+            ArchiveCMSWorkoutUseCase(
+                repository: resolver.resolve(CMSWorkoutRepository.self)!
+            )
+        }
+        .inObjectScope(.container)
+
+        // ========== END CMS WORKOUT API INTEGRATION ==========
+
         return AppContainer(container: container, router: router, modelContainer: modelContainer)
     }
 
