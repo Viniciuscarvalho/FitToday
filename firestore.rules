@@ -78,5 +78,24 @@ service cloud.firestore {
       allow update: if isAuthenticated() &&
                       resource.data.userId == request.auth.uid;
     }
+
+    // Personal Workouts collection - treinos enviados pelo Personal Trainer
+    match /personalWorkouts/{workoutId} {
+      // Users can only read workouts assigned to them
+      allow read: if isAuthenticated() &&
+                    resource.data.userId == request.auth.uid;
+
+      // Only trainers can create workouts (via CMS/Admin)
+      // Users cannot create workouts directly
+      allow create: if false;
+
+      // Users can update their own workouts (mark as viewed)
+      allow update: if isAuthenticated() &&
+                      resource.data.userId == request.auth.uid &&
+                      request.resource.data.diff(resource.data).affectedKeys().hasOnly(['viewedAt']);
+
+      // Users cannot delete workouts
+      allow delete: if false;
+    }
   }
 }

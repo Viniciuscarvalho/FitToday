@@ -61,6 +61,20 @@ service firebase.storage {
                    && isValidFileSize();
     }
 
+    // Personal Workout files: /personalWorkouts/{trainerId}/{userId}/{filename}
+    // PDFs and images uploaded by Personal Trainers for their students
+    match /personalWorkouts/{trainerId}/{userId}/{fileName} {
+      // Allow read if user is the assigned student
+      allow read: if isAuthenticated()
+                  && request.auth.uid == userId;
+
+      // Only trainers can upload (handled via Admin SDK/CMS)
+      allow write: if false;
+
+      // Only trainers can delete (handled via Admin SDK/CMS)
+      allow delete: if false;
+    }
+
     // Deny all other access by default
     match /{allPaths=**} {
       allow read, write: if false;

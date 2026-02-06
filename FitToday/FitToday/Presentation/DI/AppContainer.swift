@@ -603,6 +603,21 @@ struct AppContainer {
 
         // ========== END CMS WORKOUT API INTEGRATION ==========
 
+        // ========== PERSONAL WORKOUTS (Treinos do Personal) ==========
+
+        // PDF Cache Service - caches downloaded PDFs locally
+        let pdfCacheService = PDFCacheService()
+        container.register(PDFCaching.self) { _ in pdfCacheService }
+            .inObjectScope(.container)
+
+        // Personal Workout Repository - fetches trainer-submitted workouts from Firebase
+        container.register(PersonalWorkoutRepository.self) { _ in
+            FirebasePersonalWorkoutRepository()
+        }
+        .inObjectScope(.container)
+
+        // ========== END PERSONAL WORKOUTS ==========
+
         return AppContainer(container: container, router: router, modelContainer: modelContainer)
     }
 
