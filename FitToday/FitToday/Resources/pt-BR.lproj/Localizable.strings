@@ -512,3 +512,11 @@
 
 // MARK: - Exercise Fallback
 "exercise.description.fallback" = "Execute o exercicio mantendo a postura correta e controlando o movimento.";
+
+// MARK: - Personal Workouts (Treinos do Personal)
+"personal.title" = "Personal";
+"personal.empty.title" = "Nenhum treino do Personal";
+"personal.empty.message" = "Seu personal trainer ainda não enviou treinos para você";
+"personal.loading" = "Carregando treino...";
+"personal.error.load" = "Erro ao carregar";
+"personal.new_badge" = "NOVO";

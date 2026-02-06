@@ -2,27 +2,39 @@
 //  WorkoutTabView.swift
 //  FitToday
 //
-//  Main Workout tab with segmented control for "My Workouts" and "Programs".
+//  Main Workout tab with segmented control for "My Workouts", "Programs" and "Personal".
 //
 
 import SwiftUI
 import Swinject
 
-/// Main Workout tab view with two sections: My Workouts and Programs.
+/// Main Workout tab view with three sections: My Workouts, Programs, and Personal.
 struct WorkoutTabView: View {
+    @Environment(\.dependencyResolver) private var envResolver
     let resolver: Resolver
 
     @State private var selectedSegment: WorkoutSegment = .myWorkouts
     @State private var showCreateWorkout = false
+    @State private var personalWorkoutsViewModel: PersonalWorkoutsViewModel?
 
     enum WorkoutSegment: CaseIterable {
         case myWorkouts
         case programs
+        case personal
 
         var title: String {
             switch self {
             case .myWorkouts: return "workout_tab.segment.my_workouts".localized
             case .programs: return "workout_tab.segment.programs".localized
+            case .personal: return "personal.title".localized
+            }
+        }
+
+        var icon: String {
+            switch self {
+            case .myWorkouts: return "figure.strengthtraining.traditional"
+            case .programs: return "list.bullet.rectangle"
+            case .personal: return "person.fill"
             }
         }
     }
@@ -42,6 +54,9 @@ struct WorkoutTabView: View {
 
                     ProgramsListView()
                         .tag(WorkoutSegment.programs)
+
+                    PersonalWorkoutsListView()
+                        .tag(WorkoutSegment.personal)
                 }
                 .tabViewStyle(.page(indexDisplayMode: .never))
                 .animation(.easeInOut(duration: 0.2), value: selectedSegment)
@@ -74,19 +89,32 @@ struct WorkoutTabView: View {
                         selectedSegment = segment
                     }
                 } label: {
-                    Text(segment.title)
-                        .font(FitTodayFont.ui(size: 15, weight: selectedSegment == segment ? .bold : .medium))
-                        .foregroundStyle(selectedSegment == segment ? FitTodayColor.textPrimary : FitTodayColor.textSecondary)
-                        .padding(.vertical, FitTodaySpacing.sm)
-                        .padding(.horizontal, FitTodaySpacing.md)
-                        .background(
-                            Capsule()
-                                .fill(selectedSegment == segment ? FitTodayColor.brandPrimary.opacity(0.2) : Color.clear)
-                        )
-                        .overlay(
-                            Capsule()
-                                .stroke(selectedSegment == segment ? FitTodayColor.brandPrimary : Color.clear, lineWidth: 1)
-                        )
+                    HStack(spacing: 4) {
+                        Text(segment.title)
+                            .font(FitTodayFont.ui(size: 14, weight: selectedSegment == segment ? .bold : .medium))
+
+                        // Badge para treinos novos do Personal
+                        if segment == .personal, let count = personalWorkoutsViewModel?.newWorkoutsCount, count > 0 {
+                            Text("\(count)")
+                                .font(FitTodayFont.ui(size: 10, weight: .bold))
+                                .foregroundStyle(.white)
+                                .padding(.horizontal, 5)
+                                .padding(.vertical, 2)
+                                .background(FitTodayColor.error)
+                                .clipShape(Capsule())
+                        }
+                    }
+                    .foregroundStyle(selectedSegment == segment ? FitTodayColor.textPrimary : FitTodayColor.textSecondary)
+                    .padding(.vertical, FitTodaySpacing.sm)
+                    .padding(.horizontal, FitTodaySpacing.sm)
+                    .background(
+                        Capsule()
+                            .fill(selectedSegment == segment ? FitTodayColor.brandPrimary.opacity(0.2) : Color.clear)
+                    )
+                    .overlay(
+                        Capsule()
+                            .stroke(selectedSegment == segment ? FitTodayColor.brandPrimary : Color.clear, lineWidth: 1)
+                    )
                 }
                 .buttonStyle(.plain)
             }
@@ -96,6 +124,30 @@ struct WorkoutTabView: View {
             Capsule()
                 .fill(FitTodayColor.surface)
         )
+        .task {
+            await initializePersonalWorkoutsViewModel()
+        }
+    }
+
+    // MARK: - Personal Workouts Badge
+
+    private func initializePersonalWorkoutsViewModel() async {
+        guard personalWorkoutsViewModel == nil else { return }
+
+        let resolverToUse = envResolver.resolve(Resolver.self) ?? resolver
+
+        guard let repository = resolverToUse.resolve(PersonalWorkoutRepository.self),
+              let pdfCache = resolverToUse.resolve(PDFCaching.self),
+              let authRepository = resolverToUse.resolve(AuthenticationRepository.self) else {
+            return
+        }
+
+        let vm = PersonalWorkoutsViewModel(repository: repository, pdfCache: pdfCache)
+        personalWorkoutsViewModel = vm
+
+        if let user = try? await authRepository.currentUser() {
+            vm.startObserving(userId: user.id)
+        }
     }
 
     // MARK: - Floating Action Button

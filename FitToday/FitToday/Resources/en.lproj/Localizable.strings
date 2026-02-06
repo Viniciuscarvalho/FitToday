@@ -512,3 +512,11 @@
 
 // MARK: - Exercise Fallback
 "exercise.description.fallback" = "Perform the exercise maintaining proper form and controlling the movement.";
+
+// MARK: - Personal Workouts (Trainer Workouts)
+"personal.title" = "Personal";
+"personal.empty.title" = "No Personal Trainer Workouts";
+"personal.empty.message" = "Your personal trainer hasn't sent any workouts yet";
+"personal.loading" = "Loading workout...";
+"personal.error.load" = "Failed to load";
+"personal.new_badge" = "NEW";
