@@ -17,6 +17,9 @@
 "common.loading" = "Carregando...";
 "common.retry" = "Tentar novamente";
 "common.see_all" = "Ver Todos";
+"common.delete" = "Remover";
+"common.edit" = "Editar";
+"common.view_details" = "Ver Detalhes";
 
 // MARK: - Tabs
 "tab.home" = "Inicio";
@@ -496,6 +499,11 @@
 "routine.error.already_saved" = "Este programa ja esta salvo nas suas rotinas.";
 "routine.error.not_found" = "Rotina nao encontrada.";
 "routine.delete.confirm" = "Remover esta rotina?";
+"routine.accessibility.hint" = "Toque para ver detalhes. Segure para mais opcoes.";
+
+// MARK: - Workout Delete
+"workout.delete.confirm" = "Remover este treino?";
+"workout.delete.message" = "O treino \"%@\" sera removido permanentemente.";
 
 // MARK: - Check-in Errors (Extended)
 "checkin.error.network" = "Sem conexao com a internet.";

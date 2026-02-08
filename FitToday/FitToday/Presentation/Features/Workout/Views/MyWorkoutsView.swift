@@ -10,6 +10,8 @@ import Swinject
 
 /// View displaying the user's saved workout templates and routines.
 struct MyWorkoutsView: View {
+    @Environment(AppRouter.self) private var router
+
     @Binding var showCreateWorkout: Bool
     let resolver: Resolver
 
@@ -17,6 +19,8 @@ struct MyWorkoutsView: View {
     @State private var savedRoutines: [SavedRoutine] = []
     @State private var isLoading = true
     @State private var searchText = ""
+    @State private var workoutToDelete: CustomWorkoutTemplate?
+    @State private var showDeleteConfirmation = false
 
     private var filteredWorkouts: [CustomWorkoutTemplate] {
         if searchText.isEmpty {
@@ -142,14 +146,26 @@ struct MyWorkoutsView: View {
             }
             .padding(.horizontal, FitTodaySpacing.md)
 
-            // Routine Cards
-            ForEach(savedRoutines) { routine in
-                SavedRoutineCard(
-                    routine: routine,
-                    onDelete: { await deleteRoutine(routine.id) }
-                )
-                .padding(.horizontal, FitTodaySpacing.md)
+            // Routine Cards - Using List for swipe actions to work
+            List {
+                ForEach(savedRoutines) { routine in
+                    SavedRoutineCardRow(
+                        routine: routine,
+                        onDelete: { await deleteRoutine(routine.id) }
+                    )
+                    .listRowInsets(EdgeInsets(
+                        top: FitTodaySpacing.xs,
+                        leading: FitTodaySpacing.md,
+                        bottom: FitTodaySpacing.xs,
+                        trailing: FitTodaySpacing.md
+                    ))
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
+                }
             }
+            .listStyle(.plain)
+            .scrollDisabled(true)
+            .frame(height: CGFloat(savedRoutines.count) * 110)
         }
     }
 
@@ -167,13 +183,48 @@ struct MyWorkoutsView: View {
 
             // Workout cards
             ForEach(filteredWorkouts) { workout in
-                NavigationLink {
-                    WorkoutDetailView(workout: workout)
+                Button {
+                    router.push(.customWorkoutBuilder(workout.id), on: .workout)
                 } label: {
                     WorkoutTemplateCard(workout: workout)
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(WorkoutCardButtonStyle())
+                .contextMenu {
+                    Button {
+                        router.push(.customWorkoutBuilder(workout.id), on: .workout)
+                    } label: {
+                        Label("common.edit".localized, systemImage: "pencil")
+                    }
+
+                    Button(role: .destructive) {
+                        workoutToDelete = workout
+                        showDeleteConfirmation = true
+                    } label: {
+                        Label("common.delete".localized, systemImage: "trash")
+                    }
+                }
                 .padding(.horizontal, FitTodaySpacing.md)
+            }
+        }
+        .confirmationDialog(
+            "workout.delete.confirm".localized,
+            isPresented: $showDeleteConfirmation,
+            titleVisibility: .visible
+        ) {
+            Button("common.delete".localized, role: .destructive) {
+                if let workout = workoutToDelete {
+                    Task {
+                        await deleteWorkout(workout.id)
+                    }
+                }
+                workoutToDelete = nil
+            }
+            Button("common.cancel".localized, role: .cancel) {
+                workoutToDelete = nil
+            }
+        } message: {
+            if let workout = workoutToDelete {
+                Text("workout.delete.message".localized.replacingOccurrences(of: "%@", with: workout.name))
             }
         }
     }
@@ -251,6 +302,36 @@ struct MyWorkoutsView: View {
             print("[MyWorkouts] Error deleting routine: \(error)")
             #endif
         }
+    }
+
+    private func deleteWorkout(_ id: UUID) async {
+        guard let workoutRepo = resolver.resolve(CustomWorkoutRepository.self) else { return }
+
+        do {
+            try await workoutRepo.deleteTemplate(id: id)
+            // Reload to refresh the list
+            workouts = try await workoutRepo.listTemplates()
+
+            // Haptic feedback
+            let generator = UINotificationFeedbackGenerator()
+            generator.notificationOccurred(.success)
+        } catch {
+            #if DEBUG
+            print("[MyWorkouts] Error deleting workout: \(error)")
+            #endif
+        }
+    }
+}
+
+// MARK: - Button Style for Workout Card
+
+/// Custom button style that provides visual feedback on press
+struct WorkoutCardButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .opacity(configuration.isPressed ? 0.7 : 1.0)
+            .scaleEffect(configuration.isPressed ? 0.98 : 1.0)
+            .animation(.easeInOut(duration: 0.15), value: configuration.isPressed)
     }
 }
 
