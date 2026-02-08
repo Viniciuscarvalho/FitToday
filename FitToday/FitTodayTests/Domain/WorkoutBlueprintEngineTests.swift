@@ -330,7 +330,8 @@ final class WorkoutBlueprintEngineTests: XCTestCase {
       dayOfWeek: 2,
       weekOfYear: 5,
       hourOfDay: 10,
-      minuteOfHour: 0
+      minuteOfHour: 0,
+      secondOfMinute: 30
     )
 
     let input2 = BlueprintInput(
@@ -344,7 +345,8 @@ final class WorkoutBlueprintEngineTests: XCTestCase {
       dayOfWeek: 2,
       weekOfYear: 5,
       hourOfDay: 10,
-      minuteOfHour: 0
+      minuteOfHour: 0,
+      secondOfMinute: 30
     )
     
     // Then

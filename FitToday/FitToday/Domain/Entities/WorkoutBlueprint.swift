@@ -257,79 +257,94 @@ struct WorkoutBlueprint: Codable, Hashable, Sendable, Identifiable {
 
 /// Inputs para geração de blueprint (usado para hash de cache)
 struct BlueprintInput: Codable, Hashable, Sendable {
-  let goal: FitnessGoal
-  let structure: TrainingStructure
-  let level: TrainingLevel
-  let focus: DailyFocus
-  let sorenessLevel: MuscleSorenessLevel
-  let sorenessAreas: [MuscleGroup]
-  let energyLevel: Int // 0-10
-  let dayOfWeek: Int // 1-7 (segunda-domingo)
-  let weekOfYear: Int // 1-52
-  let hourOfDay: Int // 0-23 (hora do dia para variação mais frequente)
-  let minuteOfHour: Int // 0-59 (minuto para variação a cada 15 min)
-  
-  /// Gera hash estável para cache (usado para evitar chamadas duplicadas no mesmo bucket)
-  /// Variação a cada 15 minutos: 0-14, 15-29, 30-44, 45-59
-  var cacheKey: String {
-    let components = [
-      BlueprintVersion.current.rawValue,
-      goal.rawValue,
-      structure.rawValue,
-      level.rawValue,
-      focus.rawValue,
-      sorenessLevel.rawValue,
-      String(energyLevel),
-      String(dayOfWeek),
-      String(weekOfYear),
-      String(hourOfDay),
-      String(minuteOfHour / 15) // Buckets de 15 min: 0, 1, 2, 3
-    ]
-    return components.joined(separator: ":")
-  }
-  
-  /// Gera seed de variação baseada nos inputs + data + hora
-  /// Determinística: mesmos inputs na mesma hora → mesma seed
-  /// Mas: a cada hora, seed diferente para garantir variação
-  var variationSeed: UInt64 {
-    var hasher = Hasher()
-    hasher.combine(cacheKey)
-    let hash = hasher.finalize()
-    
-    #if DEBUG
-    print("[BlueprintInput] cacheKey: \(cacheKey)")
-    print("[BlueprintInput] variationSeed: \(UInt64(bitPattern: Int64(hash)))")
-    #endif
-    
-    return UInt64(bitPattern: Int64(hash))
-  }
-  
-  /// Factory a partir de profile + checkIn
-  static func from(profile: UserProfile, checkIn: DailyCheckIn, date: Date = .init()) -> BlueprintInput {
-    let calendar = Calendar.current
-    let dayOfWeek = calendar.component(.weekday, from: date)
-    let weekOfYear = calendar.component(.weekOfYear, from: date)
-    let hourOfDay = calendar.component(.hour, from: date)
-    let minuteOfHour = calendar.component(.minute, from: date)
+    let goal: FitnessGoal
+    let structure: TrainingStructure
+    let level: TrainingLevel
+    let focus: DailyFocus
+    let sorenessLevel: MuscleSorenessLevel
+    let sorenessAreas: [MuscleGroup]
+    let energyLevel: Int // 0-10
+    let dayOfWeek: Int // 1-7 (segunda-domingo)
+    let weekOfYear: Int // 1-52
+    let hourOfDay: Int // 0-23 (hora do dia para variação mais frequente)
+    let minuteOfHour: Int // 0-59 (minuto para variação a cada 15 min)
+    let secondOfMinute: Int // 0-59 (segundo - usado apenas em DEBUG para máxima variação)
 
-    #if DEBUG
-    print("[BlueprintInput] Criando input: goal=\(profile.mainGoal.rawValue) focus=\(checkIn.focus.rawValue) day=\(dayOfWeek) week=\(weekOfYear) hour=\(hourOfDay) minute=\(minuteOfHour)")
-    #endif
+    /// Gera hash estável para cache (usado para evitar chamadas duplicadas no mesmo bucket)
+    /// Em DEBUG: varia a cada segundo para teste
+    /// Em produção: varia a cada minuto para maior diversidade de treinos
+    var cacheKey: String {
+        var components = [
+            BlueprintVersion.current.rawValue,
+            goal.rawValue,
+            structure.rawValue,
+            level.rawValue,
+            focus.rawValue,
+            sorenessLevel.rawValue,
+            String(energyLevel),
+            String(dayOfWeek),
+            String(weekOfYear),
+            String(hourOfDay)
+        ]
 
-    return BlueprintInput(
-      goal: profile.mainGoal,
-      structure: profile.availableStructure,
-      level: profile.level,
-      focus: checkIn.focus,
-      sorenessLevel: checkIn.sorenessLevel,
-      sorenessAreas: checkIn.sorenessAreas,
-      energyLevel: checkIn.energyLevel,
-      dayOfWeek: dayOfWeek,
-      weekOfYear: weekOfYear,
-      hourOfDay: hourOfDay,
-      minuteOfHour: minuteOfHour
-    )
-  }
+        #if DEBUG
+        // Em DEBUG: usar minuto + segundo para máxima variação
+        components.append(String(minuteOfHour))
+        components.append(String(secondOfMinute))
+        #else
+        // Em produção: usar minuto completo para maior diversidade de treinos
+        // Antes: buckets de 15min (minuteOfHour / 15) = só 4 variações/hora
+        // Agora: variação por minuto = 60 variações/hora
+        components.append(String(minuteOfHour))
+        #endif
+
+        return components.joined(separator: ":")
+    }
+
+    /// Gera seed de variação baseada nos inputs + data + hora
+    /// DEBUG: muda a cada segundo para testar variação
+    /// Produção: muda a cada minuto para maior diversidade de treinos
+    var variationSeed: UInt64 {
+        var hasher = Hasher()
+        hasher.combine(cacheKey)
+        let hash = hasher.finalize()
+
+        #if DEBUG
+        print("[BlueprintInput] cacheKey: \(cacheKey)")
+        print("[BlueprintInput] variationSeed: \(UInt64(bitPattern: Int64(hash)))")
+        #endif
+
+        return UInt64(bitPattern: Int64(hash))
+    }
+
+    /// Factory a partir de profile + checkIn
+    static func from(profile: UserProfile, checkIn: DailyCheckIn, date: Date = .init()) -> BlueprintInput {
+        let calendar = Calendar.current
+        let dayOfWeek = calendar.component(.weekday, from: date)
+        let weekOfYear = calendar.component(.weekOfYear, from: date)
+        let hourOfDay = calendar.component(.hour, from: date)
+        let minuteOfHour = calendar.component(.minute, from: date)
+        let secondOfMinute = calendar.component(.second, from: date)
+
+        #if DEBUG
+        print("[BlueprintInput] Criando input: goal=\(profile.mainGoal.rawValue) focus=\(checkIn.focus.rawValue) day=\(dayOfWeek) week=\(weekOfYear) hour=\(hourOfDay) min=\(minuteOfHour) sec=\(secondOfMinute)")
+        #endif
+
+        return BlueprintInput(
+            goal: profile.mainGoal,
+            structure: profile.availableStructure,
+            level: profile.level,
+            focus: checkIn.focus,
+            sorenessLevel: checkIn.sorenessLevel,
+            sorenessAreas: checkIn.sorenessAreas,
+            energyLevel: checkIn.energyLevel,
+            dayOfWeek: dayOfWeek,
+            weekOfYear: weekOfYear,
+            hourOfDay: hourOfDay,
+            minuteOfHour: minuteOfHour,
+            secondOfMinute: secondOfMinute
+        )
+    }
 }
 
 // MARK: - Codable Extensions for ClosedRange
