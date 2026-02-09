@@ -44,6 +44,7 @@ enum AppRoute: Hashable {
     case workoutPlan(UUID)
     case exerciseDetail
     case workoutExercisePreview(ExercisePrescription)  // Preview de exercício (não altera índice)
+    case workoutPreview(ProgramWorkout)  // Preview de treino antes de iniciar (Task 7.0)
     case workoutSummary
     case paywall
     case programDetail(String)  // Detalhe do programa

@@ -82,41 +82,40 @@ private struct SubstitutionChatResponse: Decodable {
 // MARK: - Service
 
 actor ExerciseSubstitutionService: ExerciseSubstituting {
-    private let client: OpenAIClienting
+    private let client: NewOpenAIClient
     private let logger: (String) -> Void
-    
-    init(client: OpenAIClienting, logger: @escaping (String) -> Void = { print("[Substitution]", $0) }) {
+
+    init(client: NewOpenAIClient, logger: @escaping (String) -> Void = { print("[Substitution]", $0) }) {
         self.client = client
         self.logger = logger
     }
-    
+
     func suggestAlternatives(
         for exercise: WorkoutExercise,
         userProfile: UserProfile,
         reason: SubstitutionReason?
     ) async throws -> [AlternativeExercise] {
         let prompt = buildPrompt(for: exercise, profile: userProfile, reason: reason)
-        let cacheKey = Hashing.sha256(prompt)
-        
+
         logger("Buscando alternativas para: \(exercise.name)")
-        
-        let data = try await client.sendJSONPrompt(prompt: prompt, cachedKey: cacheKey, focus: nil)
-        
+
+        let data = try await client.generateWorkout(prompt: prompt)
+
         // Decodificar resposta do Chat Completions
-        let chatResponse = try JSONDecoder().decode(SubstitutionChatResponse.self, from: data)
-        
+        let chatResponse = try JSONDecoder().decode(ChatCompletionResponse.self, from: data)
+
         guard let content = chatResponse.choices.first?.message.content,
               let contentData = content.data(using: .utf8) else {
             logger("Resposta vazia do OpenAI")
             throw SubstitutionError.noAlternativesFound
         }
-        
+
         let response = try JSONDecoder().decode(SubstitutionResponse.self, from: contentData)
-        
+
         guard !response.alternatives.isEmpty else {
             throw SubstitutionError.noAlternativesFound
         }
-        
+
         logger("Encontradas \(response.alternatives.count) alternativas")
         return response.alternatives
     }
@@ -200,10 +199,9 @@ enum SubstitutionError: Error, LocalizedError {
 struct ExerciseSubstitutionServiceFactory {
     /// Cria o serviço de substituição se OpenAI estiver configurado
     static func create() -> ExerciseSubstituting? {
-        guard let config = OpenAIConfiguration.loadFromUserKey() else {
+        guard let client = NewOpenAIClient.fromUserKey() else {
             return nil
         }
-        let client = OpenAIClient(configuration: config)
         return ExerciseSubstitutionService(client: client)
     }
 }

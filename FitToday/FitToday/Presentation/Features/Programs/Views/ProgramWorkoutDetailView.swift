@@ -31,7 +31,9 @@ struct ProgramWorkoutDetailView: View {
             VStack(spacing: FitTodaySpacing.lg) {
                 headerSection
                 exercisesSection
+                startWorkoutButton
             }
+            .padding(.bottom, FitTodaySpacing.xl)
         }
         .background(FitTodayColor.background.ignoresSafeArea())
         .navigationTitle(workout.title)
@@ -259,6 +261,37 @@ struct ProgramWorkoutDetailView: View {
         )
 
         await repository.saveCustomization(customization)
+    }
+
+    // MARK: - Start Workout Button
+
+    private var startWorkoutButton: some View {
+        Button {
+            // Create a workout with the current (potentially customized) exercise list
+            let customizedWorkout = ProgramWorkout(
+                id: workout.id,
+                templateId: workout.templateId,
+                title: workout.title,
+                subtitle: workout.subtitle,
+                estimatedDurationMinutes: workout.estimatedDurationMinutes,
+                exercises: exercises
+            )
+            router.push(.workoutPreview(customizedWorkout), on: router.selectedTab)
+        } label: {
+            HStack(spacing: FitTodaySpacing.sm) {
+                Image(systemName: "play.fill")
+                Text("Iniciar Treino")
+                    .font(.system(.headline, weight: .semibold))
+            }
+            .foregroundStyle(.white)
+            .frame(maxWidth: .infinity)
+            .padding()
+            .background(FitTodayColor.brandPrimary)
+            .clipShape(RoundedRectangle(cornerRadius: FitTodayRadius.md))
+        }
+        .disabled(exercises.isEmpty || editMode == .active)
+        .opacity(editMode == .active ? 0.5 : 1.0)
+        .padding(.horizontal)
     }
 
     // MARK: - Conversion Helpers
