@@ -154,6 +154,12 @@ struct WorkoutProgress: Codable, Hashable, Sendable {
         }
         lastUpdatedAt = Date()
     }
+
+    mutating func removeExercise(at index: Int) {
+        guard exercises.indices.contains(index) else { return }
+        exercises.remove(at: index)
+        lastUpdatedAt = Date()
+    }
 }
 
 // MARK: - Persistence Key

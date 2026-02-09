@@ -242,6 +242,53 @@ import UIKit
         UserDefaults.standard.removeObject(forKey: substitutionsKey)
     }
     
+    // MARK: - Exercise Removal
+
+    /// Removes an exercise from the current workout plan at the specified phase and item index.
+    /// - Parameters:
+    ///   - phaseIndex: The index of the phase containing the exercise
+    ///   - itemIndex: The index of the item within the phase
+    /// - Returns: true if exercise was removed, false if operation was blocked
+    @discardableResult
+    func removeExercise(fromPhase phaseIndex: Int, at itemIndex: Int) -> Bool {
+        guard var currentSession = session else { return false }
+        guard phaseIndex < currentSession.plan.phases.count else { return false }
+        guard itemIndex < currentSession.plan.phases[phaseIndex].items.count else { return false }
+
+        // Ensure at least 1 exercise remains in the entire workout
+        let totalExercises = currentSession.plan.phases.reduce(0) { total, phase in
+            total + phase.items.filter { if case .exercise = $0 { return true }; return false }.count
+        }
+        guard totalExercises > 1 else { return false }
+
+        // Remove the item
+        currentSession.plan.phases[phaseIndex].items.remove(at: itemIndex)
+
+        // Remove empty phases
+        currentSession.plan.phases.removeAll { $0.items.isEmpty }
+
+        // Update session
+        session = currentSession
+
+        // Update progress if needed
+        if var currentProgress = progress {
+            currentProgress.removeExercise(at: currentProgress.exercises.count > itemIndex ? itemIndex : currentProgress.exercises.count - 1)
+            progress = currentProgress
+            persistProgress()
+        }
+
+        // Adjust current exercise index if needed
+        if currentExerciseIndex >= exercises.count {
+            currentExerciseIndex = max(0, exercises.count - 1)
+        }
+
+        // Haptic feedback
+        let generator = UINotificationFeedbackGenerator()
+        generator.notificationOccurred(.warning)
+
+        return true
+    }
+
     // MARK: - Finish Session
 
     func finish(status: WorkoutStatus) async throws {

@@ -14,7 +14,11 @@ struct PhaseSectionView: View {
     @Environment(WorkoutSessionStore.self) private var sessionStore
 
     let phase: WorkoutPlanPhase
+    let phaseIndex: Int
     let displayMode: PhaseDisplayMode
+
+    @State private var showDeleteConfirmation = false
+    @State private var itemToDelete: Int?
 
     var body: some View {
         // Não exibe a fase se não tiver itens após filtragem
@@ -37,21 +41,55 @@ struct PhaseSectionView: View {
                         case .exercise(let prescription):
                             // Usar índice local dentro da fase (não global)
                             let localIndex = idx + 1
-                            WorkoutExerciseRow(
-                                index: localIndex,
-                                prescription: prescription,
-                                isCurrent: sessionStore.currentExerciseIndex == localIndex
-                            )
-                            .contentShape(Rectangle())
-                            .onTapGesture {
+                            Button {
                                 router.push(.workoutExercisePreview(prescription), on: .home)
+                            } label: {
+                                WorkoutExerciseRow(
+                                    index: localIndex,
+                                    prescription: prescription,
+                                    isCurrent: sessionStore.currentExerciseIndex == localIndex
+                                )
                             }
-                            .accessibilityHint("Toque para ver detalhes do exercício")
+                            .buttonStyle(ExerciseRowButtonStyle())
+                            .contextMenu {
+                                Button {
+                                    router.push(.workoutExercisePreview(prescription), on: .home)
+                                } label: {
+                                    Label("Ver detalhes", systemImage: "info.circle")
+                                }
+
+                                Button(role: .destructive) {
+                                    itemToDelete = idx
+                                    showDeleteConfirmation = true
+                                } label: {
+                                    Label("Remover exercício", systemImage: "trash")
+                                }
+                            }
+                            .accessibilityHint("Toque para ver detalhes. Segure para mais opções.")
                         }
                     }
                 }
             }
             .padding(.top, FitTodaySpacing.md)
+            .confirmationDialog(
+                "Remover exercício?",
+                isPresented: $showDeleteConfirmation,
+                titleVisibility: .visible
+            ) {
+                Button("Remover", role: .destructive) {
+                    if let idx = itemToDelete {
+                        withAnimation(.easeInOut(duration: 0.3)) {
+                            sessionStore.removeExercise(fromPhase: phaseIndex, at: idx)
+                        }
+                    }
+                    itemToDelete = nil
+                }
+                Button("Cancelar", role: .cancel) {
+                    itemToDelete = nil
+                }
+            } message: {
+                Text("Este exercício será removido do treino atual.")
+            }
         }
     }
 
@@ -101,5 +139,18 @@ struct PhaseSectionView: View {
             return "\(title) · RPE \(rpe)"
         }
         return title
+    }
+}
+
+// MARK: - Button Style for Exercise Row
+
+/// Custom button style that provides visual feedback on press
+/// without interfering with the row's appearance
+struct ExerciseRowButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .opacity(configuration.isPressed ? 0.7 : 1.0)
+            .scaleEffect(configuration.isPressed ? 0.98 : 1.0)
+            .animation(.easeInOut(duration: 0.15), value: configuration.isPressed)
     }
 }

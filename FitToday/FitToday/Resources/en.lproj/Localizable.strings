@@ -17,6 +17,9 @@
 "common.loading" = "Loading...";
 "common.retry" = "Retry";
 "common.see_all" = "See All";
+"common.delete" = "Delete";
+"common.edit" = "Edit";
+"common.view_details" = "View Details";
 
 // MARK: - Tabs
 "tab.home" = "Home";
@@ -496,6 +499,11 @@
 "routine.error.already_saved" = "This program is already saved in your routines.";
 "routine.error.not_found" = "Routine not found.";
 "routine.delete.confirm" = "Remove this routine?";
+"routine.accessibility.hint" = "Tap to view details. Long press for more options.";
+
+// MARK: - Workout Delete
+"workout.delete.confirm" = "Remove this workout?";
+"workout.delete.message" = "The workout \"%@\" will be permanently removed.";
 
 // MARK: - Check-in Errors (Extended)
 "checkin.error.network" = "No internet connection.";

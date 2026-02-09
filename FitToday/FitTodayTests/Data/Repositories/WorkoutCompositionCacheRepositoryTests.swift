@@ -92,7 +92,8 @@ final class WorkoutCompositionCacheRepositoryTests: XCTestCase {
             dayOfWeek: 2,
             weekOfYear: 1,
             hourOfDay: 10,
-            minuteOfHour: 0
+            minuteOfHour: 0,
+            secondOfMinute: 0
         )
 
         let input2 = BlueprintInput(
@@ -106,12 +107,13 @@ final class WorkoutCompositionCacheRepositoryTests: XCTestCase {
             dayOfWeek: 2,
             weekOfYear: 1,
             hourOfDay: 10,
-            minuteOfHour: 0
+            minuteOfHour: 0,
+            secondOfMinute: 0
         )
-        
+
         XCTAssertEqual(input1.cacheKey, input2.cacheKey, "Same inputs should produce same cache key")
     }
-    
+
     func testBlueprintInputCacheKeyDiffersWithDifferentInputs() {
         let input1 = BlueprintInput(
             goal: .hypertrophy,
@@ -124,7 +126,8 @@ final class WorkoutCompositionCacheRepositoryTests: XCTestCase {
             dayOfWeek: 2,
             weekOfYear: 1,
             hourOfDay: 10,
-            minuteOfHour: 0
+            minuteOfHour: 0,
+            secondOfMinute: 0
         )
 
         let input2 = BlueprintInput(
@@ -138,12 +141,13 @@ final class WorkoutCompositionCacheRepositoryTests: XCTestCase {
             dayOfWeek: 2,
             weekOfYear: 1,
             hourOfDay: 10,
-            minuteOfHour: 0
+            minuteOfHour: 0,
+            secondOfMinute: 0
         )
-        
+
         XCTAssertNotEqual(input1.cacheKey, input2.cacheKey, "Different inputs should produce different cache keys")
     }
-    
+
     func testVariationSeedIsDeterministic() {
         let input = BlueprintInput(
             goal: .hypertrophy,
@@ -156,7 +160,8 @@ final class WorkoutCompositionCacheRepositoryTests: XCTestCase {
             dayOfWeek: 3,
             weekOfYear: 5,
             hourOfDay: 10,
-            minuteOfHour: 0
+            minuteOfHour: 0,
+            secondOfMinute: 0
         )
         
         let seed1 = input.variationSeed

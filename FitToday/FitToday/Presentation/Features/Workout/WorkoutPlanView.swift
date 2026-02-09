@@ -167,8 +167,8 @@ struct WorkoutPlanView: View {
 
     private func exerciseList(for plan: WorkoutPlan) -> some View {
         VStack(alignment: .leading, spacing: FitTodaySpacing.md) {
-            ForEach(plan.phases) { phase in
-                PhaseSectionView(phase: phase, displayMode: displayMode)
+            ForEach(Array(plan.phases.enumerated()), id: \.element.id) { index, phase in
+                PhaseSectionView(phase: phase, phaseIndex: index, displayMode: displayMode)
                     .transition(.asymmetric(
                         insertion: .opacity.combined(with: .move(edge: .trailing)),
                         removal: .opacity.combined(with: .move(edge: .leading))
