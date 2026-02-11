@@ -199,7 +199,7 @@ struct WorkoutPlanView: View {
             errorMessage = "Nenhum plano encontrado."
             return
         }
-        router.push(.exerciseDetail, on: .home)
+        router.push(.workoutExecution, on: .home)
     }
 
     private func showModeInfo() {

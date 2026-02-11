@@ -21,7 +21,7 @@ enum ErrorMapper {
     case let domainError as DomainError:
       return handleDomainError(domainError)
       
-    case let openAIError as OpenAIClientError:
+    case let openAIError as NewOpenAIClient.ClientError:
       return handleOpenAIError(openAIError)
       
     case let imageCacheError as ImageCacheError:
@@ -204,30 +204,37 @@ enum ErrorMapper {
   
   // MARK: - OpenAIClientError Handling
   
-  private static func handleOpenAIError(_ error: OpenAIClientError) -> ErrorMessage {
+  private static func handleOpenAIError(_ error: NewOpenAIClient.ClientError) -> ErrorMessage {
     switch error {
-    case .configurationMissing:
+    case .missingAPIKey:
       return ErrorMessage(
         title: "IA não configurada",
         message: "Geramos um ótimo treino local para você hoje.",
         action: .dismiss
       )
-      
+
     case .invalidResponse:
       return ErrorMessage(
         title: "IA temporariamente indisponível",
         message: "Geramos um ótimo treino local para você hoje.",
         action: .dismiss
       )
-      
-    case .httpError(let status, _):
-      if status == 429 {
+
+    case .decodingError:
+      return ErrorMessage(
+        title: "Erro ao processar resposta",
+        message: "Geramos um ótimo treino local para você hoje.",
+        action: .dismiss
+      )
+
+    case .httpError(let statusCode, _):
+      if statusCode == 429 {
         return ErrorMessage(
           title: "Limite atingido",
           message: "Você atingiu o limite de treinos com IA hoje. Geramos um treino local.",
           action: .dismiss
         )
-      } else if status >= 500 {
+      } else if statusCode >= 500 {
         return ErrorMessage(
           title: "Servidor temporariamente indisponível",
           message: "Geramos um ótimo treino local para você hoje.",
@@ -240,6 +247,13 @@ enum ErrorMapper {
           action: .dismiss
         )
       }
+
+    case .emptyWorkoutResponse:
+      return ErrorMessage(
+        title: "Resposta incompleta",
+        message: "A IA não retornou exercícios. Geramos um treino local para você.",
+        action: .dismiss
+      )
     }
   }
   

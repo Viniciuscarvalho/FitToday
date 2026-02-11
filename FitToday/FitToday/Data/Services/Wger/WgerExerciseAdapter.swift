@@ -36,8 +36,8 @@ struct WgerExerciseAdapter {
         // Clean HTML from description
         let instructions = cleanDescription(wgerExercise.description)
 
-        // Get media URLs from images
-        let media = createMedia(from: images)
+        // Get media URLs from images with priority resolution
+        let media = createMedia(from: images, muscleGroup: muscleGroup)
 
         return WorkoutExercise(
             id: String(wgerExercise.id),
@@ -85,17 +85,58 @@ struct WgerExerciseAdapter {
         return sentences
     }
 
-    private static func createMedia(from images: [WgerExerciseImage]) -> ExerciseMedia? {
-        guard !images.isEmpty else { return nil }
+    /// Resolves exercise media with priority: video > GIF > image > placeholder.
+    /// - Parameters:
+    ///   - images: Array of exercise images from Wger API.
+    ///   - videos: Optional array of exercise videos (not currently provided by Wger).
+    ///   - muscleGroup: The primary muscle group for placeholder fallback.
+    /// - Returns: ExerciseMedia with best available media or placeholder.
+    private static func createMedia(
+        from images: [WgerExerciseImage],
+        videos: [URL]? = nil,
+        muscleGroup: MuscleGroup
+    ) -> ExerciseMedia {
+        // Priority 1: Video (if available)
+        if let videoURL = videos?.first {
+            return ExerciseMedia(
+                videoURL: videoURL,
+                imageURL: nil,
+                gifURL: nil,
+                placeholderMuscleGroup: nil,
+                source: "Wger"
+            )
+        }
 
-        // Find main image
+        // Priority 2: GIF (Wger doesn't currently provide GIFs, but check imageURLs for .gif extension)
+        if let gifImage = images.first(where: { $0.image.lowercased().hasSuffix(".gif") }) {
+            return ExerciseMedia(
+                videoURL: nil,
+                imageURL: nil,
+                gifURL: gifImage.imageURL,
+                placeholderMuscleGroup: nil,
+                source: "Wger"
+            )
+        }
+
+        // Priority 3: Image (static image)
         let mainImage = images.first { $0.isMain } ?? images.first
-        let imageURL = mainImage?.imageURL
+        if let imageURL = mainImage?.imageURL {
+            return ExerciseMedia(
+                videoURL: nil,
+                imageURL: imageURL,
+                gifURL: nil,
+                placeholderMuscleGroup: nil,
+                source: "Wger"
+            )
+        }
 
+        // Priority 4: Placeholder (no media available)
         return ExerciseMedia(
-            imageURL: imageURL,
-            gifURL: nil, // Wger doesn't provide GIFs
-            source: "Wger"
+            videoURL: nil,
+            imageURL: nil,
+            gifURL: nil,
+            placeholderMuscleGroup: muscleGroup,
+            source: "Placeholder"
         )
     }
 }

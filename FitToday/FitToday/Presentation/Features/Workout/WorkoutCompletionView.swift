@@ -7,17 +7,19 @@
 
 import SwiftUI
 import Swinject
+import UIKit
 
 struct WorkoutCompletionView: View {
     @Environment(AppRouter.self) private var router
     @Environment(WorkoutSessionStore.self) private var sessionStore
+    @Environment(WorkoutTimerStore.self) private var workoutTimer
     @Environment(\.dependencyResolver) private var resolver
-    
+
     @State private var isGeneratingNewPlan = false
     @State private var errorMessage: String?
     @State private var isProfileIncomplete = false
     @State private var showProfilePrompt = false
-    
+
     @State private var canUseHealthKit = false
     @State private var healthKitState: HealthKitAuthorizationState = .notDetermined
     @State private var isExportingHealthKit = false
@@ -33,6 +35,9 @@ struct WorkoutCompletionView: View {
     @State private var showCelebration = false
     @State private var isInGroup = false
     @State private var currentEntry: WorkoutHistoryEntry?
+
+    // Success feedback
+    @State private var didPlayHaptic = false
 
     var body: some View {
         VStack(spacing: FitTodaySpacing.lg) {
@@ -51,6 +56,11 @@ struct WorkoutCompletionView: View {
                     .multilineTextAlignment(.center)
             }
             .padding(.horizontal)
+
+            // Workout summary statistics for completed workouts
+            if status == .completed {
+                workoutSummaryCard
+            }
 
             // Rating prompt for completed workouts
             if status == .completed && !hasRated {
@@ -137,6 +147,7 @@ struct WorkoutCompletionView: View {
             await loadHealthKitAvailability()
             await checkGroupMembership()
             loadCurrentEntry()
+            playSuccessHapticIfNeeded()
         }
         .sheet(isPresented: $showProfilePrompt) {
             if let resolver = resolver as? Resolver {
@@ -457,5 +468,70 @@ struct WorkoutCompletionView: View {
 
     private var status: WorkoutStatus {
         sessionStore.lastCompletionStatus ?? .completed
+    }
+
+    // MARK: - Workout Summary Card
+
+    private var workoutSummaryCard: some View {
+        VStack(spacing: FitTodaySpacing.md) {
+            // Total workout time
+            HStack(spacing: FitTodaySpacing.sm) {
+                Image(systemName: "clock.fill")
+                    .foregroundStyle(FitTodayColor.brandPrimary)
+                    .font(.title3)
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Tempo Total")
+                        .font(.footnote)
+                        .foregroundStyle(FitTodayColor.textSecondary)
+                    Text(workoutTimer.formattedTime)
+                        .font(.title3.weight(.semibold))
+                        .foregroundStyle(FitTodayColor.textPrimary)
+                }
+
+                Spacer()
+            }
+
+            Divider()
+
+            // Exercises completed
+            HStack(spacing: FitTodaySpacing.sm) {
+                Image(systemName: "checkmark.circle.fill")
+                    .foregroundStyle(FitTodayColor.brandPrimary)
+                    .font(.title3)
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Exercícios")
+                        .font(.footnote)
+                        .foregroundStyle(FitTodayColor.textSecondary)
+                    Text("\(sessionStore.completedExercisesCount) de \(sessionStore.exerciseCount)")
+                        .font(.title3.weight(.semibold))
+                        .foregroundStyle(FitTodayColor.textPrimary)
+                }
+
+                Spacer()
+            }
+        }
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: FitTodayRadius.md)
+                .fill(FitTodayColor.brandPrimary.opacity(0.08))
+                .overlay(
+                    RoundedRectangle(cornerRadius: FitTodayRadius.md)
+                        .stroke(FitTodayColor.brandPrimary.opacity(0.2), lineWidth: 1)
+                )
+        )
+        .padding(.horizontal)
+    }
+
+    // MARK: - Success Feedback
+
+    private func playSuccessHapticIfNeeded() {
+        guard status == .completed, !didPlayHaptic else { return }
+        didPlayHaptic = true
+
+        // Play success haptic feedback
+        let generator = UINotificationFeedbackGenerator()
+        generator.notificationOccurred(.success)
     }
 }

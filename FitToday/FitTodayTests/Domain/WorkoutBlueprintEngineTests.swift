@@ -22,25 +22,24 @@ final class WorkoutBlueprintEngineTests: XCTestCase {
     super.tearDown()
   }
   
-  // MARK: - Determinism Tests
-  
-  func testSameInputsProduceSameBlueprint() {
+  // MARK: - Variation Tests
+
+  func testEachCallProducesDifferentBlueprint() {
     // Given: mesmos inputs
     let profile = makeProfile(goal: .hypertrophy, structure: .fullGym, level: .intermediate)
     let checkIn = makeCheckIn(focus: .upper, soreness: .none)
-    
+
     // When: gerar blueprint duas vezes
     let blueprint1 = engine.generateBlueprint(profile: profile, checkIn: checkIn)
     let blueprint2 = engine.generateBlueprint(profile: profile, checkIn: checkIn)
-    
-    // Then: blueprints são idênticos (exceto id e createdAt)
-    XCTAssertEqual(blueprint1.variationSeed, blueprint2.variationSeed)
-    XCTAssertEqual(blueprint1.title, blueprint2.title)
+
+    // Then: seeds devem ser DIFERENTES (variação garantida)
+    XCTAssertNotEqual(blueprint1.variationSeed, blueprint2.variationSeed, "Seeds should be different for variation")
+
+    // Estrutura consistente (mesmo goal, focus, blocks.count)
     XCTAssertEqual(blueprint1.focus, blueprint2.focus)
     XCTAssertEqual(blueprint1.goal, blueprint2.goal)
     XCTAssertEqual(blueprint1.blocks.count, blueprint2.blocks.count)
-    XCTAssertEqual(blueprint1.totalExerciseCount, blueprint2.totalExerciseCount)
-    XCTAssertEqual(blueprint1.intensity, blueprint2.intensity)
   }
   
   func testLowEnergyDowngradesIntensity() {
@@ -224,19 +223,20 @@ final class WorkoutBlueprintEngineTests: XCTestCase {
   
   // MARK: - Diversity Tests
   
-  func testDiversityCheckerIdentifiesIdenticalBlueprints() {
-    // Given
+  func testDiversityCheckerIdentifiesSimilarBlueprints() {
+    // Given: mesmos inputs mas seeds diferentes
     let profile = makeProfile(goal: .hypertrophy, structure: .fullGym, level: .intermediate)
     let checkIn = makeCheckIn(focus: .upper, soreness: .none)
-    
+
     let blueprint1 = engine.generateBlueprint(profile: profile, checkIn: checkIn)
     let blueprint2 = engine.generateBlueprint(profile: profile, checkIn: checkIn)
-    
+
     // When
     let diversityScore = BlueprintDiversityChecker.diversityScore(blueprint1, blueprint2)
-    
-    // Then: blueprints idênticos devem ter score baixo (próximo de 0)
-    XCTAssertLessThan(diversityScore, 0.1, "Blueprints idênticos devem ter diversidade < 0.1")
+
+    // Then: blueprints com mesmos parâmetros mas seeds diferentes
+    // ainda devem ter score relativamente baixo pois goal/focus/structure são iguais
+    XCTAssertLessThan(diversityScore, 0.5, "Blueprints similares devem ter diversidade < 0.5")
   }
   
   func testDiversityCheckerIdentifiesDifferentBlueprints() {
@@ -317,8 +317,10 @@ final class WorkoutBlueprintEngineTests: XCTestCase {
     XCTAssertEqual(blueprint.version, .v1)
   }
   
-  func testInputsHashIsStable() {
-    // Given
+  func testInputsWithSameSeedHaveSameCacheKey() {
+    // Given: mesma seed = mesma cacheKey
+    let seed: UInt64 = 12345
+
     let input1 = BlueprintInput(
       goal: .hypertrophy,
       structure: .fullGym,
@@ -327,11 +329,7 @@ final class WorkoutBlueprintEngineTests: XCTestCase {
       sorenessLevel: .none,
       sorenessAreas: [],
       energyLevel: 7,
-      dayOfWeek: 2,
-      weekOfYear: 5,
-      hourOfDay: 10,
-      minuteOfHour: 0,
-      secondOfMinute: 30
+      variationSeed: seed
     )
 
     let input2 = BlueprintInput(
@@ -342,16 +340,26 @@ final class WorkoutBlueprintEngineTests: XCTestCase {
       sorenessLevel: .none,
       sorenessAreas: [],
       energyLevel: 7,
-      dayOfWeek: 2,
-      weekOfYear: 5,
-      hourOfDay: 10,
-      minuteOfHour: 0,
-      secondOfMinute: 30
+      variationSeed: seed
     )
-    
+
     // Then
     XCTAssertEqual(input1.cacheKey, input2.cacheKey)
     XCTAssertEqual(input1.variationSeed, input2.variationSeed)
+  }
+
+  func testFactoryMethodGeneratesRandomSeeds() {
+    // Given
+    let profile = makeProfile(goal: .hypertrophy, structure: .fullGym, level: .intermediate)
+    let checkIn = makeCheckIn(focus: .upper, soreness: .none)
+
+    // When: criar dois inputs via factory
+    let input1 = BlueprintInput.from(profile: profile, checkIn: checkIn)
+    let input2 = BlueprintInput.from(profile: profile, checkIn: checkIn)
+
+    // Then: seeds devem ser diferentes (random)
+    XCTAssertNotEqual(input1.variationSeed, input2.variationSeed, "Factory should generate random seeds")
+    XCTAssertNotEqual(input1.cacheKey, input2.cacheKey, "Different seeds = different cache keys")
   }
   
   // MARK: - Helpers

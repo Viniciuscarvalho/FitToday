@@ -44,14 +44,34 @@ enum EquipmentType: String, Codable, CaseIterable, Sendable {
 }
 
 struct ExerciseMedia: Codable, Hashable, Sendable {
+    var videoURL: URL?
     var imageURL: URL?
     var gifURL: URL?
-    var source: String? // e.g. "wger"
+    var placeholderMuscleGroup: MuscleGroup?
+    var source: String? // e.g. "wger", "placeholder"
 
-    public init(imageURL: URL?, gifURL: URL?, source: String? = nil) {
+    public init(
+        videoURL: URL? = nil,
+        imageURL: URL? = nil,
+        gifURL: URL? = nil,
+        placeholderMuscleGroup: MuscleGroup? = nil,
+        source: String? = nil
+    ) {
+        self.videoURL = videoURL
         self.imageURL = imageURL
         self.gifURL = gifURL
+        self.placeholderMuscleGroup = placeholderMuscleGroup
         self.source = source
+    }
+
+    /// Returns true if there is any media available (video, GIF, or image).
+    var hasMedia: Bool {
+        videoURL != nil || gifURL != nil || imageURL != nil
+    }
+
+    /// Returns the best available media URL in priority order: video > GIF > image.
+    var bestMediaURL: URL? {
+        videoURL ?? gifURL ?? imageURL
     }
 }
 

@@ -151,28 +151,30 @@ struct AppContainer {
         }
         .inObjectScope(.container)
 
-        // OpenAI - Usa chave do usuário (armazenada no Keychain)
-        // O cliente é criado sob demanda quando a chave estiver configurada
-        let localComposer = LocalWorkoutPlanComposer()
-        container.register(LocalWorkoutPlanComposer.self) { _ in localComposer }
+        // Workout Composition - New simplified OpenAI stack
+        // Enhanced local composer with variation validation
+        let historyRepo = container.resolve(WorkoutHistoryRepository.self)!
+        let enhancedLocalComposer = EnhancedLocalWorkoutPlanComposer(
+            historyRepository: historyRepo
+        )
+        container.register(EnhancedLocalWorkoutPlanComposer.self) { _ in enhancedLocalComposer }
             .inObjectScope(.container)
 
-        let usageLimiter = OpenAIUsageLimiter()
-        container.register(OpenAIUsageLimiting.self) { _ in usageLimiter }
-            .inObjectScope(.container)
-
-        // WorkoutPlanComposing verifica em tempo de execução se há chave do usuário
+        // WorkoutPlanComposing: Use OpenAI if available, otherwise enhanced local
         container.register(WorkoutPlanComposing.self) { resolver in
-            let entitlementRepo = resolver.resolve(EntitlementRepository.self)
-            let historyRepo = resolver.resolve(WorkoutHistoryRepository.self)
-            return DynamicHybridWorkoutPlanComposer(
-                localComposer: localComposer,
-                usageLimiter: usageLimiter,
-                entitlementProvider: {
-                    return (try? await entitlementRepo?.currentEntitlement()) ?? .free
-                },
-                historyRepository: historyRepo
-            )
+            let historyRepository = resolver.resolve(WorkoutHistoryRepository.self)!
+
+            // Try to create OpenAI composer if API key is configured
+            if let client = NewOpenAIClient.fromUserKey() {
+                return NewOpenAIWorkoutComposer(
+                    client: client,
+                    localFallback: enhancedLocalComposer,
+                    historyRepository: historyRepository
+                )
+            } else {
+                // No API key - use enhanced local composer
+                return enhancedLocalComposer
+            }
         }
         .inObjectScope(.container)
         

@@ -64,11 +64,12 @@ struct WorkoutBlueprintEngine: BlueprintGenerating, Sendable {
     // Calcular duração estimada
     let duration = estimateDuration(blocks: blocks, level: input.level, structure: input.structure)
     
-    // Gerar título
+    // Gerar título com variação baseada no seed
     let title = SpecialistSessionRules.sessionTitle(
       focus: input.focus,
       goal: input.goal,
-      soreness: input.sorenessLevel
+      soreness: input.sorenessLevel,
+      seed: input.variationSeed
     )
     
     // Constraints de equipamento
@@ -180,7 +181,7 @@ struct WorkoutBlueprintEngine: BlueprintGenerating, Sendable {
     domsAdjustment: SpecialistSessionRules.DOMSAdjustment,
     seed: UInt64
   ) -> WorkoutBlockBlueprint {
-    let targetMuscles = musclesFor(focus: focus)
+    let targetMuscles = musclesFor(focus: focus, seed: seed)
     let activityMinutes = domsAdjustment.intensityReduction ? 8 : 6
     
     return WorkoutBlockBlueprint(
@@ -212,7 +213,7 @@ struct WorkoutBlueprintEngine: BlueprintGenerating, Sendable {
     domsAdjustment: SpecialistSessionRules.DOMSAdjustment,
     seed: UInt64
   ) -> [WorkoutBlockBlueprint] {
-    let targetMuscles = musclesFor(focus: focus)
+    let targetMuscles = musclesFor(focus: focus, seed: seed)
     let volumeMultiplier = domsAdjustment.volumeMultiplier
     
     // Ajustar por nível
@@ -271,15 +272,15 @@ struct WorkoutBlueprintEngine: BlueprintGenerating, Sendable {
       repsRange: 10...15,
       restSeconds: 60 + domsAdjustment.extraRestSeconds,
       rpeTarget: 6,
-      targetMuscles: secondaryMusclesFor(focus: focus),
+      targetMuscles: secondaryMusclesFor(focus: focus, seed: seed),
       avoidMuscles: []
     )
-    
+
     return [mainBlock, accessoryBlock]
   }
-  
+
   // MARK: - Performance Blocks
-  
+
   /// Blocos para objetivo de performance atlética
   /// - Movimentos explosivos e funcionais
   /// - Qualidade > quantidade
@@ -290,7 +291,7 @@ struct WorkoutBlueprintEngine: BlueprintGenerating, Sendable {
     domsAdjustment: SpecialistSessionRules.DOMSAdjustment,
     seed: UInt64
   ) -> [WorkoutBlockBlueprint] {
-    let targetMuscles = musclesFor(focus: focus)
+    let targetMuscles = musclesFor(focus: focus, seed: seed)
     
     // Ajustar número de exercícios por nível
     let mainExerciseCount: Int
@@ -348,7 +349,7 @@ struct WorkoutBlueprintEngine: BlueprintGenerating, Sendable {
     domsAdjustment: SpecialistSessionRules.DOMSAdjustment,
     seed: UInt64
   ) -> [WorkoutBlockBlueprint] {
-    let targetMuscles = musclesFor(focus: focus)
+    let targetMuscles = musclesFor(focus: focus, seed: seed)
     let volumeMultiplier = domsAdjustment.volumeMultiplier
     
     // Ajustar número de exercícios por nível (emagrecimento precisa de volume)
@@ -387,15 +388,15 @@ struct WorkoutBlueprintEngine: BlueprintGenerating, Sendable {
       repsRange: 15...20,
       restSeconds: 20,
       rpeTarget: 6,
-      targetMuscles: secondaryMusclesFor(focus: focus),
+      targetMuscles: secondaryMusclesFor(focus: focus, seed: seed),
       avoidMuscles: []
     )
-    
+
     return [metabolicBlock, accessoryBlock]
   }
-  
+
   // MARK: - Conditioning Blocks
-  
+
   /// Blocos para objetivo de condicionamento
   /// - Força + resistência
   /// - Intensidade moderada
@@ -405,7 +406,7 @@ struct WorkoutBlueprintEngine: BlueprintGenerating, Sendable {
     domsAdjustment: SpecialistSessionRules.DOMSAdjustment,
     seed: UInt64
   ) -> [WorkoutBlockBlueprint] {
-    let targetMuscles = musclesFor(focus: focus)
+    let targetMuscles = musclesFor(focus: focus, seed: seed)
     
     // Ajustar número de exercícios por nível
     let mainExerciseCount: Int
@@ -442,15 +443,15 @@ struct WorkoutBlueprintEngine: BlueprintGenerating, Sendable {
       repsRange: 12...18,
       restSeconds: 45,
       rpeTarget: 5,
-      targetMuscles: secondaryMusclesFor(focus: focus),
+      targetMuscles: secondaryMusclesFor(focus: focus, seed: seed),
       avoidMuscles: []
     )
-    
+
     return [mainBlock, accessoryBlock]
   }
-  
+
   // MARK: - Endurance Blocks (Resistência)
-  
+
   /// Blocos para objetivo de resistência cardiorrespiratória
   /// Baseado em personal-active/resistencia.md:
   /// - Ênfase em aeróbio e técnica
@@ -461,7 +462,7 @@ struct WorkoutBlueprintEngine: BlueprintGenerating, Sendable {
     domsAdjustment: SpecialistSessionRules.DOMSAdjustment,
     seed: UInt64
   ) -> [WorkoutBlockBlueprint] {
-    let targetMuscles = musclesFor(focus: focus)
+    let targetMuscles = musclesFor(focus: focus, seed: seed)
     
     // Ajustar número de exercícios por nível (resistência precisa de volume)
     let mainExerciseCount: Int
@@ -499,13 +500,13 @@ struct WorkoutBlueprintEngine: BlueprintGenerating, Sendable {
       repsRange: 15...20,
       restSeconds: 20,
       rpeTarget: 5,
-      targetMuscles: secondaryMusclesFor(focus: focus),
+      targetMuscles: secondaryMusclesFor(focus: focus, seed: seed),
       avoidMuscles: []
     )
-    
+
     return [mainBlock, accessoryBlock]
   }
-  
+
   // MARK: - Aerobic Block
   
   private func generateAerobicBlock(
@@ -554,39 +555,105 @@ struct WorkoutBlueprintEngine: BlueprintGenerating, Sendable {
   }
   
   // MARK: - Helpers
-  
-  private func musclesFor(focus: DailyFocus) -> [MuscleGroup] {
-    switch focus {
-    case .upper:
-      return [.chest, .back, .shoulders]
-    case .lower:
-      return [.quads, .quadriceps, .glutes, .hamstrings]
-    case .fullBody:
-      return [.chest, .back, .quads, .quadriceps]
-    case .cardio:
-      return [.cardioSystem, .fullBody]
-    case .core:
-      return [.core]
-    case .surprise:
-      return [.fullBody]
-    }
+
+  /// All possible muscle groups for each focus with variations
+  private static let focusMuscleVariations: [DailyFocus: [[MuscleGroup]]] = [
+    .upper: [
+      [.chest, .back, .shoulders],
+      [.back, .chest, .shoulders],
+      [.shoulders, .chest, .back],
+      [.chest, .shoulders, .back],
+      [.back, .shoulders, .chest]
+    ],
+    .lower: [
+      [.quads, .quadriceps, .glutes, .hamstrings],
+      [.glutes, .hamstrings, .quads, .quadriceps],
+      [.hamstrings, .glutes, .quads, .quadriceps],
+      [.quadriceps, .quads, .glutes, .hamstrings],
+      [.glutes, .quads, .hamstrings, .quadriceps]
+    ],
+    .fullBody: [
+      [.chest, .back, .quads, .quadriceps],
+      [.back, .quads, .chest, .glutes],
+      [.quads, .chest, .back, .shoulders],
+      [.shoulders, .back, .glutes, .quads],
+      [.glutes, .chest, .back, .quads]
+    ],
+    .cardio: [
+      [.cardioSystem, .fullBody],
+      [.fullBody, .cardioSystem]
+    ],
+    .core: [
+      [.core],
+      [.core, .glutes],
+      [.core, .back]
+    ],
+    .surprise: [
+      [.fullBody],
+      [.chest, .back, .quads],
+      [.back, .glutes, .shoulders],
+      [.quads, .chest, .core]
+    ]
+  ]
+
+  /// All possible secondary muscle groups for each focus with variations
+  private static let focusSecondaryMuscleVariations: [DailyFocus: [[MuscleGroup]]] = [
+    .upper: [
+      [.biceps, .triceps, .arms],
+      [.triceps, .biceps, .arms],
+      [.arms, .biceps, .triceps],
+      [.triceps, .arms, .biceps]
+    ],
+    .lower: [
+      [.calves, .core],
+      [.core, .calves],
+      [.calves, .core, .glutes],
+      [.core, .glutes, .calves]
+    ],
+    .fullBody: [
+      [.shoulders, .core, .glutes],
+      [.core, .glutes, .shoulders],
+      [.glutes, .shoulders, .core],
+      [.biceps, .triceps, .core],
+      [.arms, .core, .glutes]
+    ],
+    .cardio: [
+      [.core, .glutes],
+      [.glutes, .core],
+      [.core, .hamstrings]
+    ],
+    .core: [
+      [.glutes, .back],
+      [.back, .glutes],
+      [.glutes, .hamstrings]
+    ],
+    .surprise: [
+      [.core],
+      [.glutes, .core],
+      [.shoulders, .biceps],
+      [.triceps, .core]
+    ]
+  ]
+
+  private func musclesFor(focus: DailyFocus, seed: UInt64) -> [MuscleGroup] {
+    let variations = Self.focusMuscleVariations[focus] ?? [[.fullBody]]
+    let index = Int(seed % UInt64(variations.count))
+    return variations[index]
   }
-  
+
+  private func secondaryMusclesFor(focus: DailyFocus, seed: UInt64) -> [MuscleGroup] {
+    let variations = Self.focusSecondaryMuscleVariations[focus] ?? [[.core]]
+    let index = Int((seed / 3) % UInt64(variations.count))
+    return variations[index]
+  }
+
+  // Legacy methods for backward compatibility
+  private func musclesFor(focus: DailyFocus) -> [MuscleGroup] {
+    musclesFor(focus: focus, seed: 0)
+  }
+
   private func secondaryMusclesFor(focus: DailyFocus) -> [MuscleGroup] {
-    switch focus {
-    case .upper:
-      return [.biceps, .triceps, .arms]
-    case .lower:
-      return [.calves, .core]
-    case .fullBody:
-      return [.shoulders, .core, .glutes]
-    case .cardio:
-      return [.core, .glutes]
-    case .core:
-      return [.glutes, .back]
-    case .surprise:
-      return [.core]
-    }
+    secondaryMusclesFor(focus: focus, seed: 0)
   }
   
   private func applyVolumeAdjustment(
