@@ -247,6 +247,13 @@ enum ErrorMapper {
           action: .dismiss
         )
       }
+
+    case .emptyWorkoutResponse:
+      return ErrorMessage(
+        title: "Resposta incompleta",
+        message: "A IA não retornou exercícios. Geramos um treino local para você.",
+        action: .dismiss
+      )
     }
   }
   

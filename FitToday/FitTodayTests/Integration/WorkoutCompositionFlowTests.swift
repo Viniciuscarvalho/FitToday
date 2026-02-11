@@ -170,44 +170,48 @@ final class WorkoutCompositionFlowTests: XCTestCase {
     )
   }
   
-  // MARK: - Determinism Tests
-  
-  func testBlueprintDeterminismAcrossAllGoals() {
-    // Para cada objetivo, verificar que mesmos inputs = mesmo blueprint
+  // MARK: - Variation Tests
+
+  func testBlueprintVariationAcrossAllGoals() {
+    // Para cada objetivo, verificar que cada chamada gera seed diferente (variação)
     for goal in FitnessGoal.allCases {
       let profile = WorkoutTestFixtures.Profiles.forGoal(goal)
       let checkIn = WorkoutTestFixtures.CheckIns.neutral
-      
+
       let blueprint1 = blueprintEngine.generateBlueprint(profile: profile, checkIn: checkIn)
       let blueprint2 = blueprintEngine.generateBlueprint(profile: profile, checkIn: checkIn)
-      
-      XCTAssertEqual(blueprint1.variationSeed, blueprint2.variationSeed, "Seed should be deterministic for \(goal)")
-      XCTAssertEqual(blueprint1.title, blueprint2.title, "Title should be deterministic for \(goal)")
-      XCTAssertEqual(blueprint1.blocks.count, blueprint2.blocks.count, "Block count should be deterministic for \(goal)")
+
+      // Seeds devem ser DIFERENTES para garantir variação
+      XCTAssertNotEqual(blueprint1.variationSeed, blueprint2.variationSeed, "Seeds should be different for \(goal) to ensure variation")
+
+      // Estrutura básica deve ser consistente com o objetivo
+      XCTAssertEqual(blueprint1.goal, blueprint2.goal, "Goal should be consistent for \(goal)")
+      XCTAssertEqual(blueprint1.blocks.count, blueprint2.blocks.count, "Block count should be consistent for \(goal)")
     }
   }
-  
-  func testPromptDeterminismAcrossAllGoals() {
+
+  func testPromptConsistencyWithSameBlueprint() {
     for goal in FitnessGoal.allCases {
       let profile = WorkoutTestFixtures.Profiles.forGoal(goal)
       let checkIn = WorkoutTestFixtures.CheckIns.neutral
       let blueprint = blueprintEngine.generateBlueprint(profile: profile, checkIn: checkIn)
-      
+
+      // Mesmo blueprint deve gerar mesmo prompt
       let prompt1 = promptAssembler.assemblePrompt(
         blueprint: blueprint,
         blocks: WorkoutTestFixtures.Blocks.all,
         profile: profile,
         checkIn: checkIn
       )
-      
+
       let prompt2 = promptAssembler.assemblePrompt(
         blueprint: blueprint,
         blocks: WorkoutTestFixtures.Blocks.all,
         profile: profile,
         checkIn: checkIn
       )
-      
-      XCTAssertEqual(prompt1.cacheKey, prompt2.cacheKey, "Cache key should be deterministic for \(goal)")
+
+      XCTAssertEqual(prompt1.cacheKey, prompt2.cacheKey, "Same blueprint should produce same cache key for \(goal)")
     }
   }
   

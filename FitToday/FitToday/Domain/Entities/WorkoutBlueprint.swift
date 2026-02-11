@@ -255,7 +255,8 @@ struct WorkoutBlueprint: Codable, Hashable, Sendable, Identifiable {
 
 // MARK: - Blueprint Input
 
-/// Inputs para geração de blueprint (usado para hash de cache)
+/// Inputs para geração de blueprint
+/// IMPORTANTE: Cada chamada gera um seed ALEATÓRIO para garantir variação nos treinos
 struct BlueprintInput: Codable, Hashable, Sendable {
     let goal: FitnessGoal
     let structure: TrainingStructure
@@ -264,70 +265,28 @@ struct BlueprintInput: Codable, Hashable, Sendable {
     let sorenessLevel: MuscleSorenessLevel
     let sorenessAreas: [MuscleGroup]
     let energyLevel: Int // 0-10
-    let dayOfWeek: Int // 1-7 (segunda-domingo)
-    let weekOfYear: Int // 1-52
-    let hourOfDay: Int // 0-23 (hora do dia para variação mais frequente)
-    let minuteOfHour: Int // 0-59 (minuto para variação a cada 15 min)
-    let secondOfMinute: Int // 0-59 (segundo - usado apenas em DEBUG para máxima variação)
 
-    /// Gera hash estável para cache (usado para evitar chamadas duplicadas no mesmo bucket)
-    /// Em DEBUG: varia a cada segundo para teste
-    /// Em produção: varia a cada minuto para maior diversidade de treinos
+    /// Seed de variação gerado aleatoriamente para cada treino
+    /// Garante que cada treino seja único, mesmo com os mesmos inputs
+    let variationSeed: UInt64
+
+    /// Chave única para identificação (baseada no seed aleatório)
+    /// Nota: Cada chamada a `from()` gera uma chave diferente
     var cacheKey: String {
-        var components = [
-            BlueprintVersion.current.rawValue,
-            goal.rawValue,
-            structure.rawValue,
-            level.rawValue,
-            focus.rawValue,
-            sorenessLevel.rawValue,
-            String(energyLevel),
-            String(dayOfWeek),
-            String(weekOfYear),
-            String(hourOfDay)
-        ]
-
-        #if DEBUG
-        // Em DEBUG: usar minuto + segundo para máxima variação
-        components.append(String(minuteOfHour))
-        components.append(String(secondOfMinute))
-        #else
-        // Em produção: usar minuto completo para maior diversidade de treinos
-        // Antes: buckets de 15min (minuteOfHour / 15) = só 4 variações/hora
-        // Agora: variação por minuto = 60 variações/hora
-        components.append(String(minuteOfHour))
-        #endif
-
-        return components.joined(separator: ":")
-    }
-
-    /// Gera seed de variação baseada nos inputs + data + hora
-    /// DEBUG: muda a cada segundo para testar variação
-    /// Produção: muda a cada minuto para maior diversidade de treinos
-    var variationSeed: UInt64 {
-        var hasher = Hasher()
-        hasher.combine(cacheKey)
-        let hash = hasher.finalize()
-
-        #if DEBUG
-        print("[BlueprintInput] cacheKey: \(cacheKey)")
-        print("[BlueprintInput] variationSeed: \(UInt64(bitPattern: Int64(hash)))")
-        #endif
-
-        return UInt64(bitPattern: Int64(hash))
+        "\(BlueprintVersion.current.rawValue):\(goal.rawValue):\(structure.rawValue):\(level.rawValue):\(focus.rawValue):\(variationSeed)"
     }
 
     /// Factory a partir de profile + checkIn
-    static func from(profile: UserProfile, checkIn: DailyCheckIn, date: Date = .init()) -> BlueprintInput {
-        let calendar = Calendar.current
-        let dayOfWeek = calendar.component(.weekday, from: date)
-        let weekOfYear = calendar.component(.weekOfYear, from: date)
-        let hourOfDay = calendar.component(.hour, from: date)
-        let minuteOfHour = calendar.component(.minute, from: date)
-        let secondOfMinute = calendar.component(.second, from: date)
+    /// Gera um seed ALEATÓRIO a cada chamada para garantir treinos variados
+    static func from(profile: UserProfile, checkIn: DailyCheckIn) -> BlueprintInput {
+        // Seed aleatório combinando random e timestamp para máxima entropia
+        let randomPart = UInt64.random(in: 0...UInt64.max)
+        let timePart = UInt64(Date().timeIntervalSince1970 * 1_000_000) // microseconds
+        let seed = randomPart ^ timePart
 
         #if DEBUG
-        print("[BlueprintInput] Criando input: goal=\(profile.mainGoal.rawValue) focus=\(checkIn.focus.rawValue) day=\(dayOfWeek) week=\(weekOfYear) hour=\(hourOfDay) min=\(minuteOfHour) sec=\(secondOfMinute)")
+        print("[BlueprintInput] Criando input: goal=\(profile.mainGoal.rawValue) focus=\(checkIn.focus.rawValue)")
+        print("[BlueprintInput] variationSeed: \(seed) (random)")
         #endif
 
         return BlueprintInput(
@@ -338,11 +297,7 @@ struct BlueprintInput: Codable, Hashable, Sendable {
             sorenessLevel: checkIn.sorenessLevel,
             sorenessAreas: checkIn.sorenessAreas,
             energyLevel: checkIn.energyLevel,
-            dayOfWeek: dayOfWeek,
-            weekOfYear: weekOfYear,
-            hourOfDay: hourOfDay,
-            minuteOfHour: minuteOfHour,
-            secondOfMinute: secondOfMinute
+            variationSeed: seed
         )
     }
 }

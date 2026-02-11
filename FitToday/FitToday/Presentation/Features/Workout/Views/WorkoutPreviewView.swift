@@ -150,8 +150,8 @@ struct WorkoutPreviewView: View {
         // Initialize workout session
         sessionStore.start(with: workoutPlan)
 
-        // Navigate to exercise detail (execution view)
-        router.push(.exerciseDetail, on: router.selectedTab)
+        // Navigate to workout execution view
+        router.push(.workoutExecution, on: router.selectedTab)
     }
 
     // MARK: - Conversion Helper

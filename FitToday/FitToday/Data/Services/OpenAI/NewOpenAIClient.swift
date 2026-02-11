@@ -26,6 +26,7 @@ actor NewOpenAIClient: Sendable {
         case invalidResponse
         case httpError(statusCode: Int, message: String)
         case decodingError(String)
+        case emptyWorkoutResponse
 
         var errorDescription: String? {
             switch self {
@@ -37,6 +38,8 @@ actor NewOpenAIClient: Sendable {
                 return "HTTP \(code): \(message)"
             case .decodingError(let detail):
                 return "Failed to decode response: \(detail)"
+            case .emptyWorkoutResponse:
+                return "OpenAI returned an empty workout response"
             }
         }
     }

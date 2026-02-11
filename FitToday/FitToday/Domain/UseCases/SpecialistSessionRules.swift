@@ -226,32 +226,68 @@ struct SpecialistSessionRules: Sendable {
     }
     
     // MARK: - Session Title Generation
-    
+
+    /// Title variations for each focus to provide workout variety
+    private static let focusTitleVariations: [DailyFocus: [String]] = [
+        .upper: ["Upper Power", "Upper Push & Pull", "Tronco Superior", "Upper Strength", "Superiores"],
+        .lower: ["Lower Power", "Leg Day", "Membros Inferiores", "Lower Strength", "Pernas & Glúteos"],
+        .fullBody: ["Full Body", "Total Body", "Corpo Inteiro", "Full Power", "Completo"],
+        .cardio: ["Cardio Blast", "Cardio Flow", "Cardio Queima", "Cardio Intenso", "Cardio Mix"],
+        .core: ["Core Strength", "Core Power", "Abdômen", "Core Blast", "Core Focus"],
+        .surprise: ["Mix Power", "Surprise Workout", "Treino Surpresa", "Mix Variado", "Combo"]
+    ]
+
+    /// Suffix variations for each session type to provide workout variety
+    private static let sessionTypeSuffixVariations: [SessionType: [String]] = [
+        .strength: ["Força", "Power", "Strength", "Pesado", "Intenso"],
+        .performance: ["Performance", "Explosivo", "Atlético", "Funcional", "Ágil"],
+        .weightLoss: ["Fat Burn", "Queima", "Metabólico", "Definição", "Shred"],
+        .conditioning: ["Conditioning", "Resistência", "Stamina", "Fit", "Condição"],
+        .endurance: ["Endurance", "Longa Duração", "Volume", "Resistência", "Persistência"]
+    ]
+
     static func sessionTitle(focus: DailyFocus, goal: FitnessGoal, soreness: MuscleSorenessLevel) -> String {
-        let prefix: String
-        switch focus {
-        case .upper: prefix = "Upper"
-        case .lower: prefix = "Lower"
-        case .fullBody: prefix = "Full Body"
-        case .cardio: prefix = "Cardio"
-        case .core: prefix = "Core"
-        case .surprise: prefix = "Mix"
+        sessionTitle(focus: focus, goal: goal, soreness: soreness, seed: nil)
+    }
+
+    /// Generates a varied session title based on seed for workout diversity
+    static func sessionTitle(focus: DailyFocus, goal: FitnessGoal, soreness: MuscleSorenessLevel, seed: UInt64?) -> String {
+        let type = sessionType(for: goal)
+
+        // Get variations arrays
+        let focusOptions = focusTitleVariations[focus] ?? ["Treino"]
+        let suffixOptions = sessionTypeSuffixVariations[type] ?? [""]
+
+        // Select variation based on seed (deterministic) or use first option
+        let focusIndex: Int
+        let suffixIndex: Int
+
+        if let seed = seed {
+            // Use seed to select variations deterministically
+            focusIndex = Int(seed % UInt64(focusOptions.count))
+            suffixIndex = Int((seed / 7) % UInt64(suffixOptions.count))
+        } else {
+            // Default to first option
+            focusIndex = 0
+            suffixIndex = 0
         }
-        
-        let suffix: String
-        switch sessionType(for: goal) {
-        case .strength: suffix = "Força"
-        case .performance: suffix = "Performance"
-        case .weightLoss: suffix = "Fat Burn"
-        case .conditioning: suffix = "Conditioning"
-        case .endurance: suffix = "Endurance"
+
+        let prefix = focusOptions[focusIndex]
+        let suffix = suffixOptions[suffixIndex]
+
+        // Avoid redundant titles like "Upper Power Power"
+        let title: String
+        if prefix.lowercased().contains(suffix.lowercased()) || suffix.lowercased().contains(prefix.lowercased()) {
+            title = prefix
+        } else {
+            title = "\(prefix) \(suffix)"
         }
-        
+
         if soreness == .strong {
-            return "\(prefix) \(suffix) (Recovery)"
+            return "\(title) (Recovery)"
         }
-        
-        return "\(prefix) \(suffix)"
+
+        return title
     }
     
     // MARK: - Intensity Calculation

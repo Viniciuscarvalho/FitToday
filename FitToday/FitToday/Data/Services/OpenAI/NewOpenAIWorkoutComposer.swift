@@ -167,11 +167,26 @@ struct NewOpenAIWorkoutComposer: WorkoutPlanComposing, Sendable {
     private func fetchRecentWorkouts(limit: Int = 3) async throws -> [WorkoutPlan] {
         do {
             let entries = try await historyRepository.listEntries(limit: limit, offset: 0)
+
+            #if DEBUG
+            print("[NewOpenAIComposer] 📋 History entries fetched: \(entries.count)")
+            for (index, entry) in entries.enumerated() {
+                let hasWorkoutPlan = entry.workoutPlan != nil
+                let exerciseCount = entry.workoutPlan?.phases.flatMap(\.items).count ?? 0
+                print("[NewOpenAIComposer]   [\(index)] \(entry.title) - hasWorkoutPlan: \(hasWorkoutPlan), exercises: \(exerciseCount)")
+            }
+            #endif
+
             let workoutPlans = entries.compactMap { $0.workoutPlan }
+
+            #if DEBUG
+            print("[NewOpenAIComposer] 📋 WorkoutPlans with exercises: \(workoutPlans.count)")
+            #endif
+
             return workoutPlans
         } catch {
             #if DEBUG
-            print("[NewOpenAIComposer] ⚠️ Failed to fetch history: \(error.localizedDescription)")
+            print("[NewOpenAIComposer] ❌ Failed to fetch history: \(error.localizedDescription)")
             #endif
             return []
         }
@@ -183,23 +198,64 @@ struct NewOpenAIWorkoutComposer: WorkoutPlanComposing, Sendable {
         blueprint: WorkoutBlueprint,
         blocks: [WorkoutBlock]
     ) throws -> WorkoutPlan {
-        // 1. Decode ChatCompletionResponse
         let decoder = JSONDecoder()
-        let chatResponse = try decoder.decode(ChatCompletionResponse.self, from: responseData)
+
+        // 1. Decode ChatCompletionResponse with debug logging
+        let chatResponse: ChatCompletionResponse
+        do {
+            chatResponse = try decoder.decode(ChatCompletionResponse.self, from: responseData)
+        } catch {
+            #if DEBUG
+            print("[NewOpenAIComposer] ❌ Failed to decode ChatCompletionResponse: \(error)")
+            if let jsonString = String(data: responseData, encoding: .utf8) {
+                print("[NewOpenAIComposer] Raw response (first 500 chars): \(String(jsonString.prefix(500)))")
+            }
+            #endif
+            throw NewOpenAIClient.ClientError.decodingError("ChatCompletionResponse: \(error.localizedDescription)")
+        }
 
         guard let content = chatResponse.choices.first?.message.content else {
+            #if DEBUG
+            print("[NewOpenAIComposer] ❌ Empty choices or content in response")
+            #endif
             throw NewOpenAIClient.ClientError.invalidResponse
         }
 
         // 2. Extract JSON from content (may be wrapped in markdown)
         guard let workoutJSON = extractJSON(from: content) else {
+            #if DEBUG
+            print("[NewOpenAIComposer] ❌ Failed to extract JSON from content (first 200 chars): \(String(content.prefix(200)))")
+            #endif
             throw NewOpenAIClient.ClientError.decodingError("Failed to extract JSON from response")
         }
 
-        // 3. Decode OpenAIWorkoutResponse
-        let workoutResponse = try decoder.decode(OpenAIWorkoutResponse.self, from: workoutJSON)
+        // 3. Decode OpenAIWorkoutResponse with debug logging
+        let workoutResponse: OpenAIWorkoutResponse
+        do {
+            workoutResponse = try decoder.decode(OpenAIWorkoutResponse.self, from: workoutJSON)
+        } catch {
+            #if DEBUG
+            print("[NewOpenAIComposer] ❌ Failed to decode OpenAIWorkoutResponse: \(error)")
+            if let jsonString = String(data: workoutJSON, encoding: .utf8) {
+                print("[NewOpenAIComposer] Workout JSON (first 1000 chars): \(String(jsonString.prefix(1000)))")
+            }
+            #endif
+            throw NewOpenAIClient.ClientError.decodingError("OpenAIWorkoutResponse: \(error.localizedDescription)")
+        }
 
-        // 4. Convert to WorkoutPlan
+        // 4. Validate response has content
+        guard !workoutResponse.phases.isEmpty else {
+            #if DEBUG
+            print("[NewOpenAIComposer] ❌ Decoded response has empty phases array")
+            #endif
+            throw NewOpenAIClient.ClientError.emptyWorkoutResponse
+        }
+
+        #if DEBUG
+        print("[NewOpenAIComposer] ✅ Decoded \(workoutResponse.phases.count) phases successfully")
+        #endif
+
+        // 5. Convert to WorkoutPlan
         let workoutPlan = convertToWorkoutPlan(
             response: workoutResponse,
             blueprint: blueprint,

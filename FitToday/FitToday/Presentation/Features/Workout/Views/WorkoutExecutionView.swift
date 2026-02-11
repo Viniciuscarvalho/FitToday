@@ -3,7 +3,7 @@
 //  FitToday
 //
 //  Main workout execution screen displaying current exercise with media, sets, and timers.
-//  Integrates WorkoutExecutionViewModel for state management.
+//  Uses WorkoutSessionStore for state management (migrated from WorkoutExecutionViewModel).
 //
 
 import SwiftUI
@@ -12,43 +12,79 @@ import Swinject
 struct WorkoutExecutionView: View {
     @Environment(\.dependencyResolver) private var resolver
     @Environment(AppRouter.self) private var router
+    @Environment(WorkoutSessionStore.self) private var sessionStore
 
-    @State private var viewModel: WorkoutExecutionViewModel?
-    @State private var translationService: ExerciseTranslationService = ExerciseTranslationService()
+    @State private var restTimerStore = RestTimerStore()
+    @State private var workoutTimerStore = WorkoutTimerStore()
+    @State private var translationService = ExerciseTranslationService()
     @State private var exerciseDescription: String = ""
-
-    let workoutPlan: WorkoutPlan
+    @State private var isPaused = false
+    @State private var showRestTimer = false
+    @State private var showSubstitutionSheet = false
+    @State private var errorMessage: String?
 
     var body: some View {
         ZStack {
-            if let viewModel = viewModel {
-                workoutContent(viewModel: viewModel)
+            if sessionStore.plan != nil {
+                workoutContent
             } else {
-                loadingView
+                emptyStateView
             }
 
             // Rest Timer Overlay
-            if let viewModel = viewModel, viewModel.isResting {
-                restTimerOverlay(viewModel: viewModel)
+            if showRestTimer || restTimerStore.isActive {
+                restTimerOverlay
             }
         }
         .navigationTitle("Executando Treino")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar(.hidden, for: .tabBar)
         .onAppear {
-            setupViewModel()
+            workoutTimerStore.start()
+        }
+        .onDisappear {
+            workoutTimerStore.pause()
+            restTimerStore.stop()
+        }
+        .alert("Ops!", isPresented: Binding(
+            get: { errorMessage != nil },
+            set: { _ in errorMessage = nil }
+        )) {
+            Button("Ok", role: .cancel) {}
+        } message: {
+            Text(errorMessage ?? "Algo inesperado aconteceu.")
+        }
+        .sheet(isPresented: $showSubstitutionSheet) {
+            if let prescription = sessionStore.currentPrescription {
+                SubstitutionSheetWrapper(
+                    exercise: prescription.exercise,
+                    resolver: resolver,
+                    onSelect: { alternative in
+                        sessionStore.substituteCurrentExercise(with: alternative)
+                        showSubstitutionSheet = false
+                    },
+                    onDismiss: {
+                        showSubstitutionSheet = false
+                    }
+                )
+            }
         }
     }
 
-    // MARK: - Loading View
+    // MARK: - Empty State View
 
-    private var loadingView: some View {
+    private var emptyStateView: some View {
         VStack(spacing: FitTodaySpacing.lg) {
-            ProgressView()
-                .scaleEffect(1.5)
+            Image(systemName: "dumbbell")
+                .font(.system(size: 48))
+                .foregroundStyle(FitTodayColor.textSecondary)
 
-            Text("Preparando treino...")
-                .font(FitTodayFont.ui(size: 16, weight: .medium))
+            Text("Nenhum treino ativo")
+                .font(FitTodayFont.ui(size: 18, weight: .semiBold))
+                .foregroundStyle(FitTodayColor.textPrimary)
+
+            Text("Volte e inicie um treino primeiro.")
+                .font(FitTodayFont.ui(size: 14, weight: .medium))
                 .foregroundStyle(FitTodayColor.textSecondary)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -57,58 +93,152 @@ struct WorkoutExecutionView: View {
 
     // MARK: - Workout Content
 
-    @ViewBuilder
-    private func workoutContent(viewModel: WorkoutExecutionViewModel) -> some View {
+    private var workoutContent: some View {
         ScrollView {
             VStack(spacing: FitTodaySpacing.lg) {
                 // Progress Header
-                progressHeader(viewModel: viewModel)
+                progressHeader
 
                 // Current Exercise Card
-                if let prescription = viewModel.currentPrescription {
-                    ExerciseExecutionCard(
-                        prescription: prescription,
-                        description: exerciseDescription,
-                        viewModel: viewModel,
-                        onSubstitute: { viewModel.showSubstitution() }
-                    )
-                    .transition(.asymmetric(
-                        insertion: .move(edge: .trailing).combined(with: .opacity),
-                        removal: .move(edge: .leading).combined(with: .opacity)
-                    ))
-                    .task(id: prescription.exercise.id) {
-                        await loadExerciseDescription(prescription.exercise)
-                    }
+                if let prescription = sessionStore.currentPrescription {
+                    exerciseCard(prescription: prescription)
                 }
 
                 // Set Completion UI
-                if let progress = viewModel.currentExerciseProgress,
-                   let prescription = viewModel.currentPrescription {
-                    SetCompletionView(
-                        progress: progress,
-                        prescription: prescription,
-                        onToggleSet: { index in
-                            viewModel.toggleSet(at: index)
-                        }
-                    )
+                if let progress = sessionStore.currentExerciseProgress,
+                   let prescription = sessionStore.currentPrescription {
+                    setCompletionSection(progress: progress, prescription: prescription)
                 }
 
                 // Navigation Controls
-                navigationControls(viewModel: viewModel)
+                navigationControls
             }
             .padding()
             .padding(.bottom, 100)
         }
         .background(FitTodayColor.background.ignoresSafeArea())
         .overlay(alignment: .bottom) {
-            bottomControlBar(viewModel: viewModel)
+            bottomControlBar
         }
-        .animation(.spring(response: 0.4, dampingFraction: 0.8), value: viewModel.currentExerciseIndex)
+        .animation(.spring(response: 0.4, dampingFraction: 0.8), value: sessionStore.currentExerciseIndex)
+    }
+
+    // MARK: - Exercise Card
+
+    @ViewBuilder
+    private func exerciseCard(prescription: ExercisePrescription) -> some View {
+        VStack(alignment: .leading, spacing: FitTodaySpacing.md) {
+            // Exercise Name
+            Text(sessionStore.effectiveCurrentExerciseName)
+                .font(FitTodayFont.display(size: 22, weight: .bold))
+                .foregroundStyle(FitTodayColor.textPrimary)
+
+            // Exercise Image
+            ExerciseHeroImage(media: prescription.exercise.media)
+                .fitCardShadow()
+
+            // Exercise Info
+            HStack(spacing: FitTodaySpacing.lg) {
+                infoTag(icon: "repeat", text: "\(prescription.sets) séries")
+                infoTag(icon: "number", text: "\(prescription.reps.display) reps")
+                infoTag(icon: "timer", text: "\(Int(prescription.restInterval))s descanso")
+            }
+
+            // Instructions
+            if !exerciseDescription.isEmpty {
+                Text(exerciseDescription)
+                    .font(FitTodayFont.ui(size: 14, weight: .medium))
+                    .foregroundStyle(FitTodayColor.textSecondary)
+                    .lineLimit(3)
+            }
+
+            // Substitution Badge
+            if sessionStore.currentExerciseHasSubstitution,
+               let sub = sessionStore.substitution(for: prescription.exercise.id) {
+                SubstitutionBadge(alternativeName: sub.name) {
+                    sessionStore.removeCurrentSubstitution()
+                }
+            }
+
+            // Substitution Button
+            if !sessionStore.currentExerciseHasSubstitution {
+                Button {
+                    showSubstitutionSheet = true
+                } label: {
+                    HStack(spacing: FitTodaySpacing.xs) {
+                        Image(systemName: "arrow.triangle.2.circlepath")
+                        Text("Não consigo fazer")
+                    }
+                    .font(FitTodayFont.ui(size: 14, weight: .medium))
+                    .foregroundStyle(FitTodayColor.brandSecondary)
+                }
+            }
+        }
+        .padding(FitTodaySpacing.md)
+        .background(FitTodayColor.surfaceElevated)
+        .clipShape(RoundedRectangle(cornerRadius: FitTodayRadius.md))
+        .transition(.asymmetric(
+            insertion: .move(edge: .trailing).combined(with: .opacity),
+            removal: .move(edge: .leading).combined(with: .opacity)
+        ))
+        .task(id: prescription.exercise.id) {
+            await loadExerciseDescription(prescription.exercise)
+        }
+    }
+
+    private func infoTag(icon: String, text: String) -> some View {
+        HStack(spacing: FitTodaySpacing.xs) {
+            Image(systemName: icon)
+                .font(.system(size: 12))
+                .foregroundStyle(FitTodayColor.brandPrimary)
+            Text(text)
+                .font(FitTodayFont.ui(size: 12, weight: .medium))
+                .foregroundStyle(FitTodayColor.textSecondary)
+        }
+    }
+
+    // MARK: - Set Completion Section
+
+    private func setCompletionSection(progress: ExerciseProgress, prescription: ExercisePrescription) -> some View {
+        VStack(alignment: .leading, spacing: FitTodaySpacing.md) {
+            HStack {
+                Text("Séries")
+                    .font(FitTodayFont.ui(size: 16, weight: .semiBold))
+                    .foregroundStyle(FitTodayColor.textPrimary)
+
+                Spacer()
+
+                Text("\(progress.completedSetsCount)/\(progress.totalSets)")
+                    .font(FitTodayFont.ui(size: 15, weight: .semiBold))
+                    .foregroundStyle(FitTodayColor.brandPrimary)
+            }
+
+            VStack(spacing: FitTodaySpacing.sm) {
+                ForEach(Array(progress.sets.enumerated()), id: \.element.id) { index, setProgress in
+                    SetCheckbox(
+                        setNumber: setProgress.setNumber,
+                        isCompleted: setProgress.isCompleted,
+                        reps: "\(prescription.reps.display) reps"
+                    ) {
+                        sessionStore.toggleCurrentExerciseSet(at: index)
+
+                        // Start rest timer when completing a set (if not the last)
+                        if !setProgress.isCompleted && index < progress.sets.count - 1 {
+                            showRestTimer = true
+                            restTimerStore.start(duration: prescription.restInterval)
+                        }
+                    }
+                }
+            }
+        }
+        .padding(FitTodaySpacing.md)
+        .background(FitTodayColor.surfaceElevated)
+        .clipShape(RoundedRectangle(cornerRadius: FitTodayRadius.md))
     }
 
     // MARK: - Progress Header
 
-    private func progressHeader(viewModel: WorkoutExecutionViewModel) -> some View {
+    private var progressHeader: some View {
         VStack(spacing: FitTodaySpacing.md) {
             // Workout Timer
             HStack {
@@ -116,7 +246,7 @@ struct WorkoutExecutionView: View {
                     .font(.system(size: 16))
                     .foregroundStyle(FitTodayColor.brandPrimary)
 
-                Text(viewModel.formattedWorkoutTime)
+                Text(workoutTimerStore.formattedTime)
                     .font(FitTodayFont.ui(size: 20, weight: .bold))
                     .monospacedDigit()
                     .foregroundStyle(FitTodayColor.textPrimary)
@@ -124,7 +254,7 @@ struct WorkoutExecutionView: View {
                 Spacer()
 
                 // Exercise Counter
-                Text("\(viewModel.completedExercisesCount)/\(viewModel.totalExercisesCount) exercícios")
+                Text("\(sessionStore.completedExercisesCount)/\(sessionStore.exerciseCount) exercícios")
                     .font(FitTodayFont.ui(size: 14, weight: .medium))
                     .foregroundStyle(FitTodayColor.textSecondary)
             }
@@ -145,11 +275,11 @@ struct WorkoutExecutionView: View {
                                 endPoint: .trailing
                             )
                         )
-                        .frame(width: geometry.size.width * viewModel.overallProgress)
+                        .frame(width: geometry.size.width * sessionStore.overallProgress)
                 }
             }
             .frame(height: 8)
-            .animation(.spring(response: 0.4, dampingFraction: 0.8), value: viewModel.overallProgress)
+            .animation(.spring(response: 0.4, dampingFraction: 0.8), value: sessionStore.overallProgress)
         }
         .padding(FitTodaySpacing.md)
         .background(FitTodayColor.surfaceElevated)
@@ -158,12 +288,14 @@ struct WorkoutExecutionView: View {
 
     // MARK: - Navigation Controls
 
-    private func navigationControls(viewModel: WorkoutExecutionViewModel) -> some View {
+    private var navigationControls: some View {
         HStack(spacing: FitTodaySpacing.md) {
             // Skip Exercise
             Button {
-                let isComplete = viewModel.skipExercise()
-                if isComplete {
+                restTimerStore.stop()
+                showRestTimer = false
+                let finished = sessionStore.skipCurrentExercise()
+                if finished {
                     navigateToCompletion()
                 }
             } label: {
@@ -181,8 +313,10 @@ struct WorkoutExecutionView: View {
 
             // Next Exercise
             Button {
-                let isComplete = viewModel.nextExercise()
-                if isComplete {
+                restTimerStore.stop()
+                showRestTimer = false
+                let finished = sessionStore.advanceToNextExercise()
+                if finished {
                     navigateToCompletion()
                 }
             } label: {
@@ -197,20 +331,25 @@ struct WorkoutExecutionView: View {
                 .background(FitTodayColor.brandPrimary)
                 .clipShape(RoundedRectangle(cornerRadius: FitTodayRadius.md))
             }
-            .disabled(!viewModel.isCurrentExerciseComplete)
-            .opacity(viewModel.isCurrentExerciseComplete ? 1.0 : 0.5)
+            .disabled(!sessionStore.isCurrentExerciseComplete)
+            .opacity(sessionStore.isCurrentExerciseComplete ? 1.0 : 0.5)
         }
     }
 
     // MARK: - Bottom Control Bar
 
-    private func bottomControlBar(viewModel: WorkoutExecutionViewModel) -> some View {
+    private var bottomControlBar: some View {
         HStack(spacing: FitTodaySpacing.lg) {
             // Pause/Play Button
             Button {
-                viewModel.togglePause()
+                isPaused.toggle()
+                if isPaused {
+                    workoutTimerStore.pause()
+                } else {
+                    workoutTimerStore.start()
+                }
             } label: {
-                Image(systemName: viewModel.isPaused ? "play.fill" : "pause.fill")
+                Image(systemName: isPaused ? "play.fill" : "pause.fill")
                     .font(.system(size: 24))
                     .foregroundStyle(FitTodayColor.textPrimary)
                     .frame(width: 56, height: 56)
@@ -222,10 +361,7 @@ struct WorkoutExecutionView: View {
 
             // Finish Workout Button
             Button {
-                Task {
-                    await viewModel.finishWorkout(status: .completed)
-                    navigateToCompletion()
-                }
+                finishWorkout()
             } label: {
                 HStack(spacing: FitTodaySpacing.sm) {
                     Image(systemName: "checkmark.circle.fill")
@@ -248,14 +384,11 @@ struct WorkoutExecutionView: View {
 
     // MARK: - Rest Timer Overlay
 
-    private func restTimerOverlay(viewModel: WorkoutExecutionViewModel) -> some View {
+    private var restTimerOverlay: some View {
         ZStack {
             // Dimmed Background
             Color.black.opacity(0.7)
                 .ignoresSafeArea()
-                .onTapGesture {
-                    // Dismiss on tap outside
-                }
 
             // Rest Timer Content
             VStack(spacing: FitTodaySpacing.xl) {
@@ -272,7 +405,7 @@ struct WorkoutExecutionView: View {
 
                     // Progress ring
                     Circle()
-                        .trim(from: 0, to: viewModel.restProgressPercentage)
+                        .trim(from: 0, to: restTimerStore.progressPercentage)
                         .stroke(
                             LinearGradient(
                                 colors: [FitTodayColor.brandPrimary, FitTodayColor.brandSecondary],
@@ -283,10 +416,10 @@ struct WorkoutExecutionView: View {
                         )
                         .frame(width: 200, height: 200)
                         .rotationEffect(.degrees(-90))
-                        .animation(.linear(duration: 0.1), value: viewModel.restProgressPercentage)
+                        .animation(.linear(duration: 0.1), value: restTimerStore.progressPercentage)
 
                     // Time display
-                    Text(viewModel.formattedRestTime)
+                    Text(restTimerStore.formattedTime)
                         .font(FitTodayFont.display(size: 60, weight: .bold))
                         .foregroundStyle(FitTodayColor.textPrimary)
                         .monospacedDigit()
@@ -297,7 +430,7 @@ struct WorkoutExecutionView: View {
                 HStack(spacing: FitTodaySpacing.lg) {
                     // +30s Button
                     Button {
-                        viewModel.addRestTime(30)
+                        restTimerStore.addTime(30)
                     } label: {
                         Text("+30s")
                             .font(FitTodayFont.ui(size: 16, weight: .semiBold))
@@ -309,7 +442,8 @@ struct WorkoutExecutionView: View {
 
                     // Skip Rest Button
                     Button {
-                        viewModel.skipRest()
+                        restTimerStore.stop()
+                        showRestTimer = false
                     } label: {
                         HStack(spacing: FitTodaySpacing.xs) {
                             Text("Pular Descanso")
@@ -334,17 +468,10 @@ struct WorkoutExecutionView: View {
             .padding(FitTodaySpacing.xl)
         }
         .transition(.opacity.combined(with: .scale(scale: 0.95)))
-        .animation(.spring(response: 0.3, dampingFraction: 0.8), value: viewModel.isResting)
+        .animation(.spring(response: 0.3, dampingFraction: 0.8), value: showRestTimer)
     }
 
     // MARK: - Helper Methods
-
-    private func setupViewModel() {
-        guard viewModel == nil else { return }
-        let vm = WorkoutExecutionViewModel(resolver: resolver)
-        vm.startWorkout(with: workoutPlan)
-        viewModel = vm
-    }
 
     private func loadExerciseDescription(_ exercise: WorkoutExercise) async {
         let instructions = exercise.instructions.joined(separator: "\n")
@@ -354,43 +481,79 @@ struct WorkoutExecutionView: View {
         }
     }
 
+    private func finishWorkout() {
+        restTimerStore.stop()
+        workoutTimerStore.reset()
+
+        Task {
+            do {
+                try await sessionStore.finish(status: .completed)
+                navigateToCompletion()
+            } catch {
+                errorMessage = error.localizedDescription
+            }
+        }
+    }
+
     private func navigateToCompletion() {
-        router.push(.workoutSummary, on: router.selectedTab)
+        router.push(.workoutSummary, on: .home)
     }
 }
 
-// MARK: - Set Completion View
+// MARK: - Substitution Sheet Wrapper
 
-private struct SetCompletionView: View {
-    let progress: ExerciseProgress
-    let prescription: ExercisePrescription
-    let onToggleSet: (Int) -> Void
+private struct SubstitutionSheetWrapper: View {
+    let exercise: WorkoutExercise
+    let resolver: Resolver
+    let onSelect: (AlternativeExercise) -> Void
+    let onDismiss: () -> Void
+
+    @State private var userProfile: UserProfile?
+    @State private var isLoading = true
 
     var body: some View {
-        VStack(alignment: .leading, spacing: FitTodaySpacing.md) {
-            Text("Séries")
-                .font(FitTodayFont.ui(size: 16, weight: .semiBold))
-                .foregroundStyle(FitTodayColor.textPrimary)
-
-            VStack(spacing: FitTodaySpacing.sm) {
-                ForEach(Array(progress.sets.enumerated()), id: \.offset) { index, set in
-                    SetCheckbox(
-                        setNumber: index + 1,
-                        isCompleted: set.isCompleted,
-                        reps: prescription.reps.display,
-                        onToggle: { onToggleSet(index) }
-                    )
+        Group {
+            if let profile = userProfile {
+                ExerciseSubstitutionSheet(
+                    exercise: exercise,
+                    userProfile: profile,
+                    onSelect: onSelect,
+                    onDismiss: onDismiss
+                )
+            } else if isLoading {
+                VStack {
+                    ProgressView()
+                    Text("Carregando...")
+                        .font(.caption)
+                        .foregroundStyle(FitTodayColor.textSecondary)
+                }
+            } else {
+                VStack(spacing: FitTodaySpacing.md) {
+                    Text("Perfil não encontrado")
+                        .font(FitTodayFont.ui(size: 17, weight: .semiBold))
+                    Button("Fechar", action: onDismiss)
                 }
             }
         }
-        .padding(FitTodaySpacing.md)
-        .background(FitTodayColor.surfaceElevated)
-        .clipShape(RoundedRectangle(cornerRadius: FitTodayRadius.md))
+        .task {
+            await loadProfile()
+        }
+    }
+
+    private func loadProfile() async {
+        isLoading = true
+        if let repo = resolver.resolve(UserProfileRepository.self) {
+            userProfile = try? await repo.loadProfile()
+        }
+        isLoading = false
     }
 }
 
-
 #Preview {
+    let container = Container()
+    let sessionStore = WorkoutSessionStore(resolver: container)
+
+    // Create a sample plan for preview
     let samplePlan = WorkoutPlan(
         id: UUID(),
         title: "Treino Push",
@@ -416,11 +579,13 @@ private struct SetCompletionView: View {
         createdAt: Date()
     )
 
-    let container = Container()
+    // Start session with sample plan
+    sessionStore.start(with: samplePlan)
 
-    NavigationStack {
-        WorkoutExecutionView(workoutPlan: samplePlan)
+    return NavigationStack {
+        WorkoutExecutionView()
             .environment(AppRouter())
+            .environment(sessionStore)
             .environment(\.dependencyResolver, container)
     }
 }

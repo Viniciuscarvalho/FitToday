@@ -38,6 +38,24 @@ struct NewWorkoutPromptBuilder: Sendable {
         checkIn: DailyCheckIn,
         previousWorkouts: [WorkoutPlan]
     ) -> String {
+        #if DEBUG
+        // Log prohibited exercises for debugging
+        var prohibitedExercises = Set<String>()
+        for workout in previousWorkouts {
+            for phase in workout.phases {
+                for item in phase.items {
+                    if case .exercise(let prescription) = item {
+                        prohibitedExercises.insert(prescription.exercise.name)
+                    }
+                }
+            }
+        }
+        print("[PromptBuilder] 🚫 Prohibited exercises count: \(prohibitedExercises.count)")
+        if !prohibitedExercises.isEmpty {
+            print("[PromptBuilder] 🚫 Prohibited: \(prohibitedExercises.sorted().joined(separator: ", "))")
+        }
+        #endif
+
         let systemMessage = buildSystemMessage(goal: profile.mainGoal, blueprint: blueprint)
         let userMessage = buildUserMessage(
             blueprint: blueprint,
@@ -222,36 +240,49 @@ struct NewWorkoutPromptBuilder: Sendable {
     // MARK: - Prohibited Workouts Formatting
 
     private func formatProhibitedWorkouts(_ workouts: [WorkoutPlan]) -> String {
-        guard !workouts.isEmpty else {
-            return ""
-        }
-
-        let recentWorkouts = Array(workouts.prefix(3))
-
         var lines: [String] = []
-        lines.append("## PROHIBITED EXERCISES (last 3 workouts)")
+
+        // Always include variation instruction
+        lines.append("## VARIATION REQUIREMENTS")
         lines.append("")
-        lines.append("Critical rule: DO NOT REPEAT these exercises. Select different exercises.")
+        lines.append("CRITICAL: Create a UNIQUE workout with MAXIMUM VARIETY.")
+        lines.append("- Select DIFFERENT exercises from the catalog each time")
+        lines.append("- Prioritize exercises you haven't suggested recently")
+        lines.append("- Mix compound and isolation movements")
+        lines.append("- Vary exercise order and selection within each muscle group")
         lines.append("")
 
-        // Collect all unique exercise names
-        var prohibitedExercises = Set<String>()
-        for workout in recentWorkouts {
-            for phase in workout.phases {
-                for item in phase.items {
-                    if case .exercise(let prescription) = item {
-                        prohibitedExercises.insert(prescription.exercise.name)
+        // Add prohibited exercises if history exists
+        if !workouts.isEmpty {
+            let recentWorkouts = Array(workouts.prefix(3))
+
+            // Collect all unique exercise names
+            var prohibitedExercises = Set<String>()
+            for workout in recentWorkouts {
+                for phase in workout.phases {
+                    for item in phase.items {
+                        if case .exercise(let prescription) = item {
+                            prohibitedExercises.insert(prescription.exercise.name)
+                        }
                     }
                 }
             }
-        }
 
-        let sortedProhibited = prohibitedExercises.sorted()
-        lines.append("PROHIBITED EXERCISES (\(sortedProhibited.count) total):")
-        for name in sortedProhibited {
-            lines.append("- \(name)")
+            if !prohibitedExercises.isEmpty {
+                lines.append("## PROHIBITED EXERCISES (from last \(recentWorkouts.count) workouts)")
+                lines.append("")
+                lines.append("⚠️ DO NOT USE any of these exercises - select alternatives:")
+                lines.append("")
+
+                let sortedProhibited = prohibitedExercises.sorted()
+                for name in sortedProhibited {
+                    lines.append("❌ \(name)")
+                }
+                lines.append("")
+                lines.append("Total prohibited: \(sortedProhibited.count) exercises")
+                lines.append("")
+            }
         }
-        lines.append("")
 
         return lines.joined(separator: "\n")
     }
