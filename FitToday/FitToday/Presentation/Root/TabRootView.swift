@@ -271,4 +271,11 @@ private final class InMemoryHistoryRepository: WorkoutHistoryRepository {
     func saveEntry(_ entry: WorkoutHistoryEntry) async throws {
         entries.append(entry)
     }
+
+    func listAppEntriesWithPlan(limit: Int) async throws -> [WorkoutHistoryEntry] {
+        let filtered = entries
+            .filter { $0.source == .app && $0.workoutPlan != nil }
+            .sorted { $0.date > $1.date }
+        return Array(filtered.prefix(limit))
+    }
 }

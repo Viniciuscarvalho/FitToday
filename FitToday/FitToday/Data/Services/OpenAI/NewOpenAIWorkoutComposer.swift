@@ -56,6 +56,19 @@ struct NewOpenAIWorkoutComposer: WorkoutPlanComposing, Sendable {
         profile: UserProfile,
         checkIn: DailyCheckIn
     ) async throws -> WorkoutPlan {
+        // 0. Verificar limite diário de gerações
+        let limiter = DailyGenerationLimiter()
+        guard limiter.canGenerate() else {
+            #if DEBUG
+            print("[NewOpenAIComposer] ⚠️ Daily generation limit reached (0 remaining)")
+            #endif
+            throw DomainError.dailyGenerationLimitReached
+        }
+
+        #if DEBUG
+        print("[NewOpenAIComposer] 📊 Generations remaining today: \(limiter.remainingGenerations())")
+        #endif
+
         // 1. Generate blueprint
         let blueprint = blueprintEngine.generateBlueprint(profile: profile, checkIn: checkIn)
 
@@ -112,12 +125,16 @@ struct NewOpenAIWorkoutComposer: WorkoutPlanComposing, Sendable {
                 )
 
                 if isValid {
+                    // Incrementar contador de gerações após sucesso
+                    limiter.incrementCount()
+
                     #if DEBUG
                     let diversity = WorkoutVariationValidator.calculateDiversityRatio(
                         generated: workoutPlan,
                         previousWorkouts: previousWorkouts
                     )
                     print("[NewOpenAIComposer] ✅ Workout passed validation (diversity: \(String(format: "%.0f", diversity * 100))%, attempt: \(attempt + 1))")
+                    print("[NewOpenAIComposer] ✅ Generation successful. Remaining today: \(limiter.remainingGenerations())")
                     #endif
 
                     return workoutPlan
@@ -164,29 +181,32 @@ struct NewOpenAIWorkoutComposer: WorkoutPlanComposing, Sendable {
     // MARK: - Private Helpers
 
     /// Fetches recent workouts from history repository
+    /// NOTE: Only fetches app-generated workouts with valid workoutPlan (excludes Apple Health imports)
     private func fetchRecentWorkouts(limit: Int = 3) async throws -> [WorkoutPlan] {
         do {
-            let entries = try await historyRepository.listEntries(limit: limit, offset: 0)
+            // IMPORTANTE: Usar método que filtra por source == .app e workoutPlan != nil
+            // Isso evita buscar treinos do Apple Health que não têm workoutPlan
+            let entries = try await historyRepository.listAppEntriesWithPlan(limit: limit)
 
             #if DEBUG
-            print("[NewOpenAIComposer] 📋 History entries fetched: \(entries.count)")
+            print("[NewOpenAIComposer] 📋 App entries with plan fetched: \(entries.count)")
             for (index, entry) in entries.enumerated() {
-                let hasWorkoutPlan = entry.workoutPlan != nil
                 let exerciseCount = entry.workoutPlan?.phases.flatMap(\.items).count ?? 0
-                print("[NewOpenAIComposer]   [\(index)] \(entry.title) - hasWorkoutPlan: \(hasWorkoutPlan), exercises: \(exerciseCount)")
+                print("[NewOpenAIComposer]   [\(index)] \(entry.title) - exercises: \(exerciseCount), source: \(entry.source.rawValue)")
             }
             #endif
 
             let workoutPlans = entries.compactMap { $0.workoutPlan }
 
             #if DEBUG
-            print("[NewOpenAIComposer] 📋 WorkoutPlans with exercises: \(workoutPlans.count)")
+            let totalExercises = workoutPlans.flatMap { $0.phases.flatMap(\.items) }.count
+            print("[NewOpenAIComposer] 📋 Total prohibited exercises available: \(totalExercises)")
             #endif
 
             return workoutPlans
         } catch {
             #if DEBUG
-            print("[NewOpenAIComposer] ❌ Failed to fetch history: \(error.localizedDescription)")
+            print("[NewOpenAIComposer] ❌ Failed to fetch app history: \(error.localizedDescription)")
             #endif
             return []
         }

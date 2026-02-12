@@ -27,6 +27,10 @@ enum DomainError: Error, LocalizedError, Sendable, Equatable {
     case challengeExpired
     case notFound(resource: String)
 
+    // MARK: - Workout Generation Errors
+    case dailyGenerationLimitReached
+    case diversityValidationFailed
+
     var errorDescription: String? {
         switch self {
         case .profileNotFound:
@@ -61,6 +65,19 @@ enum DomainError: Error, LocalizedError, Sendable, Equatable {
             return "Este desafio já expirou."
         case .notFound(let resource):
             return "Recurso não encontrado: \(resource)"
+        case .dailyGenerationLimitReached:
+            return "Você atingiu o limite de treinos por dia. Tente novamente amanhã!"
+        case .diversityValidationFailed:
+            return "Não foi possível gerar um treino diferente dos anteriores."
+        }
+    }
+
+    var recoverySuggestion: String? {
+        switch self {
+        case .dailyGenerationLimitReached:
+            return "O limite reseta à meia-noite. Use um treino salvo ou do seu programa."
+        default:
+            return nil
         }
     }
 }
