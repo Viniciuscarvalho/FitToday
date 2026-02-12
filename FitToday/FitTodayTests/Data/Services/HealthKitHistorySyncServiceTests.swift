@@ -99,5 +99,10 @@ private actor InMemoryHistoryRepo: WorkoutHistoryRepository {
             entries.append(entry)
         }
     }
+
+    func listAppEntriesWithPlan(limit: Int) async throws -> [WorkoutHistoryEntry] {
+        let filtered = entries.filter { $0.source == .app && $0.workoutPlan != nil }
+        return Array(filtered.prefix(limit))
+    }
 }
 

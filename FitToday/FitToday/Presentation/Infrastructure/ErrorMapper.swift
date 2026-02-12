@@ -199,6 +199,20 @@ enum ErrorMapper {
         message: "Recurso não encontrado: \(resource)",
         action: .dismiss
       )
+
+    case .dailyGenerationLimitReached:
+      return ErrorMessage(
+        title: "Limite diário atingido",
+        message: "Você atingiu o limite de treinos por dia. O limite reseta à meia-noite.",
+        action: .dismiss
+      )
+
+    case .diversityValidationFailed:
+      return ErrorMessage(
+        title: "Erro na geração",
+        message: "Não foi possível gerar um treino diferente dos anteriores.",
+        action: .dismiss
+      )
     }
   }
   

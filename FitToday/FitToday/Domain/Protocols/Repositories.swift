@@ -21,6 +21,12 @@ protocol WorkoutHistoryRepository: Sendable {
     func listEntries(limit: Int, offset: Int) async throws -> [WorkoutHistoryEntry]
     func count() async throws -> Int
     func saveEntry(_ entry: WorkoutHistoryEntry) async throws
+
+    /// Retorna apenas treinos gerados pelo app com workoutPlan válido.
+    /// Usado para construir lista de exercícios proibidos na geração com IA.
+    /// - Parameter limit: Número máximo de entradas a retornar
+    /// - Returns: Lista de entries do app (source == .app) com workoutPlan não-nulo
+    func listAppEntriesWithPlan(limit: Int) async throws -> [WorkoutHistoryEntry]
 }
 
 protocol EntitlementRepository: Sendable {
