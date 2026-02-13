@@ -158,8 +158,9 @@ struct PDFKitView: UIViewRepresentable {
     }
 }
 
-// MARK: - Preview
+// MARK: - Preview & Mocks
 
+#if DEBUG
 #Preview {
     PDFViewerView(
         workout: .fixture(),
@@ -170,9 +171,6 @@ struct PDFKitView: UIViewRepresentable {
     )
 }
 
-// MARK: - Mocks for Preview
-
-#if DEBUG
 final class PreviewPersonalWorkoutRepository: PersonalWorkoutRepository, @unchecked Sendable {
     var workoutsToReturn: [PersonalWorkout] = []
 
