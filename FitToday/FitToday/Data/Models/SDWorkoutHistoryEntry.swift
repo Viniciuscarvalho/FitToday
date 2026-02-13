@@ -33,6 +33,9 @@ final class SDWorkoutHistoryEntry {
     // Lista de exercícios completados serializada
     var completedExercisesJSON: Data?
 
+    // Fonte do treino (app ou Apple Health)
+    var sourceRaw: String = "app"
+
     init(
         id: UUID,
         date: Date,
@@ -47,7 +50,8 @@ final class SDWorkoutHistoryEntry {
         healthKitWorkoutUUID: UUID? = nil,
         workoutPlanJSON: Data? = nil,
         userRating: String? = nil,
-        completedExercisesJSON: Data? = nil
+        completedExercisesJSON: Data? = nil,
+        sourceRaw: String = "app"
     ) {
         self.id = id
         self.date = date
@@ -63,6 +67,7 @@ final class SDWorkoutHistoryEntry {
         self.workoutPlanJSON = workoutPlanJSON
         self.userRating = userRating
         self.completedExercisesJSON = completedExercisesJSON
+        self.sourceRaw = sourceRaw
     }
 }
 

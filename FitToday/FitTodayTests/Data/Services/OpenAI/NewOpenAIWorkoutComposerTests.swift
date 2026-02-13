@@ -70,16 +70,26 @@ final class NewOpenAIWorkoutComposerTests: XCTestCase {
     private final class MockHistoryRepository: WorkoutHistoryRepository, @unchecked Sendable {
         var mockEntries: [WorkoutHistoryEntry] = []
 
+        func listEntries() async throws -> [WorkoutHistoryEntry] {
+            mockEntries.sorted { $0.date > $1.date }
+        }
+
         func listEntries(limit: Int, offset: Int) async throws -> [WorkoutHistoryEntry] {
             return Array(mockEntries.prefix(limit))
         }
 
-        func entry(id: UUID) async throws -> WorkoutHistoryEntry? {
-            return mockEntries.first { $0.id == id }
+        func count() async throws -> Int {
+            mockEntries.count
         }
 
-        func save(_ entry: WorkoutHistoryEntry) async throws {}
-        func delete(id: UUID) async throws {}
+        func saveEntry(_ entry: WorkoutHistoryEntry) async throws {
+            mockEntries.append(entry)
+        }
+
+        func listAppEntriesWithPlan(limit: Int) async throws -> [WorkoutHistoryEntry] {
+            let filtered = mockEntries.filter { $0.source == .app && $0.workoutPlan != nil }
+            return Array(filtered.prefix(limit))
+        }
     }
 
     private final class MockLocalFallback: WorkoutPlanComposing, @unchecked Sendable {

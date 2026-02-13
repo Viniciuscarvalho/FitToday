@@ -55,12 +55,18 @@
 
 // MARK: - Home AI Workout Generator
 "home.ai.section_title" = "GERAR TREINO COM IA";
+"home.ai.focus_question" = "Qual o foco do treino?";
+"home.ai.soreness_question" = "Como estão suas dores musculares?";
+"home.ai.energy_question" = "Seu nível de energia";
+"home.ai.energy_low" = "Baixa";
+"home.ai.energy_high" = "Alta";
+"home.ai.generate_button" = "GERAR MEU TREINO";
+// Legacy keys (kept for compatibility)
 "home.ai.body_parts_question" = "O que voce quer treinar hoje?";
 "home.ai.fatigue_question" = "Como esta seu corpo?";
 "home.ai.fatigue_tired" = "Cansado";
 "home.ai.fatigue_rested" = "Descansado";
 "home.ai.time_question" = "Quanto tempo voce tem?";
-"home.ai.generate_button" = "GERAR MEU TREINO";
 
 // MARK: - Home Continue Workout
 "home.continue.section_title" = "CONTINUAR TREINO";
@@ -528,3 +534,199 @@
 "personal.loading" = "Carregando treino...";
 "personal.error.load" = "Erro ao carregar";
 "personal.new_badge" = "NOVO";
+
+// MARK: - ErrorMapper
+"error.generic.title" = "Ops!";
+"error.generic.message" = "Algo inesperado aconteceu. Tente novamente.";
+"error.network.no_connection.title" = "Sem conexão";
+"error.network.no_connection.message" = "Verifique sua internet e tente novamente.";
+"error.network.timeout.title" = "Tempo esgotado";
+"error.network.timeout.message" = "A operação demorou muito. Tente novamente.";
+"error.network.server_unavailable.title" = "Servidor indisponível";
+"error.network.server_unavailable.message" = "Não conseguimos conectar ao servidor. Tente mais tarde.";
+"error.network.invalid_url.title" = "URL inválida";
+"error.network.invalid_url.message" = "Endereço não reconhecido.";
+"error.network.mobile_data.title" = "Dados móveis desabilitados";
+"error.network.mobile_data.message" = "Ative os dados móveis ou conecte-se ao Wi-Fi.";
+"error.network.connection.title" = "Erro de conexão";
+"error.network.connection.message" = "Não conseguimos conectar. Tente novamente.";
+"error.domain.profile_not_found.title" = "Perfil não encontrado";
+"error.domain.profile_not_found.message" = "Complete seu perfil para gerar treinos personalizados.";
+"error.domain.invalid_input.title" = "Dados inválidos";
+"error.domain.no_compatible_blocks.title" = "Nenhum treino compatível";
+"error.domain.no_compatible_blocks.message" = "Não encontramos exercícios para seu perfil. Tente ajustar suas preferências.";
+"error.domain.repository_failure.title" = "Erro ao salvar";
+"error.domain.repository_failure.message" = "Não conseguimos salvar os dados.";
+"error.domain.subscription_expired.title" = "Assinatura expirada";
+"error.domain.subscription_expired.message" = "Renove sua assinatura para continuar usando recursos Pro.";
+"error.domain.not_authenticated.title" = "Autenticação necessária";
+"error.domain.not_authenticated.message" = "Você precisa estar autenticado para realizar esta ação.";
+"error.domain.already_in_group.title" = "Já está em um grupo";
+"error.domain.already_in_group.message" = "Você já faz parte de um grupo. Saia do grupo atual para entrar em outro.";
+"error.domain.group_not_found.title" = "Grupo não encontrado";
+"error.domain.group_not_found.message" = "O grupo que você está procurando não existe ou foi removido.";
+"error.domain.group_full.title" = "Grupo cheio";
+"error.domain.group_full.message" = "Este grupo já atingiu o limite máximo de membros.";
+"error.domain.not_group_admin.title" = "Permissão negada";
+"error.domain.not_group_admin.message" = "Apenas administradores do grupo podem realizar esta ação.";
+"error.domain.challenge_not_found.title" = "Desafio não encontrado";
+"error.domain.challenge_not_found.message" = "O desafio que você está procurando não existe.";
+"error.domain.invalid_challenge_type.title" = "Tipo de desafio inválido";
+"error.domain.invalid_challenge_type.message" = "O tipo de desafio especificado não é válido.";
+"error.domain.challenge_expired.title" = "Desafio expirado";
+"error.domain.challenge_expired.message" = "Este desafio já terminou.";
+"error.domain.not_found.title" = "Não encontrado";
+"error.domain.not_found.message" = "Recurso não encontrado: %@";
+"error.domain.daily_limit.title" = "Limite diário atingido";
+"error.domain.daily_limit.message" = "Você atingiu o limite de treinos por dia. O limite reseta à meia-noite.";
+"error.domain.diversity_failed.title" = "Erro na geração";
+"error.domain.diversity_failed.message" = "Não foi possível gerar um treino diferente dos anteriores.";
+"error.openai.not_configured.title" = "IA não configurada";
+"error.openai.fallback.message" = "Geramos um ótimo treino local para você hoje.";
+"error.openai.temporarily_unavailable.title" = "IA temporariamente indisponível";
+"error.openai.processing.title" = "Erro ao processar resposta";
+"error.openai.rate_limit.title" = "Limite atingido";
+"error.openai.rate_limit.message" = "Você atingiu o limite de treinos com IA hoje. Geramos um treino local.";
+"error.openai.server_unavailable.title" = "Servidor temporariamente indisponível";
+"error.openai.incomplete_response.title" = "Resposta incompleta";
+"error.openai.incomplete_response.message" = "A IA não retornou exercícios. Geramos um treino local para você.";
+"error.image.load_failed.title" = "Erro ao carregar imagem";
+"error.image.load_failed.message" = "Não conseguimos carregar a imagem (código %d).";
+"error.image.save_failed.title" = "Erro ao salvar";
+"error.image.save_failed.message" = "Não conseguimos salvar a imagem no cache.";
+"error.image.cache_full.title" = "Cache cheio";
+"error.image.cache_full.message" = "O cache de imagens está cheio. Limpe o cache nas configurações.";
+"error.image.invalid_data.title" = "Imagem inválida";
+"error.image.invalid_data.message" = "Os dados da imagem estão corrompidos.";
+
+// MARK: - Focus Options
+"focus.fullbody" = "Full Body";
+"focus.upper" = "Superior";
+"focus.lower" = "Inferior";
+"focus.cardio" = "Cardio";
+"focus.core" = "Core";
+"focus.surprise" = "Surpresa";
+
+// MARK: - Soreness Options
+"soreness.none" = "Nenhum";
+"soreness.light" = "Leve";
+"soreness.moderate" = "Moderado";
+"soreness.strong" = "Intenso";
+
+// MARK: - Exercise Picker
+"exercise_picker.title" = "Adicionar Exercício";
+"exercise_picker.search_placeholder" = "Buscar exercícios...";
+"exercise_picker.cancel" = "Cancelar";
+"exercise_picker.clear" = "Limpar";
+"exercise_picker.empty.title" = "Nenhum Exercício";
+"exercise_picker.empty.subtitle" = "Busque exercícios ou selecione uma categoria";
+
+// MARK: - Generated Workout Preview
+"generated_workout.title" = "Treino Gerado";
+"generated_workout.close" = "Fechar";
+"generated_workout.generated_ago" = "Gerado %@ atrás";
+"generated_workout.stats.duration" = "Duração";
+"generated_workout.stats.exercises" = "Exercícios";
+"generated_workout.stats.sets" = "Séries";
+"generated_workout.insights.title" = "Insights da IA";
+"generated_workout.insights.fatigue" = "Volume ajustado pela fadiga";
+"generated_workout.insights.warmup" = "Aquecimento incluso";
+"generated_workout.section.exercises" = "Exercícios";
+"generated_workout.exercise.sets" = "%d séries";
+"generated_workout.exercise.reps" = "%@ reps";
+"generated_workout.action.start" = "Iniciar Treino";
+"generated_workout.action.save" = "Salvar como Template";
+"generated_workout.detail.target_muscle" = "Músculo Alvo";
+"generated_workout.detail.equipment" = "Equipamento";
+"generated_workout.detail.sets" = "Séries";
+"generated_workout.detail.reps" = "Repetições";
+"generated_workout.detail.rest" = "Descanso";
+"generated_workout.detail.ai_notes" = "Notas da IA";
+
+// MARK: - Goal Badge
+"goal.badge.hypertrophy" = "💪 Hipertrofia";
+"goal.badge.conditioning" = "🔥 Condicionamento";
+"goal.badge.endurance" = "🏃 Resistência";
+"goal.badge.weight_loss" = "⚖️ Emagrecimento";
+"goal.badge.performance" = "🎯 Performance";
+
+// MARK: - Error Actions
+"error.action.retry" = "Tentar Novamente";
+"error.action.open_settings" = "Abrir Configurações";
+"error.action.dismiss" = "OK";
+
+// MARK: - Error States
+"error.state.dependency.title" = "Erro de Configuração";
+"error.state.network.title" = "Erro de Conexão";
+"error.state.api.title" = "Erro do Servidor";
+"error.state.api.code" = " (Código: %d)";
+
+// MARK: - PDF Viewer
+"pdf.loading" = "Carregando PDF...";
+"pdf.error.load" = "Erro ao carregar o PDF";
+"pdf.error.url" = "URL inválida";
+"pdf.page" = "Página %d de %d";
+
+// MARK: - Onboarding Setup Steps
+"onboarding.step.goal" = "Qual é seu objetivo principal?";
+"onboarding.step.structure" = "Onde você treina?";
+"onboarding.step.method" = "Qual metodologia prefere?";
+"onboarding.step.level" = "Qual seu nível atual?";
+"onboarding.step.health" = "Alguma condição ou dor?";
+"onboarding.step.frequency" = "Quantos dias por semana você treina?";
+
+// MARK: - Fitness Goal
+"goal.hypertrophy.title" = "Hipertrofia";
+"goal.hypertrophy.subtitle" = "Ganhe massa muscular";
+"goal.conditioning.title" = "Condicionamento";
+"goal.conditioning.subtitle" = "Melhore o fôlego diário";
+"goal.endurance.title" = "Resistência";
+"goal.endurance.subtitle" = "Aumente resistência";
+"goal.weightloss.title" = "Emagrecimento";
+"goal.weightloss.subtitle" = "Defina e reduza gordura";
+"goal.performance.title" = "Performance";
+"goal.performance.subtitle" = "Otimize performance esportiva";
+
+// MARK: - Training Structure
+"structure.fullgym.title" = "Academia completa";
+"structure.fullgym.subtitle" = "Máquinas + pesos livres";
+"structure.basicgym.title" = "Academia básica";
+"structure.basicgym.subtitle" = "Equipamentos essenciais";
+"structure.homedumbbells.title" = "Casa (halteres)";
+"structure.homedumbbells.subtitle" = "Até 2 pares de halteres";
+"structure.bodyweight.title" = "Peso corporal";
+"structure.bodyweight.subtitle" = "Sem equipamentos";
+
+// MARK: - Training Method
+"method.traditional.title" = "Tradicional";
+"method.traditional.subtitle" = "Séries e repetições";
+"method.circuit.title" = "Circuito";
+"method.circuit.subtitle" = "Blocos em sequência";
+"method.hiit.title" = "HIIT";
+"method.hiit.subtitle" = "Intervalos intensos";
+"method.mixed.title" = "Misto";
+"method.mixed.subtitle" = "Combinação equilibrada";
+
+// MARK: - Training Level
+"level.beginner.title" = "Iniciante";
+"level.beginner.subtitle" = "Até 6 meses treinando";
+"level.intermediate.title" = "Intermediário";
+"level.intermediate.subtitle" = "Entre 6 meses e 2 anos";
+"level.advanced.title" = "Avançado";
+"level.advanced.subtitle" = "2+ anos consistentes";
+
+// MARK: - Health Condition
+"health.none.title" = "Nenhuma";
+"health.none.subtitle" = "Tudo bem por aqui";
+"health.lowerbackpain.title" = "Dor lombar";
+"health.lowerbackpain.subtitle" = "Adaptações para coluna";
+"health.knee.title" = "Joelho";
+"health.knee.subtitle" = "Proteja os joelhos";
+"health.shoulder.title" = "Ombro";
+"health.shoulder.subtitle" = "Cuidados em empurrar/puxar";
+"health.other.title" = "Outra";
+"health.other.subtitle" = "Tratamos com menor volume";
+
+// MARK: - Workout Template Type
+"template.conditioning.title" = "Condicionamento";
+"template.conditioning.subtitle" = "Resistência e queima";

@@ -2,37 +2,31 @@
 //  AIWorkoutGeneratorCard.swift
 //  FitToday
 //
-//  Card for AI-powered workout generation with simplified design.
+//  Card for AI-powered workout generation with live inputs for DailyCheckIn.
+//  Updated to use DailyFocus, MuscleSorenessLevel, and energyLevel directly.
 //
 
 import SwiftUI
 
-/// Simplified body part options for workout generation.
-enum BodyPart: String, CaseIterable, Sendable {
-    case chest = "Peito"
-    case back = "Costas"
-    case legs = "Pernas"
-    case shoulders = "Ombros"
-
-    var muscleGroups: [MuscleGroup] {
-        switch self {
-        case .chest: return [.chest, .triceps]
-        case .back: return [.back, .biceps, .lats]
-        case .legs: return [.quads, .hamstrings, .glutes, .calves]
-        case .shoulders: return [.shoulders]
-        }
-    }
-}
-
-/// Card for AI workout generation matching the design reference.
+/// Card for AI workout generation with inputs that map directly to DailyCheckIn.
+/// These inputs are used for OpenAI workout generation.
 struct AIWorkoutGeneratorCard: View {
-    @Binding var selectedBodyParts: Set<BodyPart>
-    @Binding var fatigueValue: Double
-    @Binding var selectedTime: Int
-    let isGenerating: Bool
-    let onGenerate: () -> Void
+    // MARK: - Bindings for DailyCheckIn fields
 
-    private let timeOptions = [30, 45, 60, 90]
+    /// Focus area selection (maps directly to DailyFocus)
+    @Binding var selectedFocus: DailyFocus
+
+    /// Soreness level (maps directly to MuscleSorenessLevel)
+    @Binding var sorenessLevel: MuscleSorenessLevel
+
+    /// Energy level 0-10 (maps directly to DailyCheckIn.energyLevel)
+    @Binding var energyLevel: Int
+
+    /// Loading state
+    let isGenerating: Bool
+
+    /// Generate button action
+    let onGenerate: () -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: FitTodaySpacing.lg) {
@@ -42,14 +36,14 @@ struct AIWorkoutGeneratorCard: View {
                 .foregroundStyle(FitTodayColor.brandPrimary)
                 .tracking(1)
 
-            // Body Parts Selection
-            bodyPartsSection
+            // Focus Selection (replaces body parts)
+            focusSection
 
-            // Fatigue Slider
-            fatigueSection
+            // Soreness Level Selection (replaces fatigue slider)
+            sorenessSection
 
-            // Time Selection
-            timeSection
+            // Energy Level Slider
+            energySection
 
             // Generate Button
             generateButton
@@ -64,55 +58,92 @@ struct AIWorkoutGeneratorCard: View {
         .padding(.horizontal)
     }
 
-    // MARK: - Body Parts Section
+    // MARK: - Focus Section
 
-    private var bodyPartsSection: some View {
+    private var focusSection: some View {
         VStack(alignment: .leading, spacing: FitTodaySpacing.sm) {
-            Text("home.ai.body_parts_question".localized)
+            Text("home.ai.focus_question".localized)
                 .font(FitTodayFont.ui(size: 15, weight: .medium))
                 .foregroundStyle(FitTodayColor.textPrimary)
 
+            // First row: upper, lower, fullBody
             HStack(spacing: FitTodaySpacing.sm) {
-                ForEach(BodyPart.allCases, id: \.self) { part in
-                    BodyPartChip(
-                        title: part.rawValue,
-                        isSelected: selectedBodyParts.contains(part)
+                ForEach([DailyFocus.upper, .lower, .fullBody], id: \.self) { focus in
+                    FocusChip(
+                        focus: focus,
+                        isSelected: selectedFocus == focus
                     ) {
-                        toggleBodyPart(part)
+                        selectedFocus = focus
+                    }
+                }
+            }
+
+            // Second row: cardio, core, surprise
+            HStack(spacing: FitTodaySpacing.sm) {
+                ForEach([DailyFocus.cardio, .core, .surprise], id: \.self) { focus in
+                    FocusChip(
+                        focus: focus,
+                        isSelected: selectedFocus == focus
+                    ) {
+                        selectedFocus = focus
                     }
                 }
             }
         }
     }
 
-    private func toggleBodyPart(_ part: BodyPart) {
-        if selectedBodyParts.contains(part) {
-            selectedBodyParts.remove(part)
-        } else {
-            selectedBodyParts.insert(part)
-        }
-    }
+    // MARK: - Soreness Section
 
-    // MARK: - Fatigue Section
-
-    private var fatigueSection: some View {
+    private var sorenessSection: some View {
         VStack(alignment: .leading, spacing: FitTodaySpacing.sm) {
-            Text("home.ai.fatigue_question".localized)
+            Text("home.ai.soreness_question".localized)
                 .font(FitTodayFont.ui(size: 15, weight: .medium))
                 .foregroundStyle(FitTodayColor.textPrimary)
 
+            HStack(spacing: FitTodaySpacing.sm) {
+                ForEach(MuscleSorenessLevel.allCases, id: \.self) { level in
+                    SorenessChip(
+                        level: level,
+                        isSelected: sorenessLevel == level
+                    ) {
+                        sorenessLevel = level
+                    }
+                }
+            }
+        }
+    }
+
+    // MARK: - Energy Section
+
+    private var energySection: some View {
+        VStack(alignment: .leading, spacing: FitTodaySpacing.sm) {
+            HStack {
+                Text("home.ai.energy_question".localized)
+                    .font(FitTodayFont.ui(size: 15, weight: .medium))
+                    .foregroundStyle(FitTodayColor.textPrimary)
+
+                Spacer()
+
+                Text("\(energyLevel)/10")
+                    .font(FitTodayFont.ui(size: 14, weight: .bold))
+                    .foregroundStyle(energyColor)
+            }
+
             VStack(spacing: FitTodaySpacing.xs) {
-                Slider(value: $fatigueValue, in: 0...1)
-                    .tint(FitTodayColor.brandPrimary)
+                Slider(value: Binding(
+                    get: { Double(energyLevel) },
+                    set: { energyLevel = Int($0) }
+                ), in: 0...10, step: 1)
+                    .tint(energyColor)
 
                 HStack {
-                    Text("home.ai.fatigue_tired".localized)
+                    Text("home.ai.energy_low".localized)
                         .font(FitTodayFont.ui(size: 12, weight: .medium))
                         .foregroundStyle(FitTodayColor.textTertiary)
 
                     Spacer()
 
-                    Text("home.ai.fatigue_rested".localized)
+                    Text("home.ai.energy_high".localized)
                         .font(FitTodayFont.ui(size: 12, weight: .medium))
                         .foregroundStyle(FitTodayColor.textTertiary)
                 }
@@ -120,24 +151,11 @@ struct AIWorkoutGeneratorCard: View {
         }
     }
 
-    // MARK: - Time Section
-
-    private var timeSection: some View {
-        VStack(alignment: .leading, spacing: FitTodaySpacing.sm) {
-            Text("home.ai.time_question".localized)
-                .font(FitTodayFont.ui(size: 15, weight: .medium))
-                .foregroundStyle(FitTodayColor.textPrimary)
-
-            HStack(spacing: FitTodaySpacing.sm) {
-                ForEach(timeOptions, id: \.self) { time in
-                    TimeOptionChip(
-                        minutes: time,
-                        isSelected: selectedTime == time
-                    ) {
-                        selectedTime = time
-                    }
-                }
-            }
+    private var energyColor: Color {
+        switch energyLevel {
+        case 0...3: return FitTodayColor.error
+        case 4...6: return FitTodayColor.warning
+        default: return FitTodayColor.success
         }
     }
 
@@ -150,6 +168,7 @@ struct AIWorkoutGeneratorCard: View {
                     ProgressView()
                         .tint(.white)
                 } else {
+                    Image(systemName: "sparkles")
                     Text("home.ai.generate_button".localized)
                         .font(FitTodayFont.ui(size: 16, weight: .bold))
                 }
@@ -173,62 +192,111 @@ struct AIWorkoutGeneratorCard: View {
             )
         }
         .buttonStyle(.plain)
-        .disabled(selectedBodyParts.isEmpty || isGenerating)
-        .opacity(selectedBodyParts.isEmpty ? 0.6 : 1)
+        .disabled(isGenerating)
+        .opacity(isGenerating ? 0.6 : 1)
     }
 }
 
-// MARK: - Body Part Chip
+// MARK: - Focus Chip
 
-private struct BodyPartChip: View {
-    let title: String
+private struct FocusChip: View {
+    let focus: DailyFocus
     let isSelected: Bool
     let action: () -> Void
 
     var body: some View {
         Button(action: action) {
-            Text(title)
-                .font(FitTodayFont.ui(size: 14, weight: isSelected ? .bold : .medium))
+            HStack(spacing: FitTodaySpacing.xs) {
+                Text(focus.icon)
+                Text(focus.displayName)
+                    .font(FitTodayFont.ui(size: 13, weight: isSelected ? .bold : .medium))
+            }
+            .foregroundStyle(isSelected ? .white : FitTodayColor.textSecondary)
+            .padding(.horizontal, FitTodaySpacing.md)
+            .padding(.vertical, FitTodaySpacing.sm)
+            .background(
+                Capsule()
+                    .fill(isSelected ? FitTodayColor.brandPrimary : FitTodayColor.background)
+            )
+            .overlay(
+                Capsule()
+                    .stroke(isSelected ? FitTodayColor.brandPrimary : FitTodayColor.outline, lineWidth: 1)
+            )
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+// MARK: - Soreness Chip
+
+private struct SorenessChip: View {
+    let level: MuscleSorenessLevel
+    let isSelected: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Text(level.displayName)
+                .font(FitTodayFont.ui(size: 12, weight: isSelected ? .bold : .medium))
                 .foregroundStyle(isSelected ? .white : FitTodayColor.textSecondary)
-                .padding(.horizontal, FitTodaySpacing.md)
-                .padding(.vertical, FitTodaySpacing.sm)
+                .padding(.horizontal, FitTodaySpacing.sm)
+                .padding(.vertical, FitTodaySpacing.xs)
                 .background(
                     Capsule()
-                        .fill(isSelected ? FitTodayColor.brandPrimary : FitTodayColor.background)
+                        .fill(isSelected ? level.color : FitTodayColor.background)
                 )
                 .overlay(
                     Capsule()
-                        .stroke(isSelected ? FitTodayColor.brandPrimary : FitTodayColor.outline, lineWidth: 1)
+                        .stroke(isSelected ? level.color : FitTodayColor.outline, lineWidth: 1)
                 )
         }
         .buttonStyle(.plain)
     }
 }
 
-// MARK: - Time Option Chip
+// MARK: - Display Extensions
 
-private struct TimeOptionChip: View {
-    let minutes: Int
-    let isSelected: Bool
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            Text("\(minutes)min")
-                .font(FitTodayFont.ui(size: 14, weight: isSelected ? .bold : .medium))
-                .foregroundStyle(isSelected ? .white : FitTodayColor.textSecondary)
-                .padding(.horizontal, FitTodaySpacing.md)
-                .padding(.vertical, FitTodaySpacing.sm)
-                .background(
-                    Capsule()
-                        .fill(isSelected ? FitTodayColor.brandPrimary : FitTodayColor.background)
-                )
-                .overlay(
-                    Capsule()
-                        .stroke(isSelected ? FitTodayColor.brandPrimary : FitTodayColor.outline, lineWidth: 1)
-                )
+extension DailyFocus {
+    var displayName: String {
+        switch self {
+        case .fullBody: return "focus.fullbody".localized
+        case .upper: return "focus.upper".localized
+        case .lower: return "focus.lower".localized
+        case .cardio: return "focus.cardio".localized
+        case .core: return "focus.core".localized
+        case .surprise: return "focus.surprise".localized
         }
-        .buttonStyle(.plain)
+    }
+
+    var icon: String {
+        switch self {
+        case .fullBody: return "🏋️"
+        case .upper: return "💪"
+        case .lower: return "🦵"
+        case .cardio: return "❤️"
+        case .core: return "🎯"
+        case .surprise: return "🎲"
+        }
+    }
+}
+
+extension MuscleSorenessLevel {
+    var displayName: String {
+        switch self {
+        case .none: return "soreness.none".localized
+        case .light: return "soreness.light".localized
+        case .moderate: return "soreness.moderate".localized
+        case .strong: return "soreness.strong".localized
+        }
+    }
+
+    var color: Color {
+        switch self {
+        case .none: return FitTodayColor.success
+        case .light: return FitTodayColor.info
+        case .moderate: return FitTodayColor.warning
+        case .strong: return FitTodayColor.error
+        }
     }
 }
 
@@ -237,9 +305,9 @@ private struct TimeOptionChip: View {
 #Preview {
     ScrollView {
         AIWorkoutGeneratorCard(
-            selectedBodyParts: .constant([.legs]),
-            fatigueValue: .constant(0.5),
-            selectedTime: .constant(45),
+            selectedFocus: .constant(.upper),
+            sorenessLevel: .constant(.none),
+            energyLevel: .constant(7),
             isGenerating: false,
             onGenerate: {}
         )

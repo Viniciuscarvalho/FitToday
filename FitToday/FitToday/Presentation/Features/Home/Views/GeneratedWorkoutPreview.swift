@@ -118,11 +118,11 @@ struct GeneratedWorkoutPreview: View {
             }
             .scrollIndicators(.hidden)
             .background(FitTodayColor.background)
-            .navigationTitle("Treino Gerado")
+            .navigationTitle("generated_workout.title".localized)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Fechar") {
+                    Button("generated_workout.close".localized) {
                         onDismiss()
                     }
                 }
@@ -185,7 +185,7 @@ struct GeneratedWorkoutPreview: View {
             HStack {
                 Image(systemName: "clock")
                     .font(.system(size: 12))
-                Text("Gerado \(workout.generatedAt, style: .relative) atrás")
+                Text(workout.generatedAt, style: .relative)
                     .font(FitTodayFont.ui(size: 12, weight: .medium))
             }
             .foregroundStyle(FitTodayColor.textTertiary)
@@ -212,9 +212,9 @@ struct GeneratedWorkoutPreview: View {
 
     private var statsRow: some View {
         HStack(spacing: FitTodaySpacing.md) {
-            statItem(icon: "clock", value: "\(workout.estimatedDuration)", unit: "min", label: "Duração")
-            statItem(icon: "figure.strengthtraining.traditional", value: "\(workout.exerciseCount)", unit: "", label: "Exercícios")
-            statItem(icon: "number", value: "\(workout.totalSets)", unit: "", label: "Séries")
+            statItem(icon: "clock", value: "\(workout.estimatedDuration)", unit: "min", label: "generated_workout.stats.duration".localized)
+            statItem(icon: "figure.strengthtraining.traditional", value: "\(workout.exerciseCount)", unit: "", label: "generated_workout.stats.exercises".localized)
+            statItem(icon: "number", value: "\(workout.totalSets)", unit: "", label: "generated_workout.stats.sets".localized)
         }
     }
 
@@ -252,17 +252,17 @@ struct GeneratedWorkoutPreview: View {
 
     private var insightsSection: some View {
         VStack(alignment: .leading, spacing: FitTodaySpacing.sm) {
-            Text("Insights da IA")
+            Text("generated_workout.insights.title".localized)
                 .font(FitTodayFont.ui(size: 14, weight: .semiBold))
                 .foregroundStyle(FitTodayColor.textSecondary)
 
             HStack(spacing: FitTodaySpacing.sm) {
                 if workout.fatigueAdjusted {
-                    insightChip(icon: "battery.50", text: "Volume ajustado pela fadiga", color: .orange)
+                    insightChip(icon: "battery.50", text: "generated_workout.insights.fatigue".localized, color: .orange)
                 }
 
                 if workout.warmupIncluded {
-                    insightChip(icon: "flame", text: "Aquecimento incluso", color: .red)
+                    insightChip(icon: "flame", text: "generated_workout.insights.warmup".localized, color: .red)
                 }
             }
         }
@@ -288,7 +288,7 @@ struct GeneratedWorkoutPreview: View {
 
     private var exercisesSection: some View {
         VStack(alignment: .leading, spacing: FitTodaySpacing.sm) {
-            Text("Exercícios")
+            Text("generated_workout.section.exercises".localized)
                 .font(FitTodayFont.ui(size: 17, weight: .bold))
                 .foregroundStyle(FitTodayColor.textPrimary)
 
@@ -313,7 +313,7 @@ struct GeneratedWorkoutPreview: View {
             Button(action: onStartWorkout) {
                 HStack {
                     Image(systemName: "play.fill")
-                    Text("Iniciar Treino")
+                    Text("generated_workout.action.start".localized)
                 }
                 .font(FitTodayFont.ui(size: 16, weight: .bold))
                 .foregroundStyle(.white)
@@ -334,7 +334,7 @@ struct GeneratedWorkoutPreview: View {
             Button(action: onSaveAsTemplate) {
                 HStack {
                     Image(systemName: "square.and.arrow.down")
-                    Text("Salvar como Template")
+                    Text("generated_workout.action.save".localized)
                 }
                 .font(FitTodayFont.ui(size: 16, weight: .semiBold))
                 .foregroundStyle(FitTodayColor.brandPrimary)
@@ -390,11 +390,11 @@ struct GeneratedExerciseRow: View {
 
                 // Sets x Reps
                 VStack(alignment: .trailing, spacing: 2) {
-                    Text("\(exercise.sets) séries")
+                    Text(String(format: "generated_workout.exercise.sets".localized, exercise.sets))
                         .font(FitTodayFont.ui(size: 13, weight: .bold))
                         .foregroundStyle(FitTodayColor.textPrimary)
 
-                    Text("\(exercise.repsRange) reps")
+                    Text(String(format: "generated_workout.exercise.reps".localized, exercise.repsRange))
                         .font(FitTodayFont.ui(size: 11, weight: .medium))
                         .foregroundStyle(FitTodayColor.textSecondary)
                 }
@@ -435,15 +435,15 @@ struct ExerciseDetailSheet: View {
 
                     // Details
                     VStack(alignment: .leading, spacing: FitTodaySpacing.md) {
-                        detailRow(label: "Músculo Alvo", value: exercise.targetMuscle, icon: "target")
-                        detailRow(label: "Equipamento", value: exercise.equipment, icon: "dumbbell")
-                        detailRow(label: "Séries", value: "\(exercise.sets)", icon: "number")
-                        detailRow(label: "Repetições", value: exercise.repsRange, icon: "repeat")
-                        detailRow(label: "Descanso", value: "\(exercise.restSeconds)s", icon: "clock")
+                        detailRow(label: "generated_workout.detail.target_muscle".localized, value: exercise.targetMuscle, icon: "target")
+                        detailRow(label: "generated_workout.detail.equipment".localized, value: exercise.equipment, icon: "dumbbell")
+                        detailRow(label: "generated_workout.detail.sets".localized, value: "\(exercise.sets)", icon: "number")
+                        detailRow(label: "generated_workout.detail.reps".localized, value: exercise.repsRange, icon: "repeat")
+                        detailRow(label: "generated_workout.detail.rest".localized, value: "\(exercise.restSeconds)s", icon: "clock")
 
                         if let notes = exercise.notes {
                             VStack(alignment: .leading, spacing: FitTodaySpacing.xs) {
-                                Text("Notas da IA")
+                                Text("generated_workout.detail.ai_notes".localized)
                                     .font(FitTodayFont.ui(size: 14, weight: .semiBold))
                                     .foregroundStyle(FitTodayColor.textSecondary)
 
@@ -467,7 +467,7 @@ struct ExerciseDetailSheet: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Fechar") {
+                    Button("generated_workout.close".localized) {
                         dismiss()
                     }
                 }

@@ -14,12 +14,12 @@ enum SetupStep: Int, CaseIterable {
 
     var title: String {
         switch self {
-        case .goal: return "Qual é seu objetivo principal?"
-        case .structure: return "Onde você treina?"
-        case .method: return "Qual metodologia prefere?"
-        case .level: return "Qual seu nível atual?"
-        case .health: return "Alguma condição ou dor?"
-        case .frequency: return "Quantos dias por semana você treina?"
+        case .goal: return "onboarding.step.goal".localized
+        case .structure: return "onboarding.step.structure".localized
+        case .method: return "onboarding.step.method".localized
+        case .level: return "onboarding.step.level".localized
+        case .health: return "onboarding.step.health".localized
+        case .frequency: return "onboarding.step.frequency".localized
         }
     }
 }
@@ -29,20 +29,20 @@ enum SetupStep: Int, CaseIterable {
 extension FitnessGoal {
     var title: String {
         switch self {
-        case .hypertrophy: return "Hipertrofia"
-        case .conditioning: return "Condicionamento"
-        case .endurance: return "Resistência"
-        case .weightLoss: return "Emagrecimento"
-        case .performance: return "Performance"
+        case .hypertrophy: return "goal.hypertrophy.title".localized
+        case .conditioning: return "goal.conditioning.title".localized
+        case .endurance: return "goal.endurance.title".localized
+        case .weightLoss: return "goal.weightloss.title".localized
+        case .performance: return "goal.performance.title".localized
         }
     }
     var subtitle: String {
         switch self {
-        case .hypertrophy: return "Ganhe massa muscular"
-        case .conditioning: return "Melhore o fôlego diário"
-        case .endurance: return "Aumente resistência"
-        case .weightLoss: return "Defina e reduza gordura"
-        case .performance: return "Otimize performance esportiva"
+        case .hypertrophy: return "goal.hypertrophy.subtitle".localized
+        case .conditioning: return "goal.conditioning.subtitle".localized
+        case .endurance: return "goal.endurance.subtitle".localized
+        case .weightLoss: return "goal.weightloss.subtitle".localized
+        case .performance: return "goal.performance.subtitle".localized
         }
     }
 }
@@ -52,18 +52,18 @@ extension FitnessGoal {
 extension TrainingStructure {
     var title: String {
         switch self {
-        case .fullGym: return "Academia completa"
-        case .basicGym: return "Academia básica"
-        case .homeDumbbells: return "Casa (halteres)"
-        case .bodyweight: return "Peso corporal"
+        case .fullGym: return "structure.fullgym.title".localized
+        case .basicGym: return "structure.basicgym.title".localized
+        case .homeDumbbells: return "structure.homedumbbells.title".localized
+        case .bodyweight: return "structure.bodyweight.title".localized
         }
     }
     var subtitle: String? {
         switch self {
-        case .fullGym: return "Máquinas + pesos livres"
-        case .basicGym: return "Equipamentos essenciais"
-        case .homeDumbbells: return "Até 2 pares de halteres"
-        case .bodyweight: return "Sem equipamentos"
+        case .fullGym: return "structure.fullgym.subtitle".localized
+        case .basicGym: return "structure.basicgym.subtitle".localized
+        case .homeDumbbells: return "structure.homedumbbells.subtitle".localized
+        case .bodyweight: return "structure.bodyweight.subtitle".localized
         }
     }
 }
@@ -73,18 +73,18 @@ extension TrainingStructure {
 extension TrainingMethod {
     var title: String {
         switch self {
-        case .traditional: return "Tradicional"
-        case .circuit: return "Circuito"
-        case .hiit: return "HIIT"
-        case .mixed: return "Misto"
+        case .traditional: return "method.traditional.title".localized
+        case .circuit: return "method.circuit.title".localized
+        case .hiit: return "method.hiit.title".localized
+        case .mixed: return "method.mixed.title".localized
         }
     }
     var subtitle: String? {
         switch self {
-        case .traditional: return "Séries e repetições"
-        case .circuit: return "Blocos em sequência"
-        case .hiit: return "Intervalos intensos"
-        case .mixed: return "Combinação equilibrada"
+        case .traditional: return "method.traditional.subtitle".localized
+        case .circuit: return "method.circuit.subtitle".localized
+        case .hiit: return "method.hiit.subtitle".localized
+        case .mixed: return "method.mixed.subtitle".localized
         }
     }
 }
@@ -94,16 +94,16 @@ extension TrainingMethod {
 extension TrainingLevel {
     var title: String {
         switch self {
-        case .beginner: return "Iniciante"
-        case .intermediate: return "Intermediário"
-        case .advanced: return "Avançado"
+        case .beginner: return "level.beginner.title".localized
+        case .intermediate: return "level.intermediate.title".localized
+        case .advanced: return "level.advanced.title".localized
         }
     }
     var subtitle: String? {
         switch self {
-        case .beginner: return "Até 6 meses treinando"
-        case .intermediate: return "Entre 6 meses e 2 anos"
-        case .advanced: return "2+ anos consistentes"
+        case .beginner: return "level.beginner.subtitle".localized
+        case .intermediate: return "level.intermediate.subtitle".localized
+        case .advanced: return "level.advanced.subtitle".localized
         }
     }
 }
@@ -113,20 +113,20 @@ extension TrainingLevel {
 extension HealthCondition {
     var title: String {
         switch self {
-        case .none: return "Nenhuma"
-        case .lowerBackPain: return "Dor lombar"
-        case .knee: return "Joelho"
-        case .shoulder: return "Ombro"
-        case .other: return "Outra"
+        case .none: return "health.none.title".localized
+        case .lowerBackPain: return "health.lowerbackpain.title".localized
+        case .knee: return "health.knee.title".localized
+        case .shoulder: return "health.shoulder.title".localized
+        case .other: return "health.other.title".localized
         }
     }
     var subtitle: String? {
         switch self {
-        case .none: return "Tudo bem por aqui"
-        case .lowerBackPain: return "Adaptações para coluna"
-        case .knee: return "Proteja os joelhos"
-        case .shoulder: return "Cuidados em empurrar/puxar"
-        case .other: return "Tratamos com menor volume"
+        case .none: return "health.none.subtitle".localized
+        case .lowerBackPain: return "health.lowerbackpain.subtitle".localized
+        case .knee: return "health.knee.subtitle".localized
+        case .shoulder: return "health.shoulder.subtitle".localized
+        case .other: return "health.other.subtitle".localized
         }
     }
 }

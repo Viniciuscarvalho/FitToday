@@ -525,23 +525,27 @@ final class WorkoutExecutionViewModelTests: XCTestCase {
 private class MockWorkoutHistoryRepository: WorkoutHistoryRepository {
     var savedEntries: [WorkoutHistoryEntry] = []
 
-    func save(_ entry: WorkoutHistoryEntry) async throws {
+    func listEntries() async throws -> [WorkoutHistoryEntry] {
+        savedEntries.sorted { $0.date > $1.date }
+    }
+
+    func listEntries(limit: Int, offset: Int) async throws -> [WorkoutHistoryEntry] {
+        let sorted = savedEntries.sorted { $0.date > $1.date }
+        let start = min(offset, sorted.count)
+        let end = min(offset + limit, sorted.count)
+        return Array(sorted[start..<end])
+    }
+
+    func count() async throws -> Int {
+        savedEntries.count
+    }
+
+    func saveEntry(_ entry: WorkoutHistoryEntry) async throws {
         savedEntries.append(entry)
     }
 
-    func fetchAll(limit: Int?) async throws -> [WorkoutHistoryEntry] {
-        return Array(savedEntries.prefix(limit ?? savedEntries.count))
-    }
-
-    func fetchRecent(days: Int) async throws -> [WorkoutHistoryEntry] {
-        return savedEntries
-    }
-
-    func delete(id: UUID) async throws {
-        savedEntries.removeAll { $0.id == id }
-    }
-
-    func clear() async throws {
-        savedEntries.removeAll()
+    func listAppEntriesWithPlan(limit: Int) async throws -> [WorkoutHistoryEntry] {
+        let filtered = savedEntries.filter { $0.source == .app && $0.workoutPlan != nil }
+        return Array(filtered.prefix(limit))
     }
 }

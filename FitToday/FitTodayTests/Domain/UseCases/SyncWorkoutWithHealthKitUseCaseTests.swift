@@ -279,4 +279,9 @@ private final class MockWorkoutHistoryRepository: WorkoutHistoryRepository, @unc
             savedEntries.append(entry)
         }
     }
+
+    func listAppEntriesWithPlan(limit: Int) async throws -> [WorkoutHistoryEntry] {
+        let filtered = savedEntries.filter { $0.source == .app && $0.workoutPlan != nil }
+        return Array(filtered.prefix(limit))
+    }
 }

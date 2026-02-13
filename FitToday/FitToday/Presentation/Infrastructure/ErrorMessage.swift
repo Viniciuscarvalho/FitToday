@@ -36,11 +36,11 @@ enum ErrorAction: Equatable {
   var label: String {
     switch self {
     case .retry:
-      return "Tentar Novamente"
+      return "error.action.retry".localized
     case .openSettings:
-      return "Abrir Configurações"
+      return "error.action.open_settings".localized
     case .dismiss:
-      return "OK"
+      return "error.action.dismiss".localized
     }
   }
   

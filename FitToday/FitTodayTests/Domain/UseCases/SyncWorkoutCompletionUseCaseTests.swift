@@ -208,4 +208,9 @@ final class SocialMockWorkoutHistoryRepository: WorkoutHistoryRepository, @unche
     func saveEntry(_ entry: WorkoutHistoryEntry) async throws {
         saveEntryCalled = true
     }
+
+    func listAppEntriesWithPlan(limit: Int) async throws -> [WorkoutHistoryEntry] {
+        let filtered = listEntriesResult.filter { $0.source == .app && $0.workoutPlan != nil }
+        return Array(filtered.prefix(limit))
+    }
 }

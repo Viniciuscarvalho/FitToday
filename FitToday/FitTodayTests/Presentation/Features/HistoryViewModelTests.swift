@@ -150,5 +150,13 @@ class MockHWorkoutHistoryRepository: WorkoutHistoryRepository {
     func saveEntry(_ entry: WorkoutHistoryEntry) async throws {
         mockEntries.append(entry)
     }
+
+    func listAppEntriesWithPlan(limit: Int) async throws -> [WorkoutHistoryEntry] {
+        if shouldThrowError {
+            throw DomainError.repositoryFailure(reason: "Mock error")
+        }
+        let filtered = mockEntries.filter { $0.source == .app && $0.workoutPlan != nil }
+        return Array(filtered.prefix(limit))
+    }
 }
 

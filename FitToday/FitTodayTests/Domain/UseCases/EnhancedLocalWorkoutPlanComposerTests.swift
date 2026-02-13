@@ -479,6 +479,16 @@ final class EnhancedComposerMockHistoryRepository: WorkoutHistoryRepository {
         mockEntries.append(entry)
     }
 
+    func listAppEntriesWithPlan(limit: Int) async throws -> [WorkoutHistoryEntry] {
+        listEntriesCallCount += 1
+        lastLimit = limit
+        if shouldThrowError {
+            throw MockError.simulatedError
+        }
+        let filtered = mockEntries.filter { $0.source == .app && $0.workoutPlan != nil }
+        return Array(filtered.prefix(limit))
+    }
+
     enum MockError: Error {
         case simulatedError
     }

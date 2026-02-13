@@ -238,4 +238,8 @@ private final class MockWorkoutHistoryRepository: WorkoutHistoryRepository, @unc
     func count() async throws -> Int {
         0
     }
+
+    func listAppEntriesWithPlan(limit: Int) async throws -> [WorkoutHistoryEntry] {
+        []
+    }
 }
