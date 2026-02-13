@@ -21,11 +21,11 @@ enum ErrorState: Equatable {
     var title: String {
         switch self {
         case .dependency:
-            return "Erro de Configuração"
+            return "error.state.dependency.title".localized
         case .network:
-            return "Erro de Conexão"
+            return "error.state.network.title".localized
         case .api:
-            return "Erro do Servidor"
+            return "error.state.api.title".localized
         case .generic(let title, _):
             return title
         }
@@ -38,7 +38,7 @@ enum ErrorState: Equatable {
             return msg
         case .api(let msg, let code):
             if let code = code {
-                return "\(msg) (Código: \(code))"
+                return msg + String(format: "error.state.api.code".localized, code)
             }
             return msg
         case .generic(_, let msg):
@@ -94,7 +94,7 @@ struct ErrorStateView: View {
                 .multilineTextAlignment(.center)
 
             if let retryAction = retryAction {
-                Button("Tentar Novamente", action: retryAction)
+                Button("common.retry".localized, action: retryAction)
                     .fitPrimaryStyle()
                     .padding(.top, FitTodaySpacing.sm)
             }

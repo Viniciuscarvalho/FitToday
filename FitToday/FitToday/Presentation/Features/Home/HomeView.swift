@@ -16,10 +16,10 @@ struct HomeView: View {
     @State private var viewModel: HomeViewModel
     @State private var isGeneratingPlan = false
 
-    // AI Workout Generator State
-    @State private var selectedBodyParts: Set<BodyPart> = []
-    @State private var fatigueValue: Double = 0.5
-    @State private var selectedTime: Int = 45
+    // AI Workout Generator State - Direct mapping to DailyCheckIn fields
+    @State private var selectedFocus: DailyFocus = .fullBody
+    @State private var sorenessLevel: MuscleSorenessLevel = .none
+    @State private var energyLevel: Int = 7
 
     // Generated Workout Preview State
     @State private var generatedWorkout: GeneratedWorkout?
@@ -105,40 +105,22 @@ struct HomeView: View {
         case .noProfile:
             // Show AI generator card even without profile (guides to onboarding)
             AIWorkoutGeneratorCard(
-                selectedBodyParts: $selectedBodyParts,
-                fatigueValue: $fatigueValue,
-                selectedTime: $selectedTime,
+                selectedFocus: $selectedFocus,
+                sorenessLevel: $sorenessLevel,
+                energyLevel: $energyLevel,
                 isGenerating: isGeneratingPlan,
                 onGenerate: { router.push(.onboarding, on: .home) }
             )
 
-        case .needsDailyCheckIn:
-            // Show AI generator card
+        case .needsDailyCheckIn, .workoutReady:
+            // Show AI generator card - uses live inputs instead of stored questionnaire
             AIWorkoutGeneratorCard(
-                selectedBodyParts: $selectedBodyParts,
-                fatigueValue: $fatigueValue,
-                selectedTime: $selectedTime,
+                selectedFocus: $selectedFocus,
+                sorenessLevel: $sorenessLevel,
+                energyLevel: $energyLevel,
                 isGenerating: isGeneratingPlan,
                 onGenerate: generateWorkout
             )
-
-        case .workoutReady:
-            // Show continue workout card and AI generator
-            VStack(spacing: FitTodaySpacing.lg) {
-                ContinueWorkoutCard(
-                    workoutName: "home.continue.workout_name".localized,
-                    lastSessionInfo: "home.continue.last_session".localized,
-                    onContinue: { router.push(.dailyQuestionnaire, on: .home) }
-                )
-
-                AIWorkoutGeneratorCard(
-                    selectedBodyParts: $selectedBodyParts,
-                    fatigueValue: $fatigueValue,
-                    selectedTime: $selectedTime,
-                    isGenerating: isGeneratingPlan,
-                    onGenerate: generateWorkout
-                )
-            }
 
         case .workoutCompleted:
             // Show completed state with option to generate new
@@ -146,9 +128,9 @@ struct HomeView: View {
                 workoutCompletedCard
 
                 AIWorkoutGeneratorCard(
-                    selectedBodyParts: $selectedBodyParts,
-                    fatigueValue: $fatigueValue,
-                    selectedTime: $selectedTime,
+                    selectedFocus: $selectedFocus,
+                    sorenessLevel: $sorenessLevel,
+                    energyLevel: $energyLevel,
                     isGenerating: isGeneratingPlan,
                     onGenerate: generateWorkout
                 )
@@ -232,13 +214,27 @@ struct HomeView: View {
 
     private func generateWorkout() {
         guard !isGeneratingPlan else { return }
-        guard !selectedBodyParts.isEmpty else { return }
 
         Task {
             isGeneratingPlan = true
 
             do {
-                let workoutPlan = try await viewModel.regenerateDailyWorkoutPlan()
+                // Create DailyCheckIn from live inputs (not from stored questionnaire)
+                let checkIn = DailyCheckIn(
+                    focus: selectedFocus,
+                    sorenessLevel: sorenessLevel,
+                    sorenessAreas: [],  // Can be extended later if needed
+                    energyLevel: energyLevel
+                )
+
+                #if DEBUG
+                print("[HomeView] 🎯 Generating workout with LIVE inputs:")
+                print("[HomeView]    Focus: \(selectedFocus.rawValue)")
+                print("[HomeView]    Soreness: \(sorenessLevel.rawValue)")
+                print("[HomeView]    Energy: \(energyLevel)/10")
+                #endif
+
+                let workoutPlan = try await viewModel.generateWorkoutWithCheckIn(checkIn)
 
                 // Convert WorkoutPlan to GeneratedWorkout for preview
                 let generatedExercises = workoutPlan.exercises.map { prescription in
@@ -255,24 +251,21 @@ struct HomeView: View {
                     )
                 }
 
-                // Determine target muscles from selected body parts
-                let targetMuscles = selectedBodyParts.map { $0.rawValue }
-
                 generatedWorkout = GeneratedWorkout(
                     name: workoutPlan.title,
                     exercises: generatedExercises,
-                    estimatedDuration: selectedTime,
-                    targetMuscles: targetMuscles,
-                    fatigueAdjusted: fatigueValue < 0.5,
+                    estimatedDuration: workoutPlan.estimatedDurationMinutes,
+                    targetMuscles: [selectedFocus.displayName],
+                    fatigueAdjusted: energyLevel <= 3 || sorenessLevel == .strong,
                     warmupIncluded: true
                 )
 
                 showWorkoutPreview = true
                 await viewModel.refresh()
             } catch {
-                // Show error through viewModel
+                viewModel.handleError(error)
                 #if DEBUG
-                print("[HomeView] Error generating workout: \(error)")
+                print("[HomeView] ❌ Error generating workout: \(error)")
                 #endif
             }
 
