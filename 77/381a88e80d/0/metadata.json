@@ -1,0 +1,47 @@
+{
+  "cli_version": "0.4.4",
+  "checkpoint_id": "77381a88e80d",
+  "session_id": "602a4a6e-d3ff-449a-a318-42c7c368d0ae",
+  "strategy": "manual-commit",
+  "created_at": "2026-02-17T17:42:21.712682Z",
+  "branch": "main",
+  "checkpoints_count": 1,
+  "files_touched": [
+    ".gitignore",
+    "FitToday/FitToday/Data/Models/CMSWorkoutModels.swift",
+    "FitToday/FitToday/Data/Services/CMS/CMSWorkoutService.swift",
+    "FitToday/FitToday/Presentation/Features/PersonalTrainer/CMSWorkoutDetailView.swift",
+    "FitToday/FitToday/Presentation/Features/PersonalTrainer/CMSWorkoutFeedbackView.swift",
+    "FitToday/FitToday/Presentation/Features/PersonalTrainer/PersonalTrainerView.swift",
+    "FitToday/FitToday/Presentation/Features/PersonalTrainer/PersonalTrainerViewModel.swift",
+    "FitToday/FitToday/Presentation/Features/Programs/Views/ProgramWorkoutDetailView.swift",
+    "FitToday/FitToday/Presentation/Features/Programs/Views/ProgramsListView.swift",
+    "FitToday/FitToday/Presentation/Features/Workout/ViewModels/CreateWorkoutViewModel.swift",
+    "FitToday/FitToday/Presentation/Features/Workout/Views/CreateWorkoutView.swift",
+    "FitToday/FitToday/Presentation/Features/Workout/Views/WorkoutTabView.swift",
+    "FitToday/FitToday/Presentation/Root/TabRootView.swift",
+    "FitToday/FitToday/Presentation/Router/AppRouter.swift",
+    "FitToday/FitTodayTests/Domain/UseCases/SaveCustomWorkoutUseCaseTests.swift"
+  ],
+  "agent": "Claude Code",
+  "transcript_identifier_at_start": "30ef4199-c049-4c40-9b86-38084b6d5ff9",
+  "checkpoint_transcript_start": 368,
+  "transcript_lines_at_start": 368,
+  "token_usage": {
+    "input_tokens": 13451,
+    "cache_creation_tokens": 253054,
+    "cache_read_tokens": 7278872,
+    "output_tokens": 644,
+    "api_call_count": 62
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-02-17T17:42:21.08973Z",
+    "agent_lines": 859,
+    "human_added": 1058,
+    "human_modified": 0,
+    "human_removed": 0,
+    "total_committed": 1917,
+    "agent_percentage": 44.809598330725095
+  },
+  "transcript_path": ".claude/projects/-Users-viniciuscarvalho-Documents-FitToday/602a4a6e-d3ff-449a-a318-42c7c368d0ae.jsonl"
+}

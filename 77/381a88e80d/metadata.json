@@ -1,0 +1,40 @@
+{
+  "cli_version": "0.4.4",
+  "checkpoint_id": "77381a88e80d",
+  "strategy": "manual-commit",
+  "branch": "main",
+  "checkpoints_count": 1,
+  "files_touched": [
+    ".gitignore",
+    "FitToday/FitToday/Data/Models/CMSWorkoutModels.swift",
+    "FitToday/FitToday/Data/Services/CMS/CMSWorkoutService.swift",
+    "FitToday/FitToday/Presentation/Features/PersonalTrainer/CMSWorkoutDetailView.swift",
+    "FitToday/FitToday/Presentation/Features/PersonalTrainer/CMSWorkoutFeedbackView.swift",
+    "FitToday/FitToday/Presentation/Features/PersonalTrainer/PersonalTrainerView.swift",
+    "FitToday/FitToday/Presentation/Features/PersonalTrainer/PersonalTrainerViewModel.swift",
+    "FitToday/FitToday/Presentation/Features/Programs/Views/ProgramWorkoutDetailView.swift",
+    "FitToday/FitToday/Presentation/Features/Programs/Views/ProgramsListView.swift",
+    "FitToday/FitToday/Presentation/Features/Workout/ViewModels/CreateWorkoutViewModel.swift",
+    "FitToday/FitToday/Presentation/Features/Workout/Views/CreateWorkoutView.swift",
+    "FitToday/FitToday/Presentation/Features/Workout/Views/WorkoutTabView.swift",
+    "FitToday/FitToday/Presentation/Root/TabRootView.swift",
+    "FitToday/FitToday/Presentation/Router/AppRouter.swift",
+    "FitToday/FitTodayTests/Domain/UseCases/SaveCustomWorkoutUseCaseTests.swift"
+  ],
+  "sessions": [
+    {
+      "metadata": "/77/381a88e80d/0/metadata.json",
+      "transcript": "/77/381a88e80d/0/full.jsonl",
+      "context": "/77/381a88e80d/0/context.md",
+      "content_hash": "/77/381a88e80d/0/content_hash.txt",
+      "prompt": "/77/381a88e80d/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 13451,
+    "cache_creation_tokens": 253054,
+    "cache_read_tokens": 7278872,
+    "output_tokens": 644,
+    "api_call_count": 62
+  }
+}
