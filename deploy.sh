@@ -11,6 +11,9 @@
 # ============================================================================
 set -euo pipefail
 
+# Diretório do script (para carregar .env do mesmo local)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 # Cores
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -56,13 +59,13 @@ export ASC_UPLOAD_TIMEOUT_SECONDS
 # .env
 # ============================================================================
 load_env() {
-if [[ -f ".env" ]]; then
+if [[ -f "$SCRIPT_DIR/.env" ]]; then
 log_info "Carregando .env"
-set -a; source .env; set +a
+set -a; source "$SCRIPT_DIR/.env"; set +a
 fi
-if [[ -f ".env.local" ]]; then
+if [[ -f "$SCRIPT_DIR/.env.local" ]]; then
 log_info "Carregando .env.local"
-set -a; source .env.local; set +a
+set -a; source "$SCRIPT_DIR/.env.local"; set +a
 fi
 }
 
@@ -92,7 +95,11 @@ log_info "Crie o arquivo ExportOptions-AppStore.plist (eu te passei o template).
 exit 1
 }
 log_success "ExportOptions: $EXPORT_OPTIONS_PLIST"
+}
 
+# ============================================================================
+# RESOLVE ASC APP ID
+# ============================================================================
 resolve_asc_app_id() {
 # Se já veio setado, respeita
 if [[ -n "${ASC_APP_ID:-}" ]]; then
@@ -367,6 +374,7 @@ echo ""
 
 load_env
 check_prerequisites
+resolve_asc_app_id
 
 local ipa_path=""
 
