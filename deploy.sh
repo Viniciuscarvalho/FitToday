@@ -14,6 +14,14 @@ set -euo pipefail
 # Diretório do script (para carregar .env do mesmo local)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+# Carrega .env ANTES dos defaults para que seus valores sejam respeitados
+if [[ -f "$SCRIPT_DIR/.env" ]]; then
+set -a; source "$SCRIPT_DIR/.env"; set +a
+fi
+if [[ -f "$SCRIPT_DIR/.env.local" ]]; then
+set -a; source "$SCRIPT_DIR/.env.local"; set +a
+fi
+
 # Cores
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -86,7 +94,7 @@ exit 1
 }
 log_success "asc encontrado: $(asc --version 2>/dev/null || echo "ok")"
 
-[[ -f "$PROJECT_PATH" ]] || { log_error "PROJECT_PATH não existe: $PROJECT_PATH"; exit 1; }
+[[ -d "$PROJECT_PATH" ]] || { log_error "PROJECT_PATH não existe: $PROJECT_PATH"; exit 1; }
 log_success "Projeto: $PROJECT_PATH"
 
 [[ -f "$EXPORT_OPTIONS_PLIST" ]] || {
@@ -111,7 +119,7 @@ log_step "Resolvendo ASC_APP_ID automaticamente (bundleId/nome)"
 
 # Listar apps e filtrar por bundleId ou name; imprimir tabela de candidatos
 local result_json
-result_json="$(asc apps --paginate 2>/dev/null || true)"
+result_json="$(asc apps --output json 2>/dev/null || true)"
 
 if [[ -z "$result_json" ]]; then
 log_error "Falha ao listar apps via asc. Verifique autenticação."
@@ -132,35 +140,35 @@ payload = json.load(sys.stdin)
 data = payload.get("data", []) or []
 
 def attr(item, k):
-return (item.get("attributes") or {}).get(k)
+    return (item.get("attributes") or {}).get(k)
 
 # candidatos por bundleId, depois por name
 candidates = []
 
 if bundle_id:
-for it in data:
-if attr(it, "bundleId") == bundle_id:
-candidates.append(it)
+    for it in data:
+        if attr(it, "bundleId") == bundle_id:
+            candidates.append(it)
 
 if not candidates and name:
-for it in data:
-if attr(it, "name") == name:
-candidates.append(it)
+    for it in data:
+        if attr(it, "name") == name:
+            candidates.append(it)
 
 # imprime lista para diagnóstico (sempre que houver candidatos)
 if candidates:
-print("CANDIDATES_START")
-for it in candidates:
-print(f'{it.get("id","")}\t{attr(it,"name") or ""}\t{attr(it,"bundleId") or ""}')
-print("CANDIDATES_END")
+    print("CANDIDATES_START")
+    for it in candidates:
+        print(f'{it.get("id","")}\t{attr(it,"name") or ""}\t{attr(it,"bundleId") or ""}')
+    print("CANDIDATES_END")
 
 # decidir
 if not candidates:
-sys.exit(2)
+    sys.exit(2)
 
 # se múltiplos, não adivinhar
 if len(candidates) != 1:
-sys.exit(3)
+    sys.exit(3)
 
 print("RESOLVED_ID=" + (candidates[0].get("id") or ""))
 PY

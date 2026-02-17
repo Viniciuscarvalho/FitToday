@@ -2,17 +2,13 @@
 //  LegalSection.swift
 //  FitToday
 //
-//  Created by AI on 15/01/26.
-//
 
 import SwiftUI
 
-// 💡 Learn: Seção legal do paywall com termos e privacidade
-// Componente extraído para manter a view principal < 100 linhas
 struct LegalSection: View {
     var body: some View {
         VStack(spacing: FitTodaySpacing.xs) {
-            Text("Assinatura renovada automaticamente após o período de trial. Cancele a qualquer momento nas configurações do iPhone.")
+            Text("Compra única não renovável. O acesso é permanente após a confirmação do pagamento.")
                 .font(FitTodayFont.ui(size: 11, weight: .medium))
                 .foregroundStyle(FitTodayColor.textSecondary.opacity(0.7))
                 .multilineTextAlignment(.center)

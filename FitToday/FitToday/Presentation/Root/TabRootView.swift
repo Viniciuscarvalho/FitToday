@@ -137,7 +137,7 @@ struct TabRootView: View {
             WorkoutCompletionView()
         case .paywall:
             if let repo = resolver.resolve(EntitlementRepository.self) as? StoreKitEntitlementRepository {
-                PaywallView(storeService: repo.service) {
+                OptimizedPaywallView(storeService: repo.service) {
                     // On purchase success, generate workout
                     if let planId = sessionStore.plan?.id {
                         router.pop(on: .home) // Pop paywall

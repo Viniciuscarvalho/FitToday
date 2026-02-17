@@ -4,10 +4,23 @@
 
   ],
   "products" : [
-
+    {
+      "displayPrice" : "37.90",
+      "internalID" : "F1A2B3C4-D5E6-7890-ABCD-123456789ABC",
+      "localizations" : [
+        {
+          "description" : "Desbloqueie todos os recursos Pro para sempre",
+          "displayName" : "FitToday Pro",
+          "locale" : "pt_BR"
+        }
+      ],
+      "productID" : "com.fittoday.pro.lifetime",
+      "referenceName" : "Pro Lifetime",
+      "type" : "NonConsumable"
+    }
   ],
   "settings" : {
-    "_applicationInternalID" : "6739851234",
+    "_applicationInternalID" : "6757407118",
     "_developerTeamID" : "6U8286L9PF",
     "_failTransactionsEnabled" : false,
     "_locale" : "pt_BR",
@@ -61,81 +74,10 @@
     ]
   },
   "subscriptionGroups" : [
-    {
-      "id" : "D4E5F6A7-B8C9-4D0E-1F2A-3B4C5D6E7F8A",
-      "localizations" : [
 
-      ],
-      "name" : "FitToday Pro",
-      "subscriptions" : [
-        {
-          "adHocOffers" : [
-
-          ],
-          "codeOffers" : [
-
-          ],
-          "displayPrice" : "19.90",
-          "familyShareable" : false,
-          "groupNumber" : 1,
-          "internalID" : "A1B2C3D4-E5F6-7890-ABCD-EF1234567890",
-          "introductoryOffer" : {
-            "displayPrice" : "0",
-            "internalID" : "B2C3D4E5-F6A7-8901-BCDE-F23456789012",
-            "numberOfPeriods" : 1,
-            "paymentMode" : "free",
-            "subscriptionPeriod" : "P1W"
-          },
-          "localizations" : [
-            {
-              "description" : "Treinos adaptados ao seu dia, todo dia",
-              "displayName" : "FitToday Pro Mensal",
-              "locale" : "pt_BR"
-            }
-          ],
-          "productID" : "com.fittoday.pro.monthly",
-          "recurringSubscriptionPeriod" : "P1M",
-          "referenceName" : "Pro Mensal",
-          "subscriptionGroupID" : "D4E5F6A7-B8C9-4D0E-1F2A-3B4C5D6E7F8A",
-          "type" : "RecurringSubscription",
-          "winbackOffers" : [
-
-          ]
-        },
-        {
-          "adHocOffers" : [
-
-          ],
-          "codeOffers" : [
-
-          ],
-          "displayPrice" : "159.90",
-          "familyShareable" : false,
-          "groupNumber" : 1,
-          "internalID" : "C3D4E5F6-A7B8-9012-CDEF-345678901234",
-          "introductoryOffer" : null,
-          "localizations" : [
-            {
-              "description" : "Treinos adaptados ao seu dia, todo dia - Economize 44%",
-              "displayName" : "FitToday Pro Anual",
-              "locale" : "pt_BR"
-            }
-          ],
-          "productID" : "com.fittoday.pro.yearly",
-          "recurringSubscriptionPeriod" : "P1Y",
-          "referenceName" : "Pro Anual",
-          "subscriptionGroupID" : "D4E5F6A7-B8C9-4D0E-1F2A-3B4C5D6E7F8A",
-          "type" : "RecurringSubscription",
-          "winbackOffers" : [
-
-          ]
-        }
-      ]
-    }
   ],
   "version" : {
     "major" : 4,
     "minor" : 0
   }
 }
-

@@ -202,8 +202,8 @@
 "settings.restore_purchases" = "Restore Purchases";
 "settings.help_support" = "Help & Support";
 "settings.api_key" = "API Key Settings";
-"settings.restore_success" = "Your subscription has been restored successfully!";
-"settings.restore_not_found" = "No subscription found to restore.";
+"settings.restore_success" = "Your purchase has been restored successfully!";
+"settings.restore_not_found" = "No purchase found to restore.";
 
 // MARK: - Pro Settings
 "settings.pro.member" = "Pro Member";
@@ -213,13 +213,14 @@
 "settings.pro.cloud_sync" = "Cloud Sync";
 "settings.pro.apple_health" = "Apple Health";
 "settings.pro.ai_workouts" = "AI Workouts";
-"settings.pro.manage" = "Manage Subscription";
-"settings.pro.upgrade" = "Upgrade to Pro";
+"settings.pro.manage" = "Lifetime Pro Active";
+"settings.pro.upgrade" = "Unlock Pro";
 "settings.pro.unlock_description" = "Unlock unlimited AI workouts, cloud sync, and Apple Health integration";
 "settings.pro.unlimited_ai" = "Unlimited AI Workouts";
 "settings.pro.cloud_devices" = "Cloud Sync Across Devices";
 "settings.pro.health_integration" = "Apple Health Integration";
 "settings.pro.try_free" = "Try Pro Free";
+"settings.pro.unlock" = "Unlock Pro";
 "settings.pro.connected" = "Connected";
 "settings.pro.connect_sync" = "Connect to sync workouts";
 "settings.personal_trainer" = "Personal Trainer";

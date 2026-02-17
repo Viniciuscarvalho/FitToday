@@ -14,20 +14,23 @@ enum ProFeature: String, CaseIterable {
     // Treinos IA
     case aiWorkoutGeneration = "ai_workout_generation"
     case aiExerciseSubstitution = "ai_exercise_substitution"
-    
+
     // Tracking avançado
     case unlimitedHistory = "unlimited_history"
     case advancedDOMSAdjustment = "advanced_doms_adjustment"
-    
+
     // Biblioteca
     case premiumPrograms = "premium_programs"
-    
+
     // Configurações
     case customizableSettings = "customizable_settings"
 
     // Personal Trainer
     case personalTrainer = "personal_trainer"
     case trainerWorkouts = "trainer_workouts"
+
+    // Social
+    case simultaneousChallenges = "simultaneous_challenges"
 
     var displayName: String {
         switch self {
@@ -39,6 +42,7 @@ enum ProFeature: String, CaseIterable {
         case .customizableSettings: return "Configurações avançadas"
         case .personalTrainer: return "Personal Trainer"
         case .trainerWorkouts: return "Treinos do Personal"
+        case .simultaneousChallenges: return "Desafios simultâneos ilimitados"
         }
     }
 }
@@ -68,12 +72,12 @@ enum FeatureAccessResult {
         switch self {
         case .allowed:
             return ""
-        case .limitReached(let remaining, let limit):
-            return "Você usou \(limit - remaining)/\(limit) desta semana. Upgrade para acesso ilimitado."
+        case .limitReached(_, let limit):
+            return "Você atingiu o limite de \(limit) usos. Desbloqueie o Pro para mais."
         case .requiresPro(let feature):
-            return "\(feature.displayName) é um recurso Pro. Assine para desbloquear."
+            return "\(feature.displayName) é um recurso Pro. Desbloqueie o Pro para acessar."
         case .trialExpired:
-            return "Seu período de teste terminou. Assine para continuar."
+            return "Seu período de teste terminou. Desbloqueie o Pro para continuar."
         case .featureDisabled(let reason):
             return reason
         }
@@ -84,69 +88,73 @@ enum FeatureAccessResult {
 
 /// Política centralizada para verificação de acesso a features
 struct EntitlementPolicy {
-    
-    // MARK: - Limites Free
-    
+
+    // MARK: - Limites
+
     /// Número de treinos IA por semana para usuários Free
     static let freeAIWorkoutsPerWeek = 1
-    
+
+    /// Número de treinos IA por dia para usuários Pro
+    static let proAIWorkoutsPerDay = 2
+
     /// Dias de histórico para usuários Free
     static let freeHistoryDaysLimit = 7
-    
+
+    /// Número máximo de desafios simultâneos para Free
+    static let freeChallengesLimit = 5
+
     // MARK: - Verificação de Acesso
-    
+
     /// Verifica se o usuário pode acessar uma feature
     /// - Parameters:
     ///   - feature: Feature a ser verificada
     ///   - entitlement: Entitlement atual do usuário
-    ///   - usageCount: Uso atual (para features com limite)
+    ///   - usageCount: Uso atual (semanal para Free AI, diário para Pro AI, contagem ativa para desafios)
     /// - Returns: Resultado da verificação
     static func canAccess(
         _ feature: ProFeature,
         entitlement: ProEntitlement,
         usageCount: Int = 0
     ) -> FeatureAccessResult {
-        
-        // Pro tem acesso a tudo
+
+        // Pro tem acesso a tudo (com limites diários em IA)
         if entitlement.isPro {
-            // Verificar se trial expirou
             if let expiration = entitlement.expirationDate, expiration < Date() {
                 return .trialExpired
             }
-            return .allowed
+
+            switch feature {
+            case .aiWorkoutGeneration:
+                if usageCount >= proAIWorkoutsPerDay {
+                    return .limitReached(remaining: 0, limit: proAIWorkoutsPerDay)
+                }
+                return .allowed
+            default:
+                return .allowed
+            }
         }
-        
+
         // Verificar features específicas para Free
         switch feature {
         case .aiWorkoutGeneration:
-            // Free pode usar 1x por semana
             if usageCount >= freeAIWorkoutsPerWeek {
                 return .limitReached(remaining: 0, limit: freeAIWorkoutsPerWeek)
             }
             return .allowed
-            
-        case .aiExerciseSubstitution:
-            // Substituição requer Pro
-            return .requiresPro(feature: feature)
-            
-        case .unlimitedHistory:
-            // Free tem acesso limitado a 7 dias
-            return .requiresPro(feature: feature)
-            
-        case .advancedDOMSAdjustment:
-            // Ajuste por DOMS requer Pro
-            return .requiresPro(feature: feature)
-            
-        case .premiumPrograms:
-            // Programas premium requerem Pro
-            return .requiresPro(feature: feature)
-            
-        case .customizableSettings:
-            // Configurações avançadas requerem Pro
-            return .requiresPro(feature: feature)
 
-        case .personalTrainer, .trainerWorkouts:
-            // Personal Trainer features requerem Pro
+        case .simultaneousChallenges:
+            if usageCount >= freeChallengesLimit {
+                return .limitReached(remaining: 0, limit: freeChallengesLimit)
+            }
+            return .allowed
+
+        case .aiExerciseSubstitution,
+             .unlimitedHistory,
+             .advancedDOMSAdjustment,
+             .premiumPrograms,
+             .customizableSettings,
+             .personalTrainer,
+             .trainerWorkouts:
             return .requiresPro(feature: feature)
         }
     }
@@ -154,7 +162,7 @@ struct EntitlementPolicy {
     /// Verifica se uma feature é totalmente bloqueada para Free
     static func isProOnly(_ feature: ProFeature) -> Bool {
         switch feature {
-        case .aiWorkoutGeneration:
+        case .aiWorkoutGeneration, .simultaneousChallenges:
             return false // Free tem acesso limitado
         case .aiExerciseSubstitution,
              .unlimitedHistory,
@@ -166,30 +174,39 @@ struct EntitlementPolicy {
             return true
         }
     }
-    
-    /// Retorna o limite semanal para features com limite
-    static func weeklyLimit(for feature: ProFeature, entitlement: ProEntitlement) -> Int? {
-        guard !entitlement.isPro else { return nil } // Sem limite para Pro
-        
+
+    /// Retorna o limite de uso para uma feature
+    static func usageLimit(for feature: ProFeature, entitlement: ProEntitlement) -> (limit: Int, period: String)? {
         switch feature {
         case .aiWorkoutGeneration:
-            return freeAIWorkoutsPerWeek
+            if entitlement.isPro {
+                return (proAIWorkoutsPerDay, "dia")
+            } else {
+                return (freeAIWorkoutsPerWeek, "semana")
+            }
+        case .simultaneousChallenges:
+            if entitlement.isPro {
+                return nil // ilimitado
+            } else {
+                return (freeChallengesLimit, "simultâneos")
+            }
         default:
             return nil
         }
     }
-    
+
     // MARK: - Helpers para UI
-    
+
     /// Retorna lista de features que são Pro-only para exibição
     static var proOnlyFeatures: [ProFeature] {
         ProFeature.allCases.filter { isProOnly($0) }
     }
-    
+
     /// Retorna lista de features com limites para Free
-    static var limitedFreeFeatures: [(feature: ProFeature, limit: Int)] {
+    static var limitedFreeFeatures: [(feature: ProFeature, freeLimit: String, proLimit: String)] {
         [
-            (.aiWorkoutGeneration, freeAIWorkoutsPerWeek)
+            (.aiWorkoutGeneration, "1/semana", "2/dia"),
+            (.simultaneousChallenges, "5", "∞")
         ]
     }
 }
@@ -201,10 +218,9 @@ extension ProEntitlement {
     func canAccess(_ feature: ProFeature, usageCount: Int = 0) -> FeatureAccessResult {
         EntitlementPolicy.canAccess(feature, entitlement: self, usageCount: usageCount)
     }
-    
+
     /// Verifica se tem acesso a uma feature (simplificado)
     func hasAccess(to feature: ProFeature) -> Bool {
         canAccess(feature).isAllowed
     }
 }
-

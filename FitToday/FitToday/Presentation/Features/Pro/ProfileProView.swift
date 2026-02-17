@@ -134,21 +134,17 @@ struct ProfileProView: View {
                 }
                 .padding(.top, 4)
 
-                Button {
-                    openSubscriptionManagement()
-                } label: {
-                    HStack {
-                        Spacer()
-                        Text("settings.pro.manage".localized)
-                            .font(.system(size: 14, weight: .semibold))
-                        Spacer()
-                    }
-                    .foregroundStyle(FitTodayColor.brandPrimary)
-                    .padding(.vertical, 12)
-                    .background(FitTodayColor.brandPrimary.opacity(0.15))
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                HStack(spacing: 6) {
+                    Image(systemName: "infinity")
+                        .font(.system(size: 12, weight: .semibold))
+                    Text("Pro Vitalício ativo")
+                        .font(.system(size: 14, weight: .semibold))
                 }
-                .buttonStyle(.plain)
+                .foregroundStyle(FitTodayColor.success)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 12)
+                .background(FitTodayColor.success.opacity(0.15))
+                .clipShape(RoundedRectangle(cornerRadius: 12))
             } else {
                 // Free plan upgrade prompt
                 Text("settings.pro.upgrade".localized)
@@ -172,7 +168,7 @@ struct ProfileProView: View {
                 } label: {
                     HStack {
                         Spacer()
-                        Text("settings.pro.try_free".localized)
+                        Text("settings.pro.unlock".localized)
                             .font(.system(size: 14, weight: .semibold))
                         Image(systemName: "arrow.right")
                             .font(.system(size: 12, weight: .semibold))
@@ -439,7 +435,7 @@ struct ProfileProView: View {
     @ViewBuilder
     private var paywallSheet: some View {
         if let repo = storeKitRepository {
-            PaywallView(
+            OptimizedPaywallView(
                 storeService: repo.service,
                 onPurchaseSuccess: {
                     Task { await loadEntitlement() }
@@ -487,12 +483,6 @@ struct ProfileProView: View {
             restoreMessage = "settings.restore_not_found".localized
         }
         showingRestoreAlert = true
-    }
-
-    private func openSubscriptionManagement() {
-        if let url = URL(string: "https://apps.apple.com/account/subscriptions") {
-            UIApplication.shared.open(url)
-        }
     }
 
     private func openSupportURL() {

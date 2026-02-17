@@ -1,26 +1,22 @@
 //
-//  TrialHighlight.swift
+//  LifetimeValueHighlight.swift
 //  FitToday
-//
-//  Created by AI on 15/01/26.
 //
 
 import SwiftUI
 
-// 💡 Learn: Destaque do trial gratuito de 7 dias
-// Componente extraído para manter a view principal < 100 linhas
-struct TrialHighlight: View {
+struct LifetimeValueHighlight: View {
     var body: some View {
         VStack(spacing: FitTodaySpacing.sm) {
             HStack(spacing: FitTodaySpacing.xs) {
-                Image(systemName: "gift.fill")
+                Image(systemName: "infinity")
                     .foregroundStyle(FitTodayColor.neonCyan)
-                Text("7 DIAS GRÁTIS")
+                Text("PAGUE UMA VEZ, USE PARA SEMPRE")
                     .font(FitTodayFont.accent(size: 16))
                     .foregroundStyle(FitTodayColor.neonCyan)
             }
 
-            Text("Experimente todos os recursos Pro sem compromisso")
+            Text("Sem assinatura. Sem renovação. Acesso vitalício.")
                 .font(FitTodayFont.ui(size: 14, weight: .medium))
                 .foregroundStyle(FitTodayColor.textSecondary)
         }

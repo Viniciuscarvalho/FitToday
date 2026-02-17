@@ -2,14 +2,10 @@
 //  PaywallCTASection.swift
 //  FitToday
 //
-//  Created by AI on 15/01/26.
-//
 
 import SwiftUI
 import StoreKit
 
-// 💡 Learn: Seção de CTA do paywall com botão de compra
-// Componente extraído para manter a view principal < 100 linhas
 struct PaywallCTASection: View {
     let selectedProduct: Product?
     let isPurchasing: Bool
@@ -18,7 +14,6 @@ struct PaywallCTASection: View {
 
     var body: some View {
         VStack(spacing: FitTodaySpacing.md) {
-            // Botão principal de compra
             Button(action: onPurchase) {
                 HStack(spacing: FitTodaySpacing.sm) {
                     if isPurchasing {
@@ -45,11 +40,10 @@ struct PaywallCTASection: View {
             }
             .disabled(selectedProduct == nil || isPurchasing)
 
-            Text("Cancele a qualquer momento")
+            Text("Pagamento único. Sem assinatura.")
                 .font(FitTodayFont.ui(size: 13, weight: .medium))
                 .foregroundStyle(FitTodayColor.textSecondary)
 
-            // Botão de restaurar compras
             Button(action: onRestore) {
                 HStack(spacing: FitTodaySpacing.xs) {
                     Image(systemName: "arrow.clockwise")
@@ -62,12 +56,7 @@ struct PaywallCTASection: View {
     }
 
     private var ctaText: String {
-        guard let product = selectedProduct else { return "Assinar" }
-
-        if product.hasIntroOffer, let intro = product.introOfferDescription {
-            return "Começar \(intro)"
-        }
-
-        return "Assinar por \(product.displayPrice)/\(product.periodDescription)"
+        guard let product = selectedProduct else { return "Desbloquear Pro" }
+        return "Desbloquear Pro por \(product.displayPrice)"
     }
 }

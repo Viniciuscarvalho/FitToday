@@ -34,6 +34,11 @@ struct FeatureComparisonTable: View {
             FeatureComparisonRow(
                 feature: "Treinos IA personalizados",
                 freeValue: .limited("1/sem"),
+                proValue: .limited("2/dia")
+            )
+            FeatureComparisonRow(
+                feature: "Desafios simultâneos",
+                freeValue: .limited("5"),
                 proValue: .unlimited
             )
             FeatureComparisonRow(
@@ -50,6 +55,11 @@ struct FeatureComparisonTable: View {
                 feature: "Histórico de treinos",
                 freeValue: .limited("7 dias"),
                 proValue: .unlimited
+            )
+            FeatureComparisonRow(
+                feature: "Personal Trainer",
+                freeValue: .no,
+                proValue: .yes
             )
             FeatureComparisonRow(
                 feature: "Exercícios com GIFs",

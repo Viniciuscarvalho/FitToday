@@ -202,8 +202,8 @@
 "settings.restore_purchases" = "Restaurar Compras";
 "settings.help_support" = "Ajuda e Suporte";
 "settings.api_key" = "Configuracoes de Chave API";
-"settings.restore_success" = "Sua assinatura foi restaurada com sucesso!";
-"settings.restore_not_found" = "Nenhuma assinatura encontrada para restaurar.";
+"settings.restore_success" = "Sua compra foi restaurada com sucesso!";
+"settings.restore_not_found" = "Nenhuma compra encontrada para restaurar.";
 
 // MARK: - Pro Settings
 "settings.pro.member" = "Membro Pro";
@@ -213,13 +213,14 @@
 "settings.pro.cloud_sync" = "Sincronizacao na Nuvem";
 "settings.pro.apple_health" = "Apple Health";
 "settings.pro.ai_workouts" = "Treinos com IA";
-"settings.pro.manage" = "Gerenciar Assinatura";
-"settings.pro.upgrade" = "Assinar Pro";
+"settings.pro.manage" = "Pro Vitalicio Ativo";
+"settings.pro.upgrade" = "Desbloquear Pro";
 "settings.pro.unlock_description" = "Desbloqueie treinos ilimitados com IA, sincronizacao na nuvem e integracao com Apple Health";
 "settings.pro.unlimited_ai" = "Treinos Ilimitados com IA";
 "settings.pro.cloud_devices" = "Sincronizacao Entre Dispositivos";
 "settings.pro.health_integration" = "Integracao com Apple Health";
 "settings.pro.try_free" = "Experimente Pro Gratis";
+"settings.pro.unlock" = "Desbloquear Pro";
 "settings.pro.connected" = "Conectado";
 "settings.pro.connect_sync" = "Conecte para sincronizar treinos";
 "settings.personal_trainer" = "Personal Trainer";

@@ -48,10 +48,10 @@ final class StoreKitEntitlementRepository: EntitlementRepository, @unchecked Sen
     private func setupSubscriptionObserver() {
         // 💡 Learn: Com @Observable, usamos withObservationTracking para observar mudanças
         Task {
-            var previousValue = storeKitService.hasActiveSubscription
+            var previousValue = storeKitService.hasProAccess
             while !Task.isCancelled {
                 let currentValue = await withObservationTracking {
-                    storeKitService.hasActiveSubscription
+                    storeKitService.hasProAccess
                 } onChange: {
                     // Retorna quando há mudança
                 }
@@ -67,13 +67,13 @@ final class StoreKitEntitlementRepository: EntitlementRepository, @unchecked Sen
         }
     }
     
-    private func handleSubscriptionChange(_ hasSubscription: Bool) async {
+    private func handleSubscriptionChange(_ hasPro: Bool) async {
         let entitlement = await storeKitService.getCurrentEntitlement()
         await updateEntitlement(entitlement)
     }
     
     private func refreshFromStoreKit() async {
-        await storeKitService.refreshSubscriptionStatus()
+        await storeKitService.refreshPurchaseStatus()
         let entitlement = await storeKitService.getCurrentEntitlement()
         await updateEntitlement(entitlement)
     }

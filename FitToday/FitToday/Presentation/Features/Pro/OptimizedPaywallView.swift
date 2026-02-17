@@ -2,15 +2,12 @@
 //  OptimizedPaywallView.swift
 //  FitToday
 //
-//  Paywall otimizado com trial 7 dias e comparação Free vs Pro.
-//  Refactored on 15/01/26 - Extracted components to separate files
+//  Paywall com compra única (non-consumable) e comparação Free vs Pro.
 //
 
 import SwiftUI
 import StoreKit
 
-// 💡 Learn: View refatorada com componentes extraídos para manutenibilidade
-// Seguindo diretriz de < 100 linhas por view
 struct OptimizedPaywallView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(AppRouter.self) private var router
@@ -18,7 +15,6 @@ struct OptimizedPaywallView: View {
 
     @State private var selectedProduct: Product?
     @State private var errorMessage: ErrorMessage?
-    @State private var showComparison = false
 
     private let onPurchaseSuccess: () -> Void
     private let onDismiss: () -> Void
@@ -39,11 +35,11 @@ struct OptimizedPaywallView: View {
                 VStack(spacing: FitTodaySpacing.xl) {
                     PaywallHeroSection()
 
-                    TrialHighlight()
+                    LifetimeValueHighlight()
 
-                    comparisonSection
+                    lifetimePriceSection
 
-                    plansSection
+                    FeatureComparisonTable()
 
                     PaywallCTASection(
                         selectedProduct: selectedProduct,
@@ -77,7 +73,7 @@ struct OptimizedPaywallView: View {
             }
             .task {
                 await storeService.loadProducts()
-                selectedProduct = storeService.yearlyProduct ?? storeService.monthlyProduct
+                selectedProduct = storeService.lifetimeProduct
             }
             .errorToast(errorMessage: $errorMessage)
             .onChange(of: storeService.purchaseState) { _, newState in
@@ -86,58 +82,34 @@ struct OptimizedPaywallView: View {
         }
     }
 
-    // MARK: - Comparison Section
+    // MARK: - Lifetime Price Section
 
-    private var comparisonSection: some View {
-        VStack(spacing: FitTodaySpacing.md) {
-            Button {
-                withAnimation(.spring(response: 0.3)) {
-                    showComparison.toggle()
-                }
-            } label: {
-                HStack {
-                    Text("Comparar Free vs Pro")
-                        .font(FitTodayFont.ui(size: 15, weight: .semiBold))
+    private var lifetimePriceSection: some View {
+        VStack(spacing: FitTodaySpacing.sm) {
+            if let product = storeService.lifetimeProduct {
+                VStack(spacing: FitTodaySpacing.xs) {
+                    Text(product.displayPrice)
+                        .font(FitTodayFont.display(size: 40, weight: .extraBold))
                         .foregroundStyle(FitTodayColor.textPrimary)
 
-                    Spacer()
-
-                    Image(systemName: showComparison ? "chevron.up" : "chevron.down")
-                        .foregroundStyle(FitTodayColor.brandPrimary)
+                    Text("pagamento único")
+                        .font(FitTodayFont.ui(size: 15, weight: .medium))
+                        .foregroundStyle(FitTodayColor.textSecondary)
                 }
-                .padding()
+                .padding(FitTodaySpacing.lg)
+                .frame(maxWidth: .infinity)
                 .background(
-                    RoundedRectangle(cornerRadius: FitTodayRadius.md)
-                        .fill(FitTodayColor.surface)
+                    RoundedRectangle(cornerRadius: FitTodayRadius.lg)
+                        .fill(FitTodayColor.brandPrimary.opacity(0.08))
                 )
-            }
-
-            if showComparison {
-                FeatureComparisonTable()
-                    .transition(.opacity.combined(with: .move(edge: .top)))
-            }
-        }
-    }
-
-    // MARK: - Plans Section
-
-    private var plansSection: some View {
-        VStack(spacing: FitTodaySpacing.md) {
-            if storeService.purchaseState == .loading && storeService.products.isEmpty {
+                .overlay(
+                    RoundedRectangle(cornerRadius: FitTodayRadius.lg)
+                        .stroke(FitTodayColor.brandPrimary.opacity(0.3), lineWidth: 2)
+                )
+                .techCornerBorders(color: FitTodayColor.neonCyan, length: 16, thickness: 2)
+            } else if storeService.purchaseState == .loading {
                 ProgressView()
-                    .frame(height: 150)
-            } else {
-                ForEach(storeService.products.sorted(by: { $0.price > $1.price }), id: \.id) { product in
-                    OptimizedPlanCard(
-                        product: product,
-                        isSelected: selectedProduct?.id == product.id,
-                        isBestValue: product.id == StoreKitProductID.proYearly
-                    ) {
-                        withAnimation(.spring(response: 0.2)) {
-                            selectedProduct = product
-                        }
-                    }
-                }
+                    .frame(height: 100)
             }
         }
     }
@@ -159,7 +131,7 @@ struct OptimizedPaywallView: View {
             onPurchaseSuccess()
             dismiss()
         } else if storeService.purchaseState != .failed("") {
-            errorMessage = ErrorMessage(title: "Restaurar Compras", message: "Nenhuma assinatura encontrada para restaurar.")
+            errorMessage = ErrorMessage(title: "Restaurar Compras", message: "Nenhuma compra encontrada para restaurar.")
         }
     }
 
@@ -172,6 +144,6 @@ struct OptimizedPaywallView: View {
 
 // MARK: - Preview
 
-#Preview("Optimized Paywall") {
+#Preview("Paywall") {
     OptimizedPaywallView(storeService: StoreKitService())
 }
