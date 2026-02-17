@@ -1,0 +1,39 @@
+{
+  "cli_version": "0.4.4",
+  "checkpoint_id": "d354d133e200",
+  "session_id": "602a4a6e-d3ff-449a-a318-42c7c368d0ae",
+  "strategy": "manual-commit",
+  "created_at": "2026-02-17T16:23:31.18847Z",
+  "branch": "feature/workout-ai-fix",
+  "checkpoints_count": 1,
+  "files_touched": [
+    ".gitignore",
+    "FitToday/FitToday/Presentation/Features/Programs/Views/ProgramWorkoutDetailView.swift",
+    "FitToday/FitToday/Presentation/Features/Programs/Views/ProgramsListView.swift",
+    "FitToday/FitToday/Presentation/Features/Workout/ViewModels/CreateWorkoutViewModel.swift",
+    "FitToday/FitToday/Presentation/Features/Workout/Views/CreateWorkoutView.swift",
+    "FitToday/FitToday/Presentation/Features/Workout/Views/WorkoutTabView.swift",
+    "FitToday/FitTodayTests/Domain/UseCases/SaveCustomWorkoutUseCaseTests.swift"
+  ],
+  "agent": "Claude Code",
+  "transcript_identifier_at_start": "90177816-dfd1-45da-9f90-6faaebb24e81",
+  "checkpoint_transcript_start": 319,
+  "transcript_lines_at_start": 319,
+  "token_usage": {
+    "input_tokens": 51,
+    "cache_creation_tokens": 105466,
+    "cache_read_tokens": 1757530,
+    "output_tokens": 100,
+    "api_call_count": 14
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-02-17T16:23:30.854033Z",
+    "agent_lines": 0,
+    "human_added": 136,
+    "human_modified": 5,
+    "human_removed": 0,
+    "total_committed": 136,
+    "agent_percentage": 0
+  },
+  "transcript_path": ".claude/projects/-Users-viniciuscarvalho-Documents-FitToday/602a4a6e-d3ff-449a-a318-42c7c368d0ae.jsonl"
+}
