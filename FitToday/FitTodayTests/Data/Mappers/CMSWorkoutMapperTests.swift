@@ -26,6 +26,7 @@ final class CMSWorkoutMapperTests: XCTestCase {
         XCTAssertEqual(domain.description, cms.description)
         XCTAssertEqual(domain.estimatedDurationMinutes, cms.estimatedDurationMinutes)
         XCTAssertEqual(domain.version, cms.version)
+        XCTAssertEqual(domain.pdfUrl, cms.pdfUrl)
         XCTAssertEqual(domain.createdAt, cms.createdAt)
     }
 
@@ -148,6 +149,29 @@ final class CMSWorkoutMapperTests: XCTestCase {
             // Then
             XCTAssertEqual(domain.schedule.type, expected, "Failed for input: \(input)")
         }
+    }
+
+    func test_toDomain_mapsPdfUrl() {
+        // Given
+        let pdfUrlString = "https://example.com/workout.pdf"
+        let cms = CMSWorkout.fixture(pdfUrl: pdfUrlString)
+
+        // When
+        let domain = CMSWorkoutMapper.toDomain(cms)
+
+        // Then
+        XCTAssertEqual(domain.pdfUrl, pdfUrlString)
+    }
+
+    func test_toDomain_handlesNilPdfUrl() {
+        // Given
+        let cms = CMSWorkout.fixture(pdfUrl: nil)
+
+        // When
+        let domain = CMSWorkoutMapper.toDomain(cms)
+
+        // Then
+        XCTAssertNil(domain.pdfUrl)
     }
 
     func test_toDomain_handlesNilSchedule() {
@@ -298,6 +322,7 @@ extension CMSWorkout {
         ],
         schedule: CMSWorkoutSchedule? = CMSWorkoutSchedule(type: "once", scheduledDate: nil, dayOfWeek: nil, recurrence: nil),
         status: CMSWorkoutStatus = .active,
+        pdfUrl: String? = nil,
         version: Int = 1,
         createdAt: Date = Date(),
         updatedAt: Date = Date()
@@ -314,7 +339,7 @@ extension CMSWorkout {
             phases: phases,
             schedule: schedule,
             status: status,
-            pdfUrl: nil,
+            pdfUrl: pdfUrl,
             version: version,
             createdAt: createdAt,
             updatedAt: updatedAt

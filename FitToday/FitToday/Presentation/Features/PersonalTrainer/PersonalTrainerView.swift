@@ -35,7 +35,7 @@ struct PersonalTrainerView: View {
             .padding()
         }
         .background(FitTodayColor.background.ignoresSafeArea())
-        .navigationTitle("Personal Trainer")
+        .navigationTitle("personal_trainer.title".localized)
         .onAppear {
             viewModel.onAppear()
         }
@@ -66,7 +66,7 @@ struct PersonalTrainerView: View {
             }
         }
         .alert(
-            "Erro",
+            "personal_trainer.error.title".localized,
             isPresented: Binding(
                 get: { viewModel.error != nil },
                 set: { if !$0 { viewModel.clearError() } }
@@ -76,7 +76,7 @@ struct PersonalTrainerView: View {
                 viewModel.clearError()
             }
         } message: {
-            Text(viewModel.error?.localizedDescription ?? "Algo deu errado.")
+            Text(viewModel.error?.localizedDescription ?? "personal_trainer.error.default".localized)
         }
     }
 
@@ -86,7 +86,7 @@ struct PersonalTrainerView: View {
         VStack(spacing: FitTodaySpacing.md) {
             ProgressView()
                 .tint(FitTodayColor.brandPrimary)
-            Text("Carregando...")
+            Text("personal_trainer.loading".localized)
                 .font(FitTodayFont.ui(size: 14, weight: .medium))
                 .foregroundStyle(FitTodayColor.textSecondary)
         }
@@ -102,11 +102,11 @@ struct PersonalTrainerView: View {
                 .font(.system(size: 64))
                 .foregroundStyle(FitTodayColor.textSecondary)
 
-            Text("Em breve")
+            Text("personal_trainer.disabled.title".localized)
                 .font(FitTodayFont.ui(size: 24, weight: .bold))
                 .foregroundStyle(FitTodayColor.textPrimary)
 
-            Text("A funcionalidade de Personal Trainer estara disponivel em breve. Fique ligado nas atualizacoes!")
+            Text("personal_trainer.disabled.message".localized)
                 .font(FitTodayFont.ui(size: 16, weight: .medium))
                 .foregroundStyle(FitTodayColor.textSecondary)
                 .multilineTextAlignment(.center)
@@ -124,12 +124,12 @@ struct PersonalTrainerView: View {
                     .font(.system(size: 64))
                     .foregroundStyle(FitTodayColor.brandPrimary)
 
-                Text("Conecte-se ao seu Personal")
+                Text("personal_trainer.find.title".localized)
                     .font(FitTodayFont.ui(size: 24, weight: .bold))
                     .foregroundStyle(FitTodayColor.textPrimary)
                     .multilineTextAlignment(.center)
 
-                Text("Receba treinos personalizados e acompanhamento do seu personal trainer diretamente no app.")
+                Text("personal_trainer.find.subtitle".localized)
                     .font(FitTodayFont.ui(size: 16, weight: .medium))
                     .foregroundStyle(FitTodayColor.textSecondary)
                     .multilineTextAlignment(.center)
@@ -142,19 +142,19 @@ struct PersonalTrainerView: View {
                 } label: {
                     HStack {
                         Image(systemName: "magnifyingglass")
-                        Text("Buscar Personal Trainer")
+                        Text("personal_trainer.search.button".localized)
                     }
                 }
                 .fitPrimaryStyle()
 
                 // Invite Code Section
                 VStack(spacing: FitTodaySpacing.sm) {
-                    Text("Ou use um codigo de convite")
+                    Text("personal_trainer.invite.header".localized)
                         .font(FitTodayFont.ui(size: 14, weight: .medium))
                         .foregroundStyle(FitTodayColor.textSecondary)
 
                     HStack(spacing: FitTodaySpacing.sm) {
-                        TextField("CODIGO", text: $viewModel.inviteCode)
+                        TextField("personal_trainer.invite.placeholder".localized, text: $viewModel.inviteCode)
                             .textFieldStyle(.roundedBorder)
                             .textCase(.uppercase)
                             .autocorrectionDisabled()
@@ -169,7 +169,7 @@ struct PersonalTrainerView: View {
                                 ProgressView()
                                     .tint(.white)
                             } else {
-                                Text("Usar")
+                                Text("personal_trainer.invite.use_button".localized)
                             }
                         }
                         .fitPrimaryStyle()
@@ -187,17 +187,17 @@ struct PersonalTrainerView: View {
 
     private var benefitsSection: some View {
         VStack(alignment: .leading, spacing: FitTodaySpacing.md) {
-            Text("Beneficios")
+            Text("personal_trainer.benefits.title".localized)
                 .font(FitTodayFont.ui(size: 18, weight: .bold))
                 .foregroundStyle(FitTodayColor.textPrimary)
 
-            benefitRow(icon: "dumbbell.fill", title: "Treinos Personalizados", description: "Receba treinos feitos especialmente para voce")
+            benefitRow(icon: "dumbbell.fill", title: "personal_trainer.benefits.workouts.title".localized, description: "personal_trainer.benefits.workouts.description".localized)
 
-            benefitRow(icon: "chart.line.uptrend.xyaxis", title: "Acompanhamento", description: "Seu progresso monitorado pelo seu personal")
+            benefitRow(icon: "chart.line.uptrend.xyaxis", title: "personal_trainer.benefits.tracking.title".localized, description: "personal_trainer.benefits.tracking.description".localized)
 
-            benefitRow(icon: "message.fill", title: "Comunicacao Direta", description: "Tire duvidas e receba feedback")
+            benefitRow(icon: "message.fill", title: "personal_trainer.benefits.communication.title".localized, description: "personal_trainer.benefits.communication.description".localized)
 
-            benefitRow(icon: "calendar", title: "Agenda Sincronizada", description: "Treinos na data certa automaticamente")
+            benefitRow(icon: "calendar", title: "personal_trainer.benefits.schedule.title".localized, description: "personal_trainer.benefits.schedule.description".localized)
         }
         .padding()
         .background(FitTodayColor.surface)
@@ -275,11 +275,11 @@ struct PersonalTrainerView: View {
 
     private var statusText: String {
         switch viewModel.connectionStatus {
-        case .active: return "Conectado"
-        case .pending: return "Aguardando aprovacao"
-        case .paused: return "Conexao pausada"
-        case .cancelled: return "Conexao cancelada"
-        case .none: return "Sem conexao"
+        case .active: return "personal_trainer.status.active".localized
+        case .pending: return "personal_trainer.status.pending".localized
+        case .paused: return "personal_trainer.status.paused".localized
+        case .cancelled: return "personal_trainer.status.cancelled".localized
+        case .none: return "personal_trainer.status.none".localized
         }
     }
 
@@ -288,14 +288,14 @@ struct PersonalTrainerView: View {
     private var assignedWorkoutsSection: some View {
         VStack(alignment: .leading, spacing: FitTodaySpacing.md) {
             HStack {
-                Text("Treinos Atribuidos")
+                Text("personal_trainer.workouts.title".localized)
                     .font(FitTodayFont.ui(size: 18, weight: .bold))
                     .foregroundStyle(FitTodayColor.textPrimary)
 
                 Spacer()
 
                 if viewModel.pendingWorkoutsCount > 0 {
-                    Text("\(viewModel.pendingWorkoutsCount) pendente(s)")
+                    Text("personal_trainer.workouts.pending_count".localized(with: viewModel.pendingWorkoutsCount))
                         .font(FitTodayFont.ui(size: 12, weight: .medium))
                         .foregroundStyle(FitTodayColor.brandPrimary)
                         .padding(.horizontal, 8)
@@ -306,14 +306,19 @@ struct PersonalTrainerView: View {
             }
 
             if viewModel.assignedWorkouts.isEmpty {
-                Text("Nenhum treino atribuido ainda.")
+                Text("personal_trainer.workouts.empty".localized)
                     .font(FitTodayFont.ui(size: 14, weight: .medium))
                     .foregroundStyle(FitTodayColor.textSecondary)
                     .frame(maxWidth: .infinity)
                     .padding()
             } else {
                 ForEach(viewModel.assignedWorkouts) { workout in
-                    AssignedWorkoutRow(workout: workout)
+                    Button {
+                        router.push(.cmsWorkoutDetail(workout.id), on: .workout)
+                    } label: {
+                        AssignedWorkoutRow(workout: workout)
+                    }
+                    .buttonStyle(.plain)
                 }
             }
         }
@@ -334,7 +339,7 @@ struct PersonalTrainerView: View {
                 } label: {
                     HStack {
                         Image(systemName: "xmark.circle")
-                        Text("Cancelar Solicitacao")
+                        Text("personal_trainer.actions.cancel_request".localized)
                     }
                 }
                 .fitSecondaryStyle()
@@ -346,7 +351,7 @@ struct PersonalTrainerView: View {
                 } label: {
                     HStack {
                         Image(systemName: "person.badge.minus")
-                        Text("Desconectar")
+                        Text("personal_trainer.actions.disconnect".localized)
                     }
                 }
                 .fitSecondaryStyle()
@@ -389,7 +394,7 @@ private struct AssignedWorkoutRow: View {
                     .lineLimit(1)
 
                 HStack(spacing: FitTodaySpacing.sm) {
-                    Text("\(exerciseCount) exercicios")
+                    Text("personal_trainer.workouts.exercises_count".localized(with: exerciseCount))
                         .font(FitTodayFont.ui(size: 12, weight: .medium))
                         .foregroundStyle(FitTodayColor.textSecondary)
 

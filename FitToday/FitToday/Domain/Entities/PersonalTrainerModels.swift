@@ -175,6 +175,9 @@ struct TrainerWorkout: Sendable, Identifiable, Hashable, Codable {
 
     /// Version number for tracking updates.
     var version: Int
+
+    /// Optional PDF URL for the workout attachment.
+    var pdfUrl: String?
 }
 
 // MARK: - Trainer Workout Phase

@@ -17,7 +17,7 @@ struct CMSConfiguration: Sendable {
     let timeout: TimeInterval
 
     static let `default` = CMSConfiguration(
-        baseURL: URL(string: "https://api.fittoday.app")!,
+        baseURL: URL(string: "https://web-cms-pink.vercel.app")!,
         apiKey: nil,
         timeout: 30
     )
@@ -83,13 +83,13 @@ actor CMSWorkoutService {
     ) async throws -> CMSWorkoutListResponse {
         var components = URLComponents(url: configuration.baseURL.appendingPathComponent("/api/workouts"), resolvingAgainstBaseURL: true)!
         components.queryItems = [
-            URLQueryItem(name: "student_id", value: studentId),
+            URLQueryItem(name: "studentId", value: studentId),
             URLQueryItem(name: "page", value: String(page)),
             URLQueryItem(name: "limit", value: String(limit))
         ]
 
         if let trainerId {
-            components.queryItems?.append(URLQueryItem(name: "trainer_id", value: trainerId))
+            components.queryItems?.append(URLQueryItem(name: "trainerId", value: trainerId))
         }
 
         guard let url = components.url else {
@@ -267,27 +267,27 @@ enum CMSServiceError: LocalizedError, Sendable {
     var errorDescription: String? {
         switch self {
         case .invalidURL:
-            return "URL invalida"
+            return NSLocalizedString("cms_service.error.invalid_url", comment: "")
         case .invalidResponse:
-            return "Resposta invalida do servidor"
+            return NSLocalizedString("cms_service.error.invalid_response", comment: "")
         case .unauthorized:
-            return "Sessao expirada. Faca login novamente."
+            return NSLocalizedString("cms_service.error.unauthorized", comment: "")
         case .forbidden:
-            return "Voce nao tem permissao para acessar este recurso"
+            return NSLocalizedString("cms_service.error.forbidden", comment: "")
         case .notFound:
-            return "Treino nao encontrado"
+            return NSLocalizedString("cms_service.error.not_found", comment: "")
         case .rateLimited:
-            return "Muitas requisicoes. Aguarde um momento."
+            return NSLocalizedString("cms_service.error.rate_limited", comment: "")
         case .serverError(let code):
-            return "Erro no servidor (\(code)). Tente novamente."
+            return String(format: NSLocalizedString("cms_service.error.server_error", comment: ""), code)
         case .unexpectedStatus(let code):
-            return "Erro inesperado (\(code))"
+            return String(format: NSLocalizedString("cms_service.error.unexpected", comment: ""), code)
         case .decodingFailed:
-            return "Erro ao processar resposta"
+            return NSLocalizedString("cms_service.error.decoding", comment: "")
         case .apiError(let error):
             return error.message
         case .networkError:
-            return "Erro de conexao. Verifique sua internet."
+            return NSLocalizedString("cms_service.error.network", comment: "")
         }
     }
 }

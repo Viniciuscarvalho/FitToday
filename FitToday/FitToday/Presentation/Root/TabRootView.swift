@@ -204,6 +204,10 @@ struct TabRootView: View {
         case .trainerSearch:
             let viewModel = PersonalTrainerViewModel(resolver: resolver)
             TrainerSearchView(viewModel: viewModel)
+        case .cmsWorkoutDetail(let workoutId):
+            CMSWorkoutDetailView(workoutId: workoutId, resolver: resolver)
+        case .cmsWorkoutFeedback(let workoutId):
+            CMSWorkoutFeedbackView(workoutId: workoutId, resolver: resolver)
         }
     }
 }

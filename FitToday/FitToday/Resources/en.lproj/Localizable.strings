@@ -730,3 +730,103 @@
 // MARK: - Workout Template Type
 "template.conditioning.title" = "Conditioning";
 "template.conditioning.subtitle" = "Endurance and burning";
+
+// MARK: - Personal Trainer
+"personal_trainer.title" = "Personal Trainer";
+"personal_trainer.loading" = "Loading...";
+"personal_trainer.error.title" = "Error";
+"personal_trainer.error.default" = "Something went wrong.";
+"personal_trainer.disabled.title" = "Coming Soon";
+"personal_trainer.disabled.message" = "The Personal Trainer feature will be available soon. Stay tuned for updates!";
+"personal_trainer.find.title" = "Connect with your Trainer";
+"personal_trainer.find.subtitle" = "Receive personalized workouts and follow-up from your personal trainer directly in the app.";
+"personal_trainer.search.button" = "Find Personal Trainer";
+"personal_trainer.search.title" = "Find Trainer";
+"personal_trainer.search.placeholder" = "Search by name...";
+"personal_trainer.invite.header" = "Or use an invite code";
+"personal_trainer.invite.label" = "Invite Code";
+"personal_trainer.invite.placeholder" = "CODE";
+"personal_trainer.invite.use_button" = "Use";
+"personal_trainer.benefits.title" = "Benefits";
+"personal_trainer.benefits.workouts.title" = "Personalized Workouts";
+"personal_trainer.benefits.workouts.description" = "Receive workouts made especially for you";
+"personal_trainer.benefits.tracking.title" = "Progress Tracking";
+"personal_trainer.benefits.tracking.description" = "Your progress monitored by your trainer";
+"personal_trainer.benefits.communication.title" = "Direct Communication";
+"personal_trainer.benefits.communication.description" = "Ask questions and receive feedback";
+"personal_trainer.benefits.schedule.title" = "Synced Schedule";
+"personal_trainer.benefits.schedule.description" = "Workouts on the right date automatically";
+"personal_trainer.status.active" = "Connected";
+"personal_trainer.status.pending" = "Awaiting approval";
+"personal_trainer.status.paused" = "Connection paused";
+"personal_trainer.status.cancelled" = "Connection cancelled";
+"personal_trainer.status.none" = "No connection";
+"personal_trainer.workouts.title" = "Assigned Workouts";
+"personal_trainer.workouts.pending_count" = "%d pending";
+"personal_trainer.workouts.empty" = "No assigned workouts yet.";
+"personal_trainer.workouts.exercises_count" = "%d exercises";
+"personal_trainer.actions.cancel_request" = "Cancel Request";
+"personal_trainer.actions.disconnect" = "Disconnect";
+"personal_trainer.connect.send_button" = "Send Request";
+"personal_trainer.search.invite_code" = "Invite Code";
+"personal_trainer.search.invite_input" = "Enter the code";
+"personal_trainer.search.invite_hint" = "Ask your personal trainer for the code";
+"personal_trainer.search.find_button" = "Search";
+"personal_trainer.search.results" = "Results";
+"personal_trainer.search.searching" = "Searching...";
+"personal_trainer.search.no_results" = "No results found";
+"personal_trainer.search.no_results_hint" = "Try searching with a different name or use an invite code.";
+"personal_trainer.search.prompt" = "Search by your trainer's name";
+"personal_trainer.search.prompt_hint" = "Or use an invite code above";
+
+// MARK: - Connection Request
+"connection_request.send_button" = "Send Request";
+"connection_request.info_title" = "What happens when you send?";
+"connection_request.info_notification" = "The trainer will receive a notification with your request";
+"connection_request.info_wait" = "Wait for the trainer's approval";
+"connection_request.info_approved" = "Once approved, you'll receive personalized workouts";
+"connection_request.info_cancel" = "You can cancel the request at any time";
+
+// MARK: - CMS Workout Detail
+"cms_workout.detail.title" = "Workout Detail";
+"cms_workout.detail.view_pdf" = "View Workout PDF";
+"cms_workout.detail.completed_badge" = "Completed";
+"cms_workout.detail.retry" = "Try Again";
+"cms_workout.progress.title" = "Progress";
+"cms_workout.progress.of" = "of %d";
+"cms_workout.progress.sessions" = "Sessions";
+"cms_workout.exercise.rest_label" = "%ds rest";
+"cms_workout.completion.button" = "Mark as Completed";
+"cms_workout.completion.alert_title" = "Workout Completed!";
+"cms_workout.completion.message" = "Congratulations! The workout has been marked as completed.";
+"cms_workout.feedback.send_button" = "Send Feedback";
+
+// MARK: - CMS Feedback
+"cms_feedback.title" = "Feedback";
+"cms_feedback.empty.title" = "No feedback yet";
+"cms_feedback.empty.message" = "Send a message to your trainer about this workout.";
+"cms_feedback.trainer_reply.label" = "Trainer Reply";
+"cms_feedback.type.general" = "General";
+"cms_feedback.type.difficulty" = "Difficulty";
+"cms_feedback.type.exercise" = "Exercise";
+"cms_feedback.type.completion" = "Completion";
+"cms_feedback.type.question" = "Question";
+"cms_feedback.rating.label" = "Rating:";
+"cms_feedback.input.placeholder" = "Write your feedback...";
+
+// MARK: - PDF Errors
+"pdf.error.invalid_url" = "Invalid file URL.";
+"pdf.error.download_failed" = "Failed to download file (code: %d).";
+"pdf.error.not_found" = "File not found in cache.";
+
+// MARK: - CMS Service Errors
+"cms_service.error.invalid_url" = "Invalid URL";
+"cms_service.error.invalid_response" = "Invalid server response";
+"cms_service.error.unauthorized" = "Session expired. Please log in again.";
+"cms_service.error.forbidden" = "You don't have permission to access this resource";
+"cms_service.error.not_found" = "Workout not found";
+"cms_service.error.rate_limited" = "Too many requests. Please wait a moment.";
+"cms_service.error.server_error" = "Server error (%d). Please try again.";
+"cms_service.error.unexpected" = "Unexpected error (%d)";
+"cms_service.error.decoding" = "Error processing response";
+"cms_service.error.network" = "Connection error. Check your internet.";

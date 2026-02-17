@@ -62,6 +62,8 @@ enum AppRoute: Hashable {
     case customWorkoutBuilder(UUID?)  // Create or edit custom workout (nil = new)
     case personalTrainer  // Personal Trainer connection and workouts
     case trainerSearch  // Search for personal trainers
+    case cmsWorkoutDetail(String)  // CMS workout detail by ID
+    case cmsWorkoutFeedback(String)  // CMS workout feedback by ID
 }
 
 struct DeepLink {

@@ -17,14 +17,6 @@ struct CMSWorkoutListResponse: Codable, Sendable {
     let page: Int
     let limit: Int
     let hasMore: Bool
-
-    enum CodingKeys: String, CodingKey {
-        case workouts
-        case total
-        case page
-        case limit
-        case hasMore = "has_more"
-    }
 }
 
 // MARK: - CMS Workout DTO
@@ -47,24 +39,6 @@ struct CMSWorkout: Codable, Sendable, Identifiable {
     let version: Int
     let createdAt: Date
     let updatedAt: Date
-
-    enum CodingKeys: String, CodingKey {
-        case id
-        case trainerId = "trainer_id"
-        case studentId = "student_id"
-        case title
-        case description
-        case focus
-        case estimatedDurationMinutes = "estimated_duration_minutes"
-        case intensity
-        case phases
-        case schedule
-        case status
-        case pdfUrl = "pdf_url"
-        case version
-        case createdAt = "created_at"
-        case updatedAt = "updated_at"
-    }
 }
 
 // MARK: - CMS Workout Phase
@@ -90,19 +64,6 @@ struct CMSWorkoutItem: Codable, Sendable {
     let notes: String?
     let order: Int
     let mediaUrl: String?
-
-    enum CodingKeys: String, CodingKey {
-        case id
-        case exerciseId = "exercise_id"
-        case exerciseName = "exercise_name"
-        case sets
-        case reps
-        case weight
-        case restSeconds = "rest_seconds"
-        case notes
-        case order
-        case mediaUrl = "media_url"
-    }
 }
 
 // MARK: - CMS Workout Schedule
@@ -113,13 +74,6 @@ struct CMSWorkoutSchedule: Codable, Sendable {
     let scheduledDate: Date?
     let dayOfWeek: Int?
     let recurrence: String?
-
-    enum CodingKeys: String, CodingKey {
-        case type
-        case scheduledDate = "scheduled_date"
-        case dayOfWeek = "day_of_week"
-        case recurrence
-    }
 }
 
 // MARK: - CMS Workout Status
@@ -145,16 +99,6 @@ struct CMSWorkoutProgress: Codable, Sendable {
     let lastSessionDate: Date?
     let exerciseProgress: [CMSExerciseProgress]
     let overallProgress: Double
-
-    enum CodingKeys: String, CodingKey {
-        case workoutId = "workout_id"
-        case studentId = "student_id"
-        case completedSessions = "completed_sessions"
-        case totalSessions = "total_sessions"
-        case lastSessionDate = "last_session_date"
-        case exerciseProgress = "exercise_progress"
-        case overallProgress = "overall_progress"
-    }
 }
 
 // MARK: - CMS Exercise Progress
@@ -167,15 +111,6 @@ struct CMSExerciseProgress: Codable, Sendable {
     let targetSets: Int
     let maxWeight: Double?
     let notes: String?
-
-    enum CodingKeys: String, CodingKey {
-        case exerciseId = "exercise_id"
-        case exerciseName = "exercise_name"
-        case completedSets = "completed_sets"
-        case targetSets = "target_sets"
-        case maxWeight = "max_weight"
-        case notes
-    }
 }
 
 // MARK: - CMS Feedback
@@ -193,19 +128,6 @@ struct CMSWorkoutFeedback: Codable, Sendable, Identifiable {
     let createdAt: Date
     let repliedAt: Date?
     let replyMessage: String?
-
-    enum CodingKeys: String, CodingKey {
-        case id
-        case workoutId = "workout_id"
-        case studentId = "student_id"
-        case trainerId = "trainer_id"
-        case type
-        case message
-        case rating
-        case createdAt = "created_at"
-        case repliedAt = "replied_at"
-        case replyMessage = "reply_message"
-    }
 }
 
 // MARK: - CMS Feedback Type

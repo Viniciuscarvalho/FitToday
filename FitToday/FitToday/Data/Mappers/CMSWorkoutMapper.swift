@@ -34,7 +34,8 @@ enum CMSWorkoutMapper {
             schedule: mapSchedule(cms.schedule),
             isActive: cms.status == .active,
             createdAt: cms.createdAt,
-            version: cms.version
+            version: cms.version,
+            pdfUrl: cms.pdfUrl
         )
     }
 

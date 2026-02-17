@@ -35,6 +35,7 @@ final class PersonalTrainerViewModel {
     private let cancelConnectionUseCase: CancelTrainerConnectionUseCaseProtocol?
     private let getCurrentTrainerUseCase: GetCurrentTrainerUseCaseProtocol?
     private let fetchAssignedWorkoutsUseCase: FetchAssignedWorkoutsUseCaseProtocol?
+    private let fetchCMSWorkoutsUseCase: FetchCMSWorkoutsUseCase?
     private let featureFlagChecker: FeatureFlagChecking?
 
     private var observationTask: Task<Void, Never>?
@@ -48,6 +49,7 @@ final class PersonalTrainerViewModel {
         self.cancelConnectionUseCase = resolver.resolve(CancelTrainerConnectionUseCaseProtocol.self)
         self.getCurrentTrainerUseCase = resolver.resolve(GetCurrentTrainerUseCaseProtocol.self)
         self.fetchAssignedWorkoutsUseCase = resolver.resolve(FetchAssignedWorkoutsUseCaseProtocol.self)
+        self.fetchCMSWorkoutsUseCase = resolver.resolve(FetchCMSWorkoutsUseCase.self)
         self.featureFlagChecker = resolver.resolve(FeatureFlagChecking.self)
     }
 
@@ -58,6 +60,7 @@ final class PersonalTrainerViewModel {
         cancelConnectionUseCase: CancelTrainerConnectionUseCaseProtocol? = nil,
         getCurrentTrainerUseCase: GetCurrentTrainerUseCaseProtocol? = nil,
         fetchAssignedWorkoutsUseCase: FetchAssignedWorkoutsUseCaseProtocol? = nil,
+        fetchCMSWorkoutsUseCase: FetchCMSWorkoutsUseCase? = nil,
         featureFlagChecker: FeatureFlagChecking? = nil
     ) {
         self.discoverTrainersUseCase = discoverTrainersUseCase
@@ -65,6 +68,7 @@ final class PersonalTrainerViewModel {
         self.cancelConnectionUseCase = cancelConnectionUseCase
         self.getCurrentTrainerUseCase = getCurrentTrainerUseCase
         self.fetchAssignedWorkoutsUseCase = fetchAssignedWorkoutsUseCase
+        self.fetchCMSWorkoutsUseCase = fetchCMSWorkoutsUseCase
         self.featureFlagChecker = featureFlagChecker
     }
 
@@ -293,6 +297,23 @@ final class PersonalTrainerViewModel {
     // MARK: - Load Assigned Workouts
 
     private func loadAssignedWorkouts() async {
+        // Try CMS workouts first (primary source)
+        if let cmsUseCase = fetchCMSWorkoutsUseCase {
+            do {
+                let result = try await cmsUseCase.execute()
+                assignedWorkouts = result.workouts
+                #if DEBUG
+                print("[PersonalTrainerViewModel] Loaded \(result.workouts.count) CMS workouts")
+                #endif
+                return
+            } catch {
+                #if DEBUG
+                print("[PersonalTrainerViewModel] CMS workouts failed, falling back to Firebase: \(error)")
+                #endif
+            }
+        }
+
+        // Fallback to Firebase workouts
         guard let useCase = fetchAssignedWorkoutsUseCase else {
             return
         }

@@ -155,11 +155,11 @@ enum PDFCacheError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .invalidURL:
-            return "URL do arquivo inválida."
+            return NSLocalizedString("pdf.error.invalid_url", comment: "")
         case .downloadFailed(let code):
-            return "Falha ao baixar o arquivo (código: \(code))."
+            return String(format: NSLocalizedString("pdf.error.download_failed", comment: ""), code)
         case .fileNotFound:
-            return "Arquivo não encontrado no cache."
+            return NSLocalizedString("pdf.error.not_found", comment: "")
         }
     }
 }

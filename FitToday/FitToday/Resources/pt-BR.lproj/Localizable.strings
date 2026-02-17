@@ -730,3 +730,103 @@
 // MARK: - Workout Template Type
 "template.conditioning.title" = "Condicionamento";
 "template.conditioning.subtitle" = "Resistência e queima";
+
+// MARK: - Personal Trainer
+"personal_trainer.title" = "Personal Trainer";
+"personal_trainer.loading" = "Carregando...";
+"personal_trainer.error.title" = "Erro";
+"personal_trainer.error.default" = "Algo deu errado.";
+"personal_trainer.disabled.title" = "Em breve";
+"personal_trainer.disabled.message" = "A funcionalidade de Personal Trainer estará disponível em breve. Fique ligado nas atualizações!";
+"personal_trainer.find.title" = "Conecte-se ao seu Personal";
+"personal_trainer.find.subtitle" = "Receba treinos personalizados e acompanhamento do seu personal trainer diretamente no app.";
+"personal_trainer.search.button" = "Buscar Personal Trainer";
+"personal_trainer.search.title" = "Buscar Personal";
+"personal_trainer.search.placeholder" = "Buscar por nome...";
+"personal_trainer.invite.header" = "Ou use um código de convite";
+"personal_trainer.invite.label" = "Código de Convite";
+"personal_trainer.invite.placeholder" = "CÓDIGO";
+"personal_trainer.invite.use_button" = "Usar";
+"personal_trainer.benefits.title" = "Benefícios";
+"personal_trainer.benefits.workouts.title" = "Treinos Personalizados";
+"personal_trainer.benefits.workouts.description" = "Receba treinos feitos especialmente para você";
+"personal_trainer.benefits.tracking.title" = "Acompanhamento";
+"personal_trainer.benefits.tracking.description" = "Seu progresso monitorado pelo seu personal";
+"personal_trainer.benefits.communication.title" = "Comunicação Direta";
+"personal_trainer.benefits.communication.description" = "Tire dúvidas e receba feedback";
+"personal_trainer.benefits.schedule.title" = "Agenda Sincronizada";
+"personal_trainer.benefits.schedule.description" = "Treinos na data certa automaticamente";
+"personal_trainer.status.active" = "Conectado";
+"personal_trainer.status.pending" = "Aguardando aprovação";
+"personal_trainer.status.paused" = "Conexão pausada";
+"personal_trainer.status.cancelled" = "Conexão cancelada";
+"personal_trainer.status.none" = "Sem conexão";
+"personal_trainer.workouts.title" = "Treinos Atribuídos";
+"personal_trainer.workouts.pending_count" = "%d pendente(s)";
+"personal_trainer.workouts.empty" = "Nenhum treino atribuído ainda.";
+"personal_trainer.workouts.exercises_count" = "%d exercícios";
+"personal_trainer.actions.cancel_request" = "Cancelar Solicitação";
+"personal_trainer.actions.disconnect" = "Desconectar";
+"personal_trainer.connect.send_button" = "Enviar Solicitação";
+"personal_trainer.search.invite_code" = "Código de Convite";
+"personal_trainer.search.invite_input" = "Digite o código";
+"personal_trainer.search.invite_hint" = "Peça o código ao seu personal trainer";
+"personal_trainer.search.find_button" = "Buscar";
+"personal_trainer.search.results" = "Resultados";
+"personal_trainer.search.searching" = "Buscando...";
+"personal_trainer.search.no_results" = "Nenhum resultado encontrado";
+"personal_trainer.search.no_results_hint" = "Tente buscar com outro nome ou use um código de convite.";
+"personal_trainer.search.prompt" = "Busque pelo nome do seu personal";
+"personal_trainer.search.prompt_hint" = "Ou use um código de convite acima";
+
+// MARK: - Connection Request
+"connection_request.send_button" = "Enviar Solicitação";
+"connection_request.info_title" = "O que acontece ao enviar?";
+"connection_request.info_notification" = "O personal receberá uma notificação com sua solicitação";
+"connection_request.info_wait" = "Aguarde a aprovação do personal trainer";
+"connection_request.info_approved" = "Após aprovado, você receberá treinos personalizados";
+"connection_request.info_cancel" = "Você pode cancelar a solicitação a qualquer momento";
+
+// MARK: - CMS Workout Detail
+"cms_workout.detail.title" = "Detalhe do Treino";
+"cms_workout.detail.view_pdf" = "Ver PDF do Treino";
+"cms_workout.detail.completed_badge" = "Concluído";
+"cms_workout.detail.retry" = "Tentar Novamente";
+"cms_workout.progress.title" = "Progresso";
+"cms_workout.progress.of" = "de %d";
+"cms_workout.progress.sessions" = "Sessões";
+"cms_workout.exercise.rest_label" = "%ds descanso";
+"cms_workout.completion.button" = "Marcar como Concluído";
+"cms_workout.completion.alert_title" = "Treino Concluído!";
+"cms_workout.completion.message" = "Parabéns! O treino foi marcado como concluído.";
+"cms_workout.feedback.send_button" = "Enviar Feedback";
+
+// MARK: - CMS Feedback
+"cms_feedback.title" = "Feedback";
+"cms_feedback.empty.title" = "Nenhum feedback ainda";
+"cms_feedback.empty.message" = "Envie uma mensagem para o seu personal sobre este treino.";
+"cms_feedback.trainer_reply.label" = "Resposta do Personal";
+"cms_feedback.type.general" = "Geral";
+"cms_feedback.type.difficulty" = "Dificuldade";
+"cms_feedback.type.exercise" = "Exercício";
+"cms_feedback.type.completion" = "Conclusão";
+"cms_feedback.type.question" = "Dúvida";
+"cms_feedback.rating.label" = "Avaliação:";
+"cms_feedback.input.placeholder" = "Escreva seu feedback...";
+
+// MARK: - PDF Errors
+"pdf.error.invalid_url" = "URL do arquivo inválida.";
+"pdf.error.download_failed" = "Falha ao baixar o arquivo (código: %d).";
+"pdf.error.not_found" = "Arquivo não encontrado no cache.";
+
+// MARK: - CMS Service Errors
+"cms_service.error.invalid_url" = "URL inválida";
+"cms_service.error.invalid_response" = "Resposta inválida do servidor";
+"cms_service.error.unauthorized" = "Sessão expirada. Faça login novamente.";
+"cms_service.error.forbidden" = "Você não tem permissão para acessar este recurso";
+"cms_service.error.not_found" = "Treino não encontrado";
+"cms_service.error.rate_limited" = "Muitas requisições. Aguarde um momento.";
+"cms_service.error.server_error" = "Erro no servidor (%d). Tente novamente.";
+"cms_service.error.unexpected" = "Erro inesperado (%d)";
+"cms_service.error.decoding" = "Erro ao processar resposta";
+"cms_service.error.network" = "Erro de conexão. Verifique sua internet.";

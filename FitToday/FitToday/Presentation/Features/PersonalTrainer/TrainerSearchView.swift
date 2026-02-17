@@ -44,11 +44,11 @@ struct TrainerSearchView: View {
                 }
             }
             .background(FitTodayColor.background.ignoresSafeArea())
-            .navigationTitle("Buscar Personal")
+            .navigationTitle("personal_trainer.search.title".localized)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button("Cancelar") {
+                    Button("common.cancel".localized) {
                         dismiss()
                     }
                     .foregroundStyle(FitTodayColor.textSecondary)
@@ -68,7 +68,7 @@ struct TrainerSearchView: View {
                 Image(systemName: "magnifyingglass")
                     .foregroundStyle(FitTodayColor.textSecondary)
 
-                TextField("Buscar por nome...", text: $viewModel.searchQuery)
+                TextField("personal_trainer.search.placeholder".localized, text: $viewModel.searchQuery)
                     .textFieldStyle(.plain)
                     .autocorrectionDisabled()
                     .focused($isSearchFocused)
@@ -96,12 +96,12 @@ struct TrainerSearchView: View {
 
     private var inviteCodeSection: some View {
         VStack(alignment: .leading, spacing: FitTodaySpacing.sm) {
-            Text("Codigo de Convite")
+            Text("personal_trainer.search.invite_code".localized)
                 .font(FitTodayFont.ui(size: 14, weight: .semiBold))
                 .foregroundStyle(FitTodayColor.textSecondary)
 
             HStack(spacing: FitTodaySpacing.sm) {
-                TextField("Digite o codigo", text: $viewModel.inviteCode)
+                TextField("personal_trainer.search.invite_input".localized, text: $viewModel.inviteCode)
                     .textFieldStyle(.roundedBorder)
                     .textCase(.uppercase)
                     .autocorrectionDisabled()
@@ -116,7 +116,7 @@ struct TrainerSearchView: View {
                             .tint(.white)
                             .frame(width: 60)
                     } else {
-                        Text("Buscar")
+                        Text("personal_trainer.search.find_button".localized)
                             .frame(width: 60)
                     }
                 }
@@ -124,7 +124,7 @@ struct TrainerSearchView: View {
                 .disabled(!viewModel.canUseInviteCode || viewModel.isSearching)
             }
 
-            Text("Peca o codigo ao seu personal trainer")
+            Text("personal_trainer.search.invite_hint".localized)
                 .font(FitTodayFont.ui(size: 12, weight: .medium))
                 .foregroundStyle(FitTodayColor.textSecondary)
         }
@@ -137,7 +137,7 @@ struct TrainerSearchView: View {
 
     private var searchResultsSection: some View {
         VStack(alignment: .leading, spacing: FitTodaySpacing.md) {
-            Text("Resultados")
+            Text("personal_trainer.search.results".localized)
                 .font(FitTodayFont.ui(size: 14, weight: .semiBold))
                 .foregroundStyle(FitTodayColor.textSecondary)
 
@@ -156,7 +156,7 @@ struct TrainerSearchView: View {
         VStack(spacing: FitTodaySpacing.md) {
             ProgressView()
                 .tint(FitTodayColor.brandPrimary)
-            Text("Buscando...")
+            Text("personal_trainer.search.searching".localized)
                 .font(FitTodayFont.ui(size: 14, weight: .medium))
                 .foregroundStyle(FitTodayColor.textSecondary)
         }
@@ -172,11 +172,11 @@ struct TrainerSearchView: View {
                 .font(.system(size: 48))
                 .foregroundStyle(FitTodayColor.textSecondary)
 
-            Text("Nenhum resultado encontrado")
+            Text("personal_trainer.search.no_results".localized)
                 .font(FitTodayFont.ui(size: 16, weight: .medium))
                 .foregroundStyle(FitTodayColor.textPrimary)
 
-            Text("Tente buscar com outro nome ou use um codigo de convite.")
+            Text("personal_trainer.search.no_results_hint".localized)
                 .font(FitTodayFont.ui(size: 14, weight: .medium))
                 .foregroundStyle(FitTodayColor.textSecondary)
                 .multilineTextAlignment(.center)
@@ -192,11 +192,11 @@ struct TrainerSearchView: View {
                 .font(.system(size: 48))
                 .foregroundStyle(FitTodayColor.textSecondary.opacity(0.5))
 
-            Text("Busque pelo nome do seu personal")
+            Text("personal_trainer.search.prompt".localized)
                 .font(FitTodayFont.ui(size: 16, weight: .medium))
                 .foregroundStyle(FitTodayColor.textSecondary)
 
-            Text("Ou use um codigo de convite acima")
+            Text("personal_trainer.search.prompt_hint".localized)
                 .font(FitTodayFont.ui(size: 14, weight: .medium))
                 .foregroundStyle(FitTodayColor.textSecondary.opacity(0.7))
         }

@@ -58,7 +58,7 @@ struct ConnectionRequestSheet: View {
                                 .tint(.white)
                         } else {
                             Image(systemName: "paperplane.fill")
-                            Text("Enviar Solicitacao")
+                            Text("connection_request.send_button".localized)
                         }
                     }
                 }
@@ -68,7 +68,7 @@ struct ConnectionRequestSheet: View {
                 Button {
                     onCancel()
                 } label: {
-                    Text("Cancelar")
+                    Text("common.cancel".localized)
                 }
                 .fitSecondaryStyle()
                 .disabled(isRequesting)
@@ -121,28 +121,28 @@ struct ConnectionRequestSheet: View {
 
     private var infoBox: some View {
         VStack(alignment: .leading, spacing: FitTodaySpacing.md) {
-            Text("O que acontece ao enviar?")
+            Text("connection_request.info_title".localized)
                 .font(FitTodayFont.ui(size: 16, weight: .bold))
                 .foregroundStyle(FitTodayColor.textPrimary)
 
             infoRow(
                 icon: "envelope.fill",
-                text: "O personal recebera uma notificacao com sua solicitacao"
+                text: "connection_request.info_notification".localized
             )
 
             infoRow(
                 icon: "clock.fill",
-                text: "Aguarde a aprovacao do personal trainer"
+                text: "connection_request.info_wait".localized
             )
 
             infoRow(
                 icon: "checkmark.circle.fill",
-                text: "Apos aprovado, voce recebera treinos personalizados"
+                text: "connection_request.info_approved".localized
             )
 
             infoRow(
                 icon: "xmark.circle",
-                text: "Voce pode cancelar a solicitacao a qualquer momento"
+                text: "connection_request.info_cancel".localized
             )
         }
         .padding()
