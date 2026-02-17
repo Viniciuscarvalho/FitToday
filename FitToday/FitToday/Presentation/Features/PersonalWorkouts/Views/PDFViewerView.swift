@@ -33,7 +33,7 @@ struct PDFViewerView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("Fechar") {
+                    Button("common.done".localized) {
                         dismiss()
                     }
                 }
@@ -85,7 +85,7 @@ struct PDFViewerView: View {
             Button {
                 Task { await loadPDF() }
             } label: {
-                Label("Tentar novamente", systemImage: "arrow.clockwise")
+                Label("common.retry".localized, systemImage: "arrow.clockwise")
                     .font(FitTodayFont.ui(size: 15, weight: .semiBold))
             }
             .buttonStyle(.borderedProminent)
@@ -110,7 +110,7 @@ struct PDFViewerView: View {
                         .resizable()
                         .scaledToFit()
                 case .failure:
-                    errorView(message: "Não foi possível carregar a imagem.")
+                    errorView(message: "error.image.load_failed.title".localized)
                 @unknown default:
                     EmptyView()
                 }
@@ -158,8 +158,9 @@ struct PDFKitView: UIViewRepresentable {
     }
 }
 
-// MARK: - Preview
+// MARK: - Preview & Mocks
 
+#if DEBUG
 #Preview {
     PDFViewerView(
         workout: .fixture(),
@@ -170,9 +171,6 @@ struct PDFKitView: UIViewRepresentable {
     )
 }
 
-// MARK: - Mocks for Preview
-
-#if DEBUG
 final class PreviewPersonalWorkoutRepository: PersonalWorkoutRepository, @unchecked Sendable {
     var workoutsToReturn: [PersonalWorkout] = []
 

@@ -186,9 +186,11 @@ struct TabRootView: View {
             CustomWorkoutTemplatesView(resolver: resolver)
         case .customWorkoutBuilder(let templateId):
             if let saveUseCase = resolver.resolve(SaveCustomWorkoutUseCase.self) {
+                let exerciseService = resolver.resolve((any ExerciseServiceProtocol).self)
                 let viewModel = CustomWorkoutBuilderViewModel(
                     saveUseCase: saveUseCase,
-                    existingTemplateId: templateId
+                    existingTemplateId: templateId,
+                    exerciseService: exerciseService
                 )
                 CustomWorkoutBuilderView(viewModel: viewModel)
             } else {

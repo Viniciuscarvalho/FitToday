@@ -77,7 +77,7 @@ struct PersonalWorkoutsListView: View {
             Spacer()
             ProgressView()
                 .scaleEffect(1.2)
-            Text("Carregando treinos...")
+            Text("personal.loading".localized)
                 .font(FitTodayFont.ui(size: 14))
                 .foregroundStyle(FitTodayColor.textSecondary)
                 .padding(.top, FitTodaySpacing.md)
@@ -120,13 +120,13 @@ struct PersonalWorkoutsListView: View {
         .sheet(item: $selectedWorkout) { workout in
             PDFViewerView(workout: workout, viewModel: viewModel)
         }
-        .alert("Ops!", isPresented: Binding(
+        .alert("error.generic.title".localized, isPresented: Binding(
             get: { viewModel.errorMessage != nil },
             set: { _ in viewModel.clearError() }
         )) {
-            Button("OK", role: .cancel) {}
+            Button("error.action.dismiss".localized, role: .cancel) {}
         } message: {
-            Text(viewModel.errorMessage ?? "Erro desconhecido")
+            Text(viewModel.errorMessage ?? "error.generic.message".localized)
         }
     }
 }

@@ -7,17 +7,24 @@
 
 import Foundation
 
-/// Controla o limite de gerações de treino por dia.
-/// Máximo: 2 gerações por dia (reset à meia-noite local).
-struct DailyGenerationLimiter {
+struct DailyGenerationLimiter: Sendable {
     private static let key = "dailyWorkoutGenerationCount"
     private let maxPerDay = 2
-    private let userDefaults: UserDefaults
-    private let dateProvider: () -> Date
+    // UserDefaults é thread-safe internamente (nonisolated(unsafe) para Swift 6)
+    private nonisolated(unsafe) let userDefaults: UserDefaults
+    private let dateProvider: @Sendable () -> Date
+
+    // DateFormatter estático para evitar criação repetida (performance)
+    private static let dateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        formatter.timeZone = TimeZone.current
+        return formatter
+    }()
 
     init(
         userDefaults: UserDefaults = .standard,
-        dateProvider: @escaping () -> Date = { Date() }
+        dateProvider: @escaping @Sendable () -> Date = { Date() }
     ) {
         self.userDefaults = userDefaults
         self.dateProvider = dateProvider
@@ -73,10 +80,7 @@ struct DailyGenerationLimiter {
     }
 
     private func todayString() -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd"
-        formatter.timeZone = TimeZone.current
-        return formatter.string(from: dateProvider())
+        Self.dateFormatter.string(from: dateProvider())
     }
 }
 

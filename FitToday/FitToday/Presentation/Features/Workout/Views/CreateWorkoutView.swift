@@ -14,9 +14,16 @@ struct CreateWorkoutView: View {
     let onDismiss: () -> Void
 
     @Environment(\.dismiss) private var dismiss
-    @State private var viewModel = CreateWorkoutViewModel()
+    @State private var viewModel: CreateWorkoutViewModel
     @State private var showExerciseSearch = false
     @State private var isEditMode = false
+
+    init(resolver: Resolver, onDismiss: @escaping () -> Void) {
+        self.resolver = resolver
+        self.onDismiss = onDismiss
+        let saveUseCase = resolver.resolve(SaveCustomWorkoutUseCase.self)
+        _viewModel = State(initialValue: CreateWorkoutViewModel(saveUseCase: saveUseCase))
+    }
 
     var body: some View {
         NavigationStack {
