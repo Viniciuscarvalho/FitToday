@@ -28,9 +28,6 @@ struct ProgramsListView: View {
             }
         }
         .background(FitTodayColor.background)
-        .navigationTitle("Catálogo de Programas")
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar(.hidden, for: .tabBar)
         .task {
             guard !hasInitialized else { return }
             hasInitialized = true

@@ -119,6 +119,7 @@ struct PersonalWorkoutRow: View {
 
 // MARK: - Preview
 
+#if DEBUG
 #Preview {
     VStack(spacing: 12) {
         PersonalWorkoutRow(
@@ -151,3 +152,4 @@ struct PersonalWorkoutRow: View {
     .padding()
     .background(FitTodayColor.background)
 }
+#endif

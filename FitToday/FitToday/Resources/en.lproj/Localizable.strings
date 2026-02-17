@@ -55,12 +55,18 @@
 
 // MARK: - Home AI Workout Generator
 "home.ai.section_title" = "GENERATE AI WORKOUT";
+"home.ai.focus_question" = "What's your workout focus?";
+"home.ai.soreness_question" = "How are your muscle aches?";
+"home.ai.energy_question" = "Your energy level";
+"home.ai.energy_low" = "Low";
+"home.ai.energy_high" = "High";
+"home.ai.generate_button" = "GENERATE MY WORKOUT";
+// Legacy keys (kept for compatibility)
 "home.ai.body_parts_question" = "What do you want to train today?";
 "home.ai.fatigue_question" = "How is your body feeling?";
 "home.ai.fatigue_tired" = "Tired";
 "home.ai.fatigue_rested" = "Rested";
 "home.ai.time_question" = "How much time do you have?";
-"home.ai.generate_button" = "GENERATE MY WORKOUT";
 
 // MARK: - Home Continue Workout
 "home.continue.section_title" = "CONTINUE WORKOUT";
@@ -528,3 +534,199 @@
 "personal.loading" = "Loading workout...";
 "personal.error.load" = "Failed to load";
 "personal.new_badge" = "NEW";
+
+// MARK: - ErrorMapper
+"error.generic.title" = "Oops!";
+"error.generic.message" = "Something unexpected happened. Please try again.";
+"error.network.no_connection.title" = "No connection";
+"error.network.no_connection.message" = "Check your internet and try again.";
+"error.network.timeout.title" = "Timeout";
+"error.network.timeout.message" = "The operation took too long. Please try again.";
+"error.network.server_unavailable.title" = "Server unavailable";
+"error.network.server_unavailable.message" = "Could not connect to server. Try again later.";
+"error.network.invalid_url.title" = "Invalid URL";
+"error.network.invalid_url.message" = "Address not recognized.";
+"error.network.mobile_data.title" = "Mobile data disabled";
+"error.network.mobile_data.message" = "Enable mobile data or connect to Wi-Fi.";
+"error.network.connection.title" = "Connection error";
+"error.network.connection.message" = "Could not connect. Please try again.";
+"error.domain.profile_not_found.title" = "Profile not found";
+"error.domain.profile_not_found.message" = "Complete your profile to generate personalized workouts.";
+"error.domain.invalid_input.title" = "Invalid data";
+"error.domain.no_compatible_blocks.title" = "No compatible workouts";
+"error.domain.no_compatible_blocks.message" = "No exercises found for your profile. Try adjusting your preferences.";
+"error.domain.repository_failure.title" = "Save error";
+"error.domain.repository_failure.message" = "Could not save data.";
+"error.domain.subscription_expired.title" = "Subscription expired";
+"error.domain.subscription_expired.message" = "Renew your subscription to continue using Pro features.";
+"error.domain.not_authenticated.title" = "Authentication required";
+"error.domain.not_authenticated.message" = "You need to be authenticated to perform this action.";
+"error.domain.already_in_group.title" = "Already in a group";
+"error.domain.already_in_group.message" = "You're already part of a group. Leave your current group to join another.";
+"error.domain.group_not_found.title" = "Group not found";
+"error.domain.group_not_found.message" = "The group you're looking for doesn't exist or was removed.";
+"error.domain.group_full.title" = "Group full";
+"error.domain.group_full.message" = "This group has reached the maximum number of members.";
+"error.domain.not_group_admin.title" = "Permission denied";
+"error.domain.not_group_admin.message" = "Only group administrators can perform this action.";
+"error.domain.challenge_not_found.title" = "Challenge not found";
+"error.domain.challenge_not_found.message" = "The challenge you're looking for doesn't exist.";
+"error.domain.invalid_challenge_type.title" = "Invalid challenge type";
+"error.domain.invalid_challenge_type.message" = "The specified challenge type is invalid.";
+"error.domain.challenge_expired.title" = "Challenge expired";
+"error.domain.challenge_expired.message" = "This challenge has ended.";
+"error.domain.not_found.title" = "Not found";
+"error.domain.not_found.message" = "Resource not found: %@";
+"error.domain.daily_limit.title" = "Daily limit reached";
+"error.domain.daily_limit.message" = "You've reached the daily workout limit. The limit resets at midnight.";
+"error.domain.diversity_failed.title" = "Generation error";
+"error.domain.diversity_failed.message" = "Could not generate a workout different from previous ones.";
+"error.openai.not_configured.title" = "AI not configured";
+"error.openai.fallback.message" = "We generated a great local workout for you today.";
+"error.openai.temporarily_unavailable.title" = "AI temporarily unavailable";
+"error.openai.processing.title" = "Error processing response";
+"error.openai.rate_limit.title" = "Limit reached";
+"error.openai.rate_limit.message" = "You've reached the daily AI workout limit. We generated a local workout.";
+"error.openai.server_unavailable.title" = "Server temporarily unavailable";
+"error.openai.incomplete_response.title" = "Incomplete response";
+"error.openai.incomplete_response.message" = "AI didn't return exercises. We generated a local workout for you.";
+"error.image.load_failed.title" = "Error loading image";
+"error.image.load_failed.message" = "Could not load image (code %d).";
+"error.image.save_failed.title" = "Save error";
+"error.image.save_failed.message" = "Could not save image to cache.";
+"error.image.cache_full.title" = "Cache full";
+"error.image.cache_full.message" = "Image cache is full. Clear the cache in settings.";
+"error.image.invalid_data.title" = "Invalid image";
+"error.image.invalid_data.message" = "The image data is corrupted.";
+
+// MARK: - Focus Options
+"focus.fullbody" = "Full Body";
+"focus.upper" = "Upper Body";
+"focus.lower" = "Lower Body";
+"focus.cardio" = "Cardio";
+"focus.core" = "Core";
+"focus.surprise" = "Surprise";
+
+// MARK: - Soreness Options
+"soreness.none" = "None";
+"soreness.light" = "Light";
+"soreness.moderate" = "Moderate";
+"soreness.strong" = "Strong";
+
+// MARK: - Exercise Picker
+"exercise_picker.title" = "Add Exercise";
+"exercise_picker.search_placeholder" = "Search exercises...";
+"exercise_picker.cancel" = "Cancel";
+"exercise_picker.clear" = "Clear";
+"exercise_picker.empty.title" = "No Exercises";
+"exercise_picker.empty.subtitle" = "Search for exercises or select a category";
+
+// MARK: - Generated Workout Preview
+"generated_workout.title" = "Generated Workout";
+"generated_workout.close" = "Close";
+"generated_workout.generated_ago" = "Generated %@ ago";
+"generated_workout.stats.duration" = "Duration";
+"generated_workout.stats.exercises" = "Exercises";
+"generated_workout.stats.sets" = "Sets";
+"generated_workout.insights.title" = "AI Insights";
+"generated_workout.insights.fatigue" = "Volume adjusted for fatigue";
+"generated_workout.insights.warmup" = "Warmup included";
+"generated_workout.section.exercises" = "Exercises";
+"generated_workout.exercise.sets" = "%d sets";
+"generated_workout.exercise.reps" = "%@ reps";
+"generated_workout.action.start" = "Start Workout";
+"generated_workout.action.save" = "Save as Template";
+"generated_workout.detail.target_muscle" = "Target Muscle";
+"generated_workout.detail.equipment" = "Equipment";
+"generated_workout.detail.sets" = "Sets";
+"generated_workout.detail.reps" = "Reps";
+"generated_workout.detail.rest" = "Rest";
+"generated_workout.detail.ai_notes" = "AI Notes";
+
+// MARK: - Goal Badge
+"goal.badge.hypertrophy" = "💪 Hypertrophy";
+"goal.badge.conditioning" = "🔥 Conditioning";
+"goal.badge.endurance" = "🏃 Endurance";
+"goal.badge.weight_loss" = "⚖️ Weight Loss";
+"goal.badge.performance" = "🎯 Performance";
+
+// MARK: - Error Actions
+"error.action.retry" = "Try Again";
+"error.action.open_settings" = "Open Settings";
+"error.action.dismiss" = "OK";
+
+// MARK: - Error States
+"error.state.dependency.title" = "Configuration Error";
+"error.state.network.title" = "Connection Error";
+"error.state.api.title" = "Server Error";
+"error.state.api.code" = " (Code: %d)";
+
+// MARK: - PDF Viewer
+"pdf.loading" = "Loading PDF...";
+"pdf.error.load" = "Error loading PDF";
+"pdf.error.url" = "Invalid URL";
+"pdf.page" = "Page %d of %d";
+
+// MARK: - Onboarding Setup Steps
+"onboarding.step.goal" = "What's your main goal?";
+"onboarding.step.structure" = "Where do you train?";
+"onboarding.step.method" = "What method do you prefer?";
+"onboarding.step.level" = "What's your current level?";
+"onboarding.step.health" = "Any health conditions?";
+"onboarding.step.frequency" = "How many days per week do you train?";
+
+// MARK: - Fitness Goal
+"goal.hypertrophy.title" = "Hypertrophy";
+"goal.hypertrophy.subtitle" = "Build muscle mass";
+"goal.conditioning.title" = "Conditioning";
+"goal.conditioning.subtitle" = "Improve daily endurance";
+"goal.endurance.title" = "Endurance";
+"goal.endurance.subtitle" = "Increase stamina";
+"goal.weightloss.title" = "Weight Loss";
+"goal.weightloss.subtitle" = "Define and reduce fat";
+"goal.performance.title" = "Performance";
+"goal.performance.subtitle" = "Optimize athletic performance";
+
+// MARK: - Training Structure
+"structure.fullgym.title" = "Full Gym";
+"structure.fullgym.subtitle" = "Machines + free weights";
+"structure.basicgym.title" = "Basic Gym";
+"structure.basicgym.subtitle" = "Essential equipment";
+"structure.homedumbbells.title" = "Home (dumbbells)";
+"structure.homedumbbells.subtitle" = "Up to 2 pairs of dumbbells";
+"structure.bodyweight.title" = "Bodyweight";
+"structure.bodyweight.subtitle" = "No equipment needed";
+
+// MARK: - Training Method
+"method.traditional.title" = "Traditional";
+"method.traditional.subtitle" = "Sets and reps";
+"method.circuit.title" = "Circuit";
+"method.circuit.subtitle" = "Sequential blocks";
+"method.hiit.title" = "HIIT";
+"method.hiit.subtitle" = "Intense intervals";
+"method.mixed.title" = "Mixed";
+"method.mixed.subtitle" = "Balanced combination";
+
+// MARK: - Training Level
+"level.beginner.title" = "Beginner";
+"level.beginner.subtitle" = "Up to 6 months training";
+"level.intermediate.title" = "Intermediate";
+"level.intermediate.subtitle" = "Between 6 months and 2 years";
+"level.advanced.title" = "Advanced";
+"level.advanced.subtitle" = "2+ consistent years";
+
+// MARK: - Health Condition
+"health.none.title" = "None";
+"health.none.subtitle" = "All good here";
+"health.lowerbackpain.title" = "Lower Back Pain";
+"health.lowerbackpain.subtitle" = "Spine adaptations";
+"health.knee.title" = "Knee";
+"health.knee.subtitle" = "Protect your knees";
+"health.shoulder.title" = "Shoulder";
+"health.shoulder.subtitle" = "Care in push/pull movements";
+"health.other.title" = "Other";
+"health.other.subtitle" = "We'll reduce volume";
+
+// MARK: - Workout Template Type
+"template.conditioning.title" = "Conditioning";
+"template.conditioning.subtitle" = "Endurance and burning";

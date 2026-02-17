@@ -29,6 +29,9 @@ struct WorkoutHistoryMapper {
         // Converter userRating string para enum
         let userRating = WorkoutRating(rawString: model.userRating)
 
+        // Converter source string para enum (fallback para .app)
+        let source = WorkoutSource(rawValue: model.sourceRaw) ?? .app
+
         return WorkoutHistoryEntry(
             id: model.id,
             date: model.date,
@@ -43,7 +46,8 @@ struct WorkoutHistoryMapper {
             healthKitWorkoutUUID: model.healthKitWorkoutUUID,
             workoutPlan: workoutPlan,
             userRating: userRating,
-            completedExercises: completedExercises
+            completedExercises: completedExercises,
+            source: source
         )
     }
 
@@ -74,7 +78,8 @@ struct WorkoutHistoryMapper {
             healthKitWorkoutUUID: entry.healthKitWorkoutUUID,
             workoutPlanJSON: workoutPlanJSON,
             userRating: entry.userRating?.rawValue,
-            completedExercisesJSON: completedExercisesJSON
+            completedExercisesJSON: completedExercisesJSON,
+            sourceRaw: entry.source.rawValue
         )
     }
 }

@@ -46,6 +46,24 @@ final class SwiftDataWorkoutHistoryRepository: WorkoutHistoryRepository, @unchec
         return try context().fetchCount(descriptor)
     }
 
+    func listAppEntriesWithPlan(limit: Int) async throws -> [WorkoutHistoryEntry] {
+        var descriptor = FetchDescriptor<SDWorkoutHistoryEntry>(
+            predicate: #Predicate {
+                $0.sourceRaw == "app" && $0.workoutPlanJSON != nil
+            },
+            sortBy: [SortDescriptor(\.date, order: .reverse)]
+        )
+        descriptor.fetchLimit = limit
+
+        let models = try context().fetch(descriptor)
+
+        #if DEBUG
+        print("[HistoryRepo] Fetched \(models.count) app entries with plan (limit: \(limit))")
+        #endif
+
+        return models.compactMap(WorkoutHistoryMapper.toDomain)
+    }
+
     func saveEntry(_ entry: WorkoutHistoryEntry) async throws {
         let ctx = context()
         var descriptor = FetchDescriptor<SDWorkoutHistoryEntry>(

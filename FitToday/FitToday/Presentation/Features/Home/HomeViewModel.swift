@@ -85,11 +85,11 @@ enum HomeJourneyState: Equatable {
     var goalBadgeText: String? {
         guard let profile = userProfile else { return nil }
         switch profile.mainGoal {
-        case .hypertrophy: return "💪 Hipertrofia"
-        case .conditioning: return "🔥 Condicionamento"
-        case .endurance: return "🏃 Resistência"
-        case .weightLoss: return "⚖️ Emagrecimento"
-        case .performance: return "🎯 Performance"
+        case .hypertrophy: return "goal.badge.hypertrophy".localized
+        case .conditioning: return "goal.badge.conditioning".localized
+        case .endurance: return "goal.badge.endurance".localized
+        case .weightLoss: return "goal.badge.weight_loss".localized
+        case .performance: return "goal.badge.performance".localized
         }
     }
 
@@ -420,8 +420,9 @@ enum HomeJourneyState: Equatable {
         }
     }
     
-    /// Regera o plano diário baseado no último questionário salvo.
-    func regenerateDailyWorkoutPlan() async throws -> WorkoutPlan {
+    /// Generates a workout plan using the provided DailyCheckIn (live inputs from Home).
+    /// This is the PRIMARY method for workout generation - uses inputs directly from the UI.
+    func generateWorkoutWithCheckIn(_ checkIn: DailyCheckIn) async throws -> WorkoutPlan {
         guard
             let profileRepo = resolver.resolve(UserProfileRepository.self),
             let blocksRepo = resolver.resolve(WorkoutBlocksRepository.self),
@@ -429,22 +430,35 @@ enum HomeJourneyState: Equatable {
         else {
             throw DomainError.repositoryFailure(reason: "Dependências para gerar o treino não estão configuradas.")
         }
-        
+
         guard let profile = try await profileRepo.loadProfile() else {
             throw DomainError.profileNotFound
         }
-        
-        guard let checkIn = loadStoredCheckIn() else {
-            throw DomainError.invalidInput(reason: "Precisamos que você responda o questionário de hoje novamente.")
-        }
-        
+
+        #if DEBUG
+        print("[HomeViewModel] 🎯 Generating workout with LIVE checkIn:")
+        print("[HomeViewModel]    Focus: \(checkIn.focus.rawValue)")
+        print("[HomeViewModel]    Soreness: \(checkIn.sorenessLevel.rawValue)")
+        print("[HomeViewModel]    Energy: \(checkIn.energyLevel)/10")
+        #endif
+
         let generator = GenerateWorkoutPlanUseCase(
             blocksRepository: blocksRepo,
             composer: composer
         )
         return try await generator.execute(profile: profile, checkIn: checkIn)
     }
-    
+
+    /// Legacy method - regenerates using stored questionnaire data.
+    /// Prefer `generateWorkoutWithCheckIn(_:)` for live inputs from Home.
+    @available(*, deprecated, message: "Use generateWorkoutWithCheckIn(_:) with live inputs instead")
+    func regenerateDailyWorkoutPlan() async throws -> WorkoutPlan {
+        guard let checkIn = loadStoredCheckIn() else {
+            throw DomainError.invalidInput(reason: "Precisamos que você responda o questionário de hoje novamente.")
+        }
+        return try await generateWorkoutWithCheckIn(checkIn)
+    }
+
     private func loadStoredCheckIn() -> DailyCheckIn? {
         guard let data = UserDefaults.standard.data(forKey: AppStorageKeys.lastDailyCheckInData) else {
             return nil

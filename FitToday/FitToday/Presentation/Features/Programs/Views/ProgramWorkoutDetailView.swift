@@ -55,6 +55,16 @@ struct ProgramWorkoutDetailView: View {
         .task {
             await loadCustomization()
         }
+        .sheet(isPresented: $showAddExercise) {
+            if let exerciseService = resolver.resolve(ExerciseServiceProtocol.self) {
+                ExerciseSearchSheet(
+                    exerciseService: exerciseService,
+                    onSelect: { entry in
+                        addExerciseEntry(entry)
+                    }
+                )
+            }
+        }
     }
 
     // MARK: - Header Section
@@ -147,14 +157,23 @@ struct ProgramWorkoutDetailView: View {
     }
 
     private var exercisesList: some View {
-        LazyVStack(spacing: FitTodaySpacing.sm) {
+        VStack(spacing: FitTodaySpacing.sm) {
             ForEach(Array(exercises.enumerated()), id: \.element.id) { index, exercise in
                 ExerciseRowCard(
                     exercise: exercise,
                     index: index + 1,
-                    editMode: editMode
+                    editMode: editMode,
+                    onMoveUp: editMode == .active && index > 0 ? {
+                        moveExercise(from: IndexSet(integer: index), to: index - 1)
+                    } : nil,
+                    onMoveDown: editMode == .active && index < exercises.count - 1 ? {
+                        moveExercise(from: IndexSet(integer: index), to: index + 2)
+                    } : nil,
+                    onDelete: editMode == .active ? {
+                        deleteExercise(at: IndexSet(integer: index))
+                    } : nil
                 ) {
-                    // Navigate to exercise detail
+                    guard editMode != .active else { return }
                     let workoutExercise = createWorkoutExercise(from: exercise)
                     let prescription = ExercisePrescription(
                         exercise: workoutExercise,
@@ -167,8 +186,6 @@ struct ProgramWorkoutDetailView: View {
                 }
                 .padding(.horizontal)
             }
-            .onMove(perform: moveExercise)
-            .onDelete(perform: deleteExercise)
         }
     }
 
@@ -212,6 +229,35 @@ struct ProgramWorkoutDetailView: View {
         Task {
             await saveCustomization()
         }
+    }
+
+    private func addExerciseEntry(_ entry: CustomExerciseEntry) {
+        // Convert CustomExerciseEntry back to WgerExercise + ProgramExercise
+        let wger = WgerExercise(
+            id: Int(entry.exerciseId) ?? 0,
+            uuid: entry.id.uuidString,
+            name: entry.exerciseName,
+            exerciseBaseId: Int(entry.exerciseId) ?? 0,
+            description: nil,
+            category: nil,
+            muscles: [],
+            musclesSecondary: [],
+            equipment: [],
+            language: 2,
+            mainImageURL: entry.exerciseGifURL,
+            imageURLs: entry.exerciseGifURL.map { [$0] } ?? []
+        )
+        let newExercise = ProgramExercise(
+            id: "\(workout.id)_added_\(exercises.count)",
+            wgerExercise: wger,
+            sets: 3,
+            repsRange: 8...12,
+            restSeconds: 60,
+            notes: nil,
+            order: exercises.count
+        )
+        exercises.append(newExercise)
+        Task { await saveCustomization() }
     }
 
     // MARK: - Customization Persistence
@@ -425,67 +471,95 @@ private struct ExerciseRowCard: View {
     let exercise: ProgramExercise
     let index: Int
     let editMode: EditMode
+    var onMoveUp: (() -> Void)?
+    var onMoveDown: (() -> Void)?
+    var onDelete: (() -> Void)?
     let onTap: () -> Void
 
     var body: some View {
-        Button(action: onTap) {
-            HStack(spacing: FitTodaySpacing.md) {
-                // Drag handle when editing
-                if editMode == .active {
-                    Image(systemName: "line.3.horizontal")
-                        .foregroundStyle(FitTodayColor.textTertiary)
-                        .font(.system(.body))
-                }
-
-                // Exercise number badge
-                Text("\(index)")
-                    .font(.system(.subheadline, weight: .bold))
-                    .foregroundStyle(FitTodayColor.brandPrimary)
-                    .frame(width: 28, height: 28)
-                    .background(FitTodayColor.brandPrimary.opacity(0.15))
-                    .clipShape(Circle())
-
-                // Exercise image
-                exerciseImage
-
-                // Exercise info
-                VStack(alignment: .leading, spacing: FitTodaySpacing.xs) {
-                    Text(exercise.name)
-                        .font(.system(.subheadline, weight: .semibold))
-                        .foregroundStyle(FitTodayColor.textPrimary)
-                        .lineLimit(2)
-
-                    // Sets x Reps info
-                    HStack(spacing: FitTodaySpacing.sm) {
-                        Text("\(exercise.sets) séries")
-                        Text("•")
-                        Text("\(exercise.repsRange.lowerBound)-\(exercise.repsRange.upperBound) reps")
+        HStack(spacing: FitTodaySpacing.sm) {
+            // Move buttons in edit mode
+            if editMode == .active {
+                VStack(spacing: FitTodaySpacing.xs) {
+                    Button { onMoveUp?() } label: {
+                        Image(systemName: "chevron.up")
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundStyle(onMoveUp != nil ? FitTodayColor.brandPrimary : FitTodayColor.textTertiary.opacity(0.3))
                     }
-                    .font(.system(.caption))
-                    .foregroundStyle(FitTodayColor.textSecondary)
+                    .buttonStyle(.plain)
+                    .disabled(onMoveUp == nil)
 
-                    // Muscle groups - WgerExercise.muscles são IDs
-                    if !exercise.wgerExercise.muscles.isEmpty {
-                        Text(Self.muscleNames(for: exercise.wgerExercise.muscles))
-                            .font(.system(.caption2))
-                            .foregroundStyle(FitTodayColor.textTertiary)
-                            .lineLimit(1)
+                    Button { onMoveDown?() } label: {
+                        Image(systemName: "chevron.down")
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundStyle(onMoveDown != nil ? FitTodayColor.brandPrimary : FitTodayColor.textTertiary.opacity(0.3))
                     }
+                    .buttonStyle(.plain)
+                    .disabled(onMoveDown == nil)
                 }
-
-                Spacer()
-
-                if editMode != .active {
-                    Image(systemName: "chevron.right")
-                        .font(.system(.caption, weight: .semibold))
-                        .foregroundStyle(FitTodayColor.textTertiary)
-                }
+                .frame(width: 24)
             }
-            .padding(FitTodaySpacing.md)
-            .background(FitTodayColor.surface)
-            .clipShape(RoundedRectangle(cornerRadius: FitTodayRadius.md))
+
+            Button(action: onTap) {
+                HStack(spacing: FitTodaySpacing.md) {
+                    // Exercise number badge
+                    Text("\(index)")
+                        .font(.system(.subheadline, weight: .bold))
+                        .foregroundStyle(FitTodayColor.brandPrimary)
+                        .frame(width: 28, height: 28)
+                        .background(FitTodayColor.brandPrimary.opacity(0.15))
+                        .clipShape(Circle())
+
+                    // Exercise image
+                    exerciseImage
+
+                    // Exercise info
+                    VStack(alignment: .leading, spacing: FitTodaySpacing.xs) {
+                        Text(exercise.name)
+                            .font(.system(.subheadline, weight: .semibold))
+                            .foregroundStyle(FitTodayColor.textPrimary)
+                            .lineLimit(2)
+
+                        HStack(spacing: FitTodaySpacing.sm) {
+                            Text("\(exercise.sets) séries")
+                            Text("•")
+                            Text("\(exercise.repsRange.lowerBound)-\(exercise.repsRange.upperBound) reps")
+                        }
+                        .font(.system(.caption))
+                        .foregroundStyle(FitTodayColor.textSecondary)
+
+                        if !exercise.wgerExercise.muscles.isEmpty {
+                            Text(Self.muscleNames(for: exercise.wgerExercise.muscles))
+                                .font(.system(.caption2))
+                                .foregroundStyle(FitTodayColor.textTertiary)
+                                .lineLimit(1)
+                        }
+                    }
+
+                    Spacer()
+
+                    if editMode != .active {
+                        Image(systemName: "chevron.right")
+                            .font(.system(.caption, weight: .semibold))
+                            .foregroundStyle(FitTodayColor.textTertiary)
+                    }
+                }
+                .padding(FitTodaySpacing.md)
+                .background(FitTodayColor.surface)
+                .clipShape(RoundedRectangle(cornerRadius: FitTodayRadius.md))
+            }
+            .buttonStyle(.plain)
+
+            // Delete button in edit mode
+            if editMode == .active {
+                Button { onDelete?() } label: {
+                    Image(systemName: "trash")
+                        .font(.system(size: 14))
+                        .foregroundStyle(FitTodayColor.error)
+                }
+                .buttonStyle(.plain)
+            }
         }
-        .buttonStyle(.plain)
     }
 
     @ViewBuilder

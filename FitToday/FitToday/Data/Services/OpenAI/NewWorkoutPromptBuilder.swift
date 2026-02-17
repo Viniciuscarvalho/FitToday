@@ -126,6 +126,8 @@ struct NewWorkoutPromptBuilder: Sendable {
         let catalogSection = formatCatalog(blocks: blocks, blueprint: blueprint)
         let prohibitedSection = formatProhibitedWorkouts(previousWorkouts)
 
+        let focusRestriction = formatFocusRestriction(checkIn.focus)
+
         return """
         ## USER PROFILE
         **PRIMARY GOAL: \(profile.mainGoal.rawValue.uppercased())**
@@ -138,6 +140,8 @@ struct NewWorkoutPromptBuilder: Sendable {
 
         Adaptation rules:
         - If energy <= 3 OR DOMS == strong: keep workout conservative, prioritize technique and safety
+
+        \(focusRestriction)
 
         ## WORKOUT STRUCTURE (MANDATORY)
         \(blueprintSection)
@@ -370,5 +374,65 @@ struct NewWorkoutPromptBuilder: Sendable {
             }
         }
         .joined(separator: ", ")
+    }
+
+    /// Creates focus restriction instructions based on user's selected focus.
+    /// This ensures the AI generates exercises appropriate for the target body area.
+    private func formatFocusRestriction(_ focus: DailyFocus) -> String {
+        var lines: [String] = []
+
+        lines.append("## FOCUS RESTRICTION (CRITICAL)")
+        lines.append("")
+
+        switch focus {
+        case .upper:
+            lines.append("⚠️ TODAY'S FOCUS: UPPER BODY ONLY")
+            lines.append("")
+            lines.append("ALLOWED muscle groups: chest, back, shoulders, biceps, triceps, arms, lats, forearms")
+            lines.append("❌ FORBIDDEN: Do NOT include any lower body exercises (quads, glutes, hamstrings, calves)")
+            lines.append("❌ FORBIDDEN: Do NOT include lunges, squats, leg press, deadlifts, or any leg-dominant exercises")
+            lines.append("")
+            lines.append("Every exercise MUST target upper body muscles.")
+
+        case .lower:
+            lines.append("⚠️ TODAY'S FOCUS: LOWER BODY ONLY")
+            lines.append("")
+            lines.append("ALLOWED muscle groups: quads, quadriceps, glutes, hamstrings, calves, lowerBack")
+            lines.append("❌ FORBIDDEN: Do NOT include upper body exercises (chest, back, shoulders, biceps, triceps)")
+            lines.append("❌ FORBIDDEN: Do NOT include bench press, rows, pull-ups, or arm exercises")
+            lines.append("")
+            lines.append("Every exercise MUST target lower body muscles.")
+
+        case .fullBody:
+            lines.append("TODAY'S FOCUS: FULL BODY")
+            lines.append("")
+            lines.append("Include a balanced mix of upper AND lower body exercises.")
+            lines.append("Aim for ~50% upper body and ~50% lower body exercises.")
+            lines.append("Include at least 2 exercises for each major region (upper + lower).")
+
+        case .cardio:
+            lines.append("⚠️ TODAY'S FOCUS: CARDIO & CONDITIONING")
+            lines.append("")
+            lines.append("PRIORITIZE: High-heart-rate exercises, jumping, running, burpees, mountain climbers")
+            lines.append("Strength exercises should be explosive/plyometric (box jumps, jump squats, etc.)")
+            lines.append("Keep rest periods short (30-45s) to maintain elevated heart rate.")
+
+        case .core:
+            lines.append("⚠️ TODAY'S FOCUS: CORE & STABILITY")
+            lines.append("")
+            lines.append("PRIORITIZE: Core, abs, obliques, lower back, glutes (stabilizers)")
+            lines.append("Include planks, crunches, leg raises, Russian twists, dead bugs, etc.")
+            lines.append("Limit upper/lower body exercises to compound movements that engage core.")
+
+        case .surprise:
+            lines.append("TODAY'S FOCUS: TRAINER'S CHOICE")
+            lines.append("")
+            lines.append("Create a creative, varied workout mixing different muscle groups.")
+            lines.append("Prioritize exercises that haven't been used recently.")
+            lines.append("Balance intensity with variety for an engaging session.")
+        }
+
+        lines.append("")
+        return lines.joined(separator: "\n")
     }
 }
