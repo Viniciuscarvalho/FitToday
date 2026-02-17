@@ -1,0 +1,30 @@
+{
+  "cli_version": "0.4.4",
+  "checkpoint_id": "6e2a609456c8",
+  "strategy": "manual-commit",
+  "branch": "feature/workout-ai-fix",
+  "checkpoints_count": 2,
+  "files_touched": [
+    ".gitignore",
+    "FitToday/FitToday/Presentation/Features/Programs/Views/ProgramWorkoutDetailView.swift",
+    "FitToday/FitToday/Presentation/Features/Workout/ViewModels/CreateWorkoutViewModel.swift",
+    "FitToday/FitToday/Presentation/Features/Workout/Views/CreateWorkoutView.swift",
+    "FitToday/FitTodayTests/Domain/UseCases/SaveCustomWorkoutUseCaseTests.swift"
+  ],
+  "sessions": [
+    {
+      "metadata": "/6e/2a609456c8/0/metadata.json",
+      "transcript": "/6e/2a609456c8/0/full.jsonl",
+      "context": "/6e/2a609456c8/0/context.md",
+      "content_hash": "/6e/2a609456c8/0/content_hash.txt",
+      "prompt": "/6e/2a609456c8/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 5619,
+    "cache_creation_tokens": 139698,
+    "cache_read_tokens": 6979372,
+    "output_tokens": 662,
+    "api_call_count": 64
+  }
+}
