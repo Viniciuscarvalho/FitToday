@@ -85,6 +85,12 @@ final class CreateWorkoutViewModel {
     var isSaving = false
     var errorMessage: String?
 
+    private let saveUseCase: SaveCustomWorkoutUseCase?
+
+    init(saveUseCase: SaveCustomWorkoutUseCase? = nil) {
+        self.saveUseCase = saveUseCase
+    }
+
     // MARK: - Static Data
 
     static let categories = [
@@ -132,7 +138,7 @@ final class CreateWorkoutViewModel {
     }
 
     func saveWorkout() async {
-        guard canSave else { return }
+        guard canSave, let saveUseCase else { return }
 
         isSaving = true
         errorMessage = nil
@@ -145,18 +151,16 @@ final class CreateWorkoutViewModel {
                 category: selectedCategory
             )
 
-            // TODO: Save to repository
+            try await saveUseCase.execute(template: template)
+
             #if DEBUG
-            print("[CreateWorkout] Saving template: \(template.name) with \(template.exerciseCount) exercises")
+            print("[CreateWorkout] Saved template: \(template.name) with \(template.exerciseCount) exercises")
             #endif
-
-            try await Task.sleep(for: .milliseconds(500))
-
-            isSaving = false
         } catch {
-            isSaving = false
             errorMessage = error.localizedDescription
         }
+
+        isSaving = false
     }
 
     func reset() {
