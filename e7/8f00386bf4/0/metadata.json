@@ -1,0 +1,36 @@
+{
+  "cli_version": "0.4.4",
+  "checkpoint_id": "e78f00386bf4",
+  "session_id": "9bc2127b-0808-4411-907c-c10ed3ac12de",
+  "strategy": "manual-commit",
+  "created_at": "2026-02-17T17:58:34.651018Z",
+  "branch": "main",
+  "checkpoints_count": 4,
+  "files_touched": [
+    ".env",
+    ".env.md",
+    "ExportOptions-AppStore.plist",
+    "deploy.sh"
+  ],
+  "agent": "Claude Code",
+  "transcript_identifier_at_start": "6dc6521c-7697-48b5-8837-9d3b80fef561",
+  "checkpoint_transcript_start": 522,
+  "transcript_lines_at_start": 522,
+  "token_usage": {
+    "input_tokens": 32,
+    "cache_creation_tokens": 141254,
+    "cache_read_tokens": 2851457,
+    "output_tokens": 88,
+    "api_call_count": 24
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-02-17T17:58:33.894671Z",
+    "agent_lines": 35,
+    "human_added": 178,
+    "human_modified": 10,
+    "human_removed": 0,
+    "total_committed": 223,
+    "agent_percentage": 15.695067264573993
+  },
+  "transcript_path": ".claude/projects/-Users-viniciuscarvalho-Documents-FitToday/9bc2127b-0808-4411-907c-c10ed3ac12de.jsonl"
+}
