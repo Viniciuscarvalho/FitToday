@@ -42,14 +42,6 @@ struct WorkoutTabView: View {
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
             VStack(spacing: 0) {
-                // Fixed title header - prevents disappearing on segment switch
-                Text("workout.title".localized)
-                    .font(FitTodayFont.display(size: 28, weight: .bold))
-                    .foregroundStyle(FitTodayColor.textPrimary)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.horizontal, FitTodaySpacing.md)
-                    .padding(.top, FitTodaySpacing.sm)
-
                 // Segmented Control
                 segmentedControl
                     .padding(.horizontal, FitTodaySpacing.md)
@@ -78,8 +70,8 @@ struct WorkoutTabView: View {
             }
         }
         .background(FitTodayColor.background)
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar(.hidden, for: .navigationBar)
+        .navigationTitle("workout.title".localized)
+        .navigationBarTitleDisplayMode(.large)
         .sheet(isPresented: $showCreateWorkout) {
             CreateWorkoutView(resolver: resolver) {
                 showCreateWorkout = false

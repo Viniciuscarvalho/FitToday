@@ -69,6 +69,7 @@ struct HomeView: View {
         .navigationBarHidden(true)
         .task {
             viewModel.onAppear()
+            loadPersistedWorkout()
         }
         .sheet(isPresented: $showWorkoutPreview) {
             if let workout = generatedWorkout {
@@ -112,15 +113,26 @@ struct HomeView: View {
                 onGenerate: { router.push(.onboarding, on: .home) }
             )
 
-        case .needsDailyCheckIn, .workoutReady:
-            // Show AI generator card - uses live inputs instead of stored questionnaire
-            AIWorkoutGeneratorCard(
-                selectedFocus: $selectedFocus,
-                sorenessLevel: $sorenessLevel,
-                energyLevel: $energyLevel,
-                isGenerating: isGeneratingPlan,
-                onGenerate: generateWorkout
-            )
+        case .workoutReady:
+            VStack(spacing: FitTodaySpacing.lg) {
+                // Show today's workout card if user already generated one
+                if let workout = generatedWorkout, !viewModel.dailyWorkoutState.isFinished {
+                    TodayWorkoutCard(
+                        workout: workout,
+                        onViewWorkout: { showWorkoutPreview = true },
+                        onStartWorkout: { startGeneratedWorkout(workout) }
+                    )
+                }
+
+                // Always show AI generator card for new generation
+                AIWorkoutGeneratorCard(
+                    selectedFocus: $selectedFocus,
+                    sorenessLevel: $sorenessLevel,
+                    energyLevel: $energyLevel,
+                    isGenerating: isGeneratingPlan,
+                    onGenerate: generateWorkout
+                )
+            }
 
         case .workoutCompleted:
             // Show completed state with option to generate new
@@ -227,6 +239,12 @@ struct HomeView: View {
                     energyLevel: energyLevel
                 )
 
+                // Store checkIn for regeneration in WorkoutPlanView
+                if let checkInData = try? JSONEncoder().encode(checkIn) {
+                    UserDefaults.standard.set(checkInData, forKey: AppStorageKeys.lastDailyCheckInData)
+                    UserDefaults.standard.set(Date(), forKey: AppStorageKeys.lastDailyCheckInDate)
+                }
+
                 #if DEBUG
                 print("[HomeView] 🎯 Generating workout with LIVE inputs:")
                 print("[HomeView]    Focus: \(selectedFocus.rawValue)")
@@ -251,7 +269,7 @@ struct HomeView: View {
                     )
                 }
 
-                generatedWorkout = GeneratedWorkout(
+                let workout = GeneratedWorkout(
                     name: workoutPlan.title,
                     exercises: generatedExercises,
                     estimatedDuration: workoutPlan.estimatedDurationMinutes,
@@ -259,6 +277,10 @@ struct HomeView: View {
                     fatigueAdjusted: energyLevel <= 3 || sorenessLevel == .strong,
                     warmupIncluded: true
                 )
+
+                generatedWorkout = workout
+                persistWorkout(workout)
+                DailyWorkoutStateManager.shared.markSuggested(planId: workout.id)
 
                 showWorkoutPreview = true
                 await viewModel.refresh()
@@ -271,6 +293,29 @@ struct HomeView: View {
 
             isGeneratingPlan = false
         }
+    }
+
+    // MARK: - Workout Persistence
+
+    private static let generatedWorkoutKey = "generated_workout_today"
+
+    private func persistWorkout(_ workout: GeneratedWorkout) {
+        if let data = try? JSONEncoder().encode(workout) {
+            UserDefaults.standard.set(data, forKey: Self.generatedWorkoutKey)
+        }
+    }
+
+    private func loadPersistedWorkout() {
+        guard generatedWorkout == nil else { return }
+        let state = DailyWorkoutStateManager.shared.loadTodayState()
+        guard state.status == .suggested || state.status == .viewed else { return }
+
+        guard let data = UserDefaults.standard.data(forKey: Self.generatedWorkoutKey),
+              let workout = try? JSONDecoder().decode(GeneratedWorkout.self, from: data),
+              Calendar.current.isDateInToday(workout.generatedAt) else {
+            return
+        }
+        generatedWorkout = workout
     }
 
     private func startGeneratedWorkout(_ workout: GeneratedWorkout) {

@@ -13,7 +13,6 @@ struct HomeHeroCard: View {
     let isGeneratingPlan: Bool
     let heroErrorMessage: String?
     let onCreateProfile: () -> Void
-    let onStartDailyCheckIn: () -> Void
     let onViewTodayWorkout: () -> Void
     let onGeneratePlan: () -> Void
 
@@ -37,14 +36,6 @@ struct HomeHeroCard: View {
             loadingContent
         case .noProfile:
             noProfileContent
-        case .needsDailyCheckIn:
-            aiWorkoutContent(
-                title: "home.hero.dynamic.title".localized,
-                subtitle: "home.hero.dynamic.subtitle".localized,
-                buttonTitle: "home.hero.generate".localized,
-                buttonIcon: "bolt.fill",
-                action: onStartDailyCheckIn
-            )
         case .workoutReady:
             workoutReadyContent
         case .workoutCompleted:
@@ -332,7 +323,7 @@ struct HomeHeroCard: View {
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
-        case .noProfile, .needsDailyCheckIn:
+        case .noProfile:
             return FitTodayColor.gradientPrimary
         case .workoutReady:
             return FitTodayColor.gradientPrimary

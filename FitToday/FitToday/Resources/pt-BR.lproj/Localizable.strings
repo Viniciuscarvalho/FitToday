@@ -81,6 +81,12 @@
 "home.completed.title" = "Treino Concluido!";
 "home.completed.subtitle" = "Otimo trabalho hoje! Descanse e volte amanha.";
 
+// MARK: - Today Workout Card
+"home.today_workout.title" = "Treino do Dia";
+"home.today_workout.generated" = "Gerado por IA";
+"home.today_workout.view" = "Ver Treino";
+"home.today_workout.start" = "Iniciar";
+
 // MARK: - Home Error State
 "home.error.title" = "Ops! Algo deu errado";
 
@@ -492,6 +498,7 @@
 "programs.card.days" = "%d Dias";
 "programs.card.days_per_week" = "%d dias/semana";
 "programs.card.exercises" = "%d exercicios";
+"programs.recommended.title" = "Para Você";
 
 // MARK: - Programs Workout Preview
 "program.workout.exercises" = "exercicios";
@@ -535,6 +542,8 @@
 "personal.loading" = "Carregando treino...";
 "personal.error.load" = "Erro ao carregar";
 "personal.new_badge" = "NOVO";
+"personal.cms_workouts.title" = "Treinos do Personal";
+"personal.pdf_workouts.title" = "Fichas em PDF";
 
 // MARK: - ErrorMapper
 "error.generic.title" = "Ops!";

@@ -11,10 +11,13 @@ import Swinject
 /// View que exibe a lista de treinos do Personal Trainer.
 struct PersonalWorkoutsListView: View {
     @Environment(\.dependencyResolver) private var resolver
+    @Environment(AppRouter.self) private var router
     @State private var viewModel: PersonalWorkoutsViewModel?
     @State private var selectedWorkout: PersonalWorkout?
     @State private var dependencyError: String?
     @State private var cachedWorkouts: Set<String> = []
+    @State private var cmsWorkouts: [TrainerWorkout] = []
+    @State private var isCMSLoading = false
 
     var body: some View {
         Group {
@@ -57,15 +60,40 @@ struct PersonalWorkoutsListView: View {
                 }
             }
         }
+
+        // Carregar treinos do CMS
+        await loadCMSWorkouts()
+    }
+
+    // MARK: - CMS Workouts
+
+    private func loadCMSWorkouts() async {
+        guard let useCase = resolver.resolve(FetchCMSWorkoutsUseCase.self) else { return }
+
+        isCMSLoading = true
+        defer { isCMSLoading = false }
+
+        do {
+            let result = try await useCase.execute()
+            cmsWorkouts = result.workouts
+        } catch {
+            // CMS loading failure is non-blocking — PDF workouts still show
+            #if DEBUG
+            print("[PersonalWorkoutsListView] CMS load error: \(error)")
+            #endif
+        }
     }
 
     // MARK: - Content Views
 
     @ViewBuilder
     private func contentView(viewModel: PersonalWorkoutsViewModel) -> some View {
-        if viewModel.isLoading {
+        let isLoading = viewModel.isLoading && isCMSLoading
+        let isEmpty = viewModel.isEmpty && cmsWorkouts.isEmpty
+
+        if isLoading {
             loadingView
-        } else if viewModel.isEmpty {
+        } else if isEmpty {
             emptyStateView
         } else {
             workoutsListView(viewModel: viewModel)
@@ -97,14 +125,30 @@ struct PersonalWorkoutsListView: View {
     private func workoutsListView(viewModel: PersonalWorkoutsViewModel) -> some View {
         ScrollView {
             LazyVStack(spacing: FitTodaySpacing.md) {
-                ForEach(viewModel.workouts) { workout in
-                    PersonalWorkoutRow(
-                        workout: workout,
-                        isCached: cachedWorkouts.contains(workout.id)
-                    )
-                    .contentShape(Rectangle())
-                    .onTapGesture {
-                        selectedWorkout = workout
+                // CMS Workouts Section
+                if !cmsWorkouts.isEmpty {
+                    cmsWorkoutsSection
+                }
+
+                // PDF Workouts Section
+                if !viewModel.workouts.isEmpty {
+                    if !cmsWorkouts.isEmpty {
+                        Text("personal.pdf_workouts.title".localized)
+                            .font(FitTodayFont.ui(size: 16, weight: .bold))
+                            .foregroundStyle(FitTodayColor.textPrimary)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.top, FitTodaySpacing.sm)
+                    }
+
+                    ForEach(viewModel.workouts) { workout in
+                        PersonalWorkoutRow(
+                            workout: workout,
+                            isCached: cachedWorkouts.contains(workout.id)
+                        )
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            selectedWorkout = workout
+                        }
                     }
                 }
             }
@@ -116,6 +160,7 @@ struct PersonalWorkoutsListView: View {
                let user = try? await authRepository.currentUser() {
                 await viewModel.loadWorkouts(userId: user.id)
             }
+            await loadCMSWorkouts()
         }
         .sheet(item: $selectedWorkout) { workout in
             PDFViewerView(workout: workout, viewModel: viewModel)
@@ -128,6 +173,75 @@ struct PersonalWorkoutsListView: View {
         } message: {
             Text(viewModel.errorMessage ?? "error.generic.message".localized)
         }
+    }
+
+    // MARK: - CMS Workouts Section
+
+    private var cmsWorkoutsSection: some View {
+        VStack(alignment: .leading, spacing: FitTodaySpacing.sm) {
+            Text("personal.cms_workouts.title".localized)
+                .font(FitTodayFont.ui(size: 16, weight: .bold))
+                .foregroundStyle(FitTodayColor.textPrimary)
+
+            ForEach(cmsWorkouts) { workout in
+                Button {
+                    router.push(.cmsWorkoutDetail(workout.id), on: .workout)
+                } label: {
+                    CMSWorkoutRow(workout: workout)
+                }
+                .buttonStyle(.plain)
+            }
+        }
+    }
+}
+
+// MARK: - CMS Workout Row
+
+private struct CMSWorkoutRow: View {
+    let workout: TrainerWorkout
+
+    private var exerciseCount: Int {
+        workout.phases.reduce(0) { $0 + $1.items.count }
+    }
+
+    var body: some View {
+        HStack(spacing: FitTodaySpacing.md) {
+            ZStack {
+                Circle()
+                    .fill(workout.isActive ? FitTodayColor.brandPrimary.opacity(0.1) : FitTodayColor.textSecondary.opacity(0.1))
+                    .frame(width: 44, height: 44)
+
+                Image(systemName: workout.isActive ? "dumbbell.fill" : "checkmark.circle.fill")
+                    .font(.system(size: 20))
+                    .foregroundStyle(workout.isActive ? FitTodayColor.brandPrimary : FitTodayColor.success)
+            }
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text(workout.title)
+                    .font(FitTodayFont.ui(size: 16, weight: .semiBold))
+                    .foregroundStyle(FitTodayColor.textPrimary)
+                    .lineLimit(1)
+
+                HStack(spacing: FitTodaySpacing.sm) {
+                    Text("personal_trainer.workouts.exercises_count".localized(with: exerciseCount))
+                        .font(FitTodayFont.ui(size: 12, weight: .medium))
+                        .foregroundStyle(FitTodayColor.textSecondary)
+
+                    Text("\(workout.estimatedDurationMinutes) min")
+                        .font(FitTodayFont.ui(size: 12, weight: .medium))
+                        .foregroundStyle(FitTodayColor.textSecondary)
+                }
+            }
+
+            Spacer()
+
+            Image(systemName: "chevron.right")
+                .font(.system(size: 14, weight: .medium))
+                .foregroundStyle(FitTodayColor.textSecondary)
+        }
+        .padding()
+        .background(FitTodayColor.surface)
+        .clipShape(RoundedRectangle(cornerRadius: FitTodayRadius.md))
     }
 }
 

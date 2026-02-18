@@ -15,9 +15,7 @@ enum HomeJourneyState: Equatable {
     case loading
     /// Usuário não possui perfil → deve ir para onboarding/setup.
     case noProfile
-    /// Usuário possui perfil mas não respondeu questionário de hoje → ir para questionário diário.
-    case needsDailyCheckIn(profile: UserProfile)
-    /// Questionário respondido, treino gerado disponível.
+    /// Perfil carregado, treino pronto para gerar via IA.
     case workoutReady(profile: UserProfile)
     /// Treino concluído/pulado hoje - aguardar próximo dia.
     case workoutCompleted(profile: UserProfile)
@@ -56,7 +54,7 @@ enum HomeJourneyState: Equatable {
 
     var userProfile: UserProfile? {
         switch journeyState {
-        case .needsDailyCheckIn(let profile), .workoutReady(let profile), .workoutCompleted(let profile):
+        case .workoutReady(let profile), .workoutCompleted(let profile):
             return profile
         default:
             return nil
@@ -161,8 +159,6 @@ enum HomeJourneyState: Equatable {
             return "home.cta.loading".localized
         case .noProfile:
             return "home.cta.setup_profile".localized
-        case .needsDailyCheckIn:
-            return "home.cta.answer_questionnaire".localized
         case .workoutReady:
             return "home.cta.view_today_workout".localized
         case .workoutCompleted:
@@ -174,8 +170,6 @@ enum HomeJourneyState: Equatable {
 
     var ctaSubtitle: String? {
         switch journeyState {
-        case .needsDailyCheckIn:
-            return "home.cta.subtitle.questionnaire".localized
         case .workoutReady:
             if canSwapSuggestion {
                 return "home.cta.subtitle.swap".localized
@@ -244,14 +238,7 @@ enum HomeJourneyState: Equatable {
                 return
             }
 
-            // Verificar se já respondeu hoje
-            let hasAnsweredToday = await checkIfAnsweredToday()
-
-            if hasAnsweredToday {
-                journeyState = .workoutReady(profile: profile)
-            } else {
-                journeyState = .needsDailyCheckIn(profile: profile)
-            }
+            journeyState = .workoutReady(profile: profile)
 
             // Carregar programas e treinos recomendados
             await loadProgramsAndWorkouts(profile: profile)
@@ -365,23 +352,6 @@ enum HomeJourneyState: Equatable {
         }
     }
 
-    private func checkIfAnsweredToday() async -> Bool {
-        // Por enquanto, verificar via UserDefaults a data da última resposta
-        // Futuramente, isso pode vir de um repositório de DailyCheckIn
-        guard let lastCheckIn = UserDefaults.standard.object(forKey: AppStorageKeys.lastDailyCheckInDate) as? Date else {
-            return false
-        }
-        return Calendar.current.isDateInToday(lastCheckIn)
-    }
-
-    /// Marca que o usuário respondeu o questionário hoje.
-    func markDailyCheckInCompleted() {
-        UserDefaults.standard.set(Date(), forKey: AppStorageKeys.lastDailyCheckInDate)
-        Task {
-            await loadUserData()
-        }
-    }
-    
     /// Tenta trocar a sugestão do treino diário (1x por dia)
     func swapDailySuggestion() {
         guard dailyStateManager.trySwap() else {
@@ -447,23 +417,6 @@ enum HomeJourneyState: Equatable {
             composer: composer
         )
         return try await generator.execute(profile: profile, checkIn: checkIn)
-    }
-
-    /// Legacy method - regenerates using stored questionnaire data.
-    /// Prefer `generateWorkoutWithCheckIn(_:)` for live inputs from Home.
-    @available(*, deprecated, message: "Use generateWorkoutWithCheckIn(_:) with live inputs instead")
-    func regenerateDailyWorkoutPlan() async throws -> WorkoutPlan {
-        guard let checkIn = loadStoredCheckIn() else {
-            throw DomainError.invalidInput(reason: "Precisamos que você responda o questionário de hoje novamente.")
-        }
-        return try await generateWorkoutWithCheckIn(checkIn)
-    }
-
-    private func loadStoredCheckIn() -> DailyCheckIn? {
-        guard let data = UserDefaults.standard.data(forKey: AppStorageKeys.lastDailyCheckInData) else {
-            return nil
-        }
-        return try? JSONDecoder().decode(DailyCheckIn.self, from: data)
     }
 
     /// Observar mudanças no entitlement em background.

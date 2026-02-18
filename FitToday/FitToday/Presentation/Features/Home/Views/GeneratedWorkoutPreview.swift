@@ -8,7 +8,7 @@
 import SwiftUI
 
 /// Model for a generated workout from AI.
-struct GeneratedWorkout: Identifiable, Sendable {
+struct GeneratedWorkout: Identifiable, Sendable, Codable {
     let id: UUID
     let name: String
     let exercises: [GeneratedExercise]
@@ -48,7 +48,7 @@ struct GeneratedWorkout: Identifiable, Sendable {
 }
 
 /// Exercise within a generated workout.
-struct GeneratedExercise: Identifiable, Sendable {
+struct GeneratedExercise: Identifiable, Sendable, Codable {
     let id: UUID
     let exerciseId: Int
     let name: String

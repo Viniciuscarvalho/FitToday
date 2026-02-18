@@ -36,11 +36,16 @@ struct ProgramsListView: View {
     }
 
     private func initializeViewModel() {
-        if let repository = resolver.resolve(ProgramRepository.self) {
-            viewModel = ProgramsListViewModel(repository: repository)
-        } else {
+        guard let repository = resolver.resolve(ProgramRepository.self) else {
             dependencyError = NSLocalizedString("error.generic", comment: "Generic error")
+            return
         }
+
+        viewModel = ProgramsListViewModel(
+            repository: repository,
+            profileRepository: resolver.resolve(UserProfileRepository.self),
+            historyRepository: resolver.resolve(WorkoutHistoryRepository.self)
+        )
     }
 
     @ViewBuilder
@@ -51,8 +56,13 @@ struct ProgramsListView: View {
                 statsBanner(viewModel: viewModel)
                     .padding(.horizontal, FitTodaySpacing.md)
 
-                // Grouped Programs
-                ForEach(viewModel.groupedPrograms, id: \.category) { group in
+                // "Para Você" Recommended Section
+                if !viewModel.recommendedPrograms.isEmpty {
+                    recommendedSection(programs: viewModel.recommendedPrograms)
+                }
+
+                // Grouped Programs (sorted by profile relevance)
+                ForEach(viewModel.sortedGroupedPrograms, id: \.category) { group in
                     categorySection(
                         category: group.category,
                         programs: group.programs,
@@ -108,6 +118,39 @@ struct ProgramsListView: View {
         .padding(.vertical, FitTodaySpacing.sm)
         .background(.white.opacity(0.15))
         .clipShape(RoundedRectangle(cornerRadius: FitTodayRadius.md))
+    }
+
+    // MARK: - Recommended Section
+
+    private func recommendedSection(programs: [Program]) -> some View {
+        VStack(alignment: .leading, spacing: FitTodaySpacing.sm) {
+            HStack {
+                Image(systemName: "star.fill")
+                    .foregroundStyle(FitTodayColor.warning)
+                    .font(.system(size: 14))
+
+                Text("programs.recommended.title".localized)
+                    .font(FitTodayFont.ui(size: 17, weight: .semiBold))
+                    .foregroundStyle(FitTodayColor.textPrimary)
+
+                Spacer()
+            }
+            .padding(.horizontal, FitTodaySpacing.md)
+
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: FitTodaySpacing.sm) {
+                    ForEach(programs) { program in
+                        Button {
+                            router.push(.programDetail(program.id), on: .workout)
+                        } label: {
+                            CompactProgramCard(program: program)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                .padding(.horizontal, FitTodaySpacing.md)
+            }
+        }
     }
 
     // MARK: - Category Section
@@ -213,13 +256,25 @@ private struct CompactProgramCard: View {
 @MainActor
 @Observable final class ProgramsListViewModel {
     private(set) var programs: [Program] = []
+    private(set) var recommendedPrograms: [Program] = []
     private(set) var isLoading = false
     var errorMessage: String?
 
     private let repository: ProgramRepository
+    private let profileRepository: UserProfileRepository?
+    private let historyRepository: WorkoutHistoryRepository?
+    private let recommender = ProgramRecommender()
 
-    init(repository: ProgramRepository) {
+    private var userProfile: UserProfile?
+
+    init(
+        repository: ProgramRepository,
+        profileRepository: UserProfileRepository? = nil,
+        historyRepository: WorkoutHistoryRepository? = nil
+    ) {
         self.repository = repository
+        self.profileRepository = profileRepository
+        self.historyRepository = historyRepository
     }
 
     // MARK: - Computed Properties
@@ -249,7 +304,6 @@ private struct CompactProgramCard: View {
                 guard let programs = grouped[category], !programs.isEmpty else {
                     return nil
                 }
-                // Sort programs within category by level
                 let sortedPrograms = programs.sorted { p1, p2 in
                     let levelOrder: [ProgramLevel: Int] = [.beginner: 0, .intermediate: 1, .advanced: 2]
                     return (levelOrder[p1.level] ?? 0) < (levelOrder[p2.level] ?? 0)
@@ -257,6 +311,24 @@ private struct CompactProgramCard: View {
                 return ProgramGroup(category: category, programs: sortedPrograms)
             }
             .sorted { $0.category.sortOrder < $1.category.sortOrder }
+    }
+
+    /// Categories sorted by relevance to the user's profile goal.
+    var sortedGroupedPrograms: [ProgramGroup] {
+        guard let goal = userProfile?.mainGoal else {
+            return groupedPrograms
+        }
+
+        let priorityCategories = Self.categoriesForGoal(goal)
+
+        return groupedPrograms.sorted { a, b in
+            let aPriority = priorityCategories.firstIndex(of: a.category) ?? Int.max
+            let bPriority = priorityCategories.firstIndex(of: b.category) ?? Int.max
+            if aPriority != bPriority {
+                return aPriority < bPriority
+            }
+            return a.category.sortOrder < b.category.sortOrder
+        }
     }
 
     // MARK: - Methods
@@ -267,20 +339,41 @@ private struct CompactProgramCard: View {
 
         do {
             programs = try await repository.listPrograms()
+
+            // Load profile and history for recommendations
+            userProfile = try? await profileRepository?.loadProfile()
+            let history = (try? await historyRepository?.listEntries()) ?? []
+
+            recommendedPrograms = recommender.recommend(
+                programs: programs,
+                profile: userProfile,
+                history: history,
+                limit: 6
+            )
+
             #if DEBUG
-            print("[ProgramsListViewModel] Loaded \(programs.count) programs")
-            for category in ProgramCategory.allCases {
-                let count = programs.filter { $0.category == category }.count
-                if count > 0 {
-                    print("  - \(category.displayName): \(count) programs")
-                }
-            }
+            print("[ProgramsListViewModel] Loaded \(programs.count) programs, \(recommendedPrograms.count) recommended")
             #endif
         } catch {
             errorMessage = "Não foi possível carregar os programas: \(error.localizedDescription)"
             #if DEBUG
             print("[ProgramsListViewModel] Error: \(error)")
             #endif
+        }
+    }
+
+    // MARK: - Goal-to-Category Mapping
+
+    private static func categoriesForGoal(_ goal: FitnessGoal) -> [ProgramCategory] {
+        switch goal {
+        case .hypertrophy:
+            return [.pushPullLegs, .upperLower, .fullBody]
+        case .conditioning, .performance:
+            return [.fullBody, .specialized, .pushPullLegs]
+        case .weightLoss:
+            return [.fatLoss, .fullBody, .homeWorkout]
+        case .endurance:
+            return [.fullBody, .homeWorkout, .fatLoss]
         }
     }
 }

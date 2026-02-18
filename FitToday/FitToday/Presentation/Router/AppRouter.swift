@@ -40,7 +40,6 @@ enum AppRoute: Hashable {
     case onboarding
     case editProfile  // Rota separada para edição de perfil existente
     case setup
-    case dailyQuestionnaire
     case workoutPlan(UUID)
     case exerciseDetail
     case workoutExecution  // Nova view de execução com timer e pause/play
@@ -71,7 +70,6 @@ struct DeepLink {
         case home
         case onboarding
         case setup
-        case dailyQuestionnaire
         case paywall
         case groupInvite(groupId: String)
     }
@@ -102,8 +100,6 @@ struct DeepLink {
             destination = .onboarding
         case "setup", "/setup":
             destination = .setup
-        case "daily", "/daily":
-            destination = .dailyQuestionnaire
         case "paywall", "/paywall":
             destination = .paywall
         default:
@@ -166,9 +162,6 @@ protocol AppRouting: AnyObject {
         case .setup:
             select(tab: .home)
             push(.setup, on: .home)
-        case .dailyQuestionnaire:
-            select(tab: .home)
-            push(.dailyQuestionnaire, on: .home)
         case .paywall:
             select(tab: .home)
             push(.paywall, on: .home)

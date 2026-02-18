@@ -11,7 +11,6 @@ import SwiftUI
 // Componente extraído para manter a view principal < 100 linhas
 struct ProfileSettingsSection: View {
     let onEditProfile: () -> Void
-    let onRedoDailyQuestionnaire: () -> Void
     let onOpenHealthKit: () -> Void
     let onOpenPrivacySettings: () -> Void
     let onRestorePurchases: () -> Void
@@ -23,10 +22,6 @@ struct ProfileSettingsSection: View {
 
             VStack(spacing: 0) {
                 SettingsRow(icon: "person.text.rectangle", title: "Editar Perfil de Treino", action: onEditProfile)
-
-                Divider().padding(.leading, 56)
-
-                SettingsRow(icon: "flame", title: "Refazer Questionário Diário", action: onRedoDailyQuestionnaire)
 
                 Divider().padding(.leading, 56)
 

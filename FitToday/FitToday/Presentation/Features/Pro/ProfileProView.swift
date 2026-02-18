@@ -331,12 +331,6 @@ struct ProfileProView: View {
 
                 Divider().padding(.leading, 56)
 
-                SettingsRow(icon: "flame", title: "settings.redo_questionnaire".localized) {
-                    redoDailyQuestionnaire()
-                }
-
-                Divider().padding(.leading, 56)
-
                 SettingsRow(icon: "lock.shield", title: "settings.privacy_settings".localized) {
                     router.push(.privacySettings, on: .profile)
                 }
@@ -464,13 +458,6 @@ struct ProfileProView: View {
                 print("Failed to load entitlement: \(error)")
             }
         }
-    }
-
-    private func redoDailyQuestionnaire() {
-        UserDefaults.standard.removeObject(forKey: AppStorageKeys.lastDailyCheckInDate)
-        UserDefaults.standard.removeObject(forKey: AppStorageKeys.lastDailyCheckInData)
-        DailyWorkoutStateManager.shared.resetForNewDay()
-        router.push(.dailyQuestionnaire, on: .profile)
     }
 
     private func restorePurchases() async {

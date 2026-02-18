@@ -81,6 +81,12 @@
 "home.completed.title" = "Workout Complete!";
 "home.completed.subtitle" = "Great job today! Rest up and come back tomorrow.";
 
+// MARK: - Today Workout Card
+"home.today_workout.title" = "Today's Workout";
+"home.today_workout.generated" = "AI Generated";
+"home.today_workout.view" = "View Workout";
+"home.today_workout.start" = "Start";
+
 // MARK: - Home Error State
 "home.error.title" = "Oops! Something went wrong";
 
@@ -492,6 +498,7 @@
 "programs.card.days" = "%d Days";
 "programs.card.days_per_week" = "%d days/week";
 "programs.card.exercises" = "%d exercises";
+"programs.recommended.title" = "For You";
 
 // MARK: - Programs Workout Preview
 "program.workout.exercises" = "exercises";
@@ -535,6 +542,8 @@
 "personal.loading" = "Loading workout...";
 "personal.error.load" = "Failed to load";
 "personal.new_badge" = "NEW";
+"personal.cms_workouts.title" = "Trainer Workouts";
+"personal.pdf_workouts.title" = "PDF Workouts";
 
 // MARK: - ErrorMapper
 "error.generic.title" = "Oops!";
