@@ -1,0 +1,35 @@
+{
+  "cli_version": "0.4.4",
+  "checkpoint_id": "661a284558a3",
+  "session_id": "c03089d3-4366-48f4-8480-a76ac08b80a1",
+  "strategy": "manual-commit",
+  "created_at": "2026-02-19T13:47:58.911757Z",
+  "branch": "feature/bugfix-description-exercices",
+  "checkpoints_count": 1,
+  "files_touched": [
+    ".claude/feature-state/prd-apple-review/plan.md",
+    ".claude/feature-state/prd-bugfix-descriptionExercices/pr-url.txt",
+    ".claude/settings.local.json",
+    "tasks/prd-apple-review/prd.md",
+    "tasks/prd-apple-review/tasks.md",
+    "tasks/prd-apple-review/techspec.md"
+  ],
+  "agent": "Claude Code",
+  "token_usage": {
+    "input_tokens": 16,
+    "cache_creation_tokens": 58530,
+    "cache_read_tokens": 418561,
+    "output_tokens": 57,
+    "api_call_count": 9
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-02-19T13:47:58.730016Z",
+    "agent_lines": 0,
+    "human_added": 798,
+    "human_modified": 509,
+    "human_removed": 0,
+    "total_committed": 799,
+    "agent_percentage": 0
+  },
+  "transcript_path": ".claude/projects/-Users-viniciuscarvalho-Documents-FitToday/c03089d3-4366-48f4-8480-a76ac08b80a1.jsonl"
+}

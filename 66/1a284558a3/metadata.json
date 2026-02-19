@@ -1,0 +1,31 @@
+{
+  "cli_version": "0.4.4",
+  "checkpoint_id": "661a284558a3",
+  "strategy": "manual-commit",
+  "branch": "feature/bugfix-description-exercices",
+  "checkpoints_count": 1,
+  "files_touched": [
+    ".claude/feature-state/prd-apple-review/plan.md",
+    ".claude/feature-state/prd-bugfix-descriptionExercices/pr-url.txt",
+    ".claude/settings.local.json",
+    "tasks/prd-apple-review/prd.md",
+    "tasks/prd-apple-review/tasks.md",
+    "tasks/prd-apple-review/techspec.md"
+  ],
+  "sessions": [
+    {
+      "metadata": "/66/1a284558a3/0/metadata.json",
+      "transcript": "/66/1a284558a3/0/full.jsonl",
+      "context": "/66/1a284558a3/0/context.md",
+      "content_hash": "/66/1a284558a3/0/content_hash.txt",
+      "prompt": "/66/1a284558a3/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 16,
+    "cache_creation_tokens": 58530,
+    "cache_read_tokens": 418561,
+    "output_tokens": 57,
+    "api_call_count": 9
+  }
+}
