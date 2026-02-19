@@ -1,0 +1,27 @@
+{
+  "cli_version": "0.4.4",
+  "checkpoint_id": "ab9d61d64fd0",
+  "strategy": "manual-commit",
+  "branch": "feature/bugfix-description-exercices",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "FitToday/FitToday/Presentation/Features/Programs/Views/ProgramWorkoutDetailView.swift",
+    "FitToday/FitToday/Presentation/Features/Programs/Views/ProgramsListView.swift"
+  ],
+  "sessions": [
+    {
+      "metadata": "/ab/9d61d64fd0/0/metadata.json",
+      "transcript": "/ab/9d61d64fd0/0/full.jsonl",
+      "context": "/ab/9d61d64fd0/0/context.md",
+      "content_hash": "/ab/9d61d64fd0/0/content_hash.txt",
+      "prompt": "/ab/9d61d64fd0/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 91,
+    "cache_creation_tokens": 72770,
+    "cache_read_tokens": 4119821,
+    "output_tokens": 517,
+    "api_call_count": 37
+  }
+}
