@@ -157,7 +157,7 @@ struct ProgramWorkoutDetailView: View {
     }
 
     private var exercisesList: some View {
-        VStack(spacing: FitTodaySpacing.sm) {
+        LazyVStack(spacing: FitTodaySpacing.sm) {
             ForEach(Array(exercises.enumerated()), id: \.element.id) { index, exercise in
                 ExerciseRowCard(
                     exercise: exercise,
@@ -465,7 +465,7 @@ private struct StatBadge: View {
     }
 }
 
-// MARK: - Exercise Row Card
+// MARK: - Exercise Row Card (Hevy-style)
 
 private struct ExerciseRowCard: View {
     let exercise: ProgramExercise
@@ -477,8 +477,8 @@ private struct ExerciseRowCard: View {
     let onTap: () -> Void
 
     var body: some View {
-        HStack(spacing: FitTodaySpacing.sm) {
-            // Move buttons in edit mode
+        HStack(alignment: .top, spacing: FitTodaySpacing.sm) {
+            // Reorder controls in edit mode
             if editMode == .active {
                 VStack(spacing: FitTodaySpacing.xs) {
                     Button { onMoveUp?() } label: {
@@ -498,51 +498,48 @@ private struct ExerciseRowCard: View {
                     .disabled(onMoveDown == nil)
                 }
                 .frame(width: 24)
+                .padding(.top, FitTodaySpacing.sm)
             }
 
             Button(action: onTap) {
-                HStack(spacing: FitTodaySpacing.md) {
-                    // Exercise number badge
-                    Text("\(index)")
-                        .font(.system(.subheadline, weight: .bold))
-                        .foregroundStyle(FitTodayColor.brandPrimary)
-                        .frame(width: 28, height: 28)
-                        .background(FitTodayColor.brandPrimary.opacity(0.15))
-                        .clipShape(Circle())
+                VStack(alignment: .leading, spacing: FitTodaySpacing.sm) {
+                    // Header: circle image + title + rest timer
+                    HStack(spacing: FitTodaySpacing.sm) {
+                        exerciseCircleImage
 
-                    // Exercise image
-                    exerciseImage
+                        VStack(alignment: .leading, spacing: FitTodaySpacing.xs) {
+                            Text(exercise.name)
+                                .font(.system(.subheadline, weight: .semibold))
+                                .foregroundStyle(FitTodayColor.brandPrimary)
+                                .lineLimit(2)
 
-                    // Exercise info
-                    VStack(alignment: .leading, spacing: FitTodaySpacing.xs) {
-                        Text(exercise.name)
-                            .font(.system(.subheadline, weight: .semibold))
-                            .foregroundStyle(FitTodayColor.textPrimary)
-                            .lineLimit(2)
-
-                        HStack(spacing: FitTodaySpacing.sm) {
-                            Text("\(exercise.sets) séries")
-                            Text("•")
-                            Text("\(exercise.repsRange.lowerBound)-\(exercise.repsRange.upperBound) reps")
+                            if !exercise.wgerExercise.muscles.isEmpty {
+                                Text(Self.muscleNames(for: exercise.wgerExercise.muscles))
+                                    .font(.system(.caption2))
+                                    .foregroundStyle(FitTodayColor.textTertiary)
+                                    .lineLimit(1)
+                            }
                         }
-                        .font(.system(.caption))
+
+                        Spacer()
+
+                        // Rest timer badge
+                        HStack(spacing: 3) {
+                            Image(systemName: "timer")
+                                .font(.system(size: 11))
+                            Text(restTimerLabel)
+                                .font(.system(.caption2, weight: .medium))
+                        }
                         .foregroundStyle(FitTodayColor.textSecondary)
-
-                        if !exercise.wgerExercise.muscles.isEmpty {
-                            Text(Self.muscleNames(for: exercise.wgerExercise.muscles))
-                                .font(.system(.caption2))
-                                .foregroundStyle(FitTodayColor.textTertiary)
-                                .lineLimit(1)
-                        }
+                        .padding(.horizontal, FitTodaySpacing.sm)
+                        .padding(.vertical, 4)
+                        .background(FitTodayColor.surface)
+                        .clipShape(Capsule())
+                        .overlay(Capsule().stroke(FitTodayColor.outline.opacity(0.2), lineWidth: 1))
                     }
 
-                    Spacer()
-
-                    if editMode != .active {
-                        Image(systemName: "chevron.right")
-                            .font(.system(.caption, weight: .semibold))
-                            .foregroundStyle(FitTodayColor.textTertiary)
-                    }
+                    // SET | KG | REP RANGE table
+                    ExerciseSetsTable(sets: exercise.sets, repsRange: exercise.repsRange)
                 }
                 .padding(FitTodaySpacing.md)
                 .background(FitTodayColor.surface)
@@ -558,33 +555,46 @@ private struct ExerciseRowCard: View {
                         .foregroundStyle(FitTodayColor.error)
                 }
                 .buttonStyle(.plain)
+                .padding(.top, FitTodaySpacing.sm)
             }
         }
     }
 
+    // MARK: - Circle Image
+
     @ViewBuilder
-    private var exerciseImage: some View {
-        if let imageURL = exercise.imageURL {
-            ExerciseMediaImageURL(
-                url: imageURL,
-                size: CGSize(width: 56, height: 56),
-                contentMode: .fill,
-                cornerRadius: FitTodayRadius.sm
-            )
-        } else {
-            placeholderImage
+    private var exerciseCircleImage: some View {
+        ZStack {
+            Circle()
+                .fill(FitTodayColor.brandPrimary.opacity(0.1))
+                .frame(width: 52, height: 52)
+
+            if let imageURL = exercise.imageURL {
+                ExerciseMediaImageURL(
+                    url: imageURL,
+                    size: CGSize(width: 52, height: 52),
+                    contentMode: .fill,
+                    cornerRadius: 26
+                )
+                .clipShape(Circle())
+            } else {
+                Image(systemName: "figure.strengthtraining.traditional")
+                    .font(.system(size: 22))
+                    .foregroundStyle(FitTodayColor.brandPrimary)
+            }
         }
     }
 
-    private var placeholderImage: some View {
-        ZStack {
-            RoundedRectangle(cornerRadius: FitTodayRadius.sm)
-                .fill(FitTodayColor.brandPrimary.opacity(0.1))
-            Image(systemName: "figure.strengthtraining.traditional")
-                .font(.system(size: 24))
-                .foregroundStyle(FitTodayColor.brandPrimary)
+    // MARK: - Rest Timer Label
+
+    private var restTimerLabel: String {
+        let seconds = exercise.restSeconds
+        if seconds >= 60 {
+            let mins = seconds / 60
+            let secs = seconds % 60
+            return secs == 0 ? "\(mins)min" : "\(mins)m\(secs)s"
         }
-        .frame(width: 56, height: 56)
+        return "\(seconds)s"
     }
 
     // MARK: - Static Helpers
@@ -613,6 +623,63 @@ private struct ExerciseRowCard: View {
         case 15: return "Lombar"
         default: return nil
         }
+    }
+}
+
+// MARK: - Exercise Sets Table
+
+private struct ExerciseSetsTable: View {
+    let sets: Int
+    let repsRange: ClosedRange<Int>
+
+    var body: some View {
+        VStack(spacing: 0) {
+            tableHeader
+            Divider().padding(.vertical, 4)
+            ForEach(1...sets, id: \.self) { setNumber in
+                tableRow(setNumber: setNumber)
+                if setNumber < sets {
+                    Divider().opacity(0.4)
+                }
+            }
+        }
+        .background(FitTodayColor.background.opacity(0.5))
+        .clipShape(RoundedRectangle(cornerRadius: FitTodayRadius.sm))
+    }
+
+    private var tableHeader: some View {
+        HStack {
+            Text("SET").frame(width: 36, alignment: .center)
+            Spacer()
+            Text("KG").frame(width: 60, alignment: .center)
+            Spacer()
+            Text("REPS").frame(width: 80, alignment: .center)
+        }
+        .font(.system(.caption2, weight: .bold))
+        .foregroundStyle(FitTodayColor.textTertiary)
+        .padding(.horizontal, FitTodaySpacing.sm)
+        .padding(.top, FitTodaySpacing.xs)
+    }
+
+    private func tableRow(setNumber: Int) -> some View {
+        HStack {
+            Text("\(setNumber)")
+                .frame(width: 36, alignment: .center)
+                .font(.system(.caption, weight: .semibold))
+                .foregroundStyle(FitTodayColor.brandPrimary)
+            Spacer()
+            Text("—")
+                .frame(width: 60, alignment: .center)
+                .font(.system(.caption))
+                .foregroundStyle(FitTodayColor.textTertiary)
+            Spacer()
+            Text("\(repsRange.lowerBound)–\(repsRange.upperBound)")
+                .frame(width: 80, alignment: .center)
+                .font(.system(.caption, weight: .medium))
+                .foregroundStyle(FitTodayColor.textPrimary)
+        }
+        .padding(.horizontal, FitTodaySpacing.sm)
+        .padding(.vertical, 5)
     }
 }
 
