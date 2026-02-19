@@ -1,0 +1,1084 @@
+Os treinos hoje em atividades no histórico, está mostrando treinos genéricos que não foram registrados pelo usuário, em treinos recentes. Caso o usuário não tenha nenhum treino registrado na plataforma, buscar do treino que foi registrado no Apple Health, caso não tenha nenhum mostrar o estado de empty view. Um outro ponto que os testers falaram foi que a descrição dos exercícios continua vindo mesclada tanto espanhol como inglês, isso é porque a descrição vem da API, isso está impactando na tradução e no Localizable do aplicativo. /feature-marker prd-activity-fix
+
+---
+
+Base directory for this skill: /Users/viniciuscarvalho/.claude/skills/feature-marker
+
+# feature-marker
+
+Automates feature development with a 5-phase workflow:
+
+1. **Inputs Gate** - Validates `prd.md`, `techspec.md`, `tasks.md` exist; generates them via `~/.claude/commands/` if missing.
+2. **Analysis & Planning** - Auto-installs product-manager skill if missing; reads docs, creates implementation plan.
+3. **Implementation** - Executes tasks with progress tracking.
+4. **Tests & Validation** - Runs test suites, validates build, and runs iOS simulator (XcodeBuildMCP) if available.
+5. **Commit & PR** - Auto-installs enhanced commit command if missing; commits changes using professional workflow and creates PR (auto-detects git platform).
+
+## Usage
+
+```
+/feature-marker <feature-slug>
+```
+
+**Example**:
+```
+/feature-marker prd-user-authentication
+```
+
+### Interactive Mode
+
+```
+/feature-marker --interactive <feature-slug>
+```
+
+Opens a menu to select execution mode:
+- **Full Workflow** - Default, generates missing files and executes all phases
+- **Tasks Only** - Uses existing files, skips generation phase
+- **Ralph Loop** - Autonomous continuous execution with ralph-wiggum
+- **Spec-Driven** - Multi-agent review + worktree isolation via spec-workflow
+
+Works both in terminal (TTY menu) and Claude CLI (AskUserQuestion prompt).
+
+**Direct mode selection** (skip menu):
+```
+/feature-marker --mode full <feature-slug>
+/feature-marker --mode tasks-only <feature-slug>
+/feature-marker --mode ralph-loop <feature-slug>
+/feature-marker --mode spec-driven <feature-slug>
+```
+
+## Prerequisites
+
+### Commands
+
+The following commands must be available in `~/.claude/commands/`:
+
+- `create-prd.md` - Creates a new PRD from requirements discussion
+- `generate-spec.md` - Generates technical specification from PRD
+- `generate-tasks.md` - Breaks down feature spec into implementable tasks
+
+### Templates
+
+The commands above read templates from `~/.claude/docs/specs/` to generate structured documents.
+
+Required templates:
+- `~/.claude/docs/specs/prd-template.md` - Product Requirements Document template
+- `~/.claude/docs/specs/techspec-template.md` - Technical Specification template
+- `~/.claude/docs/specs/tasks-template.md` - Tasks breakdown template
+
+**Template Format**: Templates should be markdown files with placeholders and structure that commands will use to generate feature-specific documents.
+
+**Setup**: Ensure these templates exist before running feature-marker:
+```bash
+ls ~/.claude/docs/specs/
+# Should show: prd-template.md, techspec-template.md, tasks-template.md
+```
+
+**Note**: If templates are missing, commands in `~/.claude/commands/` will fail to generate files.
+
+### Project Structure
+
+**Feature Documents** (generated in project):
+```
+./tasks/
+└── prd-{feature-name}/
+    ├── prd.md            ← Generated from ~/.claude/docs/specs/prd-template.md
+    ├── techspec.md       ← Generated from ~/.claude/docs/specs/techspec-template.md
+    ├── tasks.md          ← Generated from ~/.claude/docs/specs/tasks-template.md
+    └── {num}_task.md     ← Individual task files (optional)
+```
+
+**State Directory** (checkpoint & progress):
+```
+.claude/feature-state/{feature-name}/
+├── checkpoint.json
+├── analysis.md
+├── plan.md
+├── progress.md
+├── test-results.md
+└── pr-url.txt
+```
+
+**User Configuration** (required setup):
+```
+~/.claude/
+├── commands/           ← Commands that generate files
+│   ├── create-prd.md
+│   ├── generate-spec.md
+│   └── generate-tasks.md
+└── docs/
+    └── specs/          ← Templates used by commands
+        ├── prd-template.md
+        ├── techspec-template.md
+        └── tasks-template.md
+```
+
+## Behavior
+
+When invoked, the skill:
+
+1. **Validates inputs** - Checks if `./tasks/prd-{feature-slug}/` contains required files
+   - If all files exist → Skips to step 3
+   - If any file is missing → Proceeds to step 2
+2. **Generates ONLY missing files** - Existing files are never overwritten:
+   - Missing PRD → `/create-prd`
+   - Missing Tech Spec → `/generate-spec {feature-slug}`
+   - Missing Tasks → `/generate-tasks {feature-slug}`
+3. **Auto-installs missing dependencies**:
+   - **Phase 1**: Checks for `product-manager` skill
+     - If missing: Installs via `npx skills add https://github.com/aj-geddes/claude-code-bmad-skills --skill product-manager`
+     - If user already has it: Uses user's version
+     - If installation fails: Continues without it (non-blocking)
+   - **Phase 4**: Checks for `/commit` command
+     - If missing: Copies from bundled `resources/commit.md` to `~/.claude/commands/commit.md`
+     - If user already has it: Uses user's version
+     - If installation fails: Falls back to standard commit workflow
+4. **Executes 5-phase workflow** via the `feature-marker` agent
+5. **Persists state** - Saves checkpoints after each phase/task for resume capability
+
+**Important**: The workflow is smart about file detection and dependencies:
+- ✅ Files/skills/commands exist → Uses them directly, no regeneration or reinstallation
+- ⚠️ Missing → Installs/generates only what's needed
+- 🔒 Never overwrites existing content
+- 👤 **User's versions always have priority** over bundled/auto-installed versions
+
+## Auto-Installed Dependencies
+
+Feature-marker automatically installs missing dependencies to enhance the workflow:
+
+### Product Manager Skill (Phase 1)
+
+**What it does**: Provides advanced PRD analysis, requirements validation, and product management capabilities.
+
+**Installation**:
+- **Check**: Phase 1 checks for `~/.claude/skills/product-manager/SKILL.md`
+- **Install**: If missing and `npx` available, runs:
+  ```bash
+  npx skills add https://github.com/aj-geddes/claude-code-bmad-skills --skill product-manager
+  ```
+- **Priority**: Uses user's existing skill if already installed
+- **Fallback**: Continues without it if installation fails (non-blocking)
+
+**Benefits**:
+- Enhanced requirement analysis
+- Better PRD validation
+- Improved feature planning
+
+### Enhanced Commit Command (Phase 4)
+
+**What it does**: Professional commit workflow with validation, splitting, and conventional commit format.
+
+**Installation**:
+- **Check**: Phase 4 checks for `~/.claude/commands/commit.md`
+- **Install**: If missing, copies from bundled `resources/commit.md` to `~/.claude/commands/commit.md`
+- **Priority**: Uses user's existing command if already installed
+- **Fallback**: Uses standard commit workflow if installation fails
+
+**Features**:
+- Pre-commit validation (lint, build, docs)
+- Intelligent commit splitting
+- Conventional commit format with emojis
+- Smart file staging
+- No Co-Authored-By footer (as per command design)
+
+**Example Output**:
+```bash
+✨ feat: add user authentication system
+🐛 fix: resolve memory leak in rendering process
+📝 docs: update API documentation
+♻️ refactor: simplify error handling logic
+```
+
+### Manual Installation
+
+If auto-installation fails, you can install manually:
+
+**Product Manager Skill**:
+```bash
+npx skills add https://github.com/aj-geddes/claude-code-bmad-skills --skill product-manager
+```
+
+**Commit Command**:
+```bash
+cp ~/.claude/skills/feature-marker/resources/commit.md ~/.claude/commands/commit.md
+```
+
+## Template Setup Guide
+
+### Template Directory Structure
+
+Commands in `~/.claude/commands/` read templates from a centralized location:
+
+```
+~/.claude/docs/specs/
+├── prd-template.md          # Product Requirements Document template
+├── techspec-template.md     # Technical Specification template
+└── tasks-template.md        # Task breakdown template
+```
+
+### Why Templates in ~/.claude/docs/specs?
+
+- **Centralized**: All projects share the same templates
+- **User-controlled**: Users can customize their own templates
+- **Portable**: Commands reference templates via standard path
+- **Separation**: Templates are not in project repositories
+
+### Template Content
+
+Each template should be a markdown file with:
+- Clear section structure
+- Placeholder text or variables
+- Examples and formatting guidelines
+
+Commands read these templates and populate them with feature-specific content.
+
+### Setup Verification
+
+To verify your setup is complete:
+
+```bash
+# Check templates exist
+ls -l ~/.claude/docs/specs/
+
+# Check commands exist
+ls -l ~/.claude/commands/
+
+# Test feature-marker
+/feature-marker --interactive prd-test-feature
+```
+
+If templates are missing, create them in `~/.claude/docs/specs/` before running feature-marker.
+
+## Checkpoint & Resume
+
+If interrupted (Ctrl+C, session crash, etc.), re-invoke with the same feature slug to resume:
+
+```
+/feature-marker prd-user-authentication
+```
+
+The skill will:
+- Detect existing checkpoint
+- Show current progress (phase, task index)
+- Ask if you want to resume or start fresh
+
+## Platform Detection
+
+In Phase 4, the skill auto-detects your git platform and selects the appropriate PR skill:
+
+| Platform | Detection | PR Skill |
+|----------|-----------|----------|
+| GitHub | `github.com` in remote URL | `checking-pr` |
+| Azure DevOps | `dev.azure.com` in remote URL | `azure-pr` |
+| GitLab | `gitlab.com` in remote URL | `checking-pr` |
+| Bitbucket | `bitbucket.org` in remote URL | `checking-pr` |
+| Other | (fallback) | `checking-pr` |
+
+## Configuration
+
+Override default behavior with `.feature-marker.json` in your repository root:
+
+```json
+{
+  "pr_skill": "custom-pr-skill",
+  "skip_pr": false,
+  "test_command": "npm run test:ci",
+  "docs_path": "./tasks",
+  "state_path": ".claude/feature-state"
+}
+```
+
+## Error Handling
+
+| Scenario | Behavior |
+|----------|----------|
+| Missing files | Auto-generate via commands |
+| No git repo | Fail early with helpful message |
+| No tests | Skip Phase 3 with warning |
+| Test failures | Report issues, allow fix, offer retry |
+| Unknown platform | Fallback to `checking-pr` |
+| PR skill unavailable | Commit only, log manual instructions |
+
+## Example Sessions
+
+### Example 1: All Files Exist (No Generation Needed)
+```
+> /feature-marker prd-user-authentication
+
+Checking for existing checkpoint...
+No checkpoint found. Starting new workflow.
+
+Phase 0: Inputs Gate
+✓ prd.md exists
+✓ techspec.md exists
+✓ tasks.md exists
+✅ All files present. Skipping generation.
+
+Phase 1: Analysis & Planning
+Reading existing documents...
+Creating implementation plan...
+Checkpoint saved.
+
+Phase 2: Implementation
+[1/6] Create User entity... ✓
+[2/6] Add authentication service... ✓
+...
+```
+
+### Example 2: Partial Files (Generates Only Missing)
+```
+> /feature-marker prd-payment-integration
+
+Checking for existing checkpoint...
+No checkpoint found. Starting new workflow.
+
+Phase 0: Inputs Gate
+✓ prd.md exists
+✗ techspec.md missing → Generating via /generate-spec...
+✓ tasks.md exists
+
+✅ Generated missing file. All inputs ready.
+
+Phase 1: Analysis & Planning
+Reading documents...
+Creating implementation plan...
+Checkpoint saved.
+...
+```
+
+### Example 3: Complete Workflow with Auto-Install
+```
+> /feature-marker prd-new-feature
+
+Phase 0: Inputs Gate
+✗ prd.md missing → Generating via /create-prd...
+✗ techspec.md missing → Generating via /generate-spec...
+✗ tasks.md missing → Generating via /generate-tasks...
+
+Phase 1: Analysis & Planning
+⚙️  Installing product-manager skill...
+✓ product-manager skill installed successfully
+Reading PRD, Tech Spec, and Tasks...
+Creating implementation plan...
+Checkpoint saved.
+
+Phase 2: Implementation
+[1/6] Create User entity... ✓
+[2/6] Add authentication service... ✓
+[3/6] Implement login endpoint... ✓
+[4/6] Add JWT token handling... ✓
+[5/6] Create logout endpoint... ✓
+[6/6] Add session management... ✓
+Checkpoint saved.
+
+Phase 3: Tests & Validation
+Running: swift test
+All tests passed.
+Checkpoint saved.
+
+Phase 4: Commit & PR
+⚙️  Installing commit command...
+✓ commit command installed successfully
+Using enhanced commit workflow (/commit)...
+✨ feat: implement user authentication system
+Detected platform: GitHub
+Creating PR via /checking-pr...
+
+✓ Feature complete!
+PR URL: https://github.com/user/repo/pull/42
+```
+
+### Example 4: Using Existing User Tools
+```
+> /feature-marker prd-payment-feature
+
+Phase 0: Inputs Gate
+✓ All inputs validated.
+
+Phase 1: Analysis & Planning
+✓ product-manager skill already installed (using user's version)
+...
+
+Phase 4: Commit & PR
+✓ commit command already exists (using user's version)
+...
+```
+
+
+ARGUMENTS: prd-activity-fix
+
+---
+
+<task-notification>
+<task-id>a0ea343</task-id>
+<tool-use-id>REDACTED</tool-use-id>
+<status>completed</status>
+<summary>Agent "Explore activity and exercise code" completed</summary>
+<result>Perfect! Now I have a comprehensive understanding. Let me create a detailed summary:
+
+## FitToday iOS Project - Architecture Overview
+
+Based on my thorough exploration of the FitToday codebase, here's a comprehensive understanding of the activity/history screen, exercise descriptions, Apple Health integration, and data flow:
+
+---
+
+### 1. ACTIVITY/HISTORY SCREEN ARCHITECTURE
+
+#### Main Views
+- **Location**: `/Users/viniciuscarvalho/Documents/FitToday/FitToday/FitToday/Presentation/Features/Activity/Views/`
+- **ActivityTabView.swift**: Master container with three segments (History, Challenges, Stats)
+- **HistoryView.swift**: Redesigned history UI with two tabs (history, challenges)
+  - Shows sections grouped by date with workout entries
+  - Displays insights header (streak, weekly stats, sparkline)
+  - Implements infinite scroll pagination
+  - Supports pull-to-refresh
+
+#### Key Components
+- **HistoryRow**: Individual workout entry display showing title, focus, status, program name, duration, calories
+- **HistoryInsightsHeader**: Shows current/best streak, weekly minutes sparkline
+- **GroupsContentView**: Social challenges management (embedded in history)
+- **LeaderboardPreviewCard**: Top 5 members by weekly workout count
+
+---
+
+### 2. DATA FLOW - FROM API/HEALTHKIT TO UI
+
+#### Domain Layer (Business Logic)
+- **File**: `/Domain/Entities/HistoryModels.swift`
+- **WorkoutHistoryEntry** (Domain Model):
+  ```swift
+  struct WorkoutHistoryEntry: Codable, Hashable, Sendable, Identifiable {
+    var id: UUID
+    var date: Date
+    var planId: UUID
+    var title: String
+    var focus: DailyFocus
+    var status: WorkoutStatus (.completed | .skipped)
+    var programId: String?
+    var programName: String?
+    var durationMinutes: Int?
+    var caloriesBurned: Int?
+    var healthKitWorkoutUUID: UUID?
+    var workoutPlan: WorkoutPlan?
+    var userRating: WorkoutRating?
+    var completedExercises: [CompletedExercise]?
+    var source: WorkoutSource (.app | .appleHealth | .merged)
+  }
+  ```
+- **UnifiedWorkoutSession**: Represents completed session with exercises, sets, volume
+- **WorkoutStatus** enum: completed, skipped
+- **WorkoutSource** enum: app, appleHealth, merged
+
+#### Data Layer - Repository Pattern
+**Repository Protocol**: `/Domain/Protocols/Repositories.swift`
+```swift
+protocol WorkoutHistoryRepository: Sendable {
+  func listEntries() async throws -> [WorkoutHistoryEntry]
+  func listEntries(limit: Int, offset: Int) async throws -> [WorkoutHistoryEntry]
+  func count() async throws -> Int
+  func saveEntry(_ entry: WorkoutHistoryEntry) async throws
+  func listAppEntriesWithPlan(limit: Int) async throws -> [WorkoutHistoryEntry]
+}
+```
+
+**Implementation**: `/Data/Repositories/SwiftDataWorkoutHistoryRepository.swift`
+- Uses SwiftData for local persistence
+- Implements pagination (limit/offset) for performance
+- Fetches sorted by date (reverse chronological)
+- Serializes WorkoutPlan and CompletedExercises as JSON for storage
+
+#### Database Models (SwiftData)
+- **File**: `/Data/Models/SDWorkoutHistoryEntry.swift`
+- Stores raw string values for enums (focus, status, source)
+- JSON serialization for nested objects (workoutPlan, completedExercises)
+- Unique constraint on `id` field
+
+#### Data Mapping
+**File**: `/Data/Mappers/WorkoutHistoryMapper.swift`
+- Maps `SDWorkoutHistoryEntry` → `WorkoutHistoryEntry` (domain)
+- Handles JSON decoding/encoding for:
+  - WorkoutPlan
+  - CompletedExercise arrays
+  - WorkoutRating enums
+
+---
+
+### 3. EXERCISE DESCRIPTIONS - LOCALIZATION & TRANSLATION
+
+#### Exercise Data Models
+- **File**: `/Domain/Entities/WorkoutModels.swift`
+```swift
+struct WorkoutExercise: Codable, Hashable, Sendable {
+  var id: String
+  var name: String
+  var mainMuscle: MuscleGroup
+  var equipment: EquipmentType
+  var instructions: [String]  // Split sentences from description
+  var media: ExerciseMedia?
+}
+
+struct ExerciseMedia: Codable, Hashable, Sendable {
+  var videoURL: URL?
+  var imageURL: URL?
+  var gifURL: URL?
+  var placeholderMuscleGroup: MuscleGroup?
+  var source: String?  // "Wger", "Placeholder"
+}
+```
+
+#### Description Processing Pipeline
+1. **Source**: Wger API (`WgerExercise.description` field)
+2. **HTML Cleaning**: Strips HTML tags and decodes entities
+3. **Translation**: ExerciseTranslationService
+4. **Split to Sentences**: For instructions array
+
+#### ExerciseTranslationService
+**File**: `/Data/Services/Translation/ExerciseTranslationService.swift`
+- **Actor-based** for thread-safety
+- **Language Detection**: Uses NaturalLanguage framework
+- **Supported translations**: English → Portuguese, Spanish → Portuguese
+- **Translation approach**: Local dictionaries (no external API)
+- **Caching**: In-memory cache to avoid reprocessing
+- **Dictionary size**: 370+ English terms, 180+ Spanish terms
+- **Fallback**: Localizable string key "exercise.description.fallback"
+
+#### Language Detection Strategy
+1. Try NLLanguageRecognizer for dominant language
+2. Check pattern-based detection (Portuguese, English, Spanish patterns)
+3. Fallback to localized string if unknown
+
+#### Terms Covered
+- Articles, prepositions, verbs (imperative)
+- Body parts: brazos, legs, pecho, hombros, etc.
+- Equipment: barbell, dumbbell, machine, kettlebell
+- Directions: up, down, forward, backward, left, right
+- Common phrases: "starting position", "range of motion"
+- Numbers: reps, sets, seconds
+
+---
+
+### 4. APPLE HEALTH INTEGRATION
+
+#### HealthKit Service
+**File**: `/Data/Services/HealthKit/HealthKitService.swift`
+
+```swift
+actor HealthKitService: HealthKitServicing {
+  func authorizationState() async -> HealthKitAuthorizationState
+  func requestAuthorization() async throws
+  func fetchWorkouts(in range: DateInterval) async throws -> [ImportedSessionMetric]
+  func exportWorkout(plan: WorkoutPlan, completedAt: Date) async throws -> ExportedWorkoutReceipt
+  func fetchCaloriesForWorkout(workoutUUID: UUID, around date: Date) async throws -> Int?
+}
+
+struct ImportedSessionMetric: Sendable, Hashable {
+  let workoutUUID: UUID
+  let startDate: Date
+  let endDate: Date
+  let durationMinutes: Int
+  let caloriesBurned: Int?
+}
+```
+
+**Key Features**:
+- Reads: HKWorkout, HKQuantityType.activeEnergyBurned
+- Exports FitToday workouts back to Apple Health
+- Maps DailyFocus → HKWorkoutActivityType
+- Supports query by date range
+
+#### HealthKit History Sync Service
+**File**: `/Data/Services/HealthKit/HealthKitHistorySyncService.swift`
+
+**Three Main Functions**:
+
+1. **syncLastDays(days: Int)** - Sync app workouts with HealthKit data
+   - Matches by date + time + duration (20% tolerance)
+   - Updates durationMinutes, caloriesBurned, healthKitWorkoutUUID
+   - Syncs to challenges if >= 30 minutes
+
+2. **importExternalWorkouts(days: Int)** - Import workouts done outside the app
+   - Filters out already-imported workouts by UUID
+   - Additional deduplication by date+duration (5-min tolerance)
+   - Creates new WorkoutHistoryEntry with `.appleHealth` source
+   - Uses constant UUID for all Apple Health imports: `00000000-0000-0000-0000-APPLEHEALTH`
+   - Default focus: `.fullBody` for external workouts
+
+3. **cleanupStaleUUIDs(days: Int)** - Remove stale HealthKit references
+   - Detects UUIDs that no longer exist in HealthKit
+   - Clears them to allow re-matching
+
+#### Match Algorithm Details
+- **Time window**: 3 hours max delta from entry date
+- **Duration validation**: Entry duration ± 20% tolerance
+- **Deduplication**: Prevents same workout imported twice
+- **Score-based**: Sorts candidates by time delta, picks best match
+
+---
+
+### 5. VIEWMODEL & USE CASE LAYER
+
+#### HistoryViewModel
+**File**: `/Presentation/Features/History/HistoryViewModel.swift`
+
+```swift
+@MainActor
+@Observable final class HistoryViewModel: ErrorPresenting {
+  private(set) var sections: [HistorySection] = []
+  private(set) var isLoading = false
+  private(set) var isLoadingMore = false
+  private(set) var hasMorePages = true
+  private(set) var insights: HistoryInsights?
+  var errorMessage: ErrorMessage?
+  
+  private let repository: WorkoutHistoryRepository
+  private let pageSize = 20
+  private let insightsUseCase = ComputeHistoryInsightsUseCase()
+  
+  func loadHistory()
+  func refresh() async
+  func loadMoreIfNeeded()
+}
+```
+
+**Pagination Strategy**:
+- Page size: 20 entries
+- Tracks currentOffset and hasMorePages
+- Lazy-loads next page when last entry appears
+- Computes insights on each load: streak, weekly stats
+
+#### HistorySection (Group by Date)
+```swift
+struct HistorySection: Identifiable, Hashable {
+  let id: Date
+  let date: Date
+  let entries: [WorkoutHistoryEntry]
+  var title: String  // "Monday, 15 of January"
+}
+```
+
+**Localization**: Uses Portuguese locale for date formatting
+
+---
+
+### 6. LOCALIZATION FILES
+
+#### English
+**File**: `/Resources/en.lproj/Localizable.strings`
+- Common keys: cancel, save, done, next, back, skip
+- Tab labels: home, workout, create, activity, profile, programs
+- History-specific: "history.header.title", "history.empty", "history.loading_more"
+
+#### Portuguese (Brazil)
+**File**: `/Resources/pt-BR.lproj/Localizable.strings`
+- Same keys with PT-BR translations
+- Example: "common.cancel" = "Cancelar"
+
+#### Dynamic Keys Used in Code
+- `"history.tab.history"` → displayed in tab selector
+- `"history.tab.challenges"`
+- `"history.empty"` → empty state message
+- `"history.header.title"` → "Histórico"
+- `"history.header.subtitle"`
+- `"history.loading_more"` → "Carregando mais..."
+- `"questionnaire.focus.upper"`, `.lower`, `.cardio`, `.core`, `.fullbody`, `.surprise`
+- `"history.streak.current"`, `.best`, `.days`
+- `"history.weekly_minutes"`, `history.weekly_summary`
+
+---
+
+### 7. COMPLETE DATA FLOW DIAGRAM
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                   USER INTERACTION LAYER                     │
+│  HistoryView → HistoryViewModel.loadHistory()                │
+└────────────────────┬────────────────────────────────────────┘
+                     │
+┌────────────────────▼────────────────────────────────────────┐
+│                   USE CASE LAYER                             │
+│  ComputeHistoryInsightsUseCase (compute streak, sparkline)   │
+└────────────────────┬────────────────────────────────────────┘
+                     │
+┌────────────────────▼────────────────────────────────────────┐
+│                REPOSITORY LAYER                              │
+│  WorkoutHistoryRepository.listEntries(limit, offset)         │
+└────────────────────┬────────────────────────────────────────┘
+                     │
+┌────────────────────▼────────────────────────────────────────┐
+│            DATA MAPPER LAYER                                 │
+│  WorkoutHistoryMapper.toDomain(SDWorkoutHistoryEntry)        │
+│  - Deserialize WorkoutPlan JSON                              │
+│  - Deserialize CompletedExercise JSON                        │
+│  - Convert enum raw values                                   │
+└────────────────────┬────────────────────────────────────────┘
+                     │
+┌────────────────────▼────────────────────────────────────────┐
+│         SWIFTDATA PERSISTENCE LAYER                          │
+│  SDWorkoutHistoryEntry (SwiftData @Model)                    │
+│  - Stores as JSON for nested objects                         │
+│  - Indexed by date (reverse sort)                            │
+└────────────────────┬────────────────────────────────────────┘
+                     │
+        ┌────────────┴────────────┐
+        │                         │
+┌───────▼─────────┐    ┌─────────▼───────┐
+│   APP WORKOUTS  │    │ HEALTHKIT SYNC  │
+│                 │    │                 │
+│ App-generated & │    │ External        │
+│ completed by    │    │ workouts done   │
+│ user            │    │ outside app     │
+│                 │    │                 │
+│ Source: .app    │    │ Source:         │
+│                 │    │ .appleHealth    │
+└─────────────────┘    └─────────────────┘
+
+HEALTHKIT SYNC PIPELINE:
+┌─────────────────────────────────────────────────────────────┐
+│ HealthKitHistorySyncService                                  │
+│ 1. syncLastDays() - Match app workouts with HK data          │
+│    - Time delta < 3 hours                                    │
+│    - Duration tolerance: ±20%                                │
+│    - Updates: durationMinutes, caloriesBurned, UUID          │
+│                                                              │
+│ 2. importExternalWorkouts() - Import external workouts       │
+│    - Default duration: full day estimate                     │
+│    - Source: .appleHealth                                    │
+│    - Syncs to challenges if >= 30 min                        │
+│                                                              │
+│ 3. cleanupStaleUUIDs() - Remove invalid references           │
+└─────────────────────────────────────────────────────────────┘
+
+EXERCISE DESCRIPTION PIPELINE:
+┌──────────────────┐
+│  Wger API        │ (HTML + possibly mixed languages)
+│  WgerExercise    │
+│  .description    │
+└────────┬─────────┘
+         │
+┌────────▼─────────────────────────┐
+│ WgerExerciseAdapter               │
+│ cleanDescription(description)     │
+│ - Strip HTML tags                 │
+│ - Decode HTML entities            │
+│ - Split into sentences            │
+└────────┬─────────────────────────┘
+         │
+┌────────▼────────────────────────────────────┐
+│ ExerciseTranslationService                   │
+│ ensureLocalizedDescription()                 │
+│ 1. Language detection (NLLanguageRecognizer) │
+│ 2. Pattern-based detection if needed         │
+│ 3. Translate if not Portuguese               │
+│ 4. Cache result                              │
+└────────┬────────────────────────────────────┘
+         │
+┌────────▼──────────────────────────┐
+│ WorkoutExercise.instructions: [String]
+│ (Ready for UI display)
+└───────────────────────────────────┘
+```
+
+---
+
+### 8. KEY ARCHITECTURAL PATTERNS
+
+1. **Repository Pattern**: Clean separation between domain and data layers
+2. **MVVM with @Observable**: Modern SwiftUI state management (no @StateObject)
+3. **Mapper Pattern**: Explicit transformation between layers
+4. **Actor-based Concurrency**: Thread-safe services (ExerciseTranslationService, HealthKitService)
+5. **Pagination**: Lazy-loading for performance with 20-entry pages
+6. **Caching**: Translation service uses in-memory cache
+7. **Source Tracking**: WorkoutSource enum distinguishes app vs imported workouts
+8. **JSON Serialization**: Nested objects stored as Data in SwiftData
+9. **Error Handling**: ErrorPresenting protocol for consistent error management
+10. **Localization**: String(localized:) for multi-language support
+
+---
+
+### 9. KEY FILES SUMMARY
+
+| File Path | Purpose |
+|-----------|---------|
+| `/Presentation/Features/Activity/Views/ActivityTabView.swift` | Main Activity tab UI |
+| `/Presentation/Features/History/HistoryView.swift` | History tab implementation |
+| `/Presentation/Features/History/HistoryViewModel.swift` | History state & logic |
+| `/Domain/Entities/HistoryModels.swift` | Domain models (Entry, Status, Source) |
+| `/Domain/Entities/UnifiedWorkoutSession.swift` | Unified session representation |
+| `/Domain/Protocols/Repositories.swift` | Repository interface definition |
+| `/Data/Repositories/SwiftDataWorkoutHistoryRepository.swift` | Repository implementation |
+| `/Data/Mappers/WorkoutHistoryMapper.swift` | Domain ↔ Data mapping |
+| `/Data/Models/SDWorkoutHistoryEntry.swift` | SwiftData model |
+| `/Data/Services/HealthKit/HealthKitService.swift` | HealthKit read/write |
+| `/Data/Services/HealthKit/HealthKitHistorySyncService.swift` | Sync logic |
+| `/Data/Services/Translation/ExerciseTranslationService.swift` | Description translation |
+| `/Data/Services/Wger/WgerExerciseAdapter.swift` | API → Domain conversion |
+| `/Domain/Entities/WorkoutModels.swift` | Exercise & media models |
+| `/Domain/Entities/WorkoutRating.swift` | Rating & CompletedExercise |
+| `/Resources/en.lproj/Localizable.strings` | English localization |
+| `/Resources/pt-BR.lproj/Localizable.strings` | Portuguese localization |
+
+---
+
+This architecture provides:
+- **Clean separation of concerns** across presentation, domain, and data layers
+- **Type-safe** entity mapping with explicit transformers
+- **Efficient pagination** for large history datasets
+- **Robust HealthKit integration** with intelligent matching algorithms
+- **Smart translation** with language detection and local dictionaries
+- **Multi-language support** with comprehensive localization files</result>
+<usage>total_tokens: 92888
+tool_uses: 32
+duration_ms: 67477</usage>
+</task-notification>
+Full transcript available at: REDACTED.output
+
+---
+
+This session is being continued from a previous conversation that ran out of context. The summary below covers the earlier portion of the conversation.
+
+Analysis:
+Let me chronologically analyze the conversation:
+
+1. **User's Initial Request**: The user described two bugs in their FitToday iOS app:
+   - The Activity tab's "Treinos Recentes" (Recent Workouts) shows generic/mock workouts not registered by the user. Should show user's real workouts, fallback to Apple Health workouts, then empty view.
+   - Exercise descriptions are mixed Spanish/English because they come from the API, impacting localization.
+   - User invoked `/feature-marker prd-activity-fix` to start a structured workflow.
+
+2. **Phase 0 - Inputs Gate**: Checked for existing files in `tasks/prd-activity-fix/` and `.claude/feature-state/prd-activity-fix/` - none found. All 3 documents needed generation.
+
+3. **Exploration Phase**: 
+   - Launched an Explore agent in background to research the codebase
+   - Found key files: ActivityTabView.swift, HistoryViewModel.swift, HistoryView.swift, ExerciseTranslationService.swift, WgerModels.swift, etc.
+   - Read ActivityTabView.swift - found the root cause: `loadWorkouts()` uses `MockWorkoutData.recentSessions` (hardcoded mock data)
+   - Read HistoryViewModel.swift - confirmed it correctly uses `WorkoutHistoryRepository`
+   - Read HistoryView.swift - confirmed working pattern for resolving repository
+   - Read ExerciseTranslationService.swift - found dictionary-based translation with no post-translation quality check
+   - Read WgerAPIService.swift - confirmed language filtering works but dictionary translation produces garbled results
+   - Read HealthKitHistorySyncService.swift - confirmed Apple Health imports exist with `source: .appleHealth`
+   - Read Localizable.strings (English) - confirmed localization keys exist
+   - Checked Swinject registration - confirmed `WorkoutHistoryRepository` is registered in `AppContainer.swift:45`
+
+4. **Document Generation**:
+   - Created `tasks/prd-activity-fix/prd.md` - PRD with 4 functional requirements
+   - Created `tasks/prd-activity-fix/techspec.md` - Technical specification with 4 changes
+   - Created `tasks/prd-activity-fix/tasks.md` - 5 implementation tasks
+   - Created `.claude/feature-state/prd-activity-fix/analysis.md` - Root cause analysis
+
+5. **Phase 2 - Implementation**:
+   - Created 4 task items in task tracker
+   
+   **Task 1 (COMPLETED)**: Replace mock data with WorkoutHistoryRepository
+   - Changed `@State private var workouts: [UnifiedWorkoutSession]` to `[WorkoutHistoryEntry]`
+   - Added `repository` computed property resolving from Swinject
+   - Updated `workoutDays` to use `entry.date` instead of `session.startedAt`
+   - Replaced `WorkoutSessionCard` usage with `WorkoutEntryCard`
+   - Rewrote `loadWorkouts()` to use `repository.listEntries(limit: 20, offset: 0)`
+   - Created new `WorkoutEntryCard` struct using `WorkoutHistoryEntry` data
+   - Removed `MockWorkoutData` enum entirely
+   
+   **Task 2 (COMPLETED)**: Add post-translation quality check
+   - Added `validateTranslationQuality(_:)` method to `ExerciseTranslationService`
+   - Applied it after every `translateToPortuguese()` call (3 places)
+   - If translated text still contains Spanish/English patterns → returns Portuguese fallback
+   - Added "hacia" to Spanish dictionary (was missing, causing remaining Spanish patterns)
+   
+   **Task 3 (IN PROGRESS)**: Update ExerciseTranslationService tests
+   - Read existing tests file
+   - Was about to add new test cases for quality check
+   - Also added " hacia " → " em direção a " to Spanish dictionary
+   
+   **Task 4 (PENDING)**: Build verification and test run
+
+6. Key architectural details:
+   - MVVM with @Observable pattern
+   - Swinject for DI
+   - SwiftData for persistence
+   - Actor-based services (ExerciseTranslationService, HealthKitService)
+   - WorkoutHistoryRepository protocol with SwiftData implementation
+   - WorkoutSource enum: .app, .appleHealth, .merged
+   - Repository returns ALL entries regardless of source (no need for separate Apple Health fallback query)
+
+Summary:
+1. Primary Request and Intent:
+   The user reported two bugs in the FitToday iOS app and invoked `/feature-marker prd-activity-fix` to create a structured feature workflow:
+   
+   **Bug 1 - Mock data in Activity tab**: The "Treinos Recentes" (Recent Workouts) section in the Activity tab shows hardcoded mock workouts (Push Day, Pull Day, Leg Day) that were never registered by the user. The fix should: (a) show only user-registered workouts from the platform, (b) fallback to Apple Health imported workouts if no app workouts exist, (c) show empty view if neither source has data.
+   
+   **Bug 2 - Mixed language exercise descriptions**: Exercise descriptions from the Wger API come mixed in Spanish and English, impacting the app's translation and Localizable system. The `ExerciseTranslationService` dictionary-based translation produces incomplete/garbled mixed-language results.
+
+   The user's original message (in Portuguese): "Os treinos hoje em atividades no histórico, está mostrando treinos genéricos que não foram registrados pelo usuário, em treinos recentes. Caso o usuário não tenha nenhum treino registrado na plataforma, buscar do treino que foi registrado no Apple Health, caso não tenha nenhum mostrar o estado de empty view. Um outro ponto que os testers falaram foi que a descrição dos exercícios continua vindo mesclada tanto espanhol como inglês, isso é porque a descrição vem da API, isso está impactando na tradução e no Localizable do aplicativo."
+
+2. Key Technical Concepts:
+   - iOS 17+ / Swift 6.0 / SwiftUI
+   - MVVM with @Observable (not ObservableObject)
+   - Swinject dependency injection (Resolver pattern)
+   - SwiftData for local persistence (SDWorkoutHistoryEntry @Model)
+   - Actor-based concurrency (ExerciseTranslationService, HealthKitHistorySyncService)
+   - Repository pattern (WorkoutHistoryRepository protocol)
+   - WorkoutSource enum: `.app`, `.appleHealth`, `.merged`
+   - NaturalLanguage framework for language detection
+   - Dictionary-based translation (EN→PT, ES→PT)
+   - Wger API for exercise data with language filtering
+   - Feature-marker workflow (PRD → TechSpec → Tasks → Implementation → Tests → Commit)
+
+3. Files and Code Sections:
+
+   - **`FitToday/Presentation/Features/Activity/Views/ActivityTabView.swift`** (MODIFIED - primary fix for Bug 1)
+     - Root cause of Bug 1: `loadWorkouts()` used `MockWorkoutData.recentSessions` (hardcoded mock data)
+     - Changed `@State private var workouts: [UnifiedWorkoutSession]` → `[WorkoutHistoryEntry]`
+     - Added repository resolution via Swinject:
+       ```swift
+       private var repository: WorkoutHistoryRepository? {
+           resolver.resolve(WorkoutHistoryRepository.self)
+       }
+       ```
+     - Updated calendar highlighting to use `entry.date`:
+       ```swift
+       private var workoutDays: Set<DateComponents> {
+           let calendar = Calendar.current
+           return Set(workouts.compactMap { entry in
+               calendar.dateComponents([.year, .month, .day], from: entry.date)
+           })
+       }
+       ```
+     - Replaced mock data loading with real repository call:
+       ```swift
+       private func loadWorkouts() async {
+           guard let repository else {
+               isLoading = false
+               return
+           }
+           do {
+               let entries = try await repository.listEntries(limit: 20, offset: 0)
+               workouts = entries
+           } catch {
+               workouts = []
+           }
+           isLoading = false
+       }
+       ```
+     - Replaced `WorkoutSessionCard(session:)` with new `WorkoutEntryCard(entry:)` in the ForEach
+     - Created new `WorkoutEntryCard` struct that displays `WorkoutHistoryEntry` data (title, date, source icon, program name, duration, calories, status)
+     - Removed `MockWorkoutData` enum entirely (was lines 495-519)
+     - Note: Repository returns ALL entries including Apple Health imports (no separate fallback query needed)
+
+   - **`FitToday/Data/Services/Translation/ExerciseTranslationService.swift`** (MODIFIED - fix for Bug 2)
+     - Added `validateTranslationQuality(_:)` method after the translation engine section:
+       ```swift
+       private func validateTranslationQuality(_ translated: String) -> String {
+           if containsSpanishPatterns(translated) || containsEnglishPatterns(translated) {
+               #if DEBUG
+               print("[Translation] ⚠️ Post-translation still contains foreign patterns, using fallback")
+               #endif
+               return getPortugueseFallback()
+           }
+           return translated
+       }
+       ```
+     - Applied quality check in 3 places (after each `translateToPortuguese()` call):
+       ```swift
+       let translated = translateToPortuguese(text, from: lang)
+       let result = validateTranslationQuality(translated)
+       cache[cacheKey] = result
+       ```
+     - Added missing Spanish word to dictionary:
+       ```swift
+       " hacia ": " em direção a ",
+       ```
+
+   - **`FitToday/Presentation/Features/History/HistoryViewModel.swift`** (READ - reference pattern)
+     - Shows correct pattern of using `WorkoutHistoryRepository` with pagination
+     - `@MainActor @Observable final class HistoryViewModel` with `listEntries(limit:offset:)`
+
+   - **`FitToday/Presentation/Features/History/HistoryView.swift`** (READ - reference for DI resolution)
+     - Shows how to resolve repository: `resolver.resolve(WorkoutHistoryRepository.self)`
+
+   - **`FitToday/Domain/Entities/HistoryModels.swift`** (READ)
+     - `WorkoutHistoryEntry` struct with: id, date, planId, title, focus, status, programId, programName, durationMinutes, caloriesBurned, healthKitWorkoutUUID, workoutPlan, userRating, completedExercises, source
+     - `WorkoutSource` enum: .app, .appleHealth, .merged
+     - `WorkoutStatus` enum: .completed, .skipped
+
+   - **`FitToday/Domain/Entities/UnifiedWorkoutSession.swift`** (READ)
+     - Used by old mock data, now replaced with `WorkoutHistoryEntry`
+
+   - **`FitToday/Data/Repositories/SwiftDataWorkoutHistoryRepository.swift`** (READ)
+     - Implements `listEntries(limit:offset:)` with SwiftData FetchDescriptor
+     - Returns ALL entries regardless of source (app + Apple Health)
+
+   - **`FitToday/Domain/Protocols/Repositories.swift`** (READ)
+     - `WorkoutHistoryRepository` protocol: `listEntries()`, `listEntries(limit:offset:)`, `count()`, `saveEntry()`, `listAppEntriesWithPlan(limit:)`
+
+   - **`FitToday/Presentation/DI/AppContainer.swift`** (READ via grep)
+     - Registration confirmed at line 45: `container.register(WorkoutHistoryRepository.self)`
+
+   - **`FitToday/Data/Services/Wger/WgerAPIService.swift`** (READ)
+     - Already uses `ExerciseTranslationService.ensureLocalizedDescription()` at lines 150 and 213
+     - Language filtering: names in English (language 2), descriptions in Portuguese (language 4)
+
+   - **`FitToday/Data/Services/Wger/WgerExerciseAdapter.swift`** (READ)
+     - Converts WgerExercise to WorkoutExercise, cleans HTML from descriptions
+
+   - **`FitToday/Domain/Entities/WgerModels.swift`** (READ)
+     - `WgerExerciseInfo.description(for:)` correctly falls back: Portuguese → English → nil (not Spanish)
+
+   - **`FitToday/Data/Services/HealthKit/HealthKitHistorySyncService.swift`** (READ)
+     - `importExternalWorkouts()` creates entries with `source: .appleHealth`
+
+   - **`FitToday/Resources/en.lproj/Localizable.strings`** (READ)
+     - Contains `"exercise.description.fallback"` key used by translation service
+     - Contains history-related keys
+
+   - **`FitTodayTests/Data/Services/ExerciseTranslationServiceTests.swift`** (READ - needs updating)
+     - 15 existing tests covering Portuguese pass-through, English translation, Spanish translation, cache, edge cases
+
+   - **Generated documents**:
+     - `tasks/prd-activity-fix/prd.md` - PRD with FR-001 through FR-004
+     - `tasks/prd-activity-fix/techspec.md` - Technical specification
+     - `tasks/prd-activity-fix/tasks.md` - 5 implementation tasks
+     - `.claude/feature-state/prd-activity-fix/analysis.md` - Root cause analysis
+
+4. Errors and fixes:
+   - **SourceKit diagnostic "Cannot find 'validateTranslationQuality' in scope"**: This was a transient SourceKit lag from the editor, not a real error. The method is properly defined within the same actor scope. No action needed.
+   - **SourceKit diagnostic "No such module 'Swinject'"**: Transient editor diagnostic, not a build error. The module is properly configured in the project.
+   - **Missing Spanish dictionary word "hacia"**: Identified during analysis that the Spanish test `testSpanishTextIsTranslated` would fail because "hacia" was not in the Spanish→Portuguese dictionary. After translation, " hacia " would remain and trigger the new quality check, causing fallback. Fixed by adding `" hacia ": " em direção a "` to the `spanishToPortugueseDictionary`.
+
+5. Problem Solving:
+   - **Mock data problem**: Identified that `WorkoutHistoryView.loadWorkouts()` was using `MockWorkoutData.recentSessions` instead of the real `WorkoutHistoryRepository`. Fixed by resolving the repository from Swinject and calling `listEntries(limit:offset:)`.
+   - **Apple Health fallback**: Discovered that `SwiftDataWorkoutHistoryRepository.listEntries()` already returns ALL entries including Apple Health imports (no source filter). So if user has no app workouts but has Apple Health imports, they'll show automatically. No separate fallback logic needed.
+   - **Mixed language descriptions**: Added post-translation quality validation. After dictionary-based word replacement, if the result still contains Spanish or English patterns, it means the translation is incomplete/garbled, so the Portuguese fallback message is used instead.
+   - **Test compatibility analysis**: Carefully analyzed each existing test to determine which would break with the quality check. Only `testSpanishTextIsTranslated` was at risk due to missing "hacia" in dictionary. Fixed by adding it to the dictionary.
+
+6. All user messages:
+   - Message 1: "Os treinos hoje em atividades no histórico, está mostrando treinos genéricos que não foram registrados pelo usuário, em treinos recentes. Caso o usuário não tenha nenhum treino registrado na plataforma, buscar do treino que foi registrado no Apple Health, caso não tenha nenhum mostrar o estado de empty view. Um outro ponto que os testers falaram foi que a descrição dos exercícios continua vindo mesclada tanto espanhol como inglês, isso é porque a descrição vem da API, isso está impactando na tradução e no Localizable do aplicativo. /feature-marker prd-activity-fix"
+   - (No additional explicit user messages - the second "message" was a system task notification about the background agent completing)
+
+7. Pending Tasks:
+   - **Task 3 (IN PROGRESS)**: Update ExerciseTranslationService tests - Need to add new test cases for post-translation quality validation behavior. The test file has been read but new tests haven't been written yet.
+   - **Task 4 (PENDING)**: Build verification and test run - Build project with XcodeBuildMCP and run all tests to verify no regressions.
+   - **Phase 4 (NOT STARTED)**: Commit & PR - After all tasks pass, commit changes and create PR per feature-marker workflow.
+
+8. Current Work:
+   I was working on **Task 3: Update ExerciseTranslationService tests**. I had just:
+   1. Read the existing test file (`ExerciseTranslationServiceTests.swift` - 237 lines, 15 test methods)
+   2. Added `" hacia ": " em direção a "` to the Spanish dictionary to prevent `testSpanishTextIsTranslated` from breaking
+   3. Was about to add new test cases for the post-translation quality check behavior
+
+   The task tracker shows:
+   - Task #1 [completed] - Replace mock data
+   - Task #2 [completed] - Add post-translation quality check
+   - Task #3 [in_progress] - Update ExerciseTranslationService tests
+   - Task #4 [pending] - Build verification and test run
+
+9. Optional Next Step:
+   Continue with **Task 3** - Add new test cases to `ExerciseTranslationServiceTests.swift` for the post-translation quality validation. Specifically:
+   - Add test: Spanish input that translates poorly (still has Spanish patterns after translation) → returns fallback
+   - Add test: English input that translates poorly (still has English patterns) → returns fallback  
+   - Add test: Clean translation that passes quality check → returns translated text
+   - Verify all existing tests still pass with the dictionary addition
+
+   Then proceed to **Task 4** - Build verification with XcodeBuildMCP and run tests.
+   
+   Then proceed to **Phase 4** - Commit & PR per the feature-marker workflow that was invoked.
+
+If you need specific details from before compaction (like exact code snippets, error messages, or content you generated), read the full transcript at: /Users/viniciuscarvalho/.REDACTED.jsonl
+Please continue the conversation from where we left off without asking the user any further questions. Continue with the last task that you were asked to work on.

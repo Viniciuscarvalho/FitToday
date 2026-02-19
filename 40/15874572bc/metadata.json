@@ -1,0 +1,32 @@
+{
+  "cli_version": "0.4.4",
+  "checkpoint_id": "4015874572bc",
+  "strategy": "manual-commit",
+  "branch": "feature/bugfix-description-exercices",
+  "checkpoints_count": 2,
+  "files_touched": [
+    ".claude/feature-state/prd-activity-fix/analysis.md",
+    "FitToday/FitToday/Data/Services/Translation/ExerciseTranslationService.swift",
+    "FitToday/FitToday/Presentation/Features/Activity/Views/ActivityTabView.swift",
+    "FitToday/FitTodayTests/Data/Services/ExerciseTranslationServiceTests.swift",
+    "tasks/prd-activity-fix/prd.md",
+    "tasks/prd-activity-fix/tasks.md",
+    "tasks/prd-activity-fix/techspec.md"
+  ],
+  "sessions": [
+    {
+      "metadata": "/40/15874572bc/0/metadata.json",
+      "transcript": "/40/15874572bc/0/full.jsonl",
+      "context": "/40/15874572bc/0/context.md",
+      "content_hash": "/40/15874572bc/0/content_hash.txt",
+      "prompt": "/40/15874572bc/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 139,
+    "cache_creation_tokens": 201712,
+    "cache_read_tokens": 6641327,
+    "output_tokens": 10301,
+    "api_call_count": 61
+  }
+}
