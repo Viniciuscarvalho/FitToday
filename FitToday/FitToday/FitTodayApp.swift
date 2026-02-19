@@ -30,6 +30,11 @@ struct FitTodayApp: App {
         
         // Configurar aparência global para tema escuro
         configureGlobalAppearance()
+
+        // Record first launch date (once)
+        if UserDefaults.standard.object(forKey: AppStorageKeys.firstLaunchDate) == nil {
+            UserDefaults.standard.set(Date(), forKey: AppStorageKeys.firstLaunchDate)
+        }
         
         #if DEBUG
         // Log de inicialização
