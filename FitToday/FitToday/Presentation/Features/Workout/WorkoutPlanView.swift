@@ -217,6 +217,7 @@ struct WorkoutPlanView: View {
         guard !isFinishing else { return }
         isFinishing = true
         timerStore.pause()
+        sessionStore.recordElapsedTime(timerStore.elapsedSeconds)
 
         Task {
             do {

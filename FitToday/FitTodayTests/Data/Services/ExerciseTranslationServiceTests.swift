@@ -176,6 +176,36 @@ final class ExerciseTranslationServiceTests: XCTestCase {
                       "Should handle mixed language text")
     }
 
+    // MARK: - Sentence-Initial Pattern Tests
+
+    func testSentenceInitialKeepIsDetectedAsEnglish() async {
+        // Given - verb at start of string (no leading space)
+        let text = "Keep your back straight and your core engaged throughout."
+
+        // When
+        let result = await sut.ensureLocalizedDescription(text)
+
+        // Then
+        XCTAssertFalse(result.lowercased().contains("keep"),
+                       "Sentence-initial 'Keep' should be translated")
+        XCTAssertTrue(result.lowercased().contains("mantenha") || result.lowercased().contains("costas"),
+                      "Should produce Portuguese output for sentence-initial English")
+    }
+
+    func testSentenceInitialPushIsDetectedAsEnglish() async {
+        // Given - short CMS trainer note starting with verb
+        let text = "Push through your heels as you stand up from the squat."
+
+        // When
+        let result = await sut.ensureLocalizedDescription(text)
+
+        // Then
+        XCTAssertFalse(result.lowercased().contains("push "),
+                       "Sentence-initial 'Push' should be translated")
+        XCTAssertTrue(result.lowercased().contains("empurre") || result.lowercased().contains("calcanhar"),
+                      "Should produce Portuguese output for sentence-initial English verb")
+    }
+
     // MARK: - Real-World Exercise Descriptions
 
     func testRealBenchPressDescription() async {

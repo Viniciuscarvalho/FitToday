@@ -26,77 +26,75 @@ struct CreateWorkoutView: View {
     }
 
     var body: some View {
-        NavigationStack {
-            ScrollView {
-                VStack(spacing: FitTodaySpacing.lg) {
-                    // Workout Name
-                    nameSection
+        ScrollView {
+            VStack(spacing: FitTodaySpacing.lg) {
+                // Workout Name
+                nameSection
 
-                    // Icon Selection
-                    iconSection
+                // Icon Selection
+                iconSection
 
-                    // Color Selection
-                    colorSection
+                // Color Selection
+                colorSection
 
-                    // Exercises List
-                    exercisesSection
+                // Exercises List
+                exercisesSection
 
-                    // Add Exercise Button
-                    addExerciseButton
+                // Add Exercise Button
+                addExerciseButton
 
-                    Spacer(minLength: FitTodaySpacing.xxl)
-                }
-                .padding(FitTodaySpacing.md)
+                Spacer(minLength: FitTodaySpacing.xxl)
             }
-            .scrollIndicators(.hidden)
-            .background(FitTodayColor.background)
-            .navigationTitle("create_workout.title".localized)
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("common.cancel".localized) {
+            .padding(FitTodaySpacing.md)
+        }
+        .scrollIndicators(.hidden)
+        .background(FitTodayColor.background)
+        .navigationTitle("create_workout.title".localized)
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .cancellationAction) {
+                Button("common.cancel".localized) {
+                    onDismiss()
+                    dismiss()
+                }
+                .foregroundStyle(FitTodayColor.textSecondary)
+            }
+
+            // Edit/Reorder toggle when exercises exist
+            if !viewModel.exercises.isEmpty {
+                ToolbarItem(placement: .principal) {
+                    Button {
+                        withAnimation(.easeInOut(duration: 0.2)) {
+                            isEditMode.toggle()
+                        }
+                    } label: {
+                        Text(isEditMode ? "Concluído" : "Reordenar")
+                            .font(FitTodayFont.ui(size: 14, weight: .medium))
+                            .foregroundStyle(FitTodayColor.brandPrimary)
+                    }
+                }
+            }
+
+            ToolbarItem(placement: .confirmationAction) {
+                Button("common.save".localized) {
+                    Task {
+                        await viewModel.saveWorkout()
                         onDismiss()
                         dismiss()
                     }
-                    .foregroundStyle(FitTodayColor.textSecondary)
                 }
-
-                // Edit/Reorder toggle when exercises exist
-                if !viewModel.exercises.isEmpty {
-                    ToolbarItem(placement: .principal) {
-                        Button {
-                            withAnimation(.easeInOut(duration: 0.2)) {
-                                isEditMode.toggle()
-                            }
-                        } label: {
-                            Text(isEditMode ? "Concluído" : "Reordenar")
-                                .font(FitTodayFont.ui(size: 14, weight: .medium))
-                                .foregroundStyle(FitTodayColor.brandPrimary)
-                        }
-                    }
-                }
-
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("common.save".localized) {
-                        Task {
-                            await viewModel.saveWorkout()
-                            onDismiss()
-                            dismiss()
-                        }
-                    }
-                    .foregroundStyle(viewModel.canSave ? FitTodayColor.brandPrimary : FitTodayColor.textTertiary)
-                    .disabled(!viewModel.canSave)
-                }
+                .foregroundStyle(viewModel.canSave ? FitTodayColor.brandPrimary : FitTodayColor.textTertiary)
+                .disabled(!viewModel.canSave)
             }
-            .sheet(isPresented: $showExerciseSearch) {
-                if let exerciseService = resolver.resolve(ExerciseServiceProtocol.self) {
-                    ExerciseSearchSheet(
-                        exerciseService: exerciseService,
-                        onSelect: { exercise in
-                            viewModel.addExercise(exercise)
-                        }
-                    )
-                }
+        }
+        .sheet(isPresented: $showExerciseSearch) {
+            if let exerciseService = resolver.resolve(ExerciseServiceProtocol.self) {
+                ExerciseSearchSheet(
+                    exerciseService: exerciseService,
+                    onSelect: { exercise in
+                        viewModel.addExercise(exercise)
+                    }
+                )
             }
         }
     }

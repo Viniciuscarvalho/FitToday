@@ -1,0 +1,27 @@
+{
+  "version": "1.0",
+  "feature_name": "prd-bugfix-descriptionExercices",
+  "project_path": "/Users/viniciuscarvalho/Documents/FitToday",
+  "current_phase": 1,
+  "phase_status": "completed",
+  "phases": {
+    "1": {
+      "name": "Analysis & Planning",
+      "status": "completed",
+      "outputs": ["analysis.md", "plan.md"]
+    },
+    "2": {
+      "name": "Implementation",
+      "status": "in_progress",
+      "current_task_index": 0,
+      "total_tasks": 6,
+      "completed_tasks": [],
+      "outputs": []
+    },
+    "3": {"name": "Tests & Validation", "status": "pending"},
+    "4": {"name": "Commit & PR", "status": "pending"}
+  },
+  "last_updated": "2026-02-19T00:00:00Z",
+  "paused": false,
+  "error_state": null
+}

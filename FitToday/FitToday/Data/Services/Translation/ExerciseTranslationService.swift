@@ -144,23 +144,34 @@ actor ExerciseTranslationService {
     }
 
     private func containsEnglishPatterns(_ text: String) -> Bool {
+        // Space-padded patterns match words mid-sentence.
+        // Unprefixed patterns (no leading space) match at sentence start.
         let englishIndicators = [
             " the ", " and ", " with ", " your ", " this ",
             " that ", " from ", " have ", " will ", " should ",
             " keep ", " hold ", " push ", " pull ", " lift ",
-            " lower ", " raise ", " extend ", " flex ", " repeat "
+            " lower ", " raise ", " extend ", " flex ", " repeat ",
+            // Sentence-start variants (no leading space required)
+            "keep ", "hold ", "push ", "pull ", "lift ",
+            "lower ", "raise ", "extend ", "flex ", "stand ",
+            "sit ", "lie ", "bend ", "squeeze ", "the "
         ]
         let lowercased = text.lowercased()
         return englishIndicators.contains { lowercased.contains($0) }
     }
 
     private func containsPortuguesePatterns(_ text: String) -> Bool {
+        // Space-padded patterns match words mid-sentence.
+        // Sentence-start and suffix patterns need no leading space.
         let portugueseIndicators = [
             " o ", " a ", " os ", " as ", " um ", " uma ",
             " do ", " da ", " dos ", " das ", " no ", " na ",
             " com ", " para ", " por ", " que ", " não ",
             " mantenha ", " segure ", " empurre ", " puxe ",
-            "ção ", "ões ", "mente "
+            "ção ", "ões ", "mente ",
+            // Sentence-start variants
+            "mantenha ", "segure ", "empurre ", "puxe ",
+            "fique ", "deite ", "sente ", "levante ", "abaixe "
         ]
         let lowercased = text.lowercased()
         return portugueseIndicators.contains { lowercased.contains($0) }
