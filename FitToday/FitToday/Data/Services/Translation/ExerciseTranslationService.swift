@@ -58,25 +58,28 @@ actor ExerciseTranslationService {
         // Translate if possible
         if let lang = detectedLanguage, translatableLanguages.contains(lang) {
             let translated = translateToPortuguese(text, from: lang)
-            cache[cacheKey] = translated
+            let result = validateTranslationQuality(translated)
+            cache[cacheKey] = result
             #if DEBUG
-            print("[Translation] 🌐 Translated from \(lang.rawValue): '\(text.prefix(50))...' -> '\(translated.prefix(50))...'")
+            print("[Translation] 🌐 Translated from \(lang.rawValue): '\(text.prefix(50))...' -> '\(result.prefix(50))...'")
             #endif
-            return translated
+            return result
         }
 
         // Check patterns for English even if language detection failed
         if containsEnglishPatterns(text) {
             let translated = translateToPortuguese(text, from: .english)
-            cache[cacheKey] = translated
-            return translated
+            let result = validateTranslationQuality(translated)
+            cache[cacheKey] = result
+            return result
         }
 
         // Check patterns for Spanish
         if containsSpanishPatterns(text) {
             let translated = translateToPortuguese(text, from: .spanish)
-            cache[cacheKey] = translated
-            return translated
+            let result = validateTranslationQuality(translated)
+            cache[cacheKey] = result
+            return result
         }
 
         // Fallback for unknown languages
@@ -91,6 +94,21 @@ actor ExerciseTranslationService {
         #if DEBUG
         print("[Translation] 🗑️ Cache cleared")
         #endif
+    }
+
+    // MARK: - Translation Quality Validation
+
+    /// Checks if translated text still contains foreign language patterns.
+    /// If it does, the dictionary-based translation produced garbled mixed-language text,
+    /// so we return the Portuguese fallback instead.
+    private func validateTranslationQuality(_ translated: String) -> String {
+        if containsSpanishPatterns(translated) || containsEnglishPatterns(translated) {
+            #if DEBUG
+            print("[Translation] ⚠️ Post-translation still contains foreign patterns, using fallback")
+            #endif
+            return getPortugueseFallback()
+        }
+        return translated
     }
 
     // MARK: - Translation Engine
@@ -482,6 +500,7 @@ actor ExerciseTranslationService {
         "colchoneta": "colchonete",
 
         // Directions
+        " hacia ": " em direção a ",
         "arriba": "para cima",
         "abajo": "para baixo",
         "adelante": "para frente",
