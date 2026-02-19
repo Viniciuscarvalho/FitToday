@@ -5,6 +5,7 @@
 //  Created by AI on 04/01/26.
 //
 
+import StoreKit
 import SwiftUI
 import Swinject
 import UIKit
@@ -14,6 +15,7 @@ struct WorkoutCompletionView: View {
     @Environment(WorkoutSessionStore.self) private var sessionStore
     @Environment(WorkoutTimerStore.self) private var workoutTimer
     @Environment(\.dependencyResolver) private var resolver
+    @Environment(\.requestReview) private var requestReview
 
     @State private var isGeneratingNewPlan = false
     @State private var errorMessage: String?
@@ -192,6 +194,11 @@ struct WorkoutCompletionView: View {
                         try? await Task.sleep(for: .seconds(3))
                         showCelebration = false
                     }
+            }
+        }
+        .onChange(of: hasRated) { _, rated in
+            if rated {
+                requestAppReviewIfEligible()
             }
         }
     }
@@ -533,5 +540,31 @@ struct WorkoutCompletionView: View {
         // Play success haptic feedback
         let generator = UINotificationFeedbackGenerator()
         generator.notificationOccurred(.success)
+    }
+
+    // MARK: - App Store Review
+
+    private func requestAppReviewIfEligible() {
+        guard status == .completed else { return }
+
+        Task {
+            let service = AppReviewService()
+            let workoutCount = await fetchWorkoutCount()
+
+            guard service.isEligible(completedWorkoutsCount: workoutCount) else { return }
+
+            // Delay per Apple guidelines — let user absorb the moment
+            try? await Task.sleep(for: .seconds(2))
+
+            service.recordReviewRequest()
+            await requestReview()
+        }
+    }
+
+    private func fetchWorkoutCount() async -> Int {
+        guard let historyRepo = resolver.resolve(WorkoutHistoryRepository.self) else {
+            return 0
+        }
+        return (try? await historyRepo.count()) ?? 0
     }
 }
