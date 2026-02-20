@@ -13,7 +13,6 @@ import UIKit
 struct WorkoutCompletionView: View {
     @Environment(AppRouter.self) private var router
     @Environment(WorkoutSessionStore.self) private var sessionStore
-    @Environment(WorkoutTimerStore.self) private var workoutTimer
     @Environment(\.dependencyResolver) private var resolver
     @Environment(\.requestReview) private var requestReview
 
@@ -491,7 +490,7 @@ struct WorkoutCompletionView: View {
                     Text("Tempo Total")
                         .font(.footnote)
                         .foregroundStyle(FitTodayColor.textSecondary)
-                    Text(workoutTimer.formattedTime)
+                    Text(sessionStore.formattedLastWorkoutTime)
                         .font(.title3.weight(.semibold))
                         .foregroundStyle(FitTodayColor.textPrimary)
                 }

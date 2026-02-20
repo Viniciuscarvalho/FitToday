@@ -85,14 +85,17 @@ struct WorkoutHistoryView: View {
     let resolver: Resolver
 
     @State private var selectedDate = Date()
-    @State private var workouts: [UnifiedWorkoutSession] = []
+    @State private var workouts: [WorkoutHistoryEntry] = []
     @State private var isLoading = true
 
-    // Mock workout days for calendar highlighting
+    private var repository: WorkoutHistoryRepository? {
+        resolver.resolve(WorkoutHistoryRepository.self)
+    }
+
     private var workoutDays: Set<DateComponents> {
         let calendar = Calendar.current
-        return Set(workouts.compactMap { session in
-            calendar.dateComponents([.year, .month, .day], from: session.startedAt)
+        return Set(workouts.compactMap { entry in
+            calendar.dateComponents([.year, .month, .day], from: entry.date)
         })
     }
 
@@ -143,8 +146,8 @@ struct WorkoutHistoryView: View {
                 emptyStateView
             } else {
                 LazyVStack(spacing: FitTodaySpacing.sm) {
-                    ForEach(workouts) { workout in
-                        WorkoutSessionCard(session: workout)
+                    ForEach(workouts) { entry in
+                        WorkoutEntryCard(entry: entry)
                     }
                 }
             }
@@ -185,11 +188,17 @@ struct WorkoutHistoryView: View {
     // MARK: - Data Loading
 
     private func loadWorkouts() async {
-        // Simulate loading
-        try? await Task.sleep(for: .milliseconds(500))
+        guard let repository else {
+            isLoading = false
+            return
+        }
 
-        // Mock data for demonstration
-        workouts = MockWorkoutData.recentSessions
+        do {
+            let entries = try await repository.listEntries(limit: 20, offset: 0)
+            workouts = entries
+        } catch {
+            workouts = []
+        }
         isLoading = false
     }
 }
@@ -347,21 +356,34 @@ struct DayCell: View {
     }
 }
 
-// MARK: - Workout Session Card
+// MARK: - Workout Entry Card
 
-struct WorkoutSessionCard: View {
-    let session: UnifiedWorkoutSession
+struct WorkoutEntryCard: View {
+    let entry: WorkoutHistoryEntry
+
+    private var hourString: String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "HH:mm"
+        return formatter.string(from: entry.date)
+    }
+
+    private var statusText: String {
+        switch entry.status {
+        case .completed: return "history.completed".localized
+        case .skipped: return "history.skipped".localized
+        }
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: FitTodaySpacing.sm) {
             // Header
             HStack {
                 VStack(alignment: .leading, spacing: FitTodaySpacing.xs) {
-                    Text(session.name)
+                    Text(entry.title)
                         .font(FitTodayFont.ui(size: 16, weight: .bold))
                         .foregroundStyle(FitTodayColor.textPrimary)
 
-                    Text(session.startedAt, format: .dateTime.weekday(.wide).day().month())
+                    Text(entry.date, format: .dateTime.weekday(.wide).day().month())
                         .font(FitTodayFont.ui(size: 13, weight: .medium))
                         .foregroundStyle(FitTodayColor.textSecondary)
                 }
@@ -371,14 +393,30 @@ struct WorkoutSessionCard: View {
                 sourceIcon
             }
 
-            Divider()
-                .background(FitTodayColor.outline)
+            if let programName = entry.programName {
+                HStack(spacing: FitTodaySpacing.xs) {
+                    Image(systemName: "rectangle.stack.fill")
+                        .font(.system(size: 11))
+                        .foregroundStyle(FitTodayColor.brandPrimary)
+                    Text(programName)
+                        .font(FitTodayFont.ui(size: 12, weight: .medium))
+                        .foregroundStyle(FitTodayColor.brandPrimary)
+                }
+            }
 
-            // Stats
-            HStack(spacing: FitTodaySpacing.lg) {
-                statItem(icon: "clock", value: session.formattedDuration, label: "Duração")
-                statItem(icon: "scalemass", value: session.formattedVolume, label: "Volume")
-                statItem(icon: "number", value: "\(session.totalSets)", label: "Séries")
+            if entry.durationMinutes != nil || entry.caloriesBurned != nil {
+                Divider()
+                    .background(FitTodayColor.outline)
+
+                HStack(spacing: FitTodaySpacing.lg) {
+                    if let duration = entry.durationMinutes {
+                        statItem(icon: "clock", value: "\(duration) min", label: "Duração")
+                    }
+                    if let calories = entry.caloriesBurned {
+                        statItem(icon: "flame", value: "\(calories) kcal", label: "Calorias")
+                    }
+                    statItem(icon: "checkmark.circle", value: statusText, label: hourString)
+                }
             }
         }
         .padding(FitTodaySpacing.md)
@@ -390,7 +428,7 @@ struct WorkoutSessionCard: View {
 
     @ViewBuilder
     private var sourceIcon: some View {
-        switch session.source {
+        switch entry.source {
         case .app:
             Image(systemName: "iphone")
                 .foregroundStyle(FitTodayColor.brandPrimary)
@@ -488,34 +526,6 @@ private struct ActivityStatCard: View {
                 .fill(FitTodayColor.surface)
         )
     }
-}
-
-// MARK: - Mock Data
-
-enum MockWorkoutData {
-    static let recentSessions: [UnifiedWorkoutSession] = [
-        UnifiedWorkoutSession(
-            userId: "user1",
-            name: "Push Day",
-            startedAt: Date().addingTimeInterval(-86400),
-            completedAt: Date().addingTimeInterval(-86400 + 3600),
-            exercises: []
-        ),
-        UnifiedWorkoutSession(
-            userId: "user1",
-            name: "Pull Day",
-            startedAt: Date().addingTimeInterval(-172800),
-            completedAt: Date().addingTimeInterval(-172800 + 4200),
-            exercises: []
-        ),
-        UnifiedWorkoutSession(
-            userId: "user1",
-            name: "Leg Day",
-            startedAt: Date().addingTimeInterval(-259200),
-            completedAt: Date().addingTimeInterval(-259200 + 3900),
-            exercises: []
-        )
-    ]
 }
 
 // MARK: - Preview

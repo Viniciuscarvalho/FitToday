@@ -176,6 +176,77 @@ final class ExerciseTranslationServiceTests: XCTestCase {
                       "Should handle mixed language text")
     }
 
+    // MARK: - Sentence-Initial Pattern Tests
+
+    func testSentenceInitialKeepIsDetectedAsEnglish() async {
+        // Given - verb at start of string (no leading space)
+        let text = "Keep your back straight and your core engaged throughout."
+
+        // When
+        let result = await sut.ensureLocalizedDescription(text)
+
+        // Then
+        XCTAssertFalse(result.lowercased().contains("keep"),
+                       "Sentence-initial 'Keep' should be translated")
+        XCTAssertTrue(result.lowercased().contains("mantenha") || result.lowercased().contains("costas"),
+                      "Should produce Portuguese output for sentence-initial English")
+    }
+
+    func testSentenceInitialPushIsDetectedAsEnglish() async {
+        // Given - short CMS trainer note starting with verb
+        let text = "Push through your heels as you stand up from the squat."
+
+        // When
+        let result = await sut.ensureLocalizedDescription(text)
+
+        // Then
+        XCTAssertFalse(result.lowercased().contains("push "),
+                       "Sentence-initial 'Push' should be translated")
+        XCTAssertTrue(result.lowercased().contains("empurre") || result.lowercased().contains("calcanhar"),
+                      "Should produce Portuguese output for sentence-initial English verb")
+    }
+
+    // MARK: - Post-Translation Quality Check Tests
+
+    func testSpanishTextWithUntranslatableWordsReturnsFallback() async {
+        // Given - Spanish text with words NOT in dictionary (" muy ", " desde " survive translation)
+        let spanishText = "Los músculos deben estar muy activos desde el inicio del ejercicio."
+
+        // When
+        let result = await sut.ensureLocalizedDescription(spanishText)
+
+        // Then - quality check should detect remaining Spanish patterns and return fallback
+        let fallback = await sut.ensureLocalizedDescription("")
+        XCTAssertEqual(result, fallback,
+                       "Poorly translated Spanish text should return Portuguese fallback")
+    }
+
+    func testEnglishTextWithUntranslatableWordsReturnsFallback() async {
+        // Given - English text with words NOT in dictionary (" should ", " have " survive translation)
+        let englishText = "You should have your feet flat on the floor during the entire movement."
+
+        // When
+        let result = await sut.ensureLocalizedDescription(englishText)
+
+        // Then - quality check should detect remaining English patterns and return fallback
+        let fallback = await sut.ensureLocalizedDescription("")
+        XCTAssertEqual(result, fallback,
+                       "Poorly translated English text should return Portuguese fallback")
+    }
+
+    func testCleanSpanishTranslationPassesQualityCheck() async {
+        // Given - Spanish text where all words are in the dictionary
+        let spanishText = "Mantenga los brazos extendidos y empuje el peso hacia arriba."
+
+        // When
+        let result = await sut.ensureLocalizedDescription(spanishText)
+
+        // Then - clean translation should NOT return fallback
+        let fallback = await sut.ensureLocalizedDescription("")
+        XCTAssertNotEqual(result, fallback,
+                          "Clean Spanish translation should pass quality check, not return fallback")
+    }
+
     // MARK: - Real-World Exercise Descriptions
 
     func testRealBenchPressDescription() async {

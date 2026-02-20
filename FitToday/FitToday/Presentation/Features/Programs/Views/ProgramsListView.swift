@@ -52,22 +52,13 @@ struct ProgramsListView: View {
     private func contentView(viewModel: ProgramsListViewModel) -> some View {
         ScrollView {
             VStack(spacing: FitTodaySpacing.lg) {
-                // Stats Banner
-                statsBanner(viewModel: viewModel)
+                // Action Buttons Row
+                actionButtonsRow
                     .padding(.horizontal, FitTodaySpacing.md)
 
-                // "Para Você" Recommended Section
-                if !viewModel.recommendedPrograms.isEmpty {
-                    recommendedSection(programs: viewModel.recommendedPrograms)
-                }
-
-                // Grouped Programs (sorted by profile relevance)
+                // Grouped Programs — vertical list per category
                 ForEach(viewModel.sortedGroupedPrograms, id: \.category) { group in
-                    categorySection(
-                        category: group.category,
-                        programs: group.programs,
-                        viewModel: viewModel
-                    )
+                    categorySection(category: group.category, programs: group.programs)
                 }
             }
             .padding(.vertical, FitTodaySpacing.md)
@@ -78,78 +69,43 @@ struct ProgramsListView: View {
         }
     }
 
-    // MARK: - Stats Banner
+    // MARK: - Action Buttons Row
 
-    private func statsBanner(viewModel: ProgramsListViewModel) -> some View {
-        VStack(spacing: FitTodaySpacing.md) {
-            Text("\(viewModel.programs.count) Programas Disponíveis")
-                .font(FitTodayFont.ui(size: 18, weight: .bold))
-                .foregroundStyle(.white)
-
-            HStack(spacing: FitTodaySpacing.lg) {
-                levelStat(count: viewModel.beginnerCount, label: "Iniciante")
-                levelStat(count: viewModel.intermediateCount, label: "Intermed.")
-                levelStat(count: viewModel.advancedCount, label: "Avançado")
+    private var actionButtonsRow: some View {
+        HStack(spacing: FitTodaySpacing.sm) {
+            Button {
+                // TODO: navigate to create routine
+            } label: {
+                Label("Nova Rotina", systemImage: "plus")
+                    .font(FitTodayFont.ui(size: 14, weight: .semiBold))
+                    .foregroundStyle(FitTodayColor.brandPrimary)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, FitTodaySpacing.sm)
+                    .background(FitTodayColor.brandPrimary.opacity(0.12))
+                    .clipShape(RoundedRectangle(cornerRadius: FitTodayRadius.md))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: FitTodayRadius.md)
+                            .stroke(FitTodayColor.brandPrimary.opacity(0.3), lineWidth: 1)
+                    )
             }
-        }
-        .padding(FitTodaySpacing.lg)
-        .frame(maxWidth: .infinity)
-        .background(
-            LinearGradient(
-                colors: [FitTodayColor.brandPrimary, FitTodayColor.brandPrimary.opacity(0.8)],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-        )
-        .clipShape(RoundedRectangle(cornerRadius: FitTodayRadius.lg))
-    }
+            .buttonStyle(.plain)
 
-    private func levelStat(count: Int, label: String) -> some View {
-        VStack(spacing: FitTodaySpacing.xs) {
-            Text("\(count)")
-                .font(FitTodayFont.ui(size: 24, weight: .bold))
-                .foregroundStyle(.white)
-
-            Text(label)
-                .font(FitTodayFont.ui(size: 12, weight: .medium))
-                .foregroundStyle(.white.opacity(0.8))
-        }
-        .frame(width: 70)
-        .padding(.vertical, FitTodaySpacing.sm)
-        .background(.white.opacity(0.15))
-        .clipShape(RoundedRectangle(cornerRadius: FitTodayRadius.md))
-    }
-
-    // MARK: - Recommended Section
-
-    private func recommendedSection(programs: [Program]) -> some View {
-        VStack(alignment: .leading, spacing: FitTodaySpacing.sm) {
-            HStack {
-                Image(systemName: "star.fill")
-                    .foregroundStyle(FitTodayColor.warning)
-                    .font(.system(size: 14))
-
-                Text("programs.recommended.title".localized)
-                    .font(FitTodayFont.ui(size: 17, weight: .semiBold))
-                    .foregroundStyle(FitTodayColor.textPrimary)
-
-                Spacer()
+            Button {
+                // TODO: navigate to explore/catalog
+            } label: {
+                Label("Explorar", systemImage: "safari")
+                    .font(FitTodayFont.ui(size: 14, weight: .semiBold))
+                    .foregroundStyle(FitTodayColor.textSecondary)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, FitTodaySpacing.sm)
+                    .background(FitTodayColor.surface)
+                    .clipShape(RoundedRectangle(cornerRadius: FitTodayRadius.md))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: FitTodayRadius.md)
+                            .stroke(FitTodayColor.outline.opacity(0.2), lineWidth: 1)
+                    )
             }
-            .padding(.horizontal, FitTodaySpacing.md)
-
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: FitTodaySpacing.sm) {
-                    ForEach(programs) { program in
-                        Button {
-                            router.push(.programDetail(program.id), on: .workout)
-                        } label: {
-                            CompactProgramCard(program: program)
-                        }
-                        .buttonStyle(.plain)
-                    }
-                }
-                .padding(.horizontal, FitTodaySpacing.md)
-            }
+            .buttonStyle(.plain)
         }
     }
 
@@ -157,70 +113,98 @@ struct ProgramsListView: View {
 
     private func categorySection(
         category: ProgramCategory,
-        programs: [Program],
-        viewModel: ProgramsListViewModel
+        programs: [Program]
     ) -> some View {
         VStack(alignment: .leading, spacing: FitTodaySpacing.sm) {
-            // Category Header
+            // Category Header with count
             HStack {
-                Text(category.displayName)
-                    .font(FitTodayFont.ui(size: 17, weight: .semiBold))
-                    .foregroundStyle(FitTodayColor.textPrimary)
-
+                Text("\(category.displayName) (\(programs.count))")
+                    .font(FitTodayFont.ui(size: 13, weight: .semiBold))
+                    .foregroundStyle(FitTodayColor.textSecondary)
+                    .textCase(.uppercase)
                 Spacer()
-
-                Text("\(programs.count) variações")
-                    .font(FitTodayFont.ui(size: 13, weight: .medium))
-                    .foregroundStyle(FitTodayColor.textTertiary)
             }
             .padding(.horizontal, FitTodaySpacing.md)
 
-            // Programs horizontal scroll
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: FitTodaySpacing.sm) {
-                    ForEach(programs) { program in
-                        Button {
-                            router.push(.programDetail(program.id), on: .workout)
-                        } label: {
-                            CompactProgramCard(program: program)
-                        }
-                        .buttonStyle(.plain)
+            // Vertical list of program cards
+            LazyVStack(spacing: FitTodaySpacing.sm) {
+                ForEach(programs) { program in
+                    RoutineListCard(program: program) {
+                        router.push(.programDetail(program.id), on: .workout)
                     }
+                    .padding(.horizontal, FitTodaySpacing.md)
                 }
-                .padding(.horizontal, FitTodaySpacing.md)
             }
         }
     }
 }
 
-// MARK: - Compact Program Card
+// MARK: - Routine List Card (Hevy-style)
 
-private struct CompactProgramCard: View {
+private struct RoutineListCard: View {
     let program: Program
+    let onTap: () -> Void
+
+    private var workoutPreviews: [String] {
+        // Show the template IDs as workout count hint (no network call needed)
+        let count = program.totalWorkouts
+        let names = (1...max(1, min(count, 4))).map { "Treino \($0)" }
+        return names
+    }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: FitTodaySpacing.xs) {
-            // Level Badge
-            levelBadge
+        VStack(alignment: .leading, spacing: FitTodaySpacing.sm) {
+            // Header row: level badge + name
+            HStack(spacing: FitTodaySpacing.sm) {
+                levelBadge
+                Text(program.shortName)
+                    .font(FitTodayFont.ui(size: 15, weight: .semiBold))
+                    .foregroundStyle(FitTodayColor.textPrimary)
+                    .lineLimit(1)
+                Spacer()
+                Text(program.equipment.displayName)
+                    .font(FitTodayFont.ui(size: 11, weight: .medium))
+                    .foregroundStyle(FitTodayColor.textTertiary)
+            }
 
-            // Program Name
-            Text(program.shortName)
-                .font(FitTodayFont.ui(size: 14, weight: .semiBold))
-                .foregroundStyle(FitTodayColor.textPrimary)
-                .lineLimit(1)
+            // Workout preview lines
+            VStack(alignment: .leading, spacing: FitTodaySpacing.xs) {
+                ForEach(workoutPreviews, id: \.self) { name in
+                    HStack(spacing: FitTodaySpacing.xs) {
+                        Circle()
+                            .fill(FitTodayColor.brandPrimary.opacity(0.5))
+                            .frame(width: 5, height: 5)
+                        Text(name)
+                            .font(FitTodayFont.ui(size: 13, weight: .medium))
+                            .foregroundStyle(FitTodayColor.textSecondary)
+                            .lineLimit(1)
+                    }
+                }
+                if program.totalWorkouts > 4 {
+                    Text("+ \(program.totalWorkouts - 4) treinos")
+                        .font(FitTodayFont.ui(size: 12, weight: .medium))
+                        .foregroundStyle(FitTodayColor.brandPrimary)
+                }
+            }
 
-            // Equipment
-            Text(program.equipment.displayName)
-                .font(FitTodayFont.ui(size: 12, weight: .medium))
-                .foregroundStyle(FitTodayColor.textTertiary)
+            // CTA Button
+            Button(action: onTap) {
+                Text("Iniciar Rotina")
+                    .font(FitTodayFont.ui(size: 14, weight: .semiBold))
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, FitTodaySpacing.sm)
+                    .background(FitTodayColor.brandPrimary)
+                    .clipShape(RoundedRectangle(cornerRadius: FitTodayRadius.sm))
+            }
+            .buttonStyle(.plain)
         }
-        .frame(width: 100, alignment: .leading)
-        .padding(FitTodaySpacing.sm)
+        .padding(FitTodaySpacing.md)
         .background(FitTodayColor.surface)
         .clipShape(RoundedRectangle(cornerRadius: FitTodayRadius.md))
         .overlay(
             RoundedRectangle(cornerRadius: FitTodayRadius.md)
-                .stroke(FitTodayColor.outline.opacity(0.2), lineWidth: 1)
+                .stroke(FitTodayColor.outline.opacity(0.15), lineWidth: 1)
         )
     }
 
@@ -229,7 +213,7 @@ private struct CompactProgramCard: View {
             .font(FitTodayFont.ui(size: 10, weight: .bold))
             .foregroundStyle(.white)
             .padding(.horizontal, FitTodaySpacing.sm)
-            .padding(.vertical, 4)
+            .padding(.vertical, 3)
             .background(levelColor)
             .clipShape(Capsule())
     }

@@ -58,25 +58,28 @@ actor ExerciseTranslationService {
         // Translate if possible
         if let lang = detectedLanguage, translatableLanguages.contains(lang) {
             let translated = translateToPortuguese(text, from: lang)
-            cache[cacheKey] = translated
+            let result = validateTranslationQuality(translated)
+            cache[cacheKey] = result
             #if DEBUG
-            print("[Translation] 🌐 Translated from \(lang.rawValue): '\(text.prefix(50))...' -> '\(translated.prefix(50))...'")
+            print("[Translation] 🌐 Translated from \(lang.rawValue): '\(text.prefix(50))...' -> '\(result.prefix(50))...'")
             #endif
-            return translated
+            return result
         }
 
         // Check patterns for English even if language detection failed
         if containsEnglishPatterns(text) {
             let translated = translateToPortuguese(text, from: .english)
-            cache[cacheKey] = translated
-            return translated
+            let result = validateTranslationQuality(translated)
+            cache[cacheKey] = result
+            return result
         }
 
         // Check patterns for Spanish
         if containsSpanishPatterns(text) {
             let translated = translateToPortuguese(text, from: .spanish)
-            cache[cacheKey] = translated
-            return translated
+            let result = validateTranslationQuality(translated)
+            cache[cacheKey] = result
+            return result
         }
 
         // Fallback for unknown languages
@@ -91,6 +94,21 @@ actor ExerciseTranslationService {
         #if DEBUG
         print("[Translation] 🗑️ Cache cleared")
         #endif
+    }
+
+    // MARK: - Translation Quality Validation
+
+    /// Checks if translated text still contains foreign language patterns.
+    /// If it does, the dictionary-based translation produced garbled mixed-language text,
+    /// so we return the Portuguese fallback instead.
+    private func validateTranslationQuality(_ translated: String) -> String {
+        if containsSpanishPatterns(translated) || containsEnglishPatterns(translated) {
+            #if DEBUG
+            print("[Translation] ⚠️ Post-translation still contains foreign patterns, using fallback")
+            #endif
+            return getPortugueseFallback()
+        }
+        return translated
     }
 
     // MARK: - Translation Engine
@@ -144,23 +162,34 @@ actor ExerciseTranslationService {
     }
 
     private func containsEnglishPatterns(_ text: String) -> Bool {
+        // Space-padded patterns match words mid-sentence.
+        // Unprefixed patterns (no leading space) match at sentence start.
         let englishIndicators = [
             " the ", " and ", " with ", " your ", " this ",
             " that ", " from ", " have ", " will ", " should ",
             " keep ", " hold ", " push ", " pull ", " lift ",
-            " lower ", " raise ", " extend ", " flex ", " repeat "
+            " lower ", " raise ", " extend ", " flex ", " repeat ",
+            // Sentence-start variants (no leading space required)
+            "keep ", "hold ", "push ", "pull ", "lift ",
+            "lower ", "raise ", "extend ", "flex ", "stand ",
+            "sit ", "lie ", "bend ", "squeeze ", "the "
         ]
         let lowercased = text.lowercased()
         return englishIndicators.contains { lowercased.contains($0) }
     }
 
     private func containsPortuguesePatterns(_ text: String) -> Bool {
+        // Space-padded patterns match words mid-sentence.
+        // Sentence-start and suffix patterns need no leading space.
         let portugueseIndicators = [
             " o ", " a ", " os ", " as ", " um ", " uma ",
             " do ", " da ", " dos ", " das ", " no ", " na ",
             " com ", " para ", " por ", " que ", " não ",
             " mantenha ", " segure ", " empurre ", " puxe ",
-            "ção ", "ões ", "mente "
+            "ção ", "ões ", "mente ",
+            // Sentence-start variants
+            "mantenha ", "segure ", "empurre ", "puxe ",
+            "fique ", "deite ", "sente ", "levante ", "abaixe "
         ]
         let lowercased = text.lowercased()
         return portugueseIndicators.contains { lowercased.contains($0) }
@@ -471,6 +500,7 @@ actor ExerciseTranslationService {
         "colchoneta": "colchonete",
 
         // Directions
+        " hacia ": " em direção a ",
         "arriba": "para cima",
         "abajo": "para baixo",
         "adelante": "para frente",

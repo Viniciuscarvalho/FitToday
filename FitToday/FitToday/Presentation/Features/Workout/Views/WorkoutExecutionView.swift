@@ -14,6 +14,8 @@ struct WorkoutExecutionView: View {
     @Environment(AppRouter.self) private var router
     @Environment(WorkoutSessionStore.self) private var sessionStore
 
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
     @State private var restTimerStore = RestTimerStore()
     @State private var workoutTimerStore = WorkoutTimerStore()
     @State private var translationService = ExerciseTranslationService()
@@ -24,16 +26,11 @@ struct WorkoutExecutionView: View {
     @State private var errorMessage: String?
 
     var body: some View {
-        ZStack {
+        Group {
             if sessionStore.plan != nil {
                 workoutContent
             } else {
                 emptyStateView
-            }
-
-            // Rest Timer Overlay
-            if showRestTimer || restTimerStore.isActive {
-                restTimerOverlay
             }
         }
         .navigationTitle("Executando Treino")
@@ -46,6 +43,17 @@ struct WorkoutExecutionView: View {
             workoutTimerStore.pause()
             restTimerStore.stop()
         }
+        .overlay {
+            if showRestTimer || restTimerStore.isActive {
+                restTimerOverlay
+                    .transition(
+                        reduceMotion
+                            ? .opacity
+                            : .opacity.combined(with: .scale(scale: 0.95))
+                    )
+            }
+        }
+        .animation(.spring(response: 0.3, dampingFraction: 0.8), value: showRestTimer || restTimerStore.isActive)
         .alert("Ops!", isPresented: Binding(
             get: { errorMessage != nil },
             set: { _ in errorMessage = nil }
@@ -467,8 +475,6 @@ struct WorkoutExecutionView: View {
             .techCornerBorders(length: 16, thickness: 2)
             .padding(FitTodaySpacing.xl)
         }
-        .transition(.opacity.combined(with: .scale(scale: 0.95)))
-        .animation(.spring(response: 0.3, dampingFraction: 0.8), value: showRestTimer)
     }
 
     // MARK: - Helper Methods
@@ -483,6 +489,7 @@ struct WorkoutExecutionView: View {
 
     private func finishWorkout() {
         restTimerStore.stop()
+        sessionStore.recordElapsedTime(workoutTimerStore.elapsedSeconds)
         workoutTimerStore.reset()
 
         Task {
