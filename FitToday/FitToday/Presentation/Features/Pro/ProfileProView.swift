@@ -360,7 +360,7 @@ struct ProfileProView: View {
             }
 
             Text("settings.language".localized)
-                .font(.system(size: 15))
+                .font(.system(.body))
                 .foregroundStyle(FitTodayColor.textPrimary)
 
             Spacer()
