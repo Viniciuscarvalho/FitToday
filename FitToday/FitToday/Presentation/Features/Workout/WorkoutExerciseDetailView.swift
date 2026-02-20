@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Translation
 
 struct WorkoutExerciseDetailView: View {
     @Environment(AppRouter.self) private var router
@@ -99,18 +100,22 @@ struct WorkoutExerciseDetailView: View {
                 }
 
                 if !prescription.exercise.instructions.isEmpty {
-                    VStack(alignment: .leading, spacing: FitTodaySpacing.xs) {
-                        Text("Instruções rápidas")
-                            .font(FitTodayFont.ui(size: 17, weight: .semiBold))
-                        ForEach(prescription.exercise.instructions, id: \.self) { instruction in
-                            HStack(alignment: .top, spacing: FitTodaySpacing.xs) {
-                                Image(systemName: "checkmark.circle.fill")
-                                    .font(.system(size: 12))
-                                    .foregroundStyle(FitTodayColor.brandPrimary)
-                                    .fitGlowEffect(color: FitTodayColor.brandPrimary.opacity(0.3))
-                                Text(instruction)
-                                    .font(FitTodayFont.ui(size: 17, weight: .medium))
-                                    .foregroundStyle(FitTodayColor.textSecondary)
+                    if #available(iOS 17.4, *) {
+                        TranslatableWorkoutInstructions(instructions: prescription.exercise.instructions)
+                    } else {
+                        VStack(alignment: .leading, spacing: FitTodaySpacing.xs) {
+                            Text("Instruções rápidas")
+                                .font(FitTodayFont.ui(size: 17, weight: .semiBold))
+                            ForEach(prescription.exercise.instructions, id: \.self) { instruction in
+                                HStack(alignment: .top, spacing: FitTodaySpacing.xs) {
+                                    Image(systemName: "checkmark.circle.fill")
+                                        .font(.system(size: 12))
+                                        .foregroundStyle(FitTodayColor.brandPrimary)
+                                        .fitGlowEffect(color: FitTodayColor.brandPrimary.opacity(0.3))
+                                    Text(instruction)
+                                        .font(FitTodayFont.ui(size: 17, weight: .medium))
+                                        .foregroundStyle(FitTodayColor.textSecondary)
+                                }
                             }
                         }
                     }
@@ -352,4 +357,45 @@ private struct SubstitutionSheetWrapper: View {
 }
 
 import Swinject
+
+// MARK: - Translatable Instructions (iOS 17.4+)
+
+@available(iOS 17.4, *)
+private struct TranslatableWorkoutInstructions: View {
+    let instructions: [String]
+    @State private var displayed: [String]
+    @State private var config: TranslationSession.Configuration?
+
+    init(instructions: [String]) {
+        self.instructions = instructions
+        self._displayed = State(initialValue: instructions)
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: FitTodaySpacing.xs) {
+            Text("Instruções rápidas")
+                .font(FitTodayFont.ui(size: 17, weight: .semiBold))
+            ForEach(Array(displayed.enumerated()), id: \.offset) { _, instruction in
+                HStack(alignment: .top, spacing: FitTodaySpacing.xs) {
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.system(size: 12))
+                        .foregroundStyle(FitTodayColor.brandPrimary)
+                        .fitGlowEffect(color: FitTodayColor.brandPrimary.opacity(0.3))
+                    Text(instruction)
+                        .font(FitTodayFont.ui(size: 17, weight: .medium))
+                        .foregroundStyle(FitTodayColor.textSecondary)
+                }
+            }
+        }
+        .onAppear {
+            config = .init(source: nil, target: .init(identifier: "pt-BR"))
+        }
+        .translationTask(config) { session in
+            let requests = displayed.map { TranslationSession.Request(sourceText: $0) }
+            if let responses = try? await session.translations(from: requests) {
+                displayed = responses.map { $0.targetText }
+            }
+        }
+    }
+}
 

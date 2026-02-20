@@ -55,37 +55,9 @@ actor ExerciseTranslationService {
             return text
         }
 
-        // Translate if possible
-        if let lang = detectedLanguage, translatableLanguages.contains(lang) {
-            let translated = translateToPortuguese(text, from: lang)
-            let result = validateTranslationQuality(translated)
-            cache[cacheKey] = result
-            #if DEBUG
-            print("[Translation] 🌐 Translated from \(lang.rawValue): '\(text.prefix(50))...' -> '\(result.prefix(50))...'")
-            #endif
-            return result
-        }
-
-        // Check patterns for English even if language detection failed
-        if containsEnglishPatterns(text) {
-            let translated = translateToPortuguese(text, from: .english)
-            let result = validateTranslationQuality(translated)
-            cache[cacheKey] = result
-            return result
-        }
-
-        // Check patterns for Spanish
-        if containsSpanishPatterns(text) {
-            let translated = translateToPortuguese(text, from: .spanish)
-            let result = validateTranslationQuality(translated)
-            cache[cacheKey] = result
-            return result
-        }
-
-        // Fallback for unknown languages
-        let fallback = getPortugueseFallback()
-        cache[cacheKey] = fallback
-        return fallback
+        // Return original text for non-Portuguese — Apple Translation handles it at the view layer
+        cache[cacheKey] = text
+        return text
     }
 
     /// Clears the translation cache.

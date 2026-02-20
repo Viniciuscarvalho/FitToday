@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Translation
 
 /// Tela de detalhe de exercício para a Biblioteca (fora de sessão ativa).
 /// Exibe mídia (GIF/imagem), instruções, prescrição e dicas.
@@ -36,7 +37,11 @@ struct LibraryExerciseDetailView: View {
 
         // Instruções
         if !prescription.exercise.instructions.isEmpty {
-          instructionsSection
+          if #available(iOS 17.4, *) {
+            TranslatableLibraryInstructions(instructions: prescription.exercise.instructions)
+          } else {
+            instructionsSection
+          }
         }
 
         // Dica do coach
@@ -125,6 +130,56 @@ struct LibraryExerciseDetailView: View {
       .padding()
       .background(FitTodayColor.brandSecondary.opacity(0.1))
       .cornerRadius(FitTodayRadius.md)
+    }
+  }
+}
+
+// MARK: - Translatable Instructions (iOS 17.4+)
+
+@available(iOS 17.4, *)
+private struct TranslatableLibraryInstructions: View {
+  let instructions: [String]
+  @State private var displayed: [String]
+  @State private var config: TranslationSession.Configuration?
+
+  init(instructions: [String]) {
+    self.instructions = instructions
+    self._displayed = State(initialValue: instructions)
+  }
+
+  var body: some View {
+    VStack(alignment: .leading, spacing: FitTodaySpacing.sm) {
+      SectionHeader(title: "Como executar", actionTitle: nil)
+
+      VStack(alignment: .leading, spacing: FitTodaySpacing.sm) {
+        ForEach(Array(displayed.enumerated()), id: \.offset) { index, instruction in
+          HStack(alignment: .top, spacing: FitTodaySpacing.sm) {
+            Text("\(index + 1)")
+              .font(.system(.caption, weight: .bold))
+              .foregroundStyle(FitTodayColor.brandPrimary)
+              .frame(width: 20, height: 20)
+              .background(FitTodayColor.brandPrimary.opacity(0.15))
+              .clipShape(Circle())
+
+            Text(instruction)
+              .font(.system(.body))
+              .foregroundStyle(FitTodayColor.textSecondary)
+              .fixedSize(horizontal: false, vertical: true)
+          }
+        }
+      }
+      .padding()
+      .background(FitTodayColor.surface)
+      .cornerRadius(FitTodayRadius.md)
+    }
+    .onAppear {
+      config = .init(source: nil, target: .init(identifier: "pt-BR"))
+    }
+    .translationTask(config) { session in
+      let requests = displayed.map { TranslationSession.Request(sourceText: $0) }
+      if let responses = try? await session.translations(from: requests) {
+        displayed = responses.map { $0.targetText }
+      }
     }
   }
 }
