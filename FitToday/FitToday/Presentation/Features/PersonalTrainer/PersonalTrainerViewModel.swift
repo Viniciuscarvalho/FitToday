@@ -37,6 +37,8 @@ final class PersonalTrainerViewModel {
     private let fetchAssignedWorkoutsUseCase: FetchAssignedWorkoutsUseCaseProtocol?
     private let fetchCMSWorkoutsUseCase: FetchCMSWorkoutsUseCase?
     private let featureFlagChecker: FeatureFlagChecking?
+    private let cmsWorkoutRepository: CMSWorkoutRepository?
+    private let authRepository: AuthenticationRepository?
 
     private var observationTask: Task<Void, Never>?
     private var workoutsObservationTask: Task<Void, Never>?
@@ -51,6 +53,8 @@ final class PersonalTrainerViewModel {
         self.fetchAssignedWorkoutsUseCase = resolver.resolve(FetchAssignedWorkoutsUseCaseProtocol.self)
         self.fetchCMSWorkoutsUseCase = resolver.resolve(FetchCMSWorkoutsUseCase.self)
         self.featureFlagChecker = resolver.resolve(FeatureFlagChecking.self)
+        self.cmsWorkoutRepository = resolver.resolve(CMSWorkoutRepository.self)
+        self.authRepository = resolver.resolve(AuthenticationRepository.self)
     }
 
     // For testing
@@ -61,7 +65,9 @@ final class PersonalTrainerViewModel {
         getCurrentTrainerUseCase: GetCurrentTrainerUseCaseProtocol? = nil,
         fetchAssignedWorkoutsUseCase: FetchAssignedWorkoutsUseCaseProtocol? = nil,
         fetchCMSWorkoutsUseCase: FetchCMSWorkoutsUseCase? = nil,
-        featureFlagChecker: FeatureFlagChecking? = nil
+        featureFlagChecker: FeatureFlagChecking? = nil,
+        cmsWorkoutRepository: CMSWorkoutRepository? = nil,
+        authRepository: AuthenticationRepository? = nil
     ) {
         self.discoverTrainersUseCase = discoverTrainersUseCase
         self.requestConnectionUseCase = requestConnectionUseCase
@@ -70,6 +76,8 @@ final class PersonalTrainerViewModel {
         self.fetchAssignedWorkoutsUseCase = fetchAssignedWorkoutsUseCase
         self.fetchCMSWorkoutsUseCase = fetchCMSWorkoutsUseCase
         self.featureFlagChecker = featureFlagChecker
+        self.cmsWorkoutRepository = cmsWorkoutRepository
+        self.authRepository = authRepository
     }
 
     // Note: Task cancellation is handled by onDisappear()
@@ -254,6 +262,10 @@ final class PersonalTrainerViewModel {
             searchResults = []
             searchQuery = ""
             inviteCode = ""
+
+            // Register student in CMS so the trainer can assign workouts
+            await registerStudentInCMS(trainerId: trainer.id)
+
             return true
         } catch {
             self.error = error
@@ -261,6 +273,44 @@ final class PersonalTrainerViewModel {
             print("[PersonalTrainerViewModel] Error requesting connection: \(error)")
             #endif
             return false
+        }
+    }
+
+    // MARK: - CMS Student Registration
+
+    /// Registers the student in the CMS after a successful Firebase connection.
+    /// This is best-effort — failure does not block the connection flow.
+    private func registerStudentInCMS(trainerId: String) async {
+        guard let repo = cmsWorkoutRepository,
+              let authRepo = authRepository else {
+            #if DEBUG
+            print("[PersonalTrainerViewModel] CMS registration skipped: dependencies not available")
+            #endif
+            return
+        }
+
+        do {
+            guard let user = try await authRepo.currentUser() else {
+                #if DEBUG
+                print("[PersonalTrainerViewModel] CMS registration skipped: no current user")
+                #endif
+                return
+            }
+
+            try await repo.registerStudent(
+                firebaseUid: user.id,
+                trainerId: trainerId,
+                displayName: user.displayName,
+                email: user.email
+            )
+
+            #if DEBUG
+            print("[PersonalTrainerViewModel] Student registered in CMS for trainer \(trainerId)")
+            #endif
+        } catch {
+            #if DEBUG
+            print("[PersonalTrainerViewModel] CMS registration failed (non-blocking): \(error)")
+            #endif
         }
     }
 

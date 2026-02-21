@@ -173,6 +173,27 @@ struct CMSWorkoutUpdateRequest: Codable, Sendable {
     }
 }
 
+// MARK: - CMS Student Registration
+
+/// Request body for registering a student in the CMS.
+/// Matches: POST /api/students
+struct CMSStudentRegistrationRequest: Codable, Sendable {
+    let firebaseUid: String
+    let trainerId: String
+    let displayName: String
+    let email: String?
+}
+
+/// Response from student registration.
+struct CMSStudentRegistrationResponse: Codable, Sendable {
+    let id: String
+    let firebaseUid: String
+    let trainerId: String
+    let displayName: String
+    let email: String?
+    let createdAt: Date?
+}
+
 // MARK: - CMS API Error Response
 
 /// Error response from CMS API.

@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Charts
 import Swinject
 
 /// Segments available in the Activity tab.
@@ -460,41 +461,235 @@ struct WorkoutEntryCard: View {
 }
 
 
-// MARK: - Activity Stats View (Placeholder)
+// MARK: - Activity Stats View
 
 struct ActivityStatsView: View {
     let resolver: Resolver
 
+    @State private var viewModel: ActivityStatsViewModel?
+
     var body: some View {
         ScrollView {
-            VStack(spacing: FitTodaySpacing.lg) {
-                // Weekly Stats
-                VStack(alignment: .leading, spacing: FitTodaySpacing.sm) {
-                    Text("Esta Semana")
-                        .font(FitTodayFont.ui(size: 17, weight: .bold))
-                        .foregroundStyle(FitTodayColor.textPrimary)
+            if let viewModel, !viewModel.isLoading {
+                VStack(spacing: FitTodaySpacing.lg) {
+                    // Summary Cards
+                    summarySection(viewModel: viewModel)
 
-                    HStack(spacing: FitTodaySpacing.md) {
-                        ActivityStatCard(title: "Treinos", value: "3", icon: "dumbbell")
-                        ActivityStatCard(title: "Volume", value: "2.5 ton", icon: "scalemass")
-                        ActivityStatCard(title: "Tempo", value: "2h 15m", icon: "clock")
+                    // Weekly Chart — Workouts per Day
+                    if !viewModel.dailyEntries.isEmpty {
+                        chartSection(
+                            title: "Treinos por Dia",
+                            subtitle: "Últimos 7 dias"
+                        ) {
+                            Chart(viewModel.dailyEntries) { entry in
+                                BarMark(
+                                    x: .value("Dia", entry.dayLabel),
+                                    y: .value("Treinos", entry.workouts)
+                                )
+                                .foregroundStyle(FitTodayColor.brandPrimary.gradient)
+                                .cornerRadius(4)
+                            }
+                            .chartYAxis {
+                                AxisMarks(values: .automatic(desiredCount: 4)) { value in
+                                    AxisGridLine()
+                                    AxisValueLabel {
+                                        if let intVal = value.as(Int.self) {
+                                            Text("\(intVal)")
+                                                .font(FitTodayFont.ui(size: 10, weight: .medium))
+                                                .foregroundStyle(FitTodayColor.textTertiary)
+                                        }
+                                    }
+                                }
+                            }
+                            .chartXAxis {
+                                AxisMarks { value in
+                                    AxisValueLabel {
+                                        if let label = value.as(String.self) {
+                                            Text(label)
+                                                .font(FitTodayFont.ui(size: 10, weight: .medium))
+                                                .foregroundStyle(FitTodayColor.textSecondary)
+                                        }
+                                    }
+                                }
+                            }
+                            .frame(height: 180)
+                        }
+                    }
+
+                    // Weekly Chart — Minutes per Day
+                    if !viewModel.dailyEntries.isEmpty {
+                        chartSection(
+                            title: "Minutos por Dia",
+                            subtitle: "Últimos 7 dias"
+                        ) {
+                            Chart(viewModel.dailyEntries) { entry in
+                                BarMark(
+                                    x: .value("Dia", entry.dayLabel),
+                                    y: .value("Minutos", entry.minutes)
+                                )
+                                .foregroundStyle(Color.orange.gradient)
+                                .cornerRadius(4)
+                            }
+                            .chartYAxis {
+                                AxisMarks(values: .automatic(desiredCount: 4)) { value in
+                                    AxisGridLine()
+                                    AxisValueLabel {
+                                        if let intVal = value.as(Int.self) {
+                                            Text("\(intVal)")
+                                                .font(FitTodayFont.ui(size: 10, weight: .medium))
+                                                .foregroundStyle(FitTodayColor.textTertiary)
+                                        }
+                                    }
+                                }
+                            }
+                            .chartXAxis {
+                                AxisMarks { value in
+                                    AxisValueLabel {
+                                        if let label = value.as(String.self) {
+                                            Text(label)
+                                                .font(FitTodayFont.ui(size: 10, weight: .medium))
+                                                .foregroundStyle(FitTodayColor.textSecondary)
+                                        }
+                                    }
+                                }
+                            }
+                            .frame(height: 180)
+                        }
+                    }
+
+                    // Monthly Chart — Workouts per Week
+                    if !viewModel.weeklyEntries.isEmpty {
+                        chartSection(
+                            title: "Treinos por Semana",
+                            subtitle: "Últimas 4 semanas"
+                        ) {
+                            Chart(viewModel.weeklyEntries) { entry in
+                                BarMark(
+                                    x: .value("Semana", entry.weekLabel),
+                                    y: .value("Treinos", entry.workouts)
+                                )
+                                .foregroundStyle(Color.green.gradient)
+                                .cornerRadius(4)
+                            }
+                            .chartYAxis {
+                                AxisMarks(values: .automatic(desiredCount: 4)) { value in
+                                    AxisGridLine()
+                                    AxisValueLabel {
+                                        if let intVal = value.as(Int.self) {
+                                            Text("\(intVal)")
+                                                .font(FitTodayFont.ui(size: 10, weight: .medium))
+                                                .foregroundStyle(FitTodayColor.textTertiary)
+                                        }
+                                    }
+                                }
+                            }
+                            .chartXAxis {
+                                AxisMarks { value in
+                                    AxisValueLabel {
+                                        if let label = value.as(String.self) {
+                                            Text(label)
+                                                .font(FitTodayFont.ui(size: 10, weight: .medium))
+                                                .foregroundStyle(FitTodayColor.textSecondary)
+                                        }
+                                    }
+                                }
+                            }
+                            .frame(height: 180)
+                        }
                     }
                 }
+                .padding(FitTodaySpacing.md)
+            } else {
+                VStack {
+                    Spacer(minLength: 100)
+                    ProgressView()
+                    Spacer(minLength: 100)
+                }
+                .frame(maxWidth: .infinity)
+            }
+        }
+        .scrollIndicators(.hidden)
+        .task {
+            if viewModel == nil {
+                viewModel = ActivityStatsViewModel(resolver: resolver)
+            }
+            await viewModel?.loadStats()
+        }
+        .refreshable {
+            await viewModel?.loadStats()
+        }
+    }
 
-                // Monthly Progress
-                VStack(alignment: .leading, spacing: FitTodaySpacing.sm) {
-                    Text("Este Mês")
-                        .font(FitTodayFont.ui(size: 17, weight: .bold))
-                        .foregroundStyle(FitTodayColor.textPrimary)
+    // MARK: - Summary Section
 
-                    HStack(spacing: FitTodaySpacing.md) {
-                        ActivityStatCard(title: "Treinos", value: "12", icon: "dumbbell")
-                        ActivityStatCard(title: "Streak", value: "5 dias", icon: "flame")
-                    }
+    private func summarySection(viewModel: ActivityStatsViewModel) -> some View {
+        let stats = viewModel.stats ?? .empty
+
+        return VStack(spacing: FitTodaySpacing.md) {
+            // Week row
+            VStack(alignment: .leading, spacing: FitTodaySpacing.sm) {
+                Text("Esta Semana")
+                    .font(FitTodayFont.ui(size: 17, weight: .bold))
+                    .foregroundStyle(FitTodayColor.textPrimary)
+
+                HStack(spacing: FitTodaySpacing.md) {
+                    ActivityStatCard(title: "Treinos", value: "\(stats.weekWorkoutsCount)", icon: "dumbbell")
+                    ActivityStatCard(title: "Tempo", value: formatMinutes(stats.weekTotalMinutes), icon: "clock")
+                    ActivityStatCard(title: "Calorias", value: "\(stats.weekTotalCalories)", icon: "flame")
                 }
             }
-            .padding(FitTodaySpacing.md)
+
+            // Month row
+            VStack(alignment: .leading, spacing: FitTodaySpacing.sm) {
+                Text("Este Mês")
+                    .font(FitTodayFont.ui(size: 17, weight: .bold))
+                    .foregroundStyle(FitTodayColor.textPrimary)
+
+                HStack(spacing: FitTodaySpacing.md) {
+                    ActivityStatCard(title: "Treinos", value: "\(stats.monthWorkoutsCount)", icon: "dumbbell")
+                    ActivityStatCard(title: "Streak", value: "\(stats.currentStreak) dias", icon: "flame.fill")
+                    ActivityStatCard(title: "Tempo", value: formatMinutes(stats.monthTotalMinutes), icon: "clock")
+                }
+            }
         }
+    }
+
+    // MARK: - Chart Section
+
+    private func chartSection<Content: View>(
+        title: String,
+        subtitle: String,
+        @ViewBuilder chart: () -> Content
+    ) -> some View {
+        VStack(alignment: .leading, spacing: FitTodaySpacing.sm) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(FitTodayFont.ui(size: 17, weight: .bold))
+                    .foregroundStyle(FitTodayColor.textPrimary)
+
+                Text(subtitle)
+                    .font(FitTodayFont.ui(size: 12, weight: .medium))
+                    .foregroundStyle(FitTodayColor.textTertiary)
+            }
+
+            chart()
+                .padding(FitTodaySpacing.md)
+                .background(
+                    RoundedRectangle(cornerRadius: FitTodayRadius.md)
+                        .fill(FitTodayColor.surface)
+                )
+        }
+    }
+
+    // MARK: - Helpers
+
+    private func formatMinutes(_ minutes: Int) -> String {
+        if minutes >= 60 {
+            let h = minutes / 60
+            let m = minutes % 60
+            return m > 0 ? "\(h)h \(m)m" : "\(h)h"
+        }
+        return "\(minutes)m"
     }
 }
 

@@ -17,6 +17,7 @@ struct GroupsView: View {
     @State private var showingJoinGroup = false
     @State private var showingNotifications = false
     @State private var showingManageGroup = false
+    @State private var showingInviteSheet = false
     @State private var joinGroupId: String?
 
     init(resolver: Resolver) {
@@ -114,6 +115,40 @@ struct GroupsView: View {
                     )
                 }
             }
+            .sheet(isPresented: $showingInviteSheet) {
+                if let group = viewModel.currentGroup {
+                    let links = GenerateInviteLinkUseCase().execute(groupId: group.id)
+                    NavigationStack {
+                        VStack(spacing: FitTodaySpacing.xl) {
+                            Image(systemName: "person.badge.plus")
+                                .font(.system(size: 48))
+                                .foregroundStyle(FitTodayColor.brandPrimary)
+
+                            Text("Convidar para \(group.name)")
+                                .font(FitTodayFont.ui(size: 18, weight: .bold))
+                                .foregroundStyle(FitTodayColor.textPrimary)
+                                .multilineTextAlignment(.center)
+
+                            Text("Compartilhe o link abaixo para convidar amigos para o seu grupo")
+                                .font(FitTodayFont.ui(size: 14, weight: .medium))
+                                .foregroundStyle(FitTodayColor.textSecondary)
+                                .multilineTextAlignment(.center)
+
+                            InviteShareSheet(groupName: group.name, inviteLinks: links)
+                                .buttonStyle(.borderedProminent)
+                        }
+                        .padding(FitTodaySpacing.lg)
+                        .navigationTitle("Convidar")
+                        .navigationBarTitleDisplayMode(.inline)
+                        .toolbar {
+                            ToolbarItem(placement: .cancellationAction) {
+                                Button("Fechar") { showingInviteSheet = false }
+                            }
+                        }
+                    }
+                    .presentationDetents([.medium])
+                }
+            }
             .sheet(item: Binding(
                 get: { joinGroupId.map { GroupIdWrapper(id: $0) } },
                 set: { joinGroupId = $0?.id }
@@ -134,7 +169,7 @@ struct GroupsView: View {
     // MARK: - Actions
 
     private func handleInviteTapped() {
-        // Share sheet will be handled in the toolbar menu or dashboard
+        showingInviteSheet = true
     }
 
     private func handleLeaveTapped() {

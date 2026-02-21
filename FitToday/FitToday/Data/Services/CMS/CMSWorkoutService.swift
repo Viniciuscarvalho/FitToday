@@ -175,6 +175,35 @@ actor CMSWorkoutService {
         return try await execute(request: request)
     }
 
+    // MARK: - Student Registration API
+
+    /// Registers a student in the CMS so the trainer can assign workouts.
+    ///
+    /// - Parameters:
+    ///   - firebaseUid: The student's Firebase UID.
+    ///   - trainerId: The trainer's ID.
+    ///   - displayName: The student's display name.
+    ///   - email: The student's email (optional).
+    /// - Returns: The registration response.
+    /// - Throws: CMSServiceError if the request fails.
+    func registerStudent(
+        firebaseUid: String,
+        trainerId: String,
+        displayName: String,
+        email: String?
+    ) async throws -> CMSStudentRegistrationResponse {
+        let url = configuration.baseURL.appendingPathComponent("/api/students")
+        var request = try buildRequest(url: url, method: "POST")
+        let body = CMSStudentRegistrationRequest(
+            firebaseUid: firebaseUid,
+            trainerId: trainerId,
+            displayName: displayName,
+            email: email
+        )
+        request.httpBody = try encoder.encode(body)
+        return try await execute(request: request)
+    }
+
     // MARK: - Private Helpers
 
     private func buildRequest(url: URL, method: String) throws -> URLRequest {

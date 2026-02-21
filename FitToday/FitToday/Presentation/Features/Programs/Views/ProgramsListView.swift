@@ -91,7 +91,7 @@ struct ProgramsListView: View {
             .buttonStyle(.plain)
 
             Button {
-                // TODO: navigate to explore/catalog
+                router.push(.libraryExplore, on: .workout)
             } label: {
                 Label("Explorar", systemImage: "safari")
                     .font(FitTodayFont.ui(size: 14, weight: .semiBold))

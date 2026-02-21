@@ -104,6 +104,7 @@ struct ChallengesFullListView: View {
         .sheet(item: $selectedChallenge) { challenge in
             ChallengeDetailView(
                 challenge: challenge,
+                groupId: viewModel?.currentGroupId,
                 resolver: resolver,
                 onCheckInSubmitted: {
                     Task {
@@ -479,6 +480,7 @@ struct ChallengeCard: View {
 
 struct ChallengeDetailView: View {
     let challenge: ChallengeDisplayModel
+    var groupId: String?
     var resolver: Resolver?
     var onCheckInSubmitted: (() -> Void)?
 
@@ -523,10 +525,15 @@ struct ChallengeDetailView: View {
                 }
 
                 ToolbarItem(placement: .primaryAction) {
-                    Button {
-                        // Share action
-                    } label: {
-                        Image(systemName: "square.and.arrow.up")
+                    if let groupId {
+                        let links = GenerateInviteLinkUseCase().execute(groupId: groupId)
+                        ShareLink(
+                            item: links.shareURL,
+                            subject: Text("Convite para FitToday"),
+                            message: Text("Participe do desafio '\(challenge.title)' no FitToday! 💪")
+                        ) {
+                            Image(systemName: "square.and.arrow.up")
+                        }
                     }
                 }
             }

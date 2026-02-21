@@ -75,6 +75,22 @@ protocol CMSWorkoutRepository: Sendable {
         rating: Int?
     ) async throws -> CMSWorkoutFeedback
 
+    // MARK: - Student Registration
+
+    /// Registers the current user as a student in the CMS for a trainer.
+    ///
+    /// - Parameters:
+    ///   - firebaseUid: The student's Firebase UID.
+    ///   - trainerId: The trainer's ID.
+    ///   - displayName: The student's display name.
+    ///   - email: The student's email (optional).
+    func registerStudent(
+        firebaseUid: String,
+        trainerId: String,
+        displayName: String,
+        email: String?
+    ) async throws
+
     // MARK: - Update Operations
 
     /// Marks a workout as completed.

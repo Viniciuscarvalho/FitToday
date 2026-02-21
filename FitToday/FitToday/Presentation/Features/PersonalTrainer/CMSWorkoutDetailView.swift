@@ -385,7 +385,7 @@ struct CMSWorkoutDetailView: View {
 
 // MARK: - CMS PDF Sheet View
 
-private struct CMSPDFSheetView: View {
+struct CMSPDFSheetView: View {
     let url: URL
     let title: String
 

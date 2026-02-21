@@ -76,6 +76,22 @@ final class CMSWorkoutRepositoryImpl: CMSWorkoutRepository, @unchecked Sendable 
         return try await service.postFeedback(workoutId: workoutId, feedback: request)
     }
 
+    // MARK: - Student Registration
+
+    func registerStudent(
+        firebaseUid: String,
+        trainerId: String,
+        displayName: String,
+        email: String?
+    ) async throws {
+        _ = try await service.registerStudent(
+            firebaseUid: firebaseUid,
+            trainerId: trainerId,
+            displayName: displayName,
+            email: email
+        )
+    }
+
     // MARK: - Update Operations
 
     func markWorkoutCompleted(id: String) async throws {

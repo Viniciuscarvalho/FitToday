@@ -18,6 +18,7 @@ struct PersonalWorkoutsListView: View {
     @State private var cachedWorkouts: Set<String> = []
     @State private var cmsWorkouts: [TrainerWorkout] = []
     @State private var isCMSLoading = false
+    @State private var cmsPDFSheet: CMSPDFInfo?
 
     var body: some View {
         Group {
@@ -185,20 +186,43 @@ struct PersonalWorkoutsListView: View {
 
             ForEach(cmsWorkouts) { workout in
                 Button {
-                    router.push(.cmsWorkoutDetail(workout.id), on: .workout)
+                    // PDF-only workout: open PDF directly
+                    if let pdfUrlString = workout.pdfUrl,
+                       let pdfUrl = URL(string: pdfUrlString),
+                       workout.phases.isEmpty {
+                        cmsPDFSheet = CMSPDFInfo(url: pdfUrl, title: workout.title)
+                    } else {
+                        router.push(.cmsWorkoutDetail(workout.id), on: .workout)
+                    }
                 } label: {
                     CMSWorkoutRow(workout: workout)
                 }
                 .buttonStyle(.plain)
             }
         }
+        .sheet(item: $cmsPDFSheet) { info in
+            CMSPDFSheetView(url: info.url, title: info.title)
+        }
     }
+}
+
+// MARK: - CMS PDF Info
+
+/// Identifiable wrapper for presenting a CMS PDF sheet.
+private struct CMSPDFInfo: Identifiable {
+    let id = UUID()
+    let url: URL
+    let title: String
 }
 
 // MARK: - CMS Workout Row
 
 private struct CMSWorkoutRow: View {
     let workout: TrainerWorkout
+
+    private var isPDFOnly: Bool {
+        workout.pdfUrl != nil && workout.phases.isEmpty
+    }
 
     private var exerciseCount: Int {
         workout.phases.reduce(0) { $0 + $1.items.count }
@@ -211,7 +235,7 @@ private struct CMSWorkoutRow: View {
                     .fill(workout.isActive ? FitTodayColor.brandPrimary.opacity(0.1) : FitTodayColor.textSecondary.opacity(0.1))
                     .frame(width: 44, height: 44)
 
-                Image(systemName: workout.isActive ? "dumbbell.fill" : "checkmark.circle.fill")
+                Image(systemName: isPDFOnly ? "doc.fill" : (workout.isActive ? "dumbbell.fill" : "checkmark.circle.fill"))
                     .font(.system(size: 20))
                     .foregroundStyle(workout.isActive ? FitTodayColor.brandPrimary : FitTodayColor.success)
             }
@@ -223,9 +247,15 @@ private struct CMSWorkoutRow: View {
                     .lineLimit(1)
 
                 HStack(spacing: FitTodaySpacing.sm) {
-                    Text("personal_trainer.workouts.exercises_count".localized(with: exerciseCount))
-                        .font(FitTodayFont.ui(size: 12, weight: .medium))
-                        .foregroundStyle(FitTodayColor.textSecondary)
+                    if isPDFOnly {
+                        Text("PDF")
+                            .font(FitTodayFont.ui(size: 12, weight: .medium))
+                            .foregroundStyle(FitTodayColor.brandPrimary)
+                    } else {
+                        Text("personal_trainer.workouts.exercises_count".localized(with: exerciseCount))
+                            .font(FitTodayFont.ui(size: 12, weight: .medium))
+                            .foregroundStyle(FitTodayColor.textSecondary)
+                    }
 
                     Text("\(workout.estimatedDurationMinutes) min")
                         .font(FitTodayFont.ui(size: 12, weight: .medium))
