@@ -1,0 +1,53 @@
+{
+  "cli_version": "0.4.4",
+  "checkpoint_id": "63e680c3c92a",
+  "session_id": "3614e41d-809d-4084-a168-acfb16954f37",
+  "strategy": "manual-commit",
+  "created_at": "2026-02-21T19:02:08.256315Z",
+  "branch": "main",
+  "checkpoints_count": 2,
+  "files_touched": [
+    "FitToday/FitToday/Data/Models/CMSWorkoutModels.swift",
+    "FitToday/FitToday/Data/Repositories/CMSWorkoutRepositoryImpl.swift",
+    "FitToday/FitToday/Data/Services/CMS/CMSWorkoutService.swift",
+    "FitToday/FitToday/Data/Services/Translation/ExerciseTranslationService.swift",
+    "FitToday/FitToday/Domain/Protocols/CMSWorkoutRepository.swift",
+    "FitToday/FitToday/Presentation/Features/Activity/ViewModels/ActivityStatsViewModel.swift",
+    "FitToday/FitToday/Presentation/Features/Activity/Views/ActivityTabView.swift",
+    "FitToday/FitToday/Presentation/Features/Activity/Views/ChallengesView.swift",
+    "FitToday/FitToday/Presentation/Features/Groups/Views/GroupsView.swift",
+    "FitToday/FitToday/Presentation/Features/Library/LibraryExerciseDetailView.swift",
+    "FitToday/FitToday/Presentation/Features/PersonalTrainer/CMSWorkoutDetailView.swift",
+    "FitToday/FitToday/Presentation/Features/PersonalTrainer/PersonalTrainerViewModel.swift",
+    "FitToday/FitToday/Presentation/Features/PersonalWorkouts/Views/PersonalWorkoutsListView.swift",
+    "FitToday/FitToday/Presentation/Features/Pro/ProfileProView.swift",
+    "FitToday/FitToday/Presentation/Features/Programs/Views/ProgramsListView.swift",
+    "FitToday/FitToday/Presentation/Features/Workout/WorkoutExerciseDetailView.swift",
+    "FitToday/FitToday/Presentation/Root/TabRootView.swift",
+    "FitToday/FitToday/Presentation/Router/AppRouter.swift",
+    "tasks/prd-adjusts-challenges/prd.md",
+    "tasks/prd-adjusts-challenges/tasks.md",
+    "tasks/prd-adjusts-challenges/techspec.md"
+  ],
+  "agent": "Claude Code",
+  "transcript_identifier_at_start": "6f1d898e-7100-4364-b7c0-983c41a7b365",
+  "checkpoint_transcript_start": 186,
+  "transcript_lines_at_start": 186,
+  "token_usage": {
+    "input_tokens": 14640,
+    "cache_creation_tokens": 475548,
+    "cache_read_tokens": 13526217,
+    "output_tokens": 1176,
+    "api_call_count": 113
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-02-21T19:02:07.467136Z",
+    "agent_lines": 819,
+    "human_added": 94,
+    "human_modified": 0,
+    "human_removed": 0,
+    "total_committed": 913,
+    "agent_percentage": 89.70427163198248
+  },
+  "transcript_path": ".claude/projects/-Users-viniciuscarvalho-Documents-FitToday/3614e41d-809d-4084-a168-acfb16954f37.jsonl"
+}

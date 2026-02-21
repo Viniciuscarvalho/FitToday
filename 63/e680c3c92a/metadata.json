@@ -1,0 +1,46 @@
+{
+  "cli_version": "0.4.4",
+  "checkpoint_id": "63e680c3c92a",
+  "strategy": "manual-commit",
+  "branch": "main",
+  "checkpoints_count": 2,
+  "files_touched": [
+    "FitToday/FitToday/Data/Models/CMSWorkoutModels.swift",
+    "FitToday/FitToday/Data/Repositories/CMSWorkoutRepositoryImpl.swift",
+    "FitToday/FitToday/Data/Services/CMS/CMSWorkoutService.swift",
+    "FitToday/FitToday/Data/Services/Translation/ExerciseTranslationService.swift",
+    "FitToday/FitToday/Domain/Protocols/CMSWorkoutRepository.swift",
+    "FitToday/FitToday/Presentation/Features/Activity/ViewModels/ActivityStatsViewModel.swift",
+    "FitToday/FitToday/Presentation/Features/Activity/Views/ActivityTabView.swift",
+    "FitToday/FitToday/Presentation/Features/Activity/Views/ChallengesView.swift",
+    "FitToday/FitToday/Presentation/Features/Groups/Views/GroupsView.swift",
+    "FitToday/FitToday/Presentation/Features/Library/LibraryExerciseDetailView.swift",
+    "FitToday/FitToday/Presentation/Features/PersonalTrainer/CMSWorkoutDetailView.swift",
+    "FitToday/FitToday/Presentation/Features/PersonalTrainer/PersonalTrainerViewModel.swift",
+    "FitToday/FitToday/Presentation/Features/PersonalWorkouts/Views/PersonalWorkoutsListView.swift",
+    "FitToday/FitToday/Presentation/Features/Pro/ProfileProView.swift",
+    "FitToday/FitToday/Presentation/Features/Programs/Views/ProgramsListView.swift",
+    "FitToday/FitToday/Presentation/Features/Workout/WorkoutExerciseDetailView.swift",
+    "FitToday/FitToday/Presentation/Root/TabRootView.swift",
+    "FitToday/FitToday/Presentation/Router/AppRouter.swift",
+    "tasks/prd-adjusts-challenges/prd.md",
+    "tasks/prd-adjusts-challenges/tasks.md",
+    "tasks/prd-adjusts-challenges/techspec.md"
+  ],
+  "sessions": [
+    {
+      "metadata": "/63/e680c3c92a/0/metadata.json",
+      "transcript": "/63/e680c3c92a/0/full.jsonl",
+      "context": "/63/e680c3c92a/0/context.md",
+      "content_hash": "/63/e680c3c92a/0/content_hash.txt",
+      "prompt": "/63/e680c3c92a/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 14640,
+    "cache_creation_tokens": 475548,
+    "cache_read_tokens": 13526217,
+    "output_tokens": 1176,
+    "api_call_count": 113
+  }
+}
