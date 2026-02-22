@@ -455,15 +455,20 @@ struct AppContainer {
 
         // ========== PERSONAL TRAINER CMS INTEGRATION ==========
 
-        // Personal Trainer Firebase Service
+        // Personal Trainer Firebase Service (still used for relationships)
         let personalTrainerService = FirebasePersonalTrainerService()
         container.register(FirebasePersonalTrainerService.self) { _ in personalTrainerService }
             .inObjectScope(.container)
 
-        // Personal Trainer Repository
+        // CMS Trainer Service - REST API client for trainer marketplace
+        let cmsTrainerService = CMSTrainerService()
+        container.register(CMSTrainerService.self) { _ in cmsTrainerService }
+            .inObjectScope(.container)
+
+        // Personal Trainer Repository — CMS-backed (marketplace, profiles, search)
         container.register(PersonalTrainerRepository.self) { resolver in
-            FirebasePersonalTrainerRepository(
-                service: resolver.resolve(FirebasePersonalTrainerService.self)!
+            CMSPersonalTrainerRepository(
+                service: resolver.resolve(CMSTrainerService.self)!
             )
         }
         .inObjectScope(.container)

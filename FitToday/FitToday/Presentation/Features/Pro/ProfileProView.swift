@@ -137,7 +137,7 @@ struct ProfileProView: View {
                 HStack(spacing: 6) {
                     Image(systemName: "infinity")
                         .font(.system(size: 12, weight: .semibold))
-                    Text("Pro Vitalício ativo")
+                    Text("settings.pro.manage".localized)
                         .font(.system(size: 14, weight: .semibold))
                 }
                 .foregroundStyle(FitTodayColor.success)

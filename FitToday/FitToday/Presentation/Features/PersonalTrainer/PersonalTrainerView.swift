@@ -20,19 +20,37 @@ struct PersonalTrainerView: View {
     }
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: FitTodaySpacing.lg) {
-                if viewModel.isLoading && viewModel.currentTrainer == nil {
-                    loadingView
-                } else if !viewModel.isFeatureEnabled {
-                    featureDisabledView
-                } else if viewModel.hasTrainer {
-                    connectedTrainerSection
-                } else {
-                    findTrainerSection
+        Group {
+            if viewModel.isLoading && viewModel.currentTrainer == nil {
+                ScrollView {
+                    loadingView.padding()
+                }
+            } else if !viewModel.isFeatureEnabled {
+                ScrollView {
+                    featureDisabledView.padding()
+                }
+            } else if viewModel.hasTrainer, let trainer = viewModel.currentTrainer, viewModel.isConnected {
+                TrainerDashboardView(
+                    trainer: trainer,
+                    workouts: viewModel.assignedWorkouts,
+                    isChatEnabled: viewModel.isChatEnabled,
+                    onDisconnect: {
+                        Task { await viewModel.cancelConnection() }
+                    }
+                )
+            } else if !viewModel.hasTrainer {
+                TrainerListView(viewModel: viewModel) { trainer in
+                    viewModel.selectedTrainer = trainer
+                    viewModel.showConnectionSheet = true
+                }
+            } else {
+                ScrollView {
+                    VStack(spacing: FitTodaySpacing.lg) {
+                        connectedTrainerSection
+                    }
+                    .padding()
                 }
             }
-            .padding()
         }
         .background(FitTodayColor.background.ignoresSafeArea())
         .navigationTitle("personal_trainer.title".localized)

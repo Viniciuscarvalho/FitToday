@@ -32,6 +32,7 @@ enum HomeJourneyState: Equatable {
     private(set) var topPrograms: [Program] = []
     private(set) var dailyWorkoutState: DailyWorkoutState = DailyWorkoutState()
     private(set) var historyEntries: [WorkoutHistoryEntry] = []
+    private(set) var isAiWorkoutEnabled = true
     var errorMessage: ErrorMessage? // ErrorPresenting protocol
 
     // User info - stored properties for proper @Observable tracking
@@ -196,6 +197,11 @@ enum HomeJourneyState: Equatable {
 
     private func loadUserData() async {
         journeyState = .loading
+
+        // Check feature flags
+        if let featureFlags = resolver.resolve(FeatureFlagChecking.self) {
+            isAiWorkoutEnabled = await featureFlags.isFeatureEnabled(.aiWorkoutGenerationEnabled)
+        }
 
         // Load user info from UserDefaults or Firebase Auth
         await loadUserInfo()

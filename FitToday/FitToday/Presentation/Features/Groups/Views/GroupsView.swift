@@ -27,7 +27,13 @@ struct GroupsView: View {
     var body: some View {
         NavigationStack {
             Group {
-                if viewModel.isLoading && viewModel.currentGroup == nil {
+                if !viewModel.isSocialGroupsEnabled {
+                    ContentUnavailableView(
+                        "groups.disabled.title".localized,
+                        systemImage: "person.3",
+                        description: Text("groups.disabled.message".localized)
+                    )
+                } else if viewModel.isLoading && viewModel.currentGroup == nil {
                     ProgressView()
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else if let group = viewModel.currentGroup {

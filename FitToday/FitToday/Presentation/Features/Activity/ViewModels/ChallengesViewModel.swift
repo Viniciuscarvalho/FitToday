@@ -20,6 +20,7 @@ import Swinject
     private(set) var currentGroupId: String?
     private(set) var isInGroup = false
     private(set) var healthKitSyncStatus: String?
+    private(set) var isChallengesEnabled = true
 
     private let resolver: Resolver
     nonisolated(unsafe) private var leaderboardTask: Task<Void, Never>?
@@ -36,6 +37,12 @@ import Swinject
     // MARK: - Lifecycle
 
     func onAppear() async {
+        // Check feature flag
+        if let featureFlags = resolver.resolve(FeatureFlagChecking.self) {
+            isChallengesEnabled = await featureFlags.isFeatureEnabled(.challengesEnabled)
+        }
+        guard isChallengesEnabled else { return }
+
         // Run HealthKit sync and challenges load in parallel
         async let healthKitSync: () = syncHealthKitWorkoutsIfAuthorized()
         async let challengesLoad: () = loadChallenges()

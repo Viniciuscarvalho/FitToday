@@ -210,16 +210,25 @@ struct MonthCalendarView: View {
     @Binding var selectedDate: Date
     let highlightedDays: Set<DateComponents>
 
-    private let calendar = Calendar.current
-    private let daysOfWeek = ["D", "S", "T", "Q", "Q", "S", "S"]
+    // BUG 7 FIX: use Monday-first week to match startOfWeek used by weekly stats.
+    private let calendar: Calendar = {
+        var cal = Calendar.current
+        cal.firstWeekday = 2 // Monday = 2
+        return cal
+    }()
+    // Mon, Tue, Wed, Thu, Fri, Sat, Sun
+    private let daysOfWeek = ["S", "T", "Q", "Q", "S", "S", "D"]
 
     private var monthDays: [Date?] {
         let interval = calendar.dateInterval(of: .month, for: selectedDate)!
         let firstDay = interval.start
-        let firstWeekday = calendar.component(.weekday, from: firstDay)
+        // weekday in Calendar.current is 1=Sun … 7=Sat.
+        // Convert to Monday-first column index: Mon=0 … Sun=6.
+        let firstWeekday = Calendar.current.component(.weekday, from: firstDay)
+        let mondayFirstOffset = (firstWeekday - 2 + 7) % 7
         let daysInMonth = calendar.range(of: .day, in: .month, for: selectedDate)!.count
 
-        var days: [Date?] = Array(repeating: nil, count: firstWeekday - 1)
+        var days: [Date?] = Array(repeating: nil, count: mondayFirstOffset)
 
         for day in 1...daysInMonth {
             if let date = calendar.date(byAdding: .day, value: day - 1, to: firstDay) {
@@ -471,6 +480,21 @@ struct ActivityStatsView: View {
     var body: some View {
         ScrollView {
             if let viewModel, !viewModel.isLoading {
+                // BUG 6 FIX: show error message when loading fails instead of
+                // silently rendering empty stats.
+                if let errorMessage = viewModel.errorMessage {
+                    VStack(spacing: FitTodaySpacing.md) {
+                        Image(systemName: "exclamationmark.triangle")
+                            .font(.system(size: 40))
+                            .foregroundStyle(FitTodayColor.textTertiary)
+                        Text(errorMessage)
+                            .font(FitTodayFont.ui(size: 14, weight: .medium))
+                            .foregroundStyle(FitTodayColor.textSecondary)
+                            .multilineTextAlignment(.center)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.top, FitTodaySpacing.xxl)
+                } else {
                 VStack(spacing: FitTodaySpacing.lg) {
                     // Summary Cards
                     summarySection(viewModel: viewModel)
@@ -599,6 +623,7 @@ struct ActivityStatsView: View {
                     }
                 }
                 .padding(FitTodaySpacing.md)
+                } // end else (no error)
             } else {
                 VStack {
                     Spacer(minLength: 100)
@@ -647,7 +672,7 @@ struct ActivityStatsView: View {
 
                 HStack(spacing: FitTodaySpacing.md) {
                     ActivityStatCard(title: "Treinos", value: "\(stats.monthWorkoutsCount)", icon: "dumbbell")
-                    ActivityStatCard(title: "Streak", value: "\(stats.currentStreak) dias", icon: "flame.fill")
+                    ActivityStatCard(title: "stats.streak_days".localized, value: "\(stats.currentStreak)", icon: "flame.fill")
                     ActivityStatCard(title: "Tempo", value: formatMinutes(stats.monthTotalMinutes), icon: "clock")
                 }
             }

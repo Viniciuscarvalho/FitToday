@@ -5,6 +5,8 @@
 
 // MARK: - Common
 "common.cancel" = "Cancelar";
+"common.unit.min" = "min";
+"common.unit.sets" = "séries";
 "common.save" = "Salvar";
 "common.done" = "Concluido";
 "common.next" = "Proximo";
@@ -113,6 +115,7 @@
 "stats.streak_days" = "Sequencia";
 
 // Home Quick Stats
+"home.stats.title" = "Estatísticas";
 "home.stats.this_week" = "Esta Semana";
 "home.stats.workouts" = "treinos";
 "home.stats.calories" = "Calorias";
@@ -840,3 +843,63 @@
 "cms_service.error.unexpected" = "Erro inesperado (%d)";
 "cms_service.error.decoding" = "Erro ao processar resposta";
 "cms_service.error.network" = "Erro de conexão. Verifique sua internet.";
+
+// MARK: - Operational Flags
+"operational.maintenance.title" = "Em Manutenção";
+"operational.maintenance.message" = "Estamos realizando melhorias para você. Tente novamente mais tarde.";
+"operational.force_update.title" = "Atualização Necessária";
+"operational.force_update.message" = "Uma nova versão do FitToday está disponível. Atualize para continuar usando o app.";
+"operational.force_update.button" = "Atualizar Agora";
+
+// MARK: - Feature Disabled States
+"challenges.disabled.title" = "Desafios Indisponíveis";
+"challenges.disabled.message" = "Os desafios estão temporariamente indisponíveis. Volte em breve!";
+"groups.disabled.title" = "Grupos Indisponíveis";
+"groups.disabled.message" = "Os grupos estão temporariamente indisponíveis. Volte em breve!";
+
+// MARK: - Trainer Card
+"trainer.card.show_more" = "Ver mais";
+"trainer.card.show_less" = "Ver menos";
+"trainer.card.view_profile" = "Ver Perfil";
+"trainer.card.rate" = "Avaliar";
+
+// MARK: - Trainer List
+"trainer.list.search_placeholder" = "Buscar personal...";
+"trainer.list.no_results" = "Sem Resultados";
+"trainer.list.no_results_message" = "Nenhum personal encontrado. Tente outra busca.";
+
+// MARK: - Trainer Chat
+"trainer.chat.placeholder" = "Digite uma mensagem...";
+"trainer.chat.mock.msg1" = "Oi! Atualizei seu plano de treino para esta semana. Confira os novos exercícios!";
+"trainer.chat.mock.msg2" = "Ótimo, obrigado! Vou dar uma olhada agora.";
+"trainer.chat.mock.msg3" = "Foque em manter a postura correta durante os agachamentos. Adicionei um vídeo de referência nas notas.";
+"trainer.chat.mock.msg4" = "Entendi. Devo aumentar o peso esta semana?";
+"trainer.chat.mock.msg5" = "Sim, tente adicionar 2,5kg no supino e agachamento. Me conta como foi!";
+
+// MARK: - Trainer History
+"trainer.history.this_week" = "Esta Semana";
+"trainer.history.last_week" = "Semana Passada";
+"trainer.history.older" = "Anteriores";
+"trainer.history.completed" = "Concluído";
+"trainer.history.not_completed" = "Não concluído";
+"trainer.history.more_exercises" = "+%d mais";
+"trainer.history.empty" = "Sem Histórico";
+"trainer.history.empty_message" = "Seu histórico de treinos aparecerá aqui quando você começar a treinar.";
+
+// MARK: - Trainer Evolution
+"trainer.evolution.load" = "Carga";
+"trainer.evolution.workouts" = "Treinos";
+"trainer.evolution.frequency" = "Frequência";
+"trainer.evolution.chart_title" = "Progressão de Volume";
+"trainer.evolution.date" = "Data";
+"trainer.evolution.sets" = "Séries";
+"trainer.evolution.not_enough_data" = "Complete mais treinos para ver seu gráfico de progresso.";
+"trainer.evolution.empty" = "Sem Dados";
+"trainer.evolution.empty_message" = "Suas métricas de evolução aparecerão aqui conforme você completar treinos.";
+
+// MARK: - Trainer Dashboard
+"trainer.dashboard.online" = "Online";
+"trainer.dashboard.disconnect" = "Desconectar";
+"trainer.dashboard.tab.chat" = "Chat";
+"trainer.dashboard.tab.history" = "Histórico";
+"trainer.dashboard.tab.evolution" = "Evolução";

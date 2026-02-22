@@ -5,6 +5,8 @@
 
 // MARK: - Common
 "common.cancel" = "Cancel";
+"common.unit.min" = "min";
+"common.unit.sets" = "sets";
 "common.save" = "Save";
 "common.done" = "Done";
 "common.next" = "Next";
@@ -113,6 +115,7 @@
 "stats.streak_days" = "Streak";
 
 // Home Quick Stats
+"home.stats.title" = "Stats";
 "home.stats.this_week" = "This Week";
 "home.stats.workouts" = "workouts";
 "home.stats.calories" = "Calories";
@@ -840,3 +843,63 @@
 "cms_service.error.unexpected" = "Unexpected error (%d)";
 "cms_service.error.decoding" = "Error processing response";
 "cms_service.error.network" = "Connection error. Check your internet.";
+
+// MARK: - Operational Flags
+"operational.maintenance.title" = "Under Maintenance";
+"operational.maintenance.message" = "We're performing maintenance to improve your experience. Please try again later.";
+"operational.force_update.title" = "Update Required";
+"operational.force_update.message" = "A new version of FitToday is available. Please update to continue using the app.";
+"operational.force_update.button" = "Update Now";
+
+// MARK: - Feature Disabled States
+"challenges.disabled.title" = "Challenges Unavailable";
+"challenges.disabled.message" = "Challenges are temporarily unavailable. Check back soon!";
+"groups.disabled.title" = "Groups Unavailable";
+"groups.disabled.message" = "Groups are temporarily unavailable. Check back soon!";
+
+// MARK: - Trainer Card
+"trainer.card.show_more" = "Show more";
+"trainer.card.show_less" = "Show less";
+"trainer.card.view_profile" = "View Profile";
+"trainer.card.rate" = "Rate";
+
+// MARK: - Trainer List
+"trainer.list.search_placeholder" = "Search trainers...";
+"trainer.list.no_results" = "No Results";
+"trainer.list.no_results_message" = "No trainers found. Try a different search.";
+
+// MARK: - Trainer Chat
+"trainer.chat.placeholder" = "Type a message...";
+"trainer.chat.mock.msg1" = "Hey! I updated your workout plan for this week. Check out the new exercises!";
+"trainer.chat.mock.msg2" = "Great, thanks! I'll take a look now.";
+"trainer.chat.mock.msg3" = "Focus on keeping proper form during the squats. I added a video reference in the notes.";
+"trainer.chat.mock.msg4" = "Got it. Should I increase the weight this week?";
+"trainer.chat.mock.msg5" = "Yes, try adding 2.5kg to your bench press and squats. Let me know how it goes!";
+
+// MARK: - Trainer History
+"trainer.history.this_week" = "This Week";
+"trainer.history.last_week" = "Last Week";
+"trainer.history.older" = "Older";
+"trainer.history.completed" = "Completed";
+"trainer.history.not_completed" = "Not completed";
+"trainer.history.more_exercises" = "+%d more";
+"trainer.history.empty" = "No History";
+"trainer.history.empty_message" = "Your workout history will appear here once you start training.";
+
+// MARK: - Trainer Evolution
+"trainer.evolution.load" = "Load";
+"trainer.evolution.workouts" = "Workouts";
+"trainer.evolution.frequency" = "Frequency";
+"trainer.evolution.chart_title" = "Volume Progression";
+"trainer.evolution.date" = "Date";
+"trainer.evolution.sets" = "Sets";
+"trainer.evolution.not_enough_data" = "Complete more workouts to see your progress chart.";
+"trainer.evolution.empty" = "No Data Yet";
+"trainer.evolution.empty_message" = "Your evolution metrics will appear here as you complete workouts.";
+
+// MARK: - Trainer Dashboard
+"trainer.dashboard.online" = "Online";
+"trainer.dashboard.disconnect" = "Disconnect";
+"trainer.dashboard.tab.chat" = "Chat";
+"trainer.dashboard.tab.history" = "History";
+"trainer.dashboard.tab.evolution" = "Evolution";

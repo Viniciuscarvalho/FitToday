@@ -14,6 +14,8 @@ struct TabRootView: View {
     @Environment(\.dependencyResolver) private var resolver
 
     @State private var showCreateWorkout = false
+    @State private var isMaintenanceMode = false
+    @State private var isForceUpdateRequired = false
 
     var body: some View {
         // 💡 Learn: @Bindable wrapper permite binding de @Observable objects
@@ -50,6 +52,24 @@ struct TabRootView: View {
                 showCreateWorkout = false
             }
         }
+        .task {
+            await checkOperationalFlags()
+        }
+        .overlay {
+            if isMaintenanceMode {
+                MaintenanceOverlayView()
+            }
+        }
+        .fullScreenCover(isPresented: $isForceUpdateRequired) {
+            ForceUpdateView()
+        }
+    }
+
+    private func checkOperationalFlags() async {
+        guard let featureFlags = resolver.resolve(FeatureFlagChecking.self) else { return }
+        try? await featureFlags.refreshFlags()
+        isMaintenanceMode = await featureFlags.isFeatureEnabled(.maintenanceModeEnabled)
+        isForceUpdateRequired = await featureFlags.isFeatureEnabled(.forceUpdateEnabled)
     }
 
     private func tabView(for tab: AppTab, @ViewBuilder content: () -> some View) -> some View {
@@ -177,6 +197,70 @@ struct TabRootView: View {
         case .libraryExplore:
             LibraryView(resolver: resolver)
         }
+    }
+}
+
+// MARK: - Maintenance Overlay
+
+private struct MaintenanceOverlayView: View {
+    var body: some View {
+        ZStack {
+            Color(.systemBackground).ignoresSafeArea()
+            VStack(spacing: FitTodaySpacing.lg) {
+                Image(systemName: "wrench.and.screwdriver")
+                    .font(.system(size: 56))
+                    .foregroundStyle(FitTodayColor.brandPrimary)
+                Text("operational.maintenance.title".localized)
+                    .font(FitTodayFont.ui(size: 24, weight: .bold))
+                    .foregroundStyle(FitTodayColor.textPrimary)
+                Text("operational.maintenance.message".localized)
+                    .font(FitTodayFont.ui(size: 15, weight: .medium))
+                    .foregroundStyle(FitTodayColor.textSecondary)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 32)
+            }
+        }
+    }
+}
+
+// MARK: - Force Update View
+
+private struct ForceUpdateView: View {
+    @Environment(\.openURL) private var openURL
+
+    var body: some View {
+        ZStack {
+            Color(.systemBackground).ignoresSafeArea()
+            VStack(spacing: FitTodaySpacing.lg) {
+                Image(systemName: "arrow.down.app")
+                    .font(.system(size: 56))
+                    .foregroundStyle(FitTodayColor.brandPrimary)
+                Text("operational.force_update.title".localized)
+                    .font(FitTodayFont.ui(size: 24, weight: .bold))
+                    .foregroundStyle(FitTodayColor.textPrimary)
+                Text("operational.force_update.message".localized)
+                    .font(FitTodayFont.ui(size: 15, weight: .medium))
+                    .foregroundStyle(FitTodayColor.textSecondary)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 32)
+                Button {
+                    if let url = URL(string: "https://apps.apple.com/app/fittoday") {
+                        openURL(url)
+                    }
+                } label: {
+                    Text("operational.force_update.button".localized)
+                        .font(FitTodayFont.ui(size: 16, weight: .semiBold))
+                        .foregroundStyle(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 14)
+                        .background(FitTodayColor.brandPrimary)
+                        .clipShape(RoundedRectangle(cornerRadius: FitTodayRadius.md))
+                }
+                .buttonStyle(.plain)
+                .padding(.horizontal, 32)
+            }
+        }
+        .interactiveDismissDisabled()
     }
 }
 

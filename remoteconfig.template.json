@@ -1,0 +1,134 @@
+{
+  "parameterGroups": {
+    "AI Features": {
+      "description": "AI-powered workout generation and exercise substitution",
+      "parameters": {
+        "ai_workout_generation_enabled": {
+          "defaultValue": { "value": "true" },
+          "description": "Enables AI-powered workout generation (OpenAI)",
+          "valueType": "BOOLEAN"
+        },
+        "ai_exercise_substitution_enabled": {
+          "defaultValue": { "value": "true" },
+          "description": "Enables AI exercise substitution during active workout",
+          "valueType": "BOOLEAN"
+        }
+      }
+    },
+    "Social Features": {
+      "description": "Groups, challenges, leaderboards, check-ins, and streaks",
+      "parameters": {
+        "social_groups_enabled": {
+          "defaultValue": { "value": "true" },
+          "description": "Enables group creation, joining, and management",
+          "valueType": "BOOLEAN"
+        },
+        "challenges_enabled": {
+          "defaultValue": { "value": "true" },
+          "description": "Enables workout challenges within groups",
+          "valueType": "BOOLEAN"
+        },
+        "leaderboard_enabled": {
+          "defaultValue": { "value": "true" },
+          "description": "Enables leaderboard ranking in groups",
+          "valueType": "BOOLEAN"
+        },
+        "check_in_enabled": {
+          "defaultValue": { "value": "true" },
+          "description": "Enables photo check-in for challenge validation",
+          "valueType": "BOOLEAN"
+        },
+        "group_streaks_enabled": {
+          "defaultValue": { "value": "true" },
+          "description": "Enables group streak tracking and display",
+          "valueType": "BOOLEAN"
+        }
+      }
+    },
+    "Health & Sync": {
+      "description": "Apple Health integration and activity statistics",
+      "parameters": {
+        "healthkit_sync_enabled": {
+          "defaultValue": { "value": "true" },
+          "description": "Enables Apple Health read/write integration",
+          "valueType": "BOOLEAN"
+        },
+        "stats_charts_enabled": {
+          "defaultValue": { "value": "true" },
+          "description": "Enables activity stats with Swift Charts",
+          "valueType": "BOOLEAN"
+        }
+      }
+    },
+    "Content": {
+      "description": "Programs, custom workouts, and exercise library",
+      "parameters": {
+        "programs_enabled": {
+          "defaultValue": { "value": "true" },
+          "description": "Enables structured training programs",
+          "valueType": "BOOLEAN"
+        },
+        "custom_workouts_enabled": {
+          "defaultValue": { "value": "true" },
+          "description": "Enables user-created workout templates",
+          "valueType": "BOOLEAN"
+        },
+        "exercise_library_enabled": {
+          "defaultValue": { "value": "true" },
+          "description": "Enables exercise library/explorer (Wger API)",
+          "valueType": "BOOLEAN"
+        }
+      }
+    },
+    "Personal Trainer": {
+      "description": "Personal trainer integration via CMS",
+      "parameters": {
+        "personal_trainer_enabled": {
+          "defaultValue": { "value": "false" },
+          "description": "Enables personal trainer connection via CMS",
+          "valueType": "BOOLEAN"
+        },
+        "cms_workout_sync_enabled": {
+          "defaultValue": { "value": "false" },
+          "description": "Enables synchronization of trainer-assigned workouts",
+          "valueType": "BOOLEAN"
+        },
+        "trainer_chat_enabled": {
+          "defaultValue": { "value": "false" },
+          "description": "Enables chat functionality with personal trainers",
+          "valueType": "BOOLEAN"
+        }
+      }
+    },
+    "Monetization & UX": {
+      "description": "Paywall and user experience features",
+      "parameters": {
+        "paywall_enabled": {
+          "defaultValue": { "value": "true" },
+          "description": "Enables paywall/Pro upgrade prompts",
+          "valueType": "BOOLEAN"
+        },
+        "review_request_enabled": {
+          "defaultValue": { "value": "true" },
+          "description": "Enables App Store review request after workout completion",
+          "valueType": "BOOLEAN"
+        }
+      }
+    },
+    "Operational": {
+      "description": "Maintenance mode and force update controls",
+      "parameters": {
+        "maintenance_mode_enabled": {
+          "defaultValue": { "value": "false" },
+          "description": "Shows maintenance banner and disables app usage",
+          "valueType": "BOOLEAN"
+        },
+        "force_update_enabled": {
+          "defaultValue": { "value": "false" },
+          "description": "Shows non-dismissable update dialog directing to App Store",
+          "valueType": "BOOLEAN"
+        }
+      }
+    }
+  }
+}

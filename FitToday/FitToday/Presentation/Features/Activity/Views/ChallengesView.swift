@@ -85,33 +85,42 @@ struct ChallengesFullListView: View {
     }
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: FitTodaySpacing.lg) {
-                // Filter Pills
-                filterSection
+        Group {
+            if viewModel?.isChallengesEnabled == false {
+                featureDisabledView
+            } else {
+                ScrollView {
+                    VStack(spacing: FitTodaySpacing.lg) {
+                        // Filter Pills
+                        filterSection
 
-                // Summary Card
-                if !challenges.isEmpty {
-                    summaryCard
-                }
+                        // Summary Card
+                        if !challenges.isEmpty {
+                            summaryCard
+                        }
 
-                // Challenges List
-                challengesSection
-            }
-            .padding(FitTodaySpacing.md)
-        }
-        .scrollIndicators(.hidden)
-        .sheet(item: $selectedChallenge) { challenge in
-            ChallengeDetailView(
-                challenge: challenge,
-                groupId: viewModel?.currentGroupId,
-                resolver: resolver,
-                onCheckInSubmitted: {
-                    Task {
-                        await viewModel?.refresh()
+                        // Challenges List
+                        challengesSection
                     }
+                    .padding(FitTodaySpacing.md)
                 }
-            )
+                .scrollIndicators(.hidden)
+                .sheet(item: $selectedChallenge) { challenge in
+                    ChallengeDetailView(
+                        challenge: challenge,
+                        groupId: viewModel?.currentGroupId,
+                        resolver: resolver,
+                        onCheckInSubmitted: {
+                            Task {
+                                await viewModel?.refresh()
+                            }
+                        }
+                    )
+                }
+                .refreshable {
+                    await viewModel?.refresh()
+                }
+            }
         }
         .task {
             if viewModel == nil {
@@ -122,9 +131,14 @@ struct ChallengesFullListView: View {
         .onDisappear {
             viewModel?.stopObserving()
         }
-        .refreshable {
-            await viewModel?.refresh()
-        }
+    }
+
+    private var featureDisabledView: some View {
+        ContentUnavailableView(
+            "challenges.disabled.title".localized,
+            systemImage: "trophy",
+            description: Text("challenges.disabled.message".localized)
+        )
     }
 
     // MARK: - Filter Section

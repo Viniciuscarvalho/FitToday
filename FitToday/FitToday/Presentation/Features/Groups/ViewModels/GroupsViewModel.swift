@@ -20,6 +20,7 @@ import Swinject
     private(set) var isLoading = false
     private(set) var isAdmin = false
     private(set) var unreadNotificationsCount = 0
+    private(set) var isSocialGroupsEnabled = true
     var errorMessage: ErrorMessage?
 
     // MARK: - Dependencies
@@ -43,6 +44,12 @@ import Swinject
     // MARK: - Lifecycle
 
     func onAppear() async {
+        // Check feature flag
+        if let featureFlags = resolver.resolve(FeatureFlagChecking.self) {
+            isSocialGroupsEnabled = await featureFlags.isFeatureEnabled(.socialGroupsEnabled)
+        }
+        guard isSocialGroupsEnabled else { return }
+
         await loadCurrentGroup()
         await loadUnreadNotificationsCount()
     }

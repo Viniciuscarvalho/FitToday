@@ -27,6 +27,7 @@ final class PersonalTrainerViewModel {
     var showConnectionSheet: Bool = false
     var selectedTrainer: PersonalTrainer?
     private(set) var isFeatureEnabled: Bool = false
+    private(set) var isChatEnabled: Bool = false
 
     // MARK: - Dependencies
 
@@ -135,6 +136,7 @@ final class PersonalTrainerViewModel {
             return
         }
         isFeatureEnabled = await checker.isFeatureEnabled(.personalTrainerEnabled)
+        isChatEnabled = await checker.isFeatureEnabled(.trainerChatEnabled)
     }
 
     // MARK: - Load Current Trainer
@@ -183,16 +185,17 @@ final class PersonalTrainerViewModel {
         }
 
         let query = searchQuery.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !query.isEmpty else {
-            searchResults = []
-            return
-        }
 
         isSearching = true
         error = nil
 
         do {
-            searchResults = try await useCase.searchByName(query, limit: 20)
+            if query.isEmpty {
+                // Load all active trainers from CMS marketplace
+                searchResults = try await useCase.searchByName("", limit: 20)
+            } else {
+                searchResults = try await useCase.searchByName(query, limit: 20)
+            }
         } catch {
             self.error = error
             searchResults = []
@@ -434,6 +437,6 @@ final class PersonalTrainerViewModel {
 
     func clearSearch() {
         searchQuery = ""
-        searchResults = []
+        Task { await searchTrainers() }
     }
 }

@@ -104,14 +104,16 @@ struct HomeView: View {
             loadingView
 
         case .noProfile:
-            // Show AI generator card even without profile (guides to onboarding)
-            AIWorkoutGeneratorCard(
-                selectedFocus: $selectedFocus,
-                sorenessLevel: $sorenessLevel,
-                energyLevel: $energyLevel,
-                isGenerating: isGeneratingPlan,
-                onGenerate: { router.push(.onboarding, on: .home) }
-            )
+            if viewModel.isAiWorkoutEnabled {
+                // Show AI generator card even without profile (guides to onboarding)
+                AIWorkoutGeneratorCard(
+                    selectedFocus: $selectedFocus,
+                    sorenessLevel: $sorenessLevel,
+                    energyLevel: $energyLevel,
+                    isGenerating: isGeneratingPlan,
+                    onGenerate: { router.push(.onboarding, on: .home) }
+                )
+            }
 
         case .workoutReady:
             VStack(spacing: FitTodaySpacing.lg) {
@@ -124,14 +126,16 @@ struct HomeView: View {
                     )
                 }
 
-                // Always show AI generator card for new generation
-                AIWorkoutGeneratorCard(
-                    selectedFocus: $selectedFocus,
-                    sorenessLevel: $sorenessLevel,
-                    energyLevel: $energyLevel,
-                    isGenerating: isGeneratingPlan,
-                    onGenerate: generateWorkout
-                )
+                if viewModel.isAiWorkoutEnabled {
+                    // Always show AI generator card for new generation
+                    AIWorkoutGeneratorCard(
+                        selectedFocus: $selectedFocus,
+                        sorenessLevel: $sorenessLevel,
+                        energyLevel: $energyLevel,
+                        isGenerating: isGeneratingPlan,
+                        onGenerate: generateWorkout
+                    )
+                }
             }
 
         case .workoutCompleted:
@@ -139,13 +143,15 @@ struct HomeView: View {
             VStack(spacing: FitTodaySpacing.lg) {
                 workoutCompletedCard
 
-                AIWorkoutGeneratorCard(
-                    selectedFocus: $selectedFocus,
-                    sorenessLevel: $sorenessLevel,
-                    energyLevel: $energyLevel,
-                    isGenerating: isGeneratingPlan,
-                    onGenerate: generateWorkout
-                )
+                if viewModel.isAiWorkoutEnabled {
+                    AIWorkoutGeneratorCard(
+                        selectedFocus: $selectedFocus,
+                        sorenessLevel: $sorenessLevel,
+                        energyLevel: $energyLevel,
+                        isGenerating: isGeneratingPlan,
+                        onGenerate: generateWorkout
+                    )
+                }
             }
 
         case .error(let message):

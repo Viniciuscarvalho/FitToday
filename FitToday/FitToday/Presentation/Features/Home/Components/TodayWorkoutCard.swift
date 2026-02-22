@@ -36,8 +36,8 @@ struct TodayWorkoutCard: View {
 
                 HStack(spacing: FitTodaySpacing.md) {
                     Label("\(workout.exerciseCount)", systemImage: "figure.strengthtraining.traditional")
-                    Label("\(workout.estimatedDuration) min", systemImage: "clock")
-                    Label("\(workout.totalSets) sets", systemImage: "repeat")
+                    Label("\(workout.estimatedDuration) \("common.unit.min".localized)", systemImage: "clock")
+                    Label("\(workout.totalSets) \("common.unit.sets".localized)", systemImage: "repeat")
                 }
                 .font(FitTodayFont.ui(size: 12, weight: .medium))
                 .foregroundStyle(FitTodayColor.textSecondary)
