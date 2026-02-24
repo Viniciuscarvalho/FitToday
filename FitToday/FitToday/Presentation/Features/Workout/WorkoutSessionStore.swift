@@ -186,6 +186,18 @@ import UIKit
         toggleSet(exerciseIndex: currentExerciseIndex, setIndex: setIndex)
     }
     
+    /// Update actual reps for a specific set
+    func updateSetReps(exerciseIndex: Int, setIndex: Int, reps: Int?) {
+        progress?.updateSetReps(exerciseIndex: exerciseIndex, setIndex: setIndex, reps: reps)
+        persistProgress()
+    }
+
+    /// Update weight for a specific set
+    func updateSetWeight(exerciseIndex: Int, setIndex: Int, weight: Double?) {
+        progress?.updateSetWeight(exerciseIndex: exerciseIndex, setIndex: setIndex, weight: weight)
+        persistProgress()
+    }
+
     /// Marca todas as séries do exercício atual como concluídas
     func completeAllCurrentSets() {
         progress?.completeAllSets(exerciseIndex: currentExerciseIndex)
