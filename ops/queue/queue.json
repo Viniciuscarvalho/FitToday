@@ -1,0 +1,14 @@
+{
+  "schema_version": 3,
+  "tasks": [],
+  "maintenance_conditions": {
+    "orphan_notes": { "threshold": "any", "consequence_speed": "session" },
+    "dangling_links": { "threshold": "any", "consequence_speed": "session" },
+    "inbox_pressure": { "threshold_days": 3, "consequence_speed": "session" },
+    "observations_pending": { "threshold": 10, "consequence_speed": "slow" },
+    "tensions_pending": { "threshold": 5, "consequence_speed": "slow" },
+    "topic_map_size": { "threshold": 40, "consequence_speed": "slow" },
+    "stale_batch": { "threshold_sessions": 2, "consequence_speed": "multi_session" },
+    "schema_violations": { "threshold": "any", "consequence_speed": "multi_session" }
+  }
+}
