@@ -55,8 +55,10 @@ struct WorkoutPlanView: View {
     @Environment(\.imageCacheService) private var imageCacheService
 
     @State private var timerStore = WorkoutTimerStore()
+    @State private var restTimerStore = RestTimerStore()
     @State private var errorMessage: String?
     @State private var isFinishing = false
+    @State private var isExecuting = false
     @State private var isRegenerating = false
     @State private var entitlement: ProEntitlement = .free
     @State private var animationTrigger = false
@@ -168,11 +170,21 @@ struct WorkoutPlanView: View {
     private func exerciseList(for plan: WorkoutPlan) -> some View {
         VStack(alignment: .leading, spacing: FitTodaySpacing.md) {
             ForEach(Array(plan.phases.enumerated()), id: \.element.id) { index, phase in
-                PhaseSectionView(phase: phase, phaseIndex: index, displayMode: displayMode)
-                    .transition(.asymmetric(
-                        insertion: .opacity.combined(with: .move(edge: .trailing)),
-                        removal: .opacity.combined(with: .move(edge: .leading))
-                    ))
+                PhaseSectionView(
+                    phase: phase,
+                    phaseIndex: index,
+                    displayMode: displayMode,
+                    isExecuting: isExecuting,
+                    restTimerStore: restTimerStore,
+                    onSetCompleted: { exerciseIndex, prescription in
+                        sessionStore.selectExercise(at: exerciseIndex)
+                        restTimerStore.start(duration: prescription.restInterval)
+                    }
+                )
+                .transition(.asymmetric(
+                    insertion: .opacity.combined(with: .move(edge: .trailing)),
+                    removal: .opacity.combined(with: .move(edge: .leading))
+                ))
             }
         }
         .animation(.spring(response: 0.4, dampingFraction: 0.8), value: displayMode)
@@ -199,7 +211,12 @@ struct WorkoutPlanView: View {
             errorMessage = "Nenhum plano encontrado."
             return
         }
-        router.push(.workoutExecution, on: .home)
+        withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+            isExecuting = true
+            if !timerStore.hasStarted {
+                timerStore.start()
+            }
+        }
     }
 
     private func showModeInfo() {
@@ -217,12 +234,14 @@ struct WorkoutPlanView: View {
         guard !isFinishing else { return }
         isFinishing = true
         timerStore.pause()
+        restTimerStore.stop()
         sessionStore.recordElapsedTime(timerStore.elapsedSeconds)
 
         Task {
             do {
                 try await sessionStore.finish(status: status)
                 timerStore.reset()
+                isExecuting = false
                 router.push(.workoutSummary, on: .home)
             } catch {
                 errorMessage = error.localizedDescription
