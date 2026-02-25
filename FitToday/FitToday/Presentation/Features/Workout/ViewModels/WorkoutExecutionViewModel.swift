@@ -23,7 +23,6 @@ import AVFoundation
 
     // MARK: - Live Activity Manager
 
-    @available(iOS 16.1, *)
     private var liveActivityManager: WorkoutLiveActivityManager?
 
     // MARK: - Feedback Generators
@@ -45,12 +44,7 @@ import AVFoundation
         self.restTimer = RestTimerStore()
         self.workoutTimer = WorkoutTimerStore()
 
-        // Initialize Live Activity manager if available (iOS 16.1+)
-        if #available(iOS 16.1, *) {
-            self.liveActivityManager = WorkoutLiveActivityManager()
-        }
-
-        // Prepare haptic generator
+        self.liveActivityManager = WorkoutLiveActivityManager()
         hapticGenerator.prepare()
     }
 
@@ -63,13 +57,7 @@ import AVFoundation
         self.sessionStore = sessionStore
         self.restTimer = restTimer
         self.workoutTimer = workoutTimer
-
-        // Initialize Live Activity manager if available (iOS 16.1+)
-        if #available(iOS 16.1, *) {
-            self.liveActivityManager = WorkoutLiveActivityManager()
-        }
-
-        // Prepare haptic generator
+        self.liveActivityManager = WorkoutLiveActivityManager()
         hapticGenerator.prepare()
     }
 
@@ -172,21 +160,19 @@ import AVFoundation
         sessionStore.start(with: plan)
         workoutTimer.start()
 
-        // Start Live Activity if available
-        if #available(iOS 16.1, *) {
-            Task {
-                do {
-                    let firstExerciseName = currentExerciseName
-                    let totalExercises = sessionStore.exerciseCount
-                    try await liveActivityManager?.startActivity(
-                        workoutTitle: plan.title,
-                        totalExercises: totalExercises,
-                        initialExerciseName: firstExerciseName
-                    )
-                } catch {
-                    // Live Activity start failure is non-critical, just log
-                    print("Failed to start Live Activity: \(error.localizedDescription)")
-                }
+        // Start Live Activity
+        Task {
+            do {
+                let firstExerciseName = currentExerciseName
+                let totalExercises = sessionStore.exerciseCount
+                try await liveActivityManager?.startActivity(
+                    workoutTitle: plan.title,
+                    totalExercises: totalExercises,
+                    initialExerciseName: firstExerciseName
+                )
+            } catch {
+                // Live Activity start failure is non-critical, just log
+                print("Failed to start Live Activity: \(error.localizedDescription)")
             }
         }
 
@@ -339,8 +325,7 @@ import AVFoundation
 
     /// Updates Live Activity with current workout state
     private func updateLiveActivity() async {
-        guard #available(iOS 16.1, *),
-              let manager = liveActivityManager else {
+        guard let manager = liveActivityManager else {
             return
         }
 
@@ -396,10 +381,7 @@ import AVFoundation
             restTimer.stop()
             stopLiveActivityUpdateTimer()
 
-            // End Live Activity if available
-            if #available(iOS 16.1, *) {
-                await liveActivityManager?.endActivity()
-            }
+            await liveActivityManager?.endActivity()
 
             try await sessionStore.finish(status: status)
             showCompletionScreen = true
@@ -417,10 +399,8 @@ import AVFoundation
         stopLiveActivityUpdateTimer()
 
         // Ensure Live Activity is ended
-        if #available(iOS 16.1, *) {
-            Task {
-                await liveActivityManager?.endActivity()
-            }
+        Task {
+            await liveActivityManager?.endActivity()
         }
     }
 

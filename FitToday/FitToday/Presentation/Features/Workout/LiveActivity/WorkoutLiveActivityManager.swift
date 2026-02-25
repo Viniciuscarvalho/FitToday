@@ -4,7 +4,6 @@ import OSLog
 
 /// Manager for controlling Workout Live Activity lifecycle
 /// Handles starting, updating, and ending Live Activities for workout sessions
-@available(iOS 16.1, *)
 @MainActor
 final class WorkoutLiveActivityManager {
     // MARK: - Properties
@@ -160,7 +159,6 @@ final class WorkoutLiveActivityManager {
 
 // MARK: - Error Types
 
-@available(iOS 16.1, *)
 enum LiveActivityError: LocalizedError {
     case notEnabled
     case failedToStart(underlying: Error)

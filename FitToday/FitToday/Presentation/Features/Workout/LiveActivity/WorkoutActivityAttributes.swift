@@ -3,7 +3,6 @@ import Foundation
 
 /// Attributes for the Workout Live Activity
 /// Defines the static and dynamic content shown in the Live Activity
-@available(iOS 16.1, *)
 struct WorkoutActivityAttributes: ActivityAttributes {
     /// Static content that doesn't change during the activity
     public struct ContentState: Codable, Hashable, Sendable {
