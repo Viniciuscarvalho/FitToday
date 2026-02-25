@@ -444,6 +444,13 @@
 "workout_execution.quit.confirm" = "Quit";
 "workout_execution.quit.cancel" = "Continue Workout";
 
+// MARK: - Inline Execution
+"execution.set" = "Set";
+"execution.sets" = "sets";
+"execution.rest" = "rest";
+"execution.weight" = "Weight";
+"execution.skip_rest" = "Skip";
+
 // MARK: - Rest Timer
 "rest_timer.title" = "Rest";
 "rest_timer.skip" = "Skip";

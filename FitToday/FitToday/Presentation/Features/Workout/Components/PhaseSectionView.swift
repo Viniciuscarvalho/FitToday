@@ -7,8 +7,6 @@
 
 import SwiftUI
 
-// 💡 Learn: Seção de fase do treino (Aquecimento, Força, Aeróbio, etc.)
-// Componente extraído para manter a view principal < 100 linhas
 struct PhaseSectionView: View {
     @Environment(AppRouter.self) private var router
     @Environment(WorkoutSessionStore.self) private var sessionStore
@@ -16,12 +14,14 @@ struct PhaseSectionView: View {
     let phase: WorkoutPlanPhase
     let phaseIndex: Int
     let displayMode: PhaseDisplayMode
+    var isExecuting: Bool = false
+    var restTimerStore: RestTimerStore?
+    var onSetCompleted: ((Int, ExercisePrescription) -> Void)?
 
     @State private var showDeleteConfirmation = false
     @State private var itemToDelete: Int?
 
     var body: some View {
-        // Não exibe a fase se não tiver itens após filtragem
         if !filteredItems.isEmpty {
             VStack(alignment: .leading, spacing: FitTodaySpacing.sm) {
                 SectionHeader(
@@ -39,33 +39,42 @@ struct PhaseSectionView: View {
                             ActivityRow(activity: activity)
 
                         case .exercise(let prescription):
-                            // Usar índice local dentro da fase (não global)
                             let localIndex = idx + 1
-                            Button {
-                                router.push(.workoutExercisePreview(prescription), on: .home)
-                            } label: {
-                                WorkoutExerciseRow(
-                                    index: localIndex,
+                            let globalIndex = globalExerciseIndex(for: prescription)
+
+                            if isExecuting, let globalIndex {
+                                exerciseExecutionCard(
                                     prescription: prescription,
-                                    isCurrent: sessionStore.currentExerciseIndex == localIndex
+                                    exerciseIndex: globalIndex,
+                                    localIndex: localIndex
                                 )
-                            }
-                            .buttonStyle(ExerciseRowButtonStyle())
-                            .contextMenu {
+                            } else {
                                 Button {
                                     router.push(.workoutExercisePreview(prescription), on: .home)
                                 } label: {
-                                    Label("Ver detalhes", systemImage: "info.circle")
+                                    WorkoutExerciseRow(
+                                        index: localIndex,
+                                        prescription: prescription,
+                                        isCurrent: sessionStore.currentExerciseIndex == localIndex
+                                    )
                                 }
+                                .buttonStyle(ExerciseRowButtonStyle())
+                                .contextMenu {
+                                    Button {
+                                        router.push(.workoutExercisePreview(prescription), on: .home)
+                                    } label: {
+                                        Label("Ver detalhes", systemImage: "info.circle")
+                                    }
 
-                                Button(role: .destructive) {
-                                    itemToDelete = idx
-                                    showDeleteConfirmation = true
-                                } label: {
-                                    Label("Remover exercício", systemImage: "trash")
+                                    Button(role: .destructive) {
+                                        itemToDelete = idx
+                                        showDeleteConfirmation = true
+                                    } label: {
+                                        Label("Remover exercício", systemImage: "trash")
+                                    }
                                 }
+                                .accessibilityHint("Toque para ver detalhes. Segure para mais opções.")
                             }
-                            .accessibilityHint("Toque para ver detalhes. Segure para mais opções.")
                         }
                     }
                 }
@@ -93,32 +102,120 @@ struct PhaseSectionView: View {
         }
     }
 
+    // MARK: - Execution Card
+
+    @ViewBuilder
+    private func exerciseExecutionCard(prescription: ExercisePrescription, exerciseIndex: Int, localIndex: Int) -> some View {
+        let progress = sessionStore.progress?.exercises[safe: exerciseIndex]
+        let isCurrentExercise = sessionStore.currentExerciseIndex == exerciseIndex
+
+        VStack(alignment: .leading, spacing: FitTodaySpacing.sm) {
+            // Exercise header
+            HStack(alignment: .top, spacing: FitTodaySpacing.md) {
+                ExerciseThumbnail(media: prescription.exercise.media, size: 56)
+
+                VStack(alignment: .leading, spacing: FitTodaySpacing.xs) {
+                    Text("\(localIndex). \(prescription.exercise.name)")
+                        .font(FitTodayFont.ui(size: 16, weight: .bold))
+                        .foregroundStyle(FitTodayColor.textPrimary)
+
+                    HStack(spacing: FitTodaySpacing.sm) {
+                        Text("\(prescription.sets) " + "execution.sets".localized)
+                        Text("·").foregroundStyle(FitTodayColor.textTertiary)
+                        Text("\(prescription.reps.display) reps")
+                        Text("·").foregroundStyle(FitTodayColor.textTertiary)
+                        Text("\(Int(prescription.restInterval))s " + "execution.rest".localized)
+                    }
+                    .font(FitTodayFont.ui(size: 12, weight: .medium))
+                    .foregroundStyle(FitTodayColor.textSecondary)
+                }
+
+                Spacer()
+
+                if let progress {
+                    MiniProgressRing(progress: progress.progressPercentage, size: 28)
+                }
+            }
+
+            // Set tracking rows
+            if let progress {
+                // Column headers
+                HStack(spacing: FitTodaySpacing.sm) {
+                    Spacer().frame(width: 28)
+                    Text("execution.set".localized)
+                        .frame(width: 52, alignment: .leading)
+                    Spacer()
+                    Text("Reps")
+                        .frame(width: 60, alignment: .center)
+                    Text("execution.weight".localized)
+                        .frame(width: 68, alignment: .center)
+                }
+                .font(FitTodayFont.ui(size: 11, weight: .medium))
+                .foregroundStyle(FitTodayColor.textTertiary)
+                .padding(.horizontal, FitTodaySpacing.md)
+
+                VStack(spacing: FitTodaySpacing.xs) {
+                    ForEach(Array(progress.sets.enumerated()), id: \.element.id) { setIdx, setProgress in
+                        SetCheckbox(
+                            setNumber: setProgress.setNumber,
+                            isCompleted: setProgress.isCompleted,
+                            reps: prescription.reps.display,
+                            actualReps: setProgress.actualReps,
+                            weight: setProgress.weight,
+                            onToggle: {
+                                sessionStore.toggleSet(exerciseIndex: exerciseIndex, setIndex: setIdx)
+                                if !setProgress.isCompleted && setIdx < progress.sets.count - 1 {
+                                    onSetCompleted?(exerciseIndex, prescription)
+                                }
+                            },
+                            onRepsChanged: { reps in
+                                sessionStore.updateSetReps(exerciseIndex: exerciseIndex, setIndex: setIdx, reps: reps)
+                            },
+                            onWeightChanged: { weight in
+                                sessionStore.updateSetWeight(exerciseIndex: exerciseIndex, setIndex: setIdx, weight: weight)
+                            }
+                        )
+                    }
+                }
+
+                // Inline rest timer
+                if isCurrentExercise, let restTimerStore, restTimerStore.isActive {
+                    InlineRestTimerBar(timerStore: restTimerStore)
+                        .transition(.opacity.combined(with: .scale(scale: 0.95)))
+                }
+            }
+        }
+        .padding(FitTodaySpacing.md)
+        .background(
+            RoundedRectangle(cornerRadius: FitTodayRadius.md)
+                .fill(isCurrentExercise ? FitTodayColor.surfaceElevated : FitTodayColor.surface)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: FitTodayRadius.md)
+                .stroke(isCurrentExercise ? FitTodayColor.brandPrimary.opacity(0.3) : Color.clear, lineWidth: 1)
+        )
+    }
+
     // MARK: - Computed Properties
 
-    /// Fases que são afetadas pelo modo de exibição
     private var isFilterablePhase: Bool {
         phase.kind == .warmup || phase.kind == .aerobic || phase.kind == .finisher
     }
 
-    /// Itens filtrados conforme o modo de exibição
     private var filteredItems: [WorkoutPlanItem] {
         guard isFilterablePhase else {
-            // Força, Acessórios, etc. sempre mostram todos os itens
             return phase.items
         }
 
         switch displayMode {
         case .auto:
-            // Mostra tudo (mesclado)
             return phase.items
         case .exercises:
-            // Apenas exercícios
             return phase.items.filter { item in
                 if case .exercise = item { return true }
                 return false
             }
         case .guided:
-            // Apenas atividades guiadas
             return phase.items.filter { item in
                 if case .activity = item { return true }
                 return false
@@ -129,7 +226,6 @@ struct PhaseSectionView: View {
     private var phaseHeaderTitle: String {
         var title = phase.title
 
-        // Adiciona indicador do modo quando aplicável
         if isFilterablePhase && displayMode != .auto {
             let modeIndicator = displayMode == .exercises ? "🏋️" : "🎯"
             title = "\(title) \(modeIndicator)"
@@ -140,12 +236,22 @@ struct PhaseSectionView: View {
         }
         return title
     }
+
+    private func globalExerciseIndex(for prescription: ExercisePrescription) -> Int? {
+        sessionStore.exercises.firstIndex(where: { $0.exercise.id == prescription.exercise.id })
+    }
+}
+
+// MARK: - Safe Collection Index
+
+extension Collection {
+    subscript(safe index: Index) -> Element? {
+        indices.contains(index) ? self[index] : nil
+    }
 }
 
 // MARK: - Button Style for Exercise Row
 
-/// Custom button style that provides visual feedback on press
-/// without interfering with the row's appearance
 struct ExerciseRowButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label

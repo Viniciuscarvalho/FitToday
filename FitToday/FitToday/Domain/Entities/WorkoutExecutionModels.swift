@@ -13,22 +13,34 @@ struct SetProgress: Codable, Hashable, Sendable, Identifiable {
     let setNumber: Int
     var isCompleted: Bool
     var completedAt: Date?
-    
-    init(setNumber: Int, isCompleted: Bool = false, completedAt: Date? = nil) {
+    var actualReps: Int?
+    var weight: Double?
+
+    init(setNumber: Int, isCompleted: Bool = false, completedAt: Date? = nil, actualReps: Int? = nil, weight: Double? = nil) {
         self.id = UUID()
         self.setNumber = setNumber
         self.isCompleted = isCompleted
         self.completedAt = completedAt
+        self.actualReps = actualReps
+        self.weight = weight
     }
-    
+
     mutating func complete() {
         isCompleted = true
         completedAt = Date()
     }
-    
+
     mutating func uncomplete() {
         isCompleted = false
         completedAt = nil
+    }
+
+    mutating func updateReps(_ reps: Int?) {
+        actualReps = reps
+    }
+
+    mutating func updateWeight(_ kg: Double?) {
+        weight = kg
     }
 }
 
@@ -158,6 +170,20 @@ struct WorkoutProgress: Codable, Hashable, Sendable {
     mutating func removeExercise(at index: Int) {
         guard exercises.indices.contains(index) else { return }
         exercises.remove(at: index)
+        lastUpdatedAt = Date()
+    }
+
+    mutating func updateSetReps(exerciseIndex: Int, setIndex: Int, reps: Int?) {
+        guard exercises.indices.contains(exerciseIndex),
+              exercises[exerciseIndex].sets.indices.contains(setIndex) else { return }
+        exercises[exerciseIndex].sets[setIndex].updateReps(reps)
+        lastUpdatedAt = Date()
+    }
+
+    mutating func updateSetWeight(exerciseIndex: Int, setIndex: Int, weight: Double?) {
+        guard exercises.indices.contains(exerciseIndex),
+              exercises[exerciseIndex].sets.indices.contains(setIndex) else { return }
+        exercises[exerciseIndex].sets[setIndex].updateWeight(weight)
         lastUpdatedAt = Date()
     }
 }

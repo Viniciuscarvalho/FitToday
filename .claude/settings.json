@@ -18,6 +18,20 @@
             "command": "entire hooks claude-code post-todo"
           }
         ]
+      },
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/validate-note.sh"
+          },
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/auto-commit.sh",
+            "async": true
+          }
+        ]
       }
     ],
     "PreToolUse": [
@@ -51,6 +65,14 @@
             "command": "entire hooks claude-code session-start"
           }
         ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/session-orient.sh"
+          }
+        ]
       }
     ],
     "Stop": [
@@ -60,6 +82,14 @@
           {
             "type": "command",
             "command": "entire hooks claude-code stop"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/session-capture.sh"
           }
         ]
       }
