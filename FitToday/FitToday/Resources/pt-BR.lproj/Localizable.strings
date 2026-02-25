@@ -444,6 +444,13 @@
 "workout_execution.quit.confirm" = "Sair";
 "workout_execution.quit.cancel" = "Continuar Treino";
 
+// MARK: - Inline Execution
+"execution.set" = "Série";
+"execution.sets" = "séries";
+"execution.rest" = "descanso";
+"execution.weight" = "Peso";
+"execution.skip_rest" = "Pular";
+
 // MARK: - Rest Timer
 "rest_timer.title" = "Descanse";
 "rest_timer.skip" = "Pular";
