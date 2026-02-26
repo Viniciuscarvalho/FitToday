@@ -1,0 +1,33 @@
+{
+  "cli_version": "0.4.4",
+  "checkpoint_id": "7101f491fd8e",
+  "session_id": "3614e41d-809d-4084-a168-acfb16954f37",
+  "strategy": "manual-commit",
+  "created_at": "2026-02-26T02:30:25.133194Z",
+  "branch": "feature/reorganize-screens-and-flows",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "FitToday/FitToday/Presentation/Features/AIChat/AIChatView.swift"
+  ],
+  "agent": "Claude Code",
+  "transcript_identifier_at_start": "27e0952b-8977-46a9-b44a-8a54608593ac",
+  "checkpoint_transcript_start": 6554,
+  "transcript_lines_at_start": 6554,
+  "token_usage": {
+    "input_tokens": 231,
+    "cache_creation_tokens": 135712,
+    "cache_read_tokens": 1500075,
+    "output_tokens": 105,
+    "api_call_count": 13
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-02-26T02:30:18.999252Z",
+    "agent_lines": 0,
+    "human_added": 255,
+    "human_modified": 0,
+    "human_removed": 0,
+    "total_committed": 255,
+    "agent_percentage": 0
+  },
+  "transcript_path": ".claude/projects/-Users-viniciuscarvalho-Documents-FitToday/3614e41d-809d-4084-a168-acfb16954f37.jsonl"
+}
