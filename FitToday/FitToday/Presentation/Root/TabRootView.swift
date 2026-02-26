@@ -13,12 +13,10 @@ struct TabRootView: View {
     @Environment(WorkoutSessionStore.self) private var sessionStore
     @Environment(\.dependencyResolver) private var resolver
 
-    @State private var showCreateWorkout = false
     @State private var isMaintenanceMode = false
     @State private var isForceUpdateRequired = false
 
     var body: some View {
-        // 💡 Learn: @Bindable wrapper permite binding de @Observable objects
         @Bindable var routerBinding = router
         TabView(selection: $routerBinding.selectedTab) {
             tabView(for: .home) {
@@ -29,14 +27,8 @@ struct TabRootView: View {
                 WorkoutTabView(resolver: resolver)
             }
 
-            // Create tab - center button that shows sheet
-            tabView(for: .create) {
-                Color.clear
-                    .onAppear {
-                        showCreateWorkout = true
-                        // Switch back to workout tab
-                        router.select(tab: .workout)
-                    }
+            tabView(for: .fitpal) {
+                AIChatView(resolver: resolver)
             }
 
             tabView(for: .activity) {
@@ -45,11 +37,6 @@ struct TabRootView: View {
 
             tabView(for: .profile) {
                 ProfileProView()
-            }
-        }
-        .sheet(isPresented: $showCreateWorkout) {
-            CreateWorkoutView(resolver: resolver) {
-                showCreateWorkout = false
             }
         }
         .task {
@@ -196,6 +183,8 @@ struct TabRootView: View {
             CMSWorkoutFeedbackView(workoutId: workoutId, resolver: resolver)
         case .libraryExplore:
             LibraryView(resolver: resolver)
+        case .aiChat:
+            AIChatView(resolver: resolver)
         }
     }
 }
