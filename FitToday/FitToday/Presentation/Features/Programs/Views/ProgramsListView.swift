@@ -56,6 +56,16 @@ struct ProgramsListView: View {
                 actionButtonsRow
                     .padding(.horizontal, FitTodaySpacing.md)
 
+                // Recommended Programs (horizontal scroll)
+                if !viewModel.recommendedPrograms.isEmpty {
+                    RecommendedProgramsSection(
+                        programs: viewModel.recommendedPrograms,
+                        onSelect: { programId in
+                            router.push(.programDetail(programId), on: .workout)
+                        }
+                    )
+                }
+
                 // Grouped Programs — vertical list per category
                 ForEach(viewModel.sortedGroupedPrograms, id: \.category) { group in
                     categorySection(category: group.category, programs: group.programs)

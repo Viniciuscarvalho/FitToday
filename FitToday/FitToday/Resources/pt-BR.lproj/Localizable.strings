@@ -910,3 +910,25 @@
 "trainer.dashboard.tab.chat" = "Chat";
 "trainer.dashboard.tab.history" = "Histórico";
 "trainer.dashboard.tab.evolution" = "Evolução";
+
+// MARK: - Welcome Onboarding
+"welcome.page1.title" = "Acompanhe Seus Treinos";
+"welcome.page1.description" = "Registre exercícios, séries e repetições com facilidade.";
+"welcome.page2.title" = "Siga Programas";
+"welcome.page2.description" = "Escolha entre mais de 25 programas de treino para todos os níveis.";
+"welcome.page3.title" = "Treinos com IA";
+"welcome.page3.description" = "Gere treinos personalizados com inteligência artificial.";
+"welcome.page4.title" = "Vamos Começar";
+"welcome.page4.description" = "Configure seu perfil e comece a treinar hoje mesmo.";
+"welcome.getStarted" = "Começar";
+"welcome.continue" = "Continuar";
+"welcome.skip" = "Pular";
+
+// MARK: - FitPal Tab
+"tab.fitpal" = "FitPal";
+
+// MARK: - Programs Recommended
+"programs.recommended" = "Recomendados para Você";
+
+// MARK: - Home Exercises
+"home.exercises.title" = "Exercícios de Hoje";

@@ -910,3 +910,25 @@
 "trainer.dashboard.tab.chat" = "Chat";
 "trainer.dashboard.tab.history" = "History";
 "trainer.dashboard.tab.evolution" = "Evolution";
+
+// MARK: - Welcome Onboarding
+"welcome.page1.title" = "Track Your Workouts";
+"welcome.page1.description" = "Log exercises, sets, and reps with ease.";
+"welcome.page2.title" = "Follow Programs";
+"welcome.page2.description" = "Choose from over 25 workout programs for all levels.";
+"welcome.page3.title" = "AI-Powered Training";
+"welcome.page3.description" = "Generate personalized workouts with artificial intelligence.";
+"welcome.page4.title" = "Let's Get Started";
+"welcome.page4.description" = "Set up your profile and start training today.";
+"welcome.getStarted" = "Get Started";
+"welcome.continue" = "Continue";
+"welcome.skip" = "Skip";
+
+// MARK: - FitPal Tab
+"tab.fitpal" = "FitPal";
+
+// MARK: - Programs Recommended
+"programs.recommended" = "Recommended for You";
+
+// MARK: - Home Exercises
+"home.exercises.title" = "Today's Exercises";

@@ -15,6 +15,7 @@ struct FitTodayApp: App {
     private let appContainer: AppContainer
     // 💡 Learn: Com @Observable, use @State em vez de @StateObject
     @State private var sessionStore: WorkoutSessionStore
+    @AppStorage(AppStorageKeys.hasSeenWelcome) private var hasSeenWelcome = false
     @Environment(\.scenePhase) private var scenePhase
 
     init() {
@@ -49,19 +50,25 @@ struct FitTodayApp: App {
 
     var body: some Scene {
         WindowGroup {
-            TabRootView()
-                // 💡 Learn: Com @Observable, use .environment() em vez de .environmentObject()
-                .environment(appContainer.router)
-                .environment(sessionStore)
-                .environment(\.dependencyResolver, appContainer.container)
-                .imageCacheService(appContainer.container.resolve(ImageCaching.self)!)
-                .preferredColorScheme(.dark)  // Forçar tema escuro
-                .onOpenURL { url in
-                    appContainer.router.handle(url: url)
+            Group {
+                if hasSeenWelcome {
+                    TabRootView()
+                } else {
+                    WelcomeOnboardingView()
                 }
-                .onAppear {
-                    setupNetworkMonitor()
-                }
+            }
+            // 💡 Learn: Com @Observable, use .environment() em vez de .environmentObject()
+            .environment(appContainer.router)
+            .environment(sessionStore)
+            .environment(\.dependencyResolver, appContainer.container)
+            .imageCacheService(appContainer.container.resolve(ImageCaching.self)!)
+            .preferredColorScheme(.dark)  // Forçar tema escuro
+            .onOpenURL { url in
+                appContainer.router.handle(url: url)
+            }
+            .onAppear {
+                setupNetworkMonitor()
+            }
         }
         .modelContainer(appContainer.modelContainer)
         .onChange(of: scenePhase) { _, newPhase in

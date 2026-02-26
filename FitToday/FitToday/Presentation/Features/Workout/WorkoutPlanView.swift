@@ -119,6 +119,17 @@ struct WorkoutPlanView: View {
         ZStack(alignment: .bottom) {
             ScrollView {
                 VStack(spacing: FitTodaySpacing.lg) {
+                    // Hero Header
+                    WorkoutHeroHeader(
+                        title: plan.title,
+                        subtitle: plan.focus.displayName,
+                        duration: "\(plan.estimatedDurationMinutes) min",
+                        level: plan.intensity.displayTitle
+                    )
+
+                    // Equipment Needed
+                    EquipmentSection(equipment: uniqueEquipment(from: plan))
+
                     WorkoutPlanHeader(
                         plan: plan,
                         timerStore: timerStore,
@@ -248,6 +259,13 @@ struct WorkoutPlanView: View {
             }
             isFinishing = false
         }
+    }
+
+    // MARK: - Helpers
+
+    private func uniqueEquipment(from plan: WorkoutPlan) -> [String] {
+        let equipmentSet = Set(plan.exercises.map { $0.exercise.equipment.displayName })
+        return equipmentSet.sorted()
     }
 
     // MARK: - Data Loading
