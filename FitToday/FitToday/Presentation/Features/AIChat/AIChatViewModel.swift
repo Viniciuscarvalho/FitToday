@@ -2,7 +2,7 @@
 //  AIChatViewModel.swift
 //  FitToday
 //
-//  ViewModel for the AI FitPal chat feature.
+//  ViewModel for the AI FitOrb chat feature.
 //
 
 import Foundation
@@ -23,10 +23,10 @@ final class AIChatViewModel {
 
     static var quickActions: [String] {
         [
-            "fitpal.quick.plan_workout".localized,
-            "fitpal.quick.suggest_exercises".localized,
-            "fitpal.quick.warmup".localized,
-            "fitpal.quick.recovery".localized
+            "fitorb.quick.plan_workout".localized,
+            "fitorb.quick.suggest_exercises".localized,
+            "fitorb.quick.warmup".localized,
+            "fitorb.quick.recovery".localized
         ]
     }
 
@@ -42,9 +42,18 @@ final class AIChatViewModel {
 
     // MARK: - Actions
 
+    var isChatAvailable: Bool {
+        chatService != nil
+    }
+
     func sendMessage() {
         let text = inputText.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !text.isEmpty, !isLoading else { return }
+
+        guard chatService != nil else {
+            errorMessage = "fitorb.error_no_api_key".localized
+            return
+        }
 
         let userMessage = AIChatMessage(role: .user, content: text)
         messages.append(userMessage)
@@ -54,10 +63,7 @@ final class AIChatViewModel {
 
         Task {
             do {
-                guard let service = chatService else {
-                    throw AIChatService.ServiceError.clientUnavailable
-                }
-                let response = try await service.sendMessage(text, history: messages)
+                let response = try await chatService!.sendMessage(text, history: messages)
                 let assistantMessage = AIChatMessage(role: .assistant, content: response)
                 messages.append(assistantMessage)
             } catch {

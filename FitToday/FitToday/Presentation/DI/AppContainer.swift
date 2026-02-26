@@ -194,11 +194,11 @@ struct AppContainer {
         }
         .inObjectScope(.container)
 
-        // AI Chat Service (FitPal) - wraps OpenAI for conversational mode
-        container.register(AIChatService.self) { resolver in
-            try! AIChatService(resolver: resolver)
+        // AI Chat Service (FitOrb) - wraps OpenAI for conversational mode
+        if let chatService = try? AIChatService(resolver: container) {
+            container.register(AIChatService.self) { _ in chatService }
+                .inObjectScope(.container)
         }
-        .inObjectScope(.container)
 
         // Firebase Analytics Service
         let analyticsService = FirebaseAnalyticsService()

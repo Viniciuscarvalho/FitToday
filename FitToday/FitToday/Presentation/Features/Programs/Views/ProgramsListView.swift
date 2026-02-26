@@ -52,10 +52,6 @@ struct ProgramsListView: View {
     private func contentView(viewModel: ProgramsListViewModel) -> some View {
         ScrollView {
             VStack(spacing: FitTodaySpacing.lg) {
-                // Action Buttons Row
-                actionButtonsRow
-                    .padding(.horizontal, FitTodaySpacing.md)
-
                 // Recommended Programs (horizontal scroll)
                 if !viewModel.recommendedPrograms.isEmpty {
                     RecommendedProgramsSection(
@@ -79,28 +75,6 @@ struct ProgramsListView: View {
         }
     }
 
-    // MARK: - Action Buttons Row
-
-    private var actionButtonsRow: some View {
-        HStack(spacing: FitTodaySpacing.sm) {
-            Button {
-                // TODO: navigate to create routine
-            } label: {
-                Label("Nova Rotina", systemImage: "plus")
-                    .font(FitTodayFont.ui(size: 14, weight: .semiBold))
-                    .foregroundStyle(FitTodayColor.brandPrimary)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, FitTodaySpacing.sm)
-                    .background(FitTodayColor.brandPrimary.opacity(0.12))
-                    .clipShape(RoundedRectangle(cornerRadius: FitTodayRadius.md))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: FitTodayRadius.md)
-                            .stroke(FitTodayColor.brandPrimary.opacity(0.3), lineWidth: 1)
-                    )
-            }
-            .buttonStyle(.plain)
-        }
-    }
 
     // MARK: - Category Section
 

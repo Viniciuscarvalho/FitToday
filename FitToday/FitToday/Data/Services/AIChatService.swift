@@ -2,7 +2,7 @@
 //  AIChatService.swift
 //  FitToday
 //
-//  Wraps NewOpenAIClient for conversational chat mode (FitPal).
+//  Wraps NewOpenAIClient for conversational chat mode (FitOrb).
 //
 
 import Foundation
@@ -30,7 +30,7 @@ actor AIChatService {
 
     private let client: NewOpenAIClient
 
-    private let systemPrompt = "You are FitPal, an AI fitness assistant. Help users plan workouts, suggest exercises, and provide fitness guidance. Be friendly, motivating, and concise."
+    private let systemPrompt = "You are FitOrb, an AI fitness assistant. Help users plan workouts, suggest exercises, and provide fitness guidance. Be friendly, motivating, and concise."
 
     // MARK: - Initialization
 

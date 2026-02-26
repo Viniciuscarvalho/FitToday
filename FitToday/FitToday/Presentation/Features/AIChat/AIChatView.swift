@@ -38,16 +38,26 @@ struct AIChatView: View {
                 inputBar
             }
         }
-        .navigationTitle("fitpal.title".localized)
+        .navigationTitle("fitorb.title".localized)
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    router.push(.apiKeySettings)
+                } label: {
+                    Image(systemName: "gearshape")
+                        .foregroundStyle(FitTodayColor.textSecondary)
+                }
+            }
+        }
         .task {
             await loadEntitlement()
         }
-        .alert("fitpal.error_title".localized, isPresented: .init(
+        .alert("fitorb.error_title".localized, isPresented: .init(
             get: { viewModel.errorMessage != nil },
             set: { if !$0 { viewModel.clearError() } }
         )) {
-            Button("fitpal.error_ok".localized) { viewModel.clearError() }
+            Button("fitorb.error_ok".localized) { viewModel.clearError() }
         } message: {
             Text(viewModel.errorMessage ?? "")
         }
@@ -60,11 +70,26 @@ struct AIChatView: View {
             VStack(spacing: FitTodaySpacing.xl) {
                 Spacer(minLength: FitTodaySpacing.xl)
 
-                FitPalOrbView()
+                FitOrbView()
+
+                // API key missing banner
+                if !viewModel.isChatAvailable {
+                    HStack(spacing: FitTodaySpacing.sm) {
+                        Image(systemName: "key.fill")
+                            .foregroundStyle(FitTodayColor.brandPrimary)
+                        Text("fitorb.error_no_api_key".localized)
+                            .font(FitTodayFont.ui(size: 13, weight: .medium))
+                            .foregroundStyle(FitTodayColor.textSecondary)
+                    }
+                    .padding(FitTodaySpacing.md)
+                    .background(FitTodayColor.surfaceElevated)
+                    .clipShape(RoundedRectangle(cornerRadius: FitTodayRadius.md))
+                    .padding(.horizontal, FitTodaySpacing.md)
+                }
 
                 // Quick action chips
                 VStack(spacing: FitTodaySpacing.sm) {
-                    Text("fitpal.try_asking".localized)
+                    Text("fitorb.try_asking".localized)
                         .font(FitTodayFont.ui(size: 14, weight: .medium))
                         .foregroundStyle(FitTodayColor.textSecondary)
 
@@ -113,7 +138,7 @@ struct AIChatView: View {
                         HStack {
                             ProgressView()
                                 .tint(FitTodayColor.brandPrimary)
-                            Text("fitpal.thinking".localized)
+                            Text("fitorb.thinking".localized)
                                 .font(FitTodayFont.ui(size: 14, weight: .medium))
                                 .foregroundStyle(FitTodayColor.textSecondary)
                             Spacer()
@@ -159,7 +184,7 @@ struct AIChatView: View {
 
     private var inputBar: some View {
         HStack(spacing: FitTodaySpacing.sm) {
-            TextField("fitpal.input_placeholder".localized, text: $viewModel.inputText)
+            TextField("fitorb.input_placeholder".localized, text: $viewModel.inputText)
                 .font(FitTodayFont.ui(size: 16, weight: .medium))
                 .foregroundStyle(FitTodayColor.textPrimary)
                 .padding(.horizontal, FitTodaySpacing.md)
