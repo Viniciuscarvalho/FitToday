@@ -924,24 +924,28 @@
 "welcome.continue" = "Continuar";
 "welcome.skip" = "Pular";
 
-// MARK: - FitPal Tab
-"tab.fitpal" = "FitPal";
+// MARK: - FitOrb Tab
+"tab.fitorb" = "FitOrb";
 
 // MARK: - Programs Recommended
 "programs.recommended" = "Recomendados para Você";
 
-// MARK: - Home Exercises
+// MARK: - Home
 "home.exercises.title" = "Exercícios de Hoje";
+"home.setup_profile.title" = "Complete Seu Perfil";
+"home.setup_profile.subtitle" = "Configure seu perfil fitness para receber recomendações personalizadas de treino.";
+"home.setup_profile.cta" = "Configurar Perfil";
 
-// MARK: - FitPal AI Chat
-"fitpal.title" = "FitPal";
-"fitpal.subtitle" = "Seu Assistente Fitness com IA";
-"fitpal.try_asking" = "Tente perguntar:";
-"fitpal.thinking" = "Pensando...";
-"fitpal.input_placeholder" = "Pergunte ao FitPal...";
-"fitpal.error_title" = "Erro";
-"fitpal.error_ok" = "OK";
-"fitpal.quick.plan_workout" = "Montar meu treino";
-"fitpal.quick.suggest_exercises" = "Sugerir exercícios";
-"fitpal.quick.warmup" = "Rotina de aquecimento";
-"fitpal.quick.recovery" = "Dicas de recuperação";
+// MARK: - FitOrb AI Chat
+"fitorb.title" = "FitOrb";
+"fitorb.subtitle" = "Seu Assistente Fitness com IA";
+"fitorb.try_asking" = "Tente perguntar:";
+"fitorb.thinking" = "Pensando...";
+"fitorb.input_placeholder" = "Pergunte ao FitOrb...";
+"fitorb.error_title" = "Erro";
+"fitorb.error_ok" = "OK";
+"fitorb.error_no_api_key" = "Configure sua chave de API do OpenAI em Configurações para usar o FitOrb.";
+"fitorb.quick.plan_workout" = "Montar meu treino";
+"fitorb.quick.suggest_exercises" = "Sugerir exercícios";
+"fitorb.quick.warmup" = "Rotina de aquecimento";
+"fitorb.quick.recovery" = "Dicas de recuperação";

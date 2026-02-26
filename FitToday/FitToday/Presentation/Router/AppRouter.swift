@@ -11,7 +11,7 @@ import SwiftUI
 enum AppTab: Hashable, CaseIterable {
     case home
     case workout
-    case fitpal
+    case fitorb
     case activity
     case profile
 
@@ -19,7 +19,7 @@ enum AppTab: Hashable, CaseIterable {
         switch self {
         case .home: return "tab.home".localized
         case .workout: return "tab.workout".localized
-        case .fitpal: return "tab.fitpal".localized
+        case .fitorb: return "tab.fitorb".localized
         case .activity: return "tab.activity".localized
         case .profile: return "tab.profile".localized
         }
@@ -29,7 +29,7 @@ enum AppTab: Hashable, CaseIterable {
         switch self {
         case .home: return "house.fill"
         case .workout: return "dumbbell.fill"
-        case .fitpal: return "sparkles"
+        case .fitorb: return "sparkles"
         case .activity: return "chart.bar.fill"
         case .profile: return "person.fill"
         }

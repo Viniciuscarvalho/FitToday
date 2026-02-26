@@ -27,7 +27,7 @@ struct TabRootView: View {
                 WorkoutTabView(resolver: resolver)
             }
 
-            tabView(for: .fitpal) {
+            tabView(for: .fitorb) {
                 AIChatView(resolver: resolver)
             }
 

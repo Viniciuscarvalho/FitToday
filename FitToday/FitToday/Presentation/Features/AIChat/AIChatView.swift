@@ -2,7 +2,7 @@
 //  AIChatView.swift
 //  FitToday
 //
-//  Main AI chat screen with feature gating for FitPal.
+//  Main AI chat screen with feature gating for FitOrb.
 //
 
 import SwiftUI
