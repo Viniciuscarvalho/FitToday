@@ -21,12 +21,14 @@ final class AIChatViewModel {
 
     // MARK: - Quick Actions
 
-    static let quickActions = [
-        "Plan my workout",
-        "Suggest exercises",
-        "Warm-up routine",
-        "Recovery tips"
-    ]
+    static var quickActions: [String] {
+        [
+            "fitpal.quick.plan_workout".localized,
+            "fitpal.quick.suggest_exercises".localized,
+            "fitpal.quick.warmup".localized,
+            "fitpal.quick.recovery".localized
+        ]
+    }
 
     // MARK: - Private
 

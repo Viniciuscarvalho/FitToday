@@ -38,16 +38,16 @@ struct AIChatView: View {
                 inputBar
             }
         }
-        .navigationTitle("FitPal")
+        .navigationTitle("fitpal.title".localized)
         .navigationBarTitleDisplayMode(.inline)
         .task {
             await loadEntitlement()
         }
-        .alert("Error", isPresented: .init(
+        .alert("fitpal.error_title".localized, isPresented: .init(
             get: { viewModel.errorMessage != nil },
             set: { if !$0 { viewModel.clearError() } }
         )) {
-            Button("OK") { viewModel.clearError() }
+            Button("fitpal.error_ok".localized) { viewModel.clearError() }
         } message: {
             Text(viewModel.errorMessage ?? "")
         }
@@ -64,7 +64,7 @@ struct AIChatView: View {
 
                 // Quick action chips
                 VStack(spacing: FitTodaySpacing.sm) {
-                    Text("Try asking:")
+                    Text("fitpal.try_asking".localized)
                         .font(FitTodayFont.ui(size: 14, weight: .medium))
                         .foregroundStyle(FitTodayColor.textSecondary)
 
@@ -113,7 +113,7 @@ struct AIChatView: View {
                         HStack {
                             ProgressView()
                                 .tint(FitTodayColor.brandPrimary)
-                            Text("Thinking...")
+                            Text("fitpal.thinking".localized)
                                 .font(FitTodayFont.ui(size: 14, weight: .medium))
                                 .foregroundStyle(FitTodayColor.textSecondary)
                             Spacer()
@@ -159,7 +159,7 @@ struct AIChatView: View {
 
     private var inputBar: some View {
         HStack(spacing: FitTodaySpacing.sm) {
-            TextField("Ask FitPal...", text: $viewModel.inputText)
+            TextField("fitpal.input_placeholder".localized, text: $viewModel.inputText)
                 .font(FitTodayFont.ui(size: 16, weight: .medium))
                 .foregroundStyle(FitTodayColor.textPrimary)
                 .padding(.horizontal, FitTodaySpacing.md)

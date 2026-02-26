@@ -36,12 +36,12 @@ struct FitPalOrbView: View {
                 )
 
             // Title
-            Text("FitPal")
+            Text("fitpal.title".localized)
                 .font(FitTodayFont.display(size: 24, weight: .bold))
                 .foregroundStyle(FitTodayColor.textPrimary)
 
             // Subtitle
-            Text("Your AI Fitness Assistant")
+            Text("fitpal.subtitle".localized)
                 .font(FitTodayFont.ui(size: 14, weight: .medium))
                 .foregroundStyle(FitTodayColor.textSecondary)
         }

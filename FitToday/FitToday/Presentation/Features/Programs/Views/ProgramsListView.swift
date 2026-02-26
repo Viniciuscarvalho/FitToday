@@ -99,23 +99,6 @@ struct ProgramsListView: View {
                     )
             }
             .buttonStyle(.plain)
-
-            Button {
-                router.push(.libraryExplore, on: .workout)
-            } label: {
-                Label("Explorar", systemImage: "safari")
-                    .font(FitTodayFont.ui(size: 14, weight: .semiBold))
-                    .foregroundStyle(FitTodayColor.textSecondary)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, FitTodaySpacing.sm)
-                    .background(FitTodayColor.surface)
-                    .clipShape(RoundedRectangle(cornerRadius: FitTodayRadius.md))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: FitTodayRadius.md)
-                            .stroke(FitTodayColor.outline.opacity(0.2), lineWidth: 1)
-                    )
-            }
-            .buttonStyle(.plain)
         }
     }
 

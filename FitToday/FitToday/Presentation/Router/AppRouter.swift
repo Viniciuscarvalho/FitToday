@@ -63,7 +63,6 @@ enum AppRoute: Hashable {
     case trainerSearch  // Search for personal trainers
     case cmsWorkoutDetail(String)  // CMS workout detail by ID
     case cmsWorkoutFeedback(String)  // CMS workout feedback by ID
-    case libraryExplore  // Exercise library catalog
     case aiChat  // AI Fitness Assistant (FitPal)
 }
 

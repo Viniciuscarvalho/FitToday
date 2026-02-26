@@ -932,3 +932,16 @@
 
 // MARK: - Home Exercises
 "home.exercises.title" = "Exercícios de Hoje";
+
+// MARK: - FitPal AI Chat
+"fitpal.title" = "FitPal";
+"fitpal.subtitle" = "Seu Assistente Fitness com IA";
+"fitpal.try_asking" = "Tente perguntar:";
+"fitpal.thinking" = "Pensando...";
+"fitpal.input_placeholder" = "Pergunte ao FitPal...";
+"fitpal.error_title" = "Erro";
+"fitpal.error_ok" = "OK";
+"fitpal.quick.plan_workout" = "Montar meu treino";
+"fitpal.quick.suggest_exercises" = "Sugerir exercícios";
+"fitpal.quick.warmup" = "Rotina de aquecimento";
+"fitpal.quick.recovery" = "Dicas de recuperação";

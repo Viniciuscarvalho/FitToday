@@ -181,8 +181,6 @@ struct TabRootView: View {
             CMSWorkoutDetailView(workoutId: workoutId, resolver: resolver)
         case .cmsWorkoutFeedback(let workoutId):
             CMSWorkoutFeedbackView(workoutId: workoutId, resolver: resolver)
-        case .libraryExplore:
-            LibraryView(resolver: resolver)
         case .aiChat:
             AIChatView(resolver: resolver)
         }
