@@ -122,6 +122,17 @@
 "home.stats.burned" = "burned";
 "home.stats.streak" = "Streak";
 "home.stats.days" = "days";
+"home.stats.workouts_week" = "Workouts this week";
+"home.stats.day_streak" = "day streak";
+"home.stats.total_sets" = "sets";
+"home.stats.avg_duration" = "min avg";
+
+// MARK: - Today's Workout
+"home.today.title" = "YOUR WORKOUT";
+"home.today.pro_tip" = "Always start with 5-10 minutes of light cardio or dynamic stretching to increase blood flow and prevent injuries.";
+"home.today.start" = "Start Workout";
+"home.today.from_program" = "From %@";
+"home.today.more_exercises" = "more exercises";
 
 // MARK: - Programs
 "programs.title" = "Programs";

@@ -44,9 +44,24 @@ struct HomeView: View {
                 // Daily stats summary
                 DailyStatsCard(
                     workoutsThisWeek: viewModel.workoutsThisWeek,
+                    weeklyTarget: viewModel.weeklyTarget,
                     caloriesBurned: viewModel.caloriesBurnedFormatted,
-                    streakDays: viewModel.streakDays
+                    streakDays: viewModel.streakDays,
+                    totalSets: viewModel.totalSetsThisWeek,
+                    avgDuration: viewModel.avgDurationMinutes
                 )
+
+                // Today's workout section
+                if let todayWorkout = viewModel.todayWorkout,
+                   case .workoutReady = viewModel.journeyState {
+                    TodayWorkoutSection(
+                        workout: todayWorkout,
+                        programName: viewModel.todayProgramName,
+                        onStartWorkout: {
+                            router.push(.workoutPreview(todayWorkout), on: .home)
+                        }
+                    )
+                }
 
                 // Content based on journey state
                 contentForState

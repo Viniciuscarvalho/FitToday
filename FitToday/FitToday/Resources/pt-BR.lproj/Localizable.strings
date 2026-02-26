@@ -122,6 +122,17 @@
 "home.stats.burned" = "queimadas";
 "home.stats.streak" = "Sequência";
 "home.stats.days" = "dias";
+"home.stats.workouts_week" = "Treinos na semana";
+"home.stats.day_streak" = "dias seguidos";
+"home.stats.total_sets" = "séries";
+"home.stats.avg_duration" = "min média";
+
+// MARK: - Today's Workout
+"home.today.title" = "SEU TREINO";
+"home.today.pro_tip" = "Sempre comece com 5-10 minutos de cardio leve ou alongamento dinâmico para aumentar o fluxo sanguíneo e prevenir lesões.";
+"home.today.start" = "Iniciar Treino";
+"home.today.from_program" = "De %@";
+"home.today.more_exercises" = "exercícios a mais";
 
 // MARK: - Programs
 "programs.title" = "Programas";
