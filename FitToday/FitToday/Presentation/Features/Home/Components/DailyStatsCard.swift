@@ -2,59 +2,85 @@
 //  DailyStatsCard.swift
 //  FitToday
 //
-//  Summary card displaying the user's daily workout statistics.
+//  Summary card displaying workout stats with progress ring and stat pills.
 //
 
 import SwiftUI
 
 struct DailyStatsCard: View {
     let workoutsThisWeek: Int
+    let weeklyTarget: Int
     let caloriesBurned: String
     let streakDays: Int
+    let totalSets: Int
+    let avgDuration: Int
+
+    private var progress: Double {
+        guard weeklyTarget > 0 else { return 0 }
+        return min(Double(workoutsThisWeek) / Double(weeklyTarget), 1.0)
+    }
 
     var body: some View {
-        HStack(spacing: FitTodaySpacing.lg) {
-            // Activity icon with gradient circle
-            Circle()
-                .fill(
-                    LinearGradient(
-                        colors: [FitTodayColor.brandPrimary, FitTodayColor.brandSecondary],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                )
-                .frame(width: 64, height: 64)
-                .overlay(
-                    Image(systemName: "flame.fill")
-                        .font(.system(size: 28, weight: .semibold))
-                        .foregroundStyle(.white)
-                )
+        VStack(spacing: FitTodaySpacing.lg) {
+            // Top row: progress ring + streak
+            HStack(spacing: FitTodaySpacing.lg) {
+                // Progress ring
+                ZStack {
+                    // Background ring
+                    Circle()
+                        .stroke(FitTodayColor.surfaceElevated, lineWidth: 8)
+                        .frame(width: 80, height: 80)
 
-            // Stats summary
-            VStack(alignment: .leading, spacing: FitTodaySpacing.xs) {
-                statRow(
-                    icon: "figure.strengthtraining.traditional",
-                    value: "\(workoutsThisWeek)",
-                    label: "home.stats.workouts".localized,
-                    sublabel: "home.stats.this_week".localized
-                )
+                    // Progress ring
+                    Circle()
+                        .trim(from: 0, to: progress)
+                        .stroke(
+                            LinearGradient(
+                                colors: [FitTodayColor.brandPrimary, FitTodayColor.brandSecondary],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            style: StrokeStyle(lineWidth: 8, lineCap: .round)
+                        )
+                        .frame(width: 80, height: 80)
+                        .rotationEffect(.degrees(-90))
 
-                statRow(
-                    icon: "bolt.fill",
-                    value: caloriesBurned,
-                    label: "home.stats.calories".localized,
-                    sublabel: "home.stats.burned".localized
-                )
+                    // Center text
+                    VStack(spacing: 0) {
+                        Text("\(workoutsThisWeek)/\(weeklyTarget)")
+                            .font(FitTodayFont.ui(size: 20, weight: .bold))
+                            .foregroundStyle(FitTodayColor.textPrimary)
+                    }
+                }
 
-                statRow(
-                    icon: "flame",
-                    value: "\(streakDays)",
-                    label: "home.stats.days".localized,
-                    sublabel: "home.stats.streak".localized
-                )
+                // Labels + streak
+                VStack(alignment: .leading, spacing: FitTodaySpacing.sm) {
+                    Text("home.stats.workouts_week".localized)
+                        .font(FitTodayFont.ui(size: 14, weight: .medium))
+                        .foregroundStyle(FitTodayColor.textSecondary)
+
+                    HStack(spacing: FitTodaySpacing.xs) {
+                        Image(systemName: "flame.fill")
+                            .font(.system(size: 16))
+                            .foregroundStyle(.orange)
+                        Text("\(streakDays)")
+                            .font(FitTodayFont.ui(size: 20, weight: .bold))
+                            .foregroundStyle(FitTodayColor.textPrimary)
+                        Text("home.stats.day_streak".localized)
+                            .font(FitTodayFont.ui(size: 14, weight: .medium))
+                            .foregroundStyle(FitTodayColor.textSecondary)
+                    }
+                }
+
+                Spacer()
             }
 
-            Spacer()
+            // Bottom row: stat pills
+            HStack(spacing: FitTodaySpacing.sm) {
+                statPill(icon: "bolt.fill", value: caloriesBurned, label: "cal")
+                statPill(icon: "figure.strengthtraining.traditional", value: "\(totalSets)", label: "home.stats.total_sets".localized)
+                statPill(icon: "clock.fill", value: "\(avgDuration)", label: "home.stats.avg_duration".localized)
+            }
         }
         .padding(FitTodaySpacing.lg)
         .background(FitTodayColor.surface)
@@ -66,22 +92,24 @@ struct DailyStatsCard: View {
         .padding(.horizontal)
     }
 
-    private func statRow(icon: String, value: String, label: String, sublabel: String) -> some View {
-        HStack(spacing: FitTodaySpacing.sm) {
+    private func statPill(icon: String, value: String, label: String) -> some View {
+        HStack(spacing: FitTodaySpacing.xs) {
             Image(systemName: icon)
                 .font(.system(size: 12, weight: .semibold))
                 .foregroundStyle(FitTodayColor.brandPrimary)
-                .frame(width: 16)
 
             Text(value)
-                .font(FitTodayFont.ui(size: 16, weight: .bold))
+                .font(FitTodayFont.ui(size: 14, weight: .bold))
                 .foregroundStyle(FitTodayColor.textPrimary)
 
-            Text("\(label) \(sublabel)")
-                .font(FitTodayFont.ui(size: 13, weight: .medium))
+            Text(label)
+                .font(FitTodayFont.ui(size: 12, weight: .medium))
                 .foregroundStyle(FitTodayColor.textSecondary)
-                .lineLimit(1)
         }
+        .padding(.horizontal, FitTodaySpacing.sm)
+        .padding(.vertical, FitTodaySpacing.xs)
+        .background(FitTodayColor.surfaceElevated)
+        .clipShape(Capsule())
     }
 }
 
@@ -89,8 +117,11 @@ struct DailyStatsCard: View {
     VStack {
         DailyStatsCard(
             workoutsThisWeek: 3,
+            weeklyTarget: 4,
             caloriesBurned: "1.2k",
-            streakDays: 20
+            streakDays: 20,
+            totalSets: 32,
+            avgDuration: 45
         )
     }
     .background(FitTodayColor.background)
