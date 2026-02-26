@@ -53,6 +53,13 @@ struct HomeView: View {
                 )
                 .padding(.horizontal)
 
+                // Daily stats summary
+                DailyStatsCard(
+                    workoutsThisWeek: viewModel.workoutsThisWeek,
+                    caloriesBurned: viewModel.caloriesBurnedFormatted,
+                    streakDays: viewModel.streakDays
+                )
+
                 // Content based on journey state
                 contentForState
 
