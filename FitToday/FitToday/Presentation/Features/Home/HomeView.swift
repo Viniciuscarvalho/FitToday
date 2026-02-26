@@ -3,7 +3,6 @@
 //  FitToday
 //
 //  Created by AI on 05/01/26.
-//  Redesigned on 29/01/26 - New AI workout generator card design
 //
 
 import SwiftUI
@@ -11,19 +10,8 @@ import Swinject
 
 struct HomeView: View {
     @Environment(AppRouter.self) private var router
-    @Environment(WorkoutSessionStore.self) private var sessionStore
 
     @State private var viewModel: HomeViewModel
-    @State private var isGeneratingPlan = false
-
-    // AI Workout Generator State - Direct mapping to DailyCheckIn fields
-    @State private var selectedFocus: DailyFocus = .fullBody
-    @State private var sorenessLevel: MuscleSorenessLevel = .none
-    @State private var energyLevel: Int = 7
-
-    // Generated Workout Preview State
-    @State private var generatedWorkout: GeneratedWorkout?
-    @State private var showWorkoutPreview = false
 
     init(resolver: Resolver?) {
         guard let resolver = resolver else {
@@ -62,11 +50,6 @@ struct HomeView: View {
 
                 // Content based on journey state
                 contentForState
-
-                // Exercise preview list for today's workout
-                if let workout = generatedWorkout {
-                    exercisePreviewList(workout)
-                }
             }
             .padding(.bottom, FitTodaySpacing.xl)
         }
@@ -74,29 +57,6 @@ struct HomeView: View {
         .navigationBarHidden(true)
         .task {
             viewModel.onAppear()
-            loadPersistedWorkout()
-        }
-        .sheet(isPresented: $showWorkoutPreview) {
-            if let workout = generatedWorkout {
-                GeneratedWorkoutPreview(
-                    workout: workout,
-                    onStartWorkout: {
-                        showWorkoutPreview = false
-                        startGeneratedWorkout(workout)
-                    },
-                    onSaveAsTemplate: {
-                        // TODO: Save as custom workout template
-                        showWorkoutPreview = false
-                    },
-                    onRegenerate: {
-                        showWorkoutPreview = false
-                        generateWorkout()
-                    },
-                    onDismiss: {
-                        showWorkoutPreview = false
-                    }
-                )
-            }
         }
     }
 
@@ -109,55 +69,13 @@ struct HomeView: View {
             loadingView
 
         case .noProfile:
-            if viewModel.isAiWorkoutEnabled {
-                // Show AI generator card even without profile (guides to onboarding)
-                AIWorkoutGeneratorCard(
-                    selectedFocus: $selectedFocus,
-                    sorenessLevel: $sorenessLevel,
-                    energyLevel: $energyLevel,
-                    isGenerating: isGeneratingPlan,
-                    onGenerate: { router.push(.onboarding, on: .home) }
-                )
-            }
+            setupProfileCard
 
         case .workoutReady:
-            VStack(spacing: FitTodaySpacing.lg) {
-                // Show today's workout card if user already generated one
-                if let workout = generatedWorkout, !viewModel.dailyWorkoutState.isFinished {
-                    TodayWorkoutCard(
-                        workout: workout,
-                        onViewWorkout: { showWorkoutPreview = true },
-                        onStartWorkout: { startGeneratedWorkout(workout) }
-                    )
-                }
-
-                if viewModel.isAiWorkoutEnabled {
-                    // Always show AI generator card for new generation
-                    AIWorkoutGeneratorCard(
-                        selectedFocus: $selectedFocus,
-                        sorenessLevel: $sorenessLevel,
-                        energyLevel: $energyLevel,
-                        isGenerating: isGeneratingPlan,
-                        onGenerate: generateWorkout
-                    )
-                }
-            }
+            EmptyView()
 
         case .workoutCompleted:
-            // Show completed state with option to generate new
-            VStack(spacing: FitTodaySpacing.lg) {
-                workoutCompletedCard
-
-                if viewModel.isAiWorkoutEnabled {
-                    AIWorkoutGeneratorCard(
-                        selectedFocus: $selectedFocus,
-                        sorenessLevel: $sorenessLevel,
-                        energyLevel: $energyLevel,
-                        isGenerating: isGeneratingPlan,
-                        onGenerate: generateWorkout
-                    )
-                }
-            }
+            workoutCompletedCard
 
         case .error(let message):
             errorView(message: message)
@@ -176,6 +94,35 @@ struct HomeView: View {
         }
         .frame(maxWidth: .infinity)
         .frame(height: 200)
+    }
+
+    // MARK: - Setup Profile Card
+
+    private var setupProfileCard: some View {
+        VStack(spacing: FitTodaySpacing.md) {
+            Image(systemName: "person.crop.circle.badge.plus")
+                .font(.system(size: 48))
+                .foregroundStyle(FitTodayColor.brandPrimary)
+
+            Text("home.setup_profile.title".localized)
+                .font(FitTodayFont.ui(size: 18, weight: .bold))
+                .foregroundStyle(FitTodayColor.textPrimary)
+
+            Text("home.setup_profile.subtitle".localized)
+                .font(FitTodayFont.ui(size: 14, weight: .medium))
+                .foregroundStyle(FitTodayColor.textSecondary)
+                .multilineTextAlignment(.center)
+
+            Button("home.setup_profile.cta".localized) {
+                router.push(.onboarding, on: .home)
+            }
+            .fitPrimaryStyle()
+        }
+        .padding(FitTodaySpacing.lg)
+        .frame(maxWidth: .infinity)
+        .background(FitTodayColor.surface)
+        .clipShape(RoundedRectangle(cornerRadius: FitTodayRadius.lg))
+        .padding(.horizontal)
     }
 
     // MARK: - Workout Completed Card
@@ -231,162 +178,6 @@ struct HomeView: View {
         .padding(FitTodaySpacing.lg)
         .frame(maxWidth: .infinity)
         .padding(.horizontal)
-    }
-
-    // MARK: - Exercise Preview List
-
-    private func exercisePreviewList(_ workout: GeneratedWorkout) -> some View {
-        VStack(alignment: .leading, spacing: FitTodaySpacing.sm) {
-            Text("home.exercises.title".localized)
-                .font(FitTodayFont.ui(size: 18, weight: .bold))
-                .foregroundStyle(FitTodayColor.textPrimary)
-                .padding(.horizontal)
-
-            ForEach(workout.exercises, id: \.exerciseId) { exercise in
-                ExercisePreviewRow(
-                    exerciseName: exercise.name,
-                    imageURL: exercise.imageURL.flatMap { URL(string: $0) },
-                    setsAndReps: "\(exercise.sets) x \(exercise.repsRange)",
-                    muscleGroup: exercise.targetMuscle
-                )
-                .padding(.horizontal)
-            }
-        }
-    }
-
-    // MARK: - Actions
-
-    private func generateWorkout() {
-        guard !isGeneratingPlan else { return }
-
-        Task {
-            isGeneratingPlan = true
-
-            do {
-                // Create DailyCheckIn from live inputs (not from stored questionnaire)
-                let checkIn = DailyCheckIn(
-                    focus: selectedFocus,
-                    sorenessLevel: sorenessLevel,
-                    sorenessAreas: [],  // Can be extended later if needed
-                    energyLevel: energyLevel
-                )
-
-                // Store checkIn for regeneration in WorkoutPlanView
-                if let checkInData = try? JSONEncoder().encode(checkIn) {
-                    UserDefaults.standard.set(checkInData, forKey: AppStorageKeys.lastDailyCheckInData)
-                    UserDefaults.standard.set(Date(), forKey: AppStorageKeys.lastDailyCheckInDate)
-                }
-
-                #if DEBUG
-                print("[HomeView] 🎯 Generating workout with LIVE inputs:")
-                print("[HomeView]    Focus: \(selectedFocus.rawValue)")
-                print("[HomeView]    Soreness: \(sorenessLevel.rawValue)")
-                print("[HomeView]    Energy: \(energyLevel)/10")
-                #endif
-
-                let workoutPlan = try await viewModel.generateWorkoutWithCheckIn(checkIn)
-
-                // Convert WorkoutPlan to GeneratedWorkout for preview
-                let generatedExercises = workoutPlan.exercises.map { prescription in
-                    GeneratedExercise(
-                        exerciseId: prescription.exercise.id.hashValue,
-                        name: prescription.exercise.name,
-                        targetMuscle: prescription.exercise.mainMuscle.displayName,
-                        equipment: prescription.exercise.equipment.displayName,
-                        sets: prescription.sets,
-                        repsRange: prescription.reps.display,
-                        restSeconds: Int(prescription.restInterval),
-                        notes: prescription.tip,
-                        imageURL: prescription.exercise.media?.imageURL?.absoluteString
-                    )
-                }
-
-                let workout = GeneratedWorkout(
-                    name: workoutPlan.title,
-                    exercises: generatedExercises,
-                    estimatedDuration: workoutPlan.estimatedDurationMinutes,
-                    targetMuscles: [selectedFocus.displayName],
-                    fatigueAdjusted: energyLevel <= 3 || sorenessLevel == .strong,
-                    warmupIncluded: true
-                )
-
-                generatedWorkout = workout
-                persistWorkout(workout)
-                DailyWorkoutStateManager.shared.markSuggested(planId: workout.id)
-
-                showWorkoutPreview = true
-                await viewModel.refresh()
-            } catch {
-                viewModel.handleError(error)
-                #if DEBUG
-                print("[HomeView] ❌ Error generating workout: \(error)")
-                #endif
-            }
-
-            isGeneratingPlan = false
-        }
-    }
-
-    // MARK: - Workout Persistence
-
-    private static let generatedWorkoutKey = "generated_workout_today"
-
-    private func persistWorkout(_ workout: GeneratedWorkout) {
-        if let data = try? JSONEncoder().encode(workout) {
-            UserDefaults.standard.set(data, forKey: Self.generatedWorkoutKey)
-        }
-    }
-
-    private func loadPersistedWorkout() {
-        guard generatedWorkout == nil else { return }
-        let state = DailyWorkoutStateManager.shared.loadTodayState()
-        guard state.status == .suggested || state.status == .viewed else { return }
-
-        guard let data = UserDefaults.standard.data(forKey: Self.generatedWorkoutKey),
-              let workout = try? JSONDecoder().decode(GeneratedWorkout.self, from: data),
-              Calendar.current.isDateInToday(workout.generatedAt) else {
-            return
-        }
-        generatedWorkout = workout
-    }
-
-    private func startGeneratedWorkout(_ workout: GeneratedWorkout) {
-        // Convert GeneratedWorkout to WorkoutPlan and start session
-        let exercises = workout.exercises.map { exercise in
-            let workoutExercise = WorkoutExercise(
-                id: "\(exercise.exerciseId)",
-                name: exercise.name,
-                mainMuscle: MuscleGroup.allCases.first { $0.displayName == exercise.targetMuscle } ?? .chest,
-                equipment: EquipmentType.allCases.first { $0.displayName == exercise.equipment } ?? .bodyweight,
-                instructions: [],
-                media: exercise.imageURL.flatMap { URL(string: $0) }.map { ExerciseMedia(imageURL: $0, gifURL: nil) }
-            )
-
-            // Parse reps range
-            let repsComponents = exercise.repsRange.components(separatedBy: "-")
-            let repsLower = Int(repsComponents.first ?? "8") ?? 8
-            let repsUpper = Int(repsComponents.last ?? "12") ?? 12
-
-            return ExercisePrescription(
-                exercise: workoutExercise,
-                sets: exercise.sets,
-                reps: IntRange(repsLower, repsUpper),
-                restInterval: TimeInterval(exercise.restSeconds),
-                tip: exercise.notes
-            )
-        }
-
-        let workoutPlan = WorkoutPlan(
-            id: workout.id,
-            title: workout.name,
-            focus: .fullBody,
-            estimatedDurationMinutes: workout.estimatedDuration,
-            intensity: .moderate,
-            exercises: exercises
-        )
-
-        sessionStore.start(with: workoutPlan)
-        router.push(.workoutPlan(workoutPlan.id), on: .home)
     }
 }
 
