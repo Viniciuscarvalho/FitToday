@@ -13,7 +13,7 @@ struct WorkoutTabView: View {
     @Environment(\.dependencyResolver) private var envResolver
     let resolver: Resolver
 
-    @State private var selectedSegment: WorkoutSegment = .myWorkouts
+    @State private var selectedSegment: WorkoutSegment = .programs
     @State private var showCreateWorkout = false
     @State private var personalWorkoutsViewModel: PersonalWorkoutsViewModel?
 

@@ -7,15 +7,15 @@ import SwiftUI
 
 /// Horizontal scroll section showing recommended workout programs.
 struct RecommendedProgramsSection: View {
-    let programs: [RecommendedProgram]
+    let programs: [Program]
     let onSelect: (String) -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: FitTodaySpacing.md) {
-            Text("Recommended for You")
+            Text("programs.recommended".localized)
                 .font(FitTodayFont.ui(size: 18, weight: .bold))
                 .foregroundStyle(FitTodayColor.textPrimary)
-                .padding(.horizontal, FitTodaySpacing.lg)
+                .padding(.horizontal, FitTodaySpacing.md)
 
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: FitTodaySpacing.md) {
@@ -26,63 +26,67 @@ struct RecommendedProgramsSection: View {
                             }
                     }
                 }
-                .padding(.horizontal, FitTodaySpacing.lg)
+                .padding(.horizontal, FitTodaySpacing.md)
             }
         }
     }
 
     // MARK: - Card
 
-    private func programCard(_ program: RecommendedProgram) -> some View {
+    private func programCard(_ program: Program) -> some View {
         VStack(alignment: .leading, spacing: FitTodaySpacing.sm) {
+            // Level badge
+            Text(program.level.displayName)
+                .font(FitTodayFont.ui(size: 10, weight: .bold))
+                .foregroundStyle(.white)
+                .padding(.horizontal, FitTodaySpacing.sm)
+                .padding(.vertical, 3)
+                .background(levelColor(program.level))
+                .clipShape(Capsule())
+
             Spacer()
 
-            Text(program.name)
+            Text(program.shortName)
                 .font(FitTodayFont.ui(size: 15, weight: .bold))
-                .foregroundStyle(FitTodayColor.textPrimary)
+                .foregroundStyle(.white)
                 .lineLimit(2)
 
             HStack(spacing: FitTodaySpacing.xs) {
                 Image(systemName: "figure.strengthtraining.traditional")
                     .font(.system(size: 11))
-                Text("\(program.workoutCount) workouts")
+                Text("\(program.totalWorkouts) workouts")
                     .font(FitTodayFont.ui(size: 12, weight: .medium))
             }
-            .foregroundStyle(FitTodayColor.textPrimary.opacity(0.8))
+            .foregroundStyle(.white.opacity(0.8))
         }
         .padding(FitTodaySpacing.md)
-        .frame(width: 160, height: 120, alignment: .bottomLeading)
-        .background(gradientForCategory(program.category))
+        .frame(width: 160, height: 130, alignment: .bottomLeading)
+        .background(gradientForGoal(program.goalTag))
         .clipShape(RoundedRectangle(cornerRadius: FitTodayRadius.md))
     }
 
-    // MARK: - Category Gradient
+    // MARK: - Helpers
 
-    private func gradientForCategory(_ category: String) -> LinearGradient {
-        switch category.lowercased() {
-        case "strength":
-            return FitTodayColor.gradientStrength
-        case "conditioning":
-            return FitTodayColor.gradientConditioning
-        case "aerobic":
-            return FitTodayColor.gradientAerobic
-        case "endurance":
-            return FitTodayColor.gradientEndurance
-        case "wellness":
-            return FitTodayColor.gradientWellness
-        default:
-            return FitTodayColor.gradientPrimary
+    private func levelColor(_ level: ProgramLevel) -> Color {
+        switch level {
+        case .beginner: return .green
+        case .intermediate: return .orange
+        case .advanced: return .red
         }
     }
-}
 
-// MARK: - Data Model
-
-struct RecommendedProgram: Identifiable {
-    let id: String
-    let name: String
-    let category: String
-    let workoutCount: Int
+    private func gradientForGoal(_ goal: ProgramGoalTag) -> LinearGradient {
+        switch goal {
+        case .strength:
+            return FitTodayColor.gradientPrimary
+        case .conditioning:
+            return LinearGradient(colors: [.orange, .red.opacity(0.8)], startPoint: .topLeading, endPoint: .bottomTrailing)
+        case .aerobic:
+            return LinearGradient(colors: [.cyan, .blue.opacity(0.8)], startPoint: .topLeading, endPoint: .bottomTrailing)
+        case .core:
+            return LinearGradient(colors: [.green, .teal.opacity(0.8)], startPoint: .topLeading, endPoint: .bottomTrailing)
+        }
+    }
 }
 
 // MARK: - Preview
@@ -90,9 +94,18 @@ struct RecommendedProgram: Identifiable {
 #Preview {
     RecommendedProgramsSection(
         programs: [
-            RecommendedProgram(id: "1", name: "Push Pull Legs", category: "Strength", workoutCount: 6),
-            RecommendedProgram(id: "2", name: "HIIT Cardio", category: "Conditioning", workoutCount: 4),
-            RecommendedProgram(id: "3", name: "Flexibility Flow", category: "Wellness", workoutCount: 3)
+            Program(
+                id: "1", name: "Push Pull Legs", subtitle: "Classic split",
+                goalTag: .strength, level: .intermediate, durationWeeks: 8,
+                heroImageName: "ppl", workoutTemplateIds: ["a", "b", "c", "d", "e", "f"],
+                estimatedMinutesPerSession: 60, sessionsPerWeek: 6
+            ),
+            Program(
+                id: "2", name: "HIIT Cardio", subtitle: "High intensity",
+                goalTag: .conditioning, level: .beginner, durationWeeks: 4,
+                heroImageName: "hiit", workoutTemplateIds: ["a", "b", "c", "d"],
+                estimatedMinutesPerSession: 30, sessionsPerWeek: 4
+            )
         ],
         onSelect: { _ in }
     )

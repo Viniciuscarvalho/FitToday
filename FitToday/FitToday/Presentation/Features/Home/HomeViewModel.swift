@@ -154,6 +154,21 @@ enum HomeJourneyState: Equatable {
         return streak
     }
 
+    /// Days of the week with completed workouts (0=Sunday, 6=Saturday)
+    var weekCompletedDays: Set<Int> {
+        let calendar = Calendar.current
+        let now = Date()
+        guard let weekStart = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: now)) else {
+            return []
+        }
+        var days = Set<Int>()
+        for entry in historyEntries where entry.date >= weekStart {
+            let weekday = calendar.component(.weekday, from: entry.date) - 1 // 0=Sunday
+            days.insert(weekday)
+        }
+        return days
+    }
+
     var ctaTitle: String {
         switch journeyState {
         case .loading:

@@ -46,21 +46,19 @@ struct HomeView: View {
                     onNotificationTap: { router.push(.notifications, on: .home) }
                 )
 
-                // User Stats Section (show if has any workout history)
-                if viewModel.workoutsThisWeek > 0 || viewModel.streakDays > 0 {
-                    UserStatsSection(
-                        workoutsThisWeek: viewModel.workoutsThisWeek,
-                        caloriesBurnedFormatted: viewModel.caloriesBurnedFormatted,
-                        streakDays: viewModel.streakDays
-                    )
-                }
+                // Week streak circles
+                WeekStreakRow(
+                    completedDays: viewModel.weekCompletedDays,
+                    currentStreak: viewModel.streakDays
+                )
+                .padding(.horizontal)
 
                 // Content based on journey state
                 contentForState
 
-                // Streak Banner (if streak > 0)
-                if viewModel.streakDays > 0 {
-                    StreakBanner(streakDays: viewModel.streakDays)
+                // Exercise preview list for today's workout
+                if let workout = generatedWorkout {
+                    exercisePreviewList(workout)
                 }
             }
             .padding(.bottom, FitTodaySpacing.xl)
@@ -226,6 +224,27 @@ struct HomeView: View {
         .padding(FitTodaySpacing.lg)
         .frame(maxWidth: .infinity)
         .padding(.horizontal)
+    }
+
+    // MARK: - Exercise Preview List
+
+    private func exercisePreviewList(_ workout: GeneratedWorkout) -> some View {
+        VStack(alignment: .leading, spacing: FitTodaySpacing.sm) {
+            Text("home.exercises.title".localized)
+                .font(FitTodayFont.ui(size: 18, weight: .bold))
+                .foregroundStyle(FitTodayColor.textPrimary)
+                .padding(.horizontal)
+
+            ForEach(workout.exercises, id: \.exerciseId) { exercise in
+                ExercisePreviewRow(
+                    exerciseName: exercise.name,
+                    imageURL: exercise.imageURL.flatMap { URL(string: $0) },
+                    setsAndReps: "\(exercise.sets) x \(exercise.repsRange)",
+                    muscleGroup: exercise.targetMuscle
+                )
+                .padding(.horizontal)
+            }
+        }
     }
 
     // MARK: - Actions
