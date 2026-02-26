@@ -1,0 +1,181 @@
+Implement the following plan:
+
+# Plano: Adaptar telas do FitToday no Pencil MCP
+
+## Context
+
+O usuário quer criar novas versões das telas de **Home**, **AI Assistant**, **Workout Tab**, **Workout Detail** e **Profile** no arquivo `.pen` existente (`/Users/viniciuscarvalho/Documents/untitled.pen`), baseando-se em screenshots de referência que mostram um design clean, moderno e com conteúdo fitness visual (imagens de exercícios, calorie tracker, weekly calendar).
+
+O arquivo `.pen` já possui 19 componentes reutilizáveis e ~18 telas. As novas telas serão criadas como **novos frames** ao lado das existentes, mantendo o design system atual (cores, tipografia, componentes).
+
+---
+
+## Diferenças-chave entre o design atual e as referências
+
+| Elemento | Design Atual | Referência |
+|----------|-------------|------------|
+| Home header | Greeting simples + AI Generator card | Avatar + greeting + streak badge + weekly calendar |
+| Nutrition | Não existe | Calorie ring + fuel score + macros |
+| Exercise list | Workout cards sem imagens | Exercise rows com thumbnails circulares |
+| Workout tab | Lista de treinos salvos | Ongoing workout timer + today's workout list |
+| AI Assistant | Chat com personal trainer | FitPal orb + greeting + quick action buttons |
+| Profile | Não existe no .pen | Premium badge + stats + Whoop sync + sections |
+| Workout Detail | Lista simples de exercícios | Hero image + equipment chips + exercise list com imagens |
+
+---
+
+## Novos componentes reutilizáveis a criar
+
+Antes de montar as telas, criar estes building blocks no frame `Components` (`8wJnL`):
+
+1. **Weekly Calendar Strip** - Row com dias da semana (Sun-Sat), círculos, dia ativo destacado
+2. **Exercise Row with Image** - Row com thumbnail circular (imagem), nome, detalhes, seta/checkbox
+3. **Calorie Ring** - Ellipse com progresso circular + texto central
+4. **Macro Badge** - Valor + label (ex: "100g Protein Left")
+5. **Stat Card** - Ícone + valor + label (para profile stats)
+6. **Section Row** - Row com título + seta (para seções do profile)
+7. **Quick Action Chip** - Botão com ícone + texto (para AI Assistant actions)
+
+---
+
+## Telas a criar (5 novos top-level frames)
+
+### Tela 1: Home Screen (390x844)
+Posição: encontrar espaço livre via `find_empty_space_on_canvas`
+
+**Estrutura:**
+```
+Home Screen (V2)
+├── Status Bar area (padding top)
+├── Header
+│   ├── Row: Avatar (circular, 40px) + VStack(greeting "HELLO! ADOM", "20 DAYS STREAK" com fire icon)
+│   └── Notification bell icon
+├── Weekly Calendar Strip (component ref)
+├── Nutrition Section
+│   ├── Row: Calorie Ring (circular progress 375/1450) + VStack("Fuel Score", "87/100")
+│   └── Row: Macro badges (Protein 100g, Carbs 34g, Fat 54g)
+├── Workout Section
+│   ├── "YOUR WORKOUT" header
+│   ├── Pro tip text
+│   └── Exercise list (3 rows com imagens AI-generated)
+└── Tab Bar (ref: xcybV)
+```
+
+### Tela 2: Workout Tab (390x844)
+**Estrutura:**
+```
+Workout Tab (V2)
+├── Header
+│   ├── Row: Avatar + "ADOM SHAFI" + notification icon
+├── Weekly Calendar Strip
+├── Ongoing Workout Section
+│   ├── Row: "Ongoing Workout" badge (green) + "START WORKOUT" button (dark green)
+│   ├── Timer "10MIN 30SEC" (bold, large)
+│   └── "Chest, Quadriceps, Hamstrings" subtitle
+├── Custom Workout Row (icon + "Custom Workout" + arrow)
+├── Today's Workout Section
+│   ├── "TODAY'S WORKOUT" header
+│   ├── Pro tip text
+│   └── Exercise list (3 rows com imagens)
+└── Tab Bar (ref: xcybV)
+```
+
+### Tela 3: Workout Detail (390x844)
+**Estrutura:**
+```
+Workout Detail (V2)
+├── Header: Back arrow + "Workout" + notification icon
+├── Title Section
+│   ├── "GET ACTIVE AGAIN" (bold, large)
+│   ├── "Chest, Core, Biceps" subtitle
+│   └── Row: Level badge "Beginner" + Time badge "60 Min"
+├── Hero Image (frame com AI image - pessoa com mat de exercício)
+├── Equipment Section
+│   ├── "Equipment's Needed" header
+│   └── Row: Equipment chips (Exercise Mat, Dumbbells, Treadmill)
+├── Exercises Section
+│   ├── Row: "Exercises (3)" header + "Add Exercise" button
+│   └── Exercise list (3 rows com imagens + checkboxes)
+└── "START WORKOUT" button (purple gradient, full width)
+```
+
+### Tela 4: AI Assistant "FitPal" (390x844)
+**Estrutura:**
+```
+AI Assistant (FitPal)
+├── Header: Back arrow
+├── Center Content (flex grow, centered)
+│   ├── Purple Orb (ellipse com gradient mesh roxo/magenta)
+│   ├── "FitPal" label
+│   ├── "HEY ADOM!" (bold, large)
+│   └── "How can I help you?" subtitle
+├── Quick Actions Row (wrap)
+│   ├── "Meal Plan" chip (icon + text)
+│   ├── "Workouts" chip (icon + text)
+│   └── "Ask me Fitness Questions" chip (icon + text)
+└── Input Field: text input + icons (attachment + microphone)
+```
+
+### Tela 5: Profile (390x844)
+**Estrutura:**
+```
+Profile
+├── Header: "PREMIUM MEMBER" badge + settings gear icon
+├── Profile Section (centered)
+│   ├── Avatar (circular, large, ~100px, com AI image)
+│   └── "ADOM SHAFI" name
+├── Stats Row
+│   ├── Stat: "12" Active Streak
+│   ├── Stat: "1H 20M" Workout Minutes
+│   └── Stat: "28" Completed Workout
+├── Whoop Sync Banner (green rounded pill)
+├── Sections List
+│   ├── "MY BODY" row + subtitle + arrow
+│   ├── "WORKOUT" row + subtitle + arrow
+│   └── "MEAL PLANS" row + subtitle + arrow
+└── Tab Bar (ref: xcybV)
+```
+
+---
+
+## Ordem de execução
+
+1. **Criar placeholders** - 5 frames vazios com `placeholder: true` posicionados em espaço livre
+2. **Criar componentes reutilizáveis** - Weekly Calendar, Exercise Row with Image, etc.
+3. **Montar Tela 1 (Home)** - Seção por seção, gerar imagens de exercícios com `G()`
+4. **Montar Tela 2 (Workout Tab)** - Reutilizar componentes da Home
+5. **Montar Tela 3 (Workout Detail)** - Hero image + equipment + exercise list
+6. **Montar Tela 4 (AI Assistant)** - Purple orb + quick actions
+7. **Montar Tela 5 (Profile)** - Stats + sections
+8. **Verificar cada tela** - `get_screenshot()` após completar cada uma
+9. **Remover placeholders** - Limpar flags `placeholder: true`
+
+---
+
+## Design System a manter
+
+- **Background**: `#FFFFFF` (white)
+- **Cards/Surfaces**: `#F4F4F5` (light gray)
+- **Primary CTA**: `#8B5CF6` (purple)
+- **Text primary**: `#18181B`
+- **Text secondary**: `#71717A` / `#A1A1AA`
+- **Borders**: `#E4E4E7` / `#D4D4D8`
+- **Typography**: Plus Jakarta Sans (headings), Inter (body)
+- **Corner radius**: 24px (cards), 100px (circular), 20px (chips)
+- **Tab Bar**: ref `xcybV`
+- **Green accent** (novo, para workout): `#1B4332` (dark green do reference)
+
+---
+
+## Verificação
+
+Após completar cada tela:
+1. `get_screenshot(nodeId)` para verificar visualmente
+2. Comparar com as screenshots de referência
+3. Corrigir alinhamento, espaçamento ou cores conforme necessário
+4. `snapshot_layout()` para verificar estrutura se necessário
+
+
+If you need specific details from before exiting plan mode (like exact code snippets, error messages, or content you generated), read the full transcript at: /Users/viniciuscarvalho/.REDACTED.jsonl
+
+If this plan can be broken down into multiple independent tasks, consider using the TeamCreate tool to create a team and parallelize the work.
