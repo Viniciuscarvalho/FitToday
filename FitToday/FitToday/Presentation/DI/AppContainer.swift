@@ -194,8 +194,22 @@ struct AppContainer {
         }
         .inObjectScope(.container)
 
+        // Chat Repository (persistence)
+        container.register(ChatRepository.self) { _ in
+            SwiftDataChatRepository(modelContainer: modelContainer)
+        }.inObjectScope(.container)
+
         // AI Chat Service (FitOrb) - wraps OpenAI for conversational mode
-        if let chatService = try? AIChatService(resolver: container) {
+        if let client = NewOpenAIClient.fromUserKey() {
+            container.register(NewOpenAIClient.self) { _ in client }
+                .inObjectScope(.container)
+
+            let chatService = AIChatService(
+                client: client,
+                profileRepository: container.resolve(UserProfileRepository.self)!,
+                statsRepository: container.resolve(UserStatsRepository.self)!,
+                historyRepository: container.resolve(WorkoutHistoryRepository.self)!
+            )
             container.register(AIChatService.self) { _ in chatService }
                 .inObjectScope(.container)
         }
@@ -643,7 +657,8 @@ struct AppContainer {
             SDUserStats.self,
             SDCustomWorkoutTemplate.self,
             SDCustomWorkoutCompletion.self,
-            SDSavedRoutine.self
+            SDSavedRoutine.self,
+            SDChatMessage.self
         ])
         
         // Configuração com migração automática leve

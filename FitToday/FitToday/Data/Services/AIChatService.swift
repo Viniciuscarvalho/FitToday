@@ -28,19 +28,33 @@ actor AIChatService {
     // MARK: - Properties
 
     private let client: NewOpenAIClient
+    private let profileRepository: UserProfileRepository
+    private let statsRepository: UserStatsRepository
+    private let historyRepository: WorkoutHistoryRepository
+    private let promptBuilder = ChatSystemPromptBuilder()
 
-    private let systemPrompt = "You are FitOrb, an AI fitness assistant. Help users plan workouts, suggest exercises, and provide fitness guidance. Be friendly, motivating, and concise."
+    private var cachedSystemPrompt: String?
 
     // MARK: - Initialization
 
-    init(client: NewOpenAIClient) {
+    init(
+        client: NewOpenAIClient,
+        profileRepository: UserProfileRepository,
+        statsRepository: UserStatsRepository,
+        historyRepository: WorkoutHistoryRepository
+    ) {
         self.client = client
+        self.profileRepository = profileRepository
+        self.statsRepository = statsRepository
+        self.historyRepository = historyRepository
     }
 
     // MARK: - Public API
 
     /// Sends a message along with the conversation history and returns the assistant response.
     func sendMessage(_ message: String, history: [AIChatMessage]) async throws -> String {
+        let systemPrompt = await buildContextualPrompt()
+
         var chatMessages: [[String: String]] = [
             ["role": "system", "content": systemPrompt]
         ]
@@ -58,5 +72,41 @@ actor AIChatService {
         ])
 
         return try await client.sendChat(messages: chatMessages, maxTokens: 1000, temperature: 0.7)
+    }
+
+    /// Invalidates cached system prompt (call when starting new conversation).
+    func invalidatePromptCache() {
+        cachedSystemPrompt = nil
+    }
+
+    // MARK: - Private
+
+    private func buildContextualPrompt() async -> String {
+        if let cached = cachedSystemPrompt {
+            return cached
+        }
+
+        do {
+            let profile = try await profileRepository.loadProfile()
+            let stats = try await statsRepository.loadStats()
+            let recentWorkouts = try await historyRepository.listEntries(limit: 3, offset: 0)
+
+            let prompt = promptBuilder.buildSystemPrompt(
+                profile: profile,
+                stats: stats,
+                recentWorkouts: recentWorkouts
+            )
+            cachedSystemPrompt = prompt
+            return prompt
+        } catch {
+            // Fallback to generic prompt if repos fail
+            let prompt = promptBuilder.buildSystemPrompt(
+                profile: nil,
+                stats: nil,
+                recentWorkouts: []
+            )
+            cachedSystemPrompt = prompt
+            return prompt
+        }
     }
 }
