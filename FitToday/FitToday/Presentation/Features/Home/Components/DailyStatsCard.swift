@@ -60,9 +60,7 @@ struct DailyStatsCard: View {
                         .foregroundStyle(FitTodayColor.textSecondary)
 
                     HStack(spacing: FitTodaySpacing.xs) {
-                        Image(systemName: "flame.fill")
-                            .font(.system(size: 16))
-                            .foregroundStyle(.orange)
+                        FitnessIcon(type: .consistency, color: FitTodayColor.neonYellow, size: 18)
                         Text("\(streakDays)")
                             .font(FitTodayFont.ui(size: 20, weight: .bold))
                             .foregroundStyle(FitTodayColor.textPrimary)
@@ -77,34 +75,33 @@ struct DailyStatsCard: View {
 
             // Bottom row: stat pills
             HStack(spacing: FitTodaySpacing.sm) {
-                statPill(icon: "bolt.fill", value: caloriesBurned, label: "cal")
-                statPill(icon: "figure.strengthtraining.traditional", value: "\(totalSets)", label: "home.stats.total_sets".localized)
-                statPill(icon: "clock.fill", value: "\(avgDuration)", label: "home.stats.avg_duration".localized)
+                statPill(icon: "dumbbell.fill", value: caloriesBurned, label: "vol", color: FitTodayColor.brandPrimary)
+                statPill(icon: "figure.strengthtraining.traditional", value: "\(totalSets)", label: "home.stats.total_sets".localized, color: FitTodayColor.brandSecondary)
+                statPill(icon: "clock.fill", value: "\(avgDuration)", label: "home.stats.avg_duration".localized, color: FitTodayColor.neonCyan)
             }
         }
         .padding(FitTodaySpacing.lg)
         .background(FitTodayColor.surface)
         .clipShape(RoundedRectangle(cornerRadius: FitTodayRadius.lg))
-        .overlay(
-            RoundedRectangle(cornerRadius: FitTodayRadius.lg)
-                .stroke(FitTodayColor.outline.opacity(0.15), lineWidth: 1)
-        )
+        .fitCardBorder() // Use design system border
+        .fitCardShadow() // Use design system shadow
         .padding(.horizontal)
     }
 
-    private func statPill(icon: String, value: String, label: String) -> some View {
+    private func statPill(icon: String, value: String, label: String, color: Color = FitTodayColor.brandPrimary) -> some View {
         HStack(spacing: FitTodaySpacing.xs) {
             Image(systemName: icon)
                 .font(.system(size: 12, weight: .semibold))
-                .foregroundStyle(FitTodayColor.brandPrimary)
+                .foregroundStyle(color)
 
             Text(value)
                 .font(FitTodayFont.ui(size: 14, weight: .bold))
                 .foregroundStyle(FitTodayColor.textPrimary)
 
-            Text(label)
-                .font(FitTodayFont.ui(size: 12, weight: .medium))
+            Text(label.lowercased())
+                .font(FitTodayFont.ui(size: 11, weight: .medium))
                 .foregroundStyle(FitTodayColor.textSecondary)
+                .tracking(0.5)
         }
         .padding(.horizontal, FitTodaySpacing.sm)
         .padding(.vertical, FitTodaySpacing.xs)
