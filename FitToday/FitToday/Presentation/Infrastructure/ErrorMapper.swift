@@ -230,6 +230,20 @@ enum ErrorMapper {
         message: "Não foi possível gerar um treino diferente dos anteriores.",
         action: .dismiss
       )
+
+    case .chatMessageLimitReached:
+      return ErrorMessage(
+        title: "fitorb.limit_reached.title".localized,
+        message: "fitorb.limit_reached.message".localized,
+        action: .dismiss
+      )
+
+    case .chatServiceUnavailable:
+      return ErrorMessage(
+        title: "error.openai.temporarily_unavailable.title".localized,
+        message: "fitorb.error_service_unavailable".localized,
+        action: .dismiss
+      )
     }
   }
 
