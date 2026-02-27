@@ -43,6 +43,8 @@ final class FeatureGatingUseCase: FeatureGating, @unchecked Sendable {
                 } else {
                     usageCount = await tracker.weeklyUsageCount()
                 }
+            } else if feature == .aiChat, let tracker = usageTracker {
+                usageCount = await tracker.dailyChatUsageCount()
             }
 
             return EntitlementPolicy.canAccess(feature, entitlement: entitlement, usageCount: usageCount)
