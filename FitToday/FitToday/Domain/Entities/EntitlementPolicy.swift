@@ -205,6 +205,12 @@ struct EntitlementPolicy {
             } else {
                 return (freeChallengesLimit, "simultâneos")
             }
+        case .aiChat:
+            if entitlement.isPro {
+                return nil // ilimitado
+            } else {
+                return (freeAIChatMessagesPerDay, "dia")
+            }
         default:
             return nil
         }
@@ -221,7 +227,8 @@ struct EntitlementPolicy {
     static var limitedFreeFeatures: [(feature: ProFeature, freeLimit: String, proLimit: String)] {
         [
             (.aiWorkoutGeneration, "1/semana", "2/dia"),
-            (.simultaneousChallenges, "5", "∞")
+            (.simultaneousChallenges, "5", "∞"),
+            (.aiChat, "5/dia", "ilimitado")
         ]
     }
 }
