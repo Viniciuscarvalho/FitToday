@@ -15,6 +15,7 @@ struct AIChatView: View {
     @Environment(AppRouter.self) private var router
     @State private var viewModel: AIChatViewModel
     @State private var entitlement: ProEntitlement = .free
+    @State private var showClearConfirmation = false
 
     private let entitlementRepository: EntitlementRepository?
 
@@ -42,24 +43,47 @@ struct AIChatView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                Button {
-                    router.push(.apiKeySettings)
-                } label: {
-                    Image(systemName: "gearshape")
-                        .foregroundStyle(FitTodayColor.textSecondary)
+                HStack(spacing: FitTodaySpacing.sm) {
+                    if !viewModel.messages.isEmpty {
+                        Button {
+                            showClearConfirmation = true
+                        } label: {
+                            Image(systemName: "trash")
+                                .foregroundStyle(FitTodayColor.textSecondary)
+                        }
+                    }
+                    Button {
+                        router.push(.apiKeySettings)
+                    } label: {
+                        Image(systemName: "gearshape")
+                            .foregroundStyle(FitTodayColor.textSecondary)
+                    }
                 }
             }
         }
         .task {
             await loadEntitlement()
+            await viewModel.loadHistory()
         }
-        .alert("fitorb.error_title".localized, isPresented: .init(
-            get: { viewModel.errorMessage != nil },
-            set: { if !$0 { viewModel.clearError() } }
-        )) {
-            Button("fitorb.error_ok".localized) { viewModel.clearError() }
+        .alert(
+            viewModel.errorMessage?.title ?? "",
+            isPresented: .init(
+                get: { viewModel.errorMessage != nil },
+                set: { if !$0 { viewModel.errorMessage = nil } }
+            )
+        ) {
+            Button("OK") { viewModel.errorMessage = nil }
         } message: {
-            Text(viewModel.errorMessage ?? "")
+            Text(viewModel.errorMessage?.message ?? "")
+        }
+        .confirmationDialog(
+            "fitorb.clear_chat_confirm".localized,
+            isPresented: $showClearConfirmation,
+            titleVisibility: .visible
+        ) {
+            Button("fitorb.clear_chat".localized, role: .destructive) {
+                Task { await viewModel.clearHistory() }
+            }
         }
     }
 
