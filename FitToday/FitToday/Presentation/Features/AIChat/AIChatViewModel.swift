@@ -10,14 +10,14 @@ import Swinject
 
 @MainActor
 @Observable
-final class AIChatViewModel {
+final class AIChatViewModel: ErrorPresenting {
 
     // MARK: - Properties
 
     var messages: [AIChatMessage] = []
     var inputText: String = ""
     var isLoading: Bool = false
-    var errorMessage: String?
+    var errorMessage: ErrorMessage?
 
     // MARK: - Quick Actions
 
@@ -33,17 +33,30 @@ final class AIChatViewModel {
     // MARK: - Private
 
     private let chatService: AIChatService?
+    private let chatRepository: ChatRepository?
 
     // MARK: - Initialization
 
     init(resolver: Resolver) {
-        self.chatService = try? resolver.resolve(AIChatService.self) ?? AIChatService(resolver: resolver)
+        self.chatService = resolver.resolve(AIChatService.self)
+        self.chatRepository = resolver.resolve(ChatRepository.self)
+    }
+
+    // MARK: - Computed
+
+    var isChatAvailable: Bool {
+        chatService != nil
     }
 
     // MARK: - Actions
 
-    var isChatAvailable: Bool {
-        chatService != nil
+    func loadHistory() async {
+        guard let repo = chatRepository else { return }
+        do {
+            messages = try await repo.loadMessages(limit: 50)
+        } catch {
+            handleError(error)
+        }
     }
 
     func sendMessage() {
@@ -51,7 +64,11 @@ final class AIChatViewModel {
         guard !text.isEmpty, !isLoading else { return }
 
         guard chatService != nil else {
-            errorMessage = "fitorb.error_no_api_key".localized
+            errorMessage = ErrorMessage(
+                title: "error.openai.not_configured.title".localized,
+                message: "fitorb.error_no_api_key".localized,
+                action: .dismiss
+            )
             return
         }
 
@@ -62,18 +79,26 @@ final class AIChatViewModel {
         errorMessage = nil
 
         Task {
+            // Save user message
+            try? await chatRepository?.saveMessage(userMessage)
+
             do {
                 let response = try await chatService!.sendMessage(text, history: messages)
                 let assistantMessage = AIChatMessage(role: .assistant, content: response)
                 messages.append(assistantMessage)
+                // Save assistant message
+                try? await chatRepository?.saveMessage(assistantMessage)
             } catch {
-                errorMessage = error.localizedDescription
+                handleError(error)
             }
             isLoading = false
         }
     }
 
-    func clearError() {
-        errorMessage = nil
+    func clearHistory() async {
+        messages.removeAll()
+        try? await chatRepository?.clearHistory()
+        // Invalidate cached system prompt for fresh context on next conversation
+        await chatService?.invalidatePromptCache()
     }
 }
