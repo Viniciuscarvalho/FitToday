@@ -135,6 +135,48 @@ actor NewOpenAIClient: Sendable {
         throw lastError ?? ClientError.invalidResponse
     }
 
+    /// Sends a chat completion request with conversation history.
+    ///
+    /// - Parameters:
+    ///   - messages: Array of message dictionaries with "role" and "content" keys
+    ///   - maxTokens: Maximum tokens in response (default 1000)
+    ///   - temperature: Randomness (default 0.7)
+    /// - Returns: The assistant's response content string
+    func sendChat(
+        messages: [[String: String]],
+        maxTokens: Int = 1000,
+        temperature: Double = 0.7
+    ) async throws -> String {
+        var lastError: Error?
+
+        for attempt in 0...maxRetries {
+            do {
+                let content = try await performChatRequest(
+                    messages: messages,
+                    maxTokens: maxTokens,
+                    temperature: temperature
+                )
+                return content
+            } catch {
+                lastError = error
+
+                #if DEBUG
+                print("[NewOpenAIClient] ⚠️ Chat attempt \(attempt + 1) failed: \(error.localizedDescription)")
+                #endif
+
+                if case ClientError.httpError(let code, _) = error, (400..<500).contains(code) {
+                    throw error
+                }
+
+                if attempt < maxRetries {
+                    try? await Task.sleep(nanoseconds: 500_000_000)
+                }
+            }
+        }
+
+        throw lastError ?? ClientError.invalidResponse
+    }
+
     // MARK: - Private Helpers
 
     private func performRequest(prompt: String) async throws -> Data {

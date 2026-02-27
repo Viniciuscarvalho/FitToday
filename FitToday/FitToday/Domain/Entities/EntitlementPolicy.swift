@@ -32,6 +32,9 @@ enum ProFeature: String, CaseIterable {
     // Social
     case simultaneousChallenges = "simultaneous_challenges"
 
+    // AI Chat
+    case aiChat = "ai_chat"
+
     var displayName: String {
         switch self {
         case .aiWorkoutGeneration: return "Treinos personalizados por IA"
@@ -43,6 +46,7 @@ enum ProFeature: String, CaseIterable {
         case .personalTrainer: return "Personal Trainer"
         case .trainerWorkouts: return "Treinos do Personal"
         case .simultaneousChallenges: return "Desafios simultâneos ilimitados"
+        case .aiChat: return "Assistente IA FitOrb"
         }
     }
 }
