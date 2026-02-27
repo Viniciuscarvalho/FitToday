@@ -107,6 +107,9 @@ struct EntitlementPolicy {
     /// Número máximo de desafios simultâneos para Free
     static let freeChallengesLimit = 5
 
+    /// Numero de mensagens AI chat por dia para usuarios Free
+    static let freeAIChatMessagesPerDay = 5
+
     // MARK: - Verificação de Acesso
 
     /// Verifica se o usuário pode acessar uma feature
@@ -133,6 +136,8 @@ struct EntitlementPolicy {
                     return .limitReached(remaining: 0, limit: proAIWorkoutsPerDay)
                 }
                 return .allowed
+            case .aiChat:
+                return .allowed
             default:
                 return .allowed
             }
@@ -152,6 +157,12 @@ struct EntitlementPolicy {
             }
             return .allowed
 
+        case .aiChat:
+            if usageCount >= freeAIChatMessagesPerDay {
+                return .limitReached(remaining: 0, limit: freeAIChatMessagesPerDay)
+            }
+            return .allowed
+
         case .aiExerciseSubstitution,
              .unlimitedHistory,
              .advancedDOMSAdjustment,
@@ -166,7 +177,7 @@ struct EntitlementPolicy {
     /// Verifica se uma feature é totalmente bloqueada para Free
     static func isProOnly(_ feature: ProFeature) -> Bool {
         switch feature {
-        case .aiWorkoutGeneration, .simultaneousChallenges:
+        case .aiWorkoutGeneration, .simultaneousChallenges, .aiChat:
             return false // Free tem acesso limitado
         case .aiExerciseSubstitution,
              .unlimitedHistory,

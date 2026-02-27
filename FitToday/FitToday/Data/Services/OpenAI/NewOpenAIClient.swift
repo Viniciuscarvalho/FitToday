@@ -223,6 +223,45 @@ actor NewOpenAIClient: Sendable {
 
         return data
     }
+
+    private func performChatRequest(
+        messages: [[String: String]],
+        maxTokens: Int,
+        temperature: Double
+    ) async throws -> String {
+        var request = URLRequest(url: baseURL)
+        request.httpMethod = "POST"
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.addValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
+
+        let payload: [String: Any] = [
+            "model": model,
+            "messages": messages,
+            "max_tokens": maxTokens,
+            "temperature": temperature
+        ]
+
+        request.httpBody = try JSONSerialization.data(withJSONObject: payload)
+
+        let (data, response) = try await session.data(for: request)
+
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw ClientError.invalidResponse
+        }
+
+        guard (200..<300).contains(httpResponse.statusCode) else {
+            let message = String(data: data, encoding: .utf8) ?? "No details"
+            throw ClientError.httpError(statusCode: httpResponse.statusCode, message: message)
+        }
+
+        let decoded = try JSONDecoder().decode(ChatCompletionResponse.self, from: data)
+
+        guard let content = decoded.choices.first?.message.content, !content.isEmpty else {
+            throw ClientError.emptyWorkoutResponse
+        }
+
+        return content
+    }
 }
 
 /// Response model for OpenAI Chat Completions API
