@@ -198,7 +198,7 @@ final class AIChatViewModel: ErrorPresenting {
         var actions: [String] = []
 
         let profile = try? await profileRepository?.loadProfile()
-        let stats = try? await statsRepository?.loadStats()
+        let stats = try? await statsRepository?.getCurrentStats()
 
         let hour = Calendar.current.component(.hour, from: Date())
 

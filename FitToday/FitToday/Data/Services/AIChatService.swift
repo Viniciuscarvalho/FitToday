@@ -88,7 +88,7 @@ actor AIChatService {
 
         do {
             let profile = try await profileRepository.loadProfile()
-            let stats = try await statsRepository.loadStats()
+            let stats = try await statsRepository.getCurrentStats()
             let recentWorkouts = try await historyRepository.listEntries(limit: 3, offset: 0)
 
             let prompt = promptBuilder.buildSystemPrompt(

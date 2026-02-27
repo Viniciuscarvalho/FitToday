@@ -119,7 +119,7 @@ struct AIChatView: View {
 
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: FitTodaySpacing.sm) {
-                            ForEach(AIChatViewModel.quickActions, id: \.self) { action in
+                            ForEach(viewModel.quickActions, id: \.self) { action in
                                 Button {
                                     if entitlement.isPro {
                                         viewModel.inputText = action
@@ -169,16 +169,33 @@ struct AIChatView: View {
                         }
                         .padding(.horizontal, FitTodaySpacing.md)
                         .id("loading")
+                    } else if viewModel.isTyping {
+                        HStack(spacing: 4) {
+                            ForEach(0..<3, id: \.self) { i in
+                                Circle()
+                                    .fill(FitTodayColor.brandPrimary)
+                                    .frame(width: 6, height: 6)
+                                    .opacity(0.6)
+                                    .animation(
+                                        .easeInOut(duration: 0.5)
+                                            .repeatForever()
+                                            .delay(Double(i) * 0.15),
+                                        value: viewModel.isTyping
+                                    )
+                            }
+                            Spacer()
+                        }
+                        .padding(.horizontal, FitTodaySpacing.md)
+                        .id("typing")
                     }
                 }
                 .padding(.vertical, FitTodaySpacing.sm)
             }
             .onChange(of: viewModel.messages.count) {
-                if let lastMessage = viewModel.messages.last {
-                    withAnimation {
-                        proxy.scrollTo(lastMessage.id, anchor: .bottom)
-                    }
-                }
+                scrollToBottom(proxy: proxy)
+            }
+            .onChange(of: viewModel.messages.last?.content) {
+                scrollToBottom(proxy: proxy)
             }
         }
     }
@@ -238,11 +255,19 @@ struct AIChatView: View {
                             : FitTodayColor.brandPrimary
                     )
             }
-            .disabled(viewModel.inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || viewModel.isLoading)
+            .disabled(viewModel.inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || viewModel.isLoading || viewModel.isTyping)
         }
         .padding(.horizontal, FitTodaySpacing.md)
         .padding(.vertical, FitTodaySpacing.sm)
         .background(FitTodayColor.surface)
+    }
+
+    private func scrollToBottom(proxy: ScrollViewProxy) {
+        if let lastMessage = viewModel.messages.last {
+            withAnimation {
+                proxy.scrollTo(lastMessage.id, anchor: .bottom)
+            }
+        }
     }
 
     private func loadEntitlement() async {

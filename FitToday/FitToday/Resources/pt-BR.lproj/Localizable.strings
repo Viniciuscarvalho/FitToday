@@ -960,3 +960,16 @@
 "fitorb.quick.suggest_exercises" = "Sugerir exercícios";
 "fitorb.quick.warmup" = "Rotina de aquecimento";
 "fitorb.quick.recovery" = "Dicas de recuperação";
+"fitorb.quick.morning_warmup" = "Aquecimento matinal";
+"fitorb.quick.evening_stretch" = "Alongamento noturno";
+"fitorb.quick.suggest_today" = "Sugerir treino de hoje";
+"fitorb.quick.muscle_tips" = "Dicas para hipertrofia";
+"fitorb.quick.fat_burn_tips" = "Dicas para emagrecer";
+"fitorb.quick.endurance_tips" = "Dicas de resistência";
+"fitorb.quick.performance_tips" = "Dicas de performance";
+"fitorb.clear_chat" = "Limpar Chat";
+"fitorb.clear_chat_confirm" = "Tem certeza que deseja limpar o histórico do chat?";
+"fitorb.error_empty_response" = "FitOrb não conseguiu gerar uma resposta. Tente novamente.";
+"fitorb.error_service_unavailable" = "O assistente IA não está disponível no momento.";
+"fitorb.limit_reached.title" = "Limite de Mensagens";
+"fitorb.limit_reached.message" = "Você atingiu o limite de mensagens diárias. Desbloqueie o Pro para mensagens ilimitadas.";
