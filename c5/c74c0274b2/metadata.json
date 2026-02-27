@@ -8,6 +8,14 @@
     ".claude/feature-state/prd-chat-ai-creator/analysis.md",
     ".claude/feature-state/prd-chat-ai-creator/checkpoint.json",
     ".claude/feature-state/prd-chat-ai-creator/plan.md",
+    "FitToday/FitToday/Data/Services/AIChatService.swift",
+    "FitToday/FitToday/Domain/Support/DomainError.swift",
+    "FitToday/FitToday/Presentation/DI/AppContainer.swift",
+    "FitToday/FitToday/Presentation/Features/AIChat/AIChatView.swift",
+    "FitToday/FitToday/Presentation/Features/AIChat/AIChatViewModel.swift",
+    "FitToday/FitToday/Presentation/Infrastructure/ErrorMapper.swift",
+    "FitToday/FitToday/Resources/en.lproj/Localizable.strings",
+    "FitToday/FitToday/Resources/pt-BR.lproj/Localizable.strings",
     "tasks/prd-chat-ai-creator/10_task.md",
     "tasks/prd-chat-ai-creator/11_task.md",
     "tasks/prd-chat-ai-creator/12_task.md",
@@ -41,10 +49,10 @@
     }
   ],
   "token_usage": {
-    "input_tokens": 31,
-    "cache_creation_tokens": 236981,
-    "cache_read_tokens": 2354979,
-    "output_tokens": 35927,
-    "api_call_count": 25
+    "input_tokens": 9464,
+    "cache_creation_tokens": 235881,
+    "cache_read_tokens": 11878491,
+    "output_tokens": 35805,
+    "api_call_count": 90
   }
 }
