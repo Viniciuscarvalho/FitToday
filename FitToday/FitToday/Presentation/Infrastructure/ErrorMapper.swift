@@ -24,6 +24,9 @@ enum ErrorMapper {
     case let openAIError as NewOpenAIClient.ClientError:
       return handleOpenAIError(openAIError)
 
+    case let chatError as AIChatService.ServiceError:
+      return handleChatError(chatError)
+
     case let imageCacheError as ImageCacheError:
       return handleImageCacheError(imageCacheError)
 
@@ -227,6 +230,20 @@ enum ErrorMapper {
         message: "Não foi possível gerar um treino diferente dos anteriores.",
         action: .dismiss
       )
+
+    case .chatMessageLimitReached:
+      return ErrorMessage(
+        title: "fitorb.limit_reached.title".localized,
+        message: "fitorb.limit_reached.message".localized,
+        action: .dismiss
+      )
+
+    case .chatServiceUnavailable:
+      return ErrorMessage(
+        title: "error.openai.temporarily_unavailable.title".localized,
+        message: "fitorb.error_service_unavailable".localized,
+        action: .dismiss
+      )
     }
   }
 
@@ -280,6 +297,25 @@ enum ErrorMapper {
       return ErrorMessage(
         title: "error.openai.incomplete_response.title".localized,
         message: "error.openai.incomplete_response.message".localized,
+        action: .dismiss
+      )
+    }
+  }
+
+  // MARK: - AIChatService Error Handling
+
+  private static func handleChatError(_ error: AIChatService.ServiceError) -> ErrorMessage {
+    switch error {
+    case .clientUnavailable:
+      return ErrorMessage(
+        title: "error.openai.not_configured.title".localized,
+        message: "fitorb.error_no_api_key".localized,
+        action: .dismiss
+      )
+    case .emptyResponse:
+      return ErrorMessage(
+        title: "error.openai.incomplete_response.title".localized,
+        message: "fitorb.error_empty_response".localized,
         action: .dismiss
       )
     }

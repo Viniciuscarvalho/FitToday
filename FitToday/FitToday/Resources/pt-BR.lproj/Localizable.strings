@@ -122,6 +122,17 @@
 "home.stats.burned" = "queimadas";
 "home.stats.streak" = "Sequência";
 "home.stats.days" = "dias";
+"home.stats.workouts_week" = "Treinos na semana";
+"home.stats.day_streak" = "dias seguidos";
+"home.stats.total_sets" = "séries";
+"home.stats.avg_duration" = "min média";
+
+// MARK: - Today's Workout
+"home.today.title" = "SEU TREINO";
+"home.today.pro_tip" = "Sempre comece com 5-10 minutos de cardio leve ou alongamento dinâmico para aumentar o fluxo sanguíneo e prevenir lesões.";
+"home.today.start" = "Iniciar Treino";
+"home.today.from_program" = "De %@";
+"home.today.more_exercises" = "exercícios a mais";
 
 // MARK: - Programs
 "programs.title" = "Programas";
@@ -910,3 +921,55 @@
 "trainer.dashboard.tab.chat" = "Chat";
 "trainer.dashboard.tab.history" = "Histórico";
 "trainer.dashboard.tab.evolution" = "Evolução";
+
+// MARK: - Welcome Onboarding
+"welcome.page1.title" = "Acompanhe Seus Treinos";
+"welcome.page1.description" = "Registre exercícios, séries e repetições com facilidade.";
+"welcome.page2.title" = "Siga Programas";
+"welcome.page2.description" = "Escolha entre mais de 25 programas de treino para todos os níveis.";
+"welcome.page3.title" = "Treinos com IA";
+"welcome.page3.description" = "Gere treinos personalizados com inteligência artificial.";
+"welcome.page4.title" = "Vamos Começar";
+"welcome.page4.description" = "Configure seu perfil e comece a treinar hoje mesmo.";
+"welcome.getStarted" = "Começar";
+"welcome.continue" = "Continuar";
+"welcome.skip" = "Pular";
+
+// MARK: - FitOrb Tab
+"tab.fitorb" = "FitOrb";
+
+// MARK: - Programs Recommended
+"programs.recommended" = "Recomendados para Você";
+
+// MARK: - Home
+"home.exercises.title" = "Exercícios de Hoje";
+"home.setup_profile.title" = "Complete Seu Perfil";
+"home.setup_profile.subtitle" = "Configure seu perfil fitness para receber recomendações personalizadas de treino.";
+"home.setup_profile.cta" = "Configurar Perfil";
+
+// MARK: - FitOrb AI Chat
+"fitorb.title" = "FitOrb";
+"fitorb.subtitle" = "Seu Assistente Fitness com IA";
+"fitorb.try_asking" = "Tente perguntar:";
+"fitorb.thinking" = "Pensando...";
+"fitorb.input_placeholder" = "Pergunte ao FitOrb...";
+"fitorb.error_title" = "Erro";
+"fitorb.error_ok" = "OK";
+"fitorb.error_no_api_key" = "Configure sua chave de API do OpenAI em Configurações para usar o FitOrb.";
+"fitorb.quick.plan_workout" = "Montar meu treino";
+"fitorb.quick.suggest_exercises" = "Sugerir exercícios";
+"fitorb.quick.warmup" = "Rotina de aquecimento";
+"fitorb.quick.recovery" = "Dicas de recuperação";
+"fitorb.quick.morning_warmup" = "Aquecimento matinal";
+"fitorb.quick.evening_stretch" = "Alongamento noturno";
+"fitorb.quick.suggest_today" = "Sugerir treino de hoje";
+"fitorb.quick.muscle_tips" = "Dicas para hipertrofia";
+"fitorb.quick.fat_burn_tips" = "Dicas para emagrecer";
+"fitorb.quick.endurance_tips" = "Dicas de resistência";
+"fitorb.quick.performance_tips" = "Dicas de performance";
+"fitorb.clear_chat" = "Limpar Chat";
+"fitorb.clear_chat_confirm" = "Tem certeza que deseja limpar o histórico do chat?";
+"fitorb.error_empty_response" = "FitOrb não conseguiu gerar uma resposta. Tente novamente.";
+"fitorb.error_service_unavailable" = "O assistente IA não está disponível no momento.";
+"fitorb.limit_reached.title" = "Limite de Mensagens";
+"fitorb.limit_reached.message" = "Você atingiu o limite de mensagens diárias. Desbloqueie o Pro para mensagens ilimitadas.";

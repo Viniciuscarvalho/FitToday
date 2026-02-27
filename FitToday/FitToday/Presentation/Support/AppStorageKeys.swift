@@ -12,6 +12,9 @@ enum AppStorageKeys {
     static let lastDailyCheckInData = "lastDailyCheckInData"
     static let workoutPhaseDisplayMode = "workoutPhaseDisplayMode"
 
+    // Onboarding
+    static let hasSeenWelcome = "hasSeenWelcome"
+
     // App Store Review
     static let lastReviewRequestDate = "lastReviewRequestDate"
     static let firstLaunchDate = "firstLaunchDate"

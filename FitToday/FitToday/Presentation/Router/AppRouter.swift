@@ -11,7 +11,7 @@ import SwiftUI
 enum AppTab: Hashable, CaseIterable {
     case home
     case workout
-    case create
+    case fitorb
     case activity
     case profile
 
@@ -19,7 +19,7 @@ enum AppTab: Hashable, CaseIterable {
         switch self {
         case .home: return "tab.home".localized
         case .workout: return "tab.workout".localized
-        case .create: return "tab.create".localized
+        case .fitorb: return "tab.fitorb".localized
         case .activity: return "tab.activity".localized
         case .profile: return "tab.profile".localized
         }
@@ -29,7 +29,7 @@ enum AppTab: Hashable, CaseIterable {
         switch self {
         case .home: return "house.fill"
         case .workout: return "dumbbell.fill"
-        case .create: return "plus.circle.fill"
+        case .fitorb: return "sparkles"
         case .activity: return "chart.bar.fill"
         case .profile: return "person.fill"
         }
@@ -63,7 +63,7 @@ enum AppRoute: Hashable {
     case trainerSearch  // Search for personal trainers
     case cmsWorkoutDetail(String)  // CMS workout detail by ID
     case cmsWorkoutFeedback(String)  // CMS workout feedback by ID
-    case libraryExplore  // Exercise library catalog
+    case aiChat  // AI Fitness Assistant (FitOrb)
 }
 
 struct DeepLink {

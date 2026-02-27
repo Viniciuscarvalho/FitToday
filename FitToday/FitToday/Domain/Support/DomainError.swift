@@ -31,6 +31,10 @@ enum DomainError: Error, LocalizedError, Sendable, Equatable {
     case dailyGenerationLimitReached
     case diversityValidationFailed
 
+    // MARK: - AI Chat Errors
+    case chatMessageLimitReached
+    case chatServiceUnavailable
+
     var errorDescription: String? {
         switch self {
         case .profileNotFound:
@@ -69,6 +73,10 @@ enum DomainError: Error, LocalizedError, Sendable, Equatable {
             return "Você atingiu o limite de treinos por dia. Tente novamente amanhã!"
         case .diversityValidationFailed:
             return "Não foi possível gerar um treino diferente dos anteriores."
+        case .chatMessageLimitReached:
+            return "Você atingiu o limite de mensagens por dia. Desbloqueie o Pro para continuar."
+        case .chatServiceUnavailable:
+            return "O assistente IA não está disponível no momento."
         }
     }
 

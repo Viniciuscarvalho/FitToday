@@ -122,6 +122,17 @@
 "home.stats.burned" = "burned";
 "home.stats.streak" = "Streak";
 "home.stats.days" = "days";
+"home.stats.workouts_week" = "Workouts this week";
+"home.stats.day_streak" = "day streak";
+"home.stats.total_sets" = "sets";
+"home.stats.avg_duration" = "min avg";
+
+// MARK: - Today's Workout
+"home.today.title" = "YOUR WORKOUT";
+"home.today.pro_tip" = "Always start with 5-10 minutes of light cardio or dynamic stretching to increase blood flow and prevent injuries.";
+"home.today.start" = "Start Workout";
+"home.today.from_program" = "From %@";
+"home.today.more_exercises" = "more exercises";
 
 // MARK: - Programs
 "programs.title" = "Programs";
@@ -910,3 +921,55 @@
 "trainer.dashboard.tab.chat" = "Chat";
 "trainer.dashboard.tab.history" = "History";
 "trainer.dashboard.tab.evolution" = "Evolution";
+
+// MARK: - Welcome Onboarding
+"welcome.page1.title" = "Track Your Workouts";
+"welcome.page1.description" = "Log exercises, sets, and reps with ease.";
+"welcome.page2.title" = "Follow Programs";
+"welcome.page2.description" = "Choose from over 25 workout programs for all levels.";
+"welcome.page3.title" = "AI-Powered Training";
+"welcome.page3.description" = "Generate personalized workouts with artificial intelligence.";
+"welcome.page4.title" = "Let's Get Started";
+"welcome.page4.description" = "Set up your profile and start training today.";
+"welcome.getStarted" = "Get Started";
+"welcome.continue" = "Continue";
+"welcome.skip" = "Skip";
+
+// MARK: - FitOrb Tab
+"tab.fitorb" = "FitOrb";
+
+// MARK: - Programs Recommended
+"programs.recommended" = "Recommended for You";
+
+// MARK: - Home
+"home.exercises.title" = "Today's Exercises";
+"home.setup_profile.title" = "Complete Your Profile";
+"home.setup_profile.subtitle" = "Set up your fitness profile to get personalized workout recommendations.";
+"home.setup_profile.cta" = "Set Up Profile";
+
+// MARK: - FitOrb AI Chat
+"fitorb.title" = "FitOrb";
+"fitorb.subtitle" = "Your AI Fitness Assistant";
+"fitorb.try_asking" = "Try asking:";
+"fitorb.thinking" = "Thinking...";
+"fitorb.input_placeholder" = "Ask FitOrb...";
+"fitorb.error_title" = "Error";
+"fitorb.error_ok" = "OK";
+"fitorb.error_no_api_key" = "Please configure your OpenAI API key in Settings to use FitOrb.";
+"fitorb.quick.plan_workout" = "Plan my workout";
+"fitorb.quick.suggest_exercises" = "Suggest exercises";
+"fitorb.quick.warmup" = "Warm-up routine";
+"fitorb.quick.recovery" = "Recovery tips";
+"fitorb.quick.morning_warmup" = "Morning warm-up";
+"fitorb.quick.evening_stretch" = "Evening stretching";
+"fitorb.quick.suggest_today" = "Suggest today's workout";
+"fitorb.quick.muscle_tips" = "Muscle building tips";
+"fitorb.quick.fat_burn_tips" = "Fat burning tips";
+"fitorb.quick.endurance_tips" = "Endurance tips";
+"fitorb.quick.performance_tips" = "Performance tips";
+"fitorb.clear_chat" = "Clear Chat";
+"fitorb.clear_chat_confirm" = "Are you sure you want to clear chat history?";
+"fitorb.error_empty_response" = "FitOrb could not generate a response. Please try again.";
+"fitorb.error_service_unavailable" = "The AI assistant is not available at the moment.";
+"fitorb.limit_reached.title" = "Message Limit Reached";
+"fitorb.limit_reached.message" = "You have reached the daily message limit. Unlock Pro for unlimited messages.";
