@@ -12,8 +12,24 @@ struct TrainerDashboardView: View {
     let workouts: [TrainerWorkout]
     let isChatEnabled: Bool
     let onDisconnect: () -> Void
+    let initialTab: TrainerDashboardTab
 
-    @State private var selectedTab: DashboardTab = .history
+    @State private var selectedTab: TrainerDashboardTab
+
+    init(
+        trainer: PersonalTrainer,
+        workouts: [TrainerWorkout],
+        isChatEnabled: Bool,
+        onDisconnect: @escaping () -> Void,
+        initialTab: TrainerDashboardTab = .today
+    ) {
+        self.trainer = trainer
+        self.workouts = workouts
+        self.isChatEnabled = isChatEnabled
+        self.onDisconnect = onDisconnect
+        self.initialTab = initialTab
+        self._selectedTab = State(wrappedValue: initialTab)
+    }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -127,6 +143,11 @@ struct TrainerDashboardView: View {
     @ViewBuilder
     private var tabContent: some View {
         switch selectedTab {
+        case .today:
+            TodayWorkoutTabView(
+                workouts: workouts,
+                onViewHistory: { selectedTab = .history }
+            )
         case .chat:
             TrainerChatView(trainerId: trainer.id, trainerName: trainer.displayName)
         case .history:
@@ -138,26 +159,39 @@ struct TrainerDashboardView: View {
 
     // MARK: - Helpers
 
-    private var availableTabs: [DashboardTab] {
+    private var availableTabs: [TrainerDashboardTab] {
+        var tabs: [TrainerDashboardTab] = [.today]
         if isChatEnabled {
-            return DashboardTab.allCases
+            tabs.append(.chat)
         }
-        return [.history, .evolution]
+        tabs.append(contentsOf: [.history, .evolution])
+        return tabs
     }
 }
 
 // MARK: - Dashboard Tab
 
-private enum DashboardTab: CaseIterable, Hashable {
+enum TrainerDashboardTab: CaseIterable, Hashable {
+    case today
     case chat
     case history
     case evolution
 
     var title: String {
         switch self {
+        case .today: return "Hoje"
         case .chat: return "trainer.dashboard.tab.chat".localized
         case .history: return "trainer.dashboard.tab.history".localized
         case .evolution: return "trainer.dashboard.tab.evolution".localized
+        }
+    }
+
+    var icon: String {
+        switch self {
+        case .today: return "doc.fill"
+        case .chat: return "message.fill"
+        case .history: return "clock.fill"
+        case .evolution: return "chart.line.uptrend.xyaxis"
         }
     }
 }

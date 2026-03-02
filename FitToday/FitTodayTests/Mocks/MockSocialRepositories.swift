@@ -48,6 +48,10 @@ final class MockAuthenticationRepository: AuthenticationRepository, @unchecked S
         signOutCalled = true
     }
 
+    func getIDToken() async throws -> String {
+        "mock-firebase-id-token"
+    }
+
     func observeAuthState() -> AsyncStream<SocialUser?> {
         AsyncStream { continuation in
             continuation.yield(currentUserResult)

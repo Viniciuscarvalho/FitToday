@@ -61,6 +61,8 @@ enum AppRoute: Hashable {
     case customWorkoutBuilder(UUID?)  // Create or edit custom workout (nil = new)
     case personalTrainer  // Personal Trainer connection and workouts
     case trainerSearch  // Search for personal trainers
+    case trainerDashboard  // Trainer dashboard (tabs: Today, Chat, History)
+    case trainerChat  // Direct access to trainer chat tab
     case cmsWorkoutDetail(String)  // CMS workout detail by ID
     case cmsWorkoutFeedback(String)  // CMS workout feedback by ID
     case aiChat  // AI Fitness Assistant (FitOrb)
@@ -73,6 +75,8 @@ struct DeepLink {
         case setup
         case paywall
         case groupInvite(groupId: String)
+        case trainerDashboard
+        case trainerChat
     }
 
     let destination: Destination
@@ -90,6 +94,20 @@ struct DeepLink {
             let groupId = String(path.dropFirst("/invite/".count))
             destination = .groupInvite(groupId: groupId)
             return
+        }
+
+        // Handle trainer routes: fittoday://trainer/dashboard, fittoday://trainer/chat
+        if host == "trainer" {
+            switch path.lowercased() {
+            case "/dashboard":
+                destination = .trainerDashboard
+                return
+            case "/chat":
+                destination = .trainerChat
+                return
+            default:
+                break
+            }
         }
 
         // Handle other routes
@@ -169,6 +187,12 @@ protocol AppRouting: AnyObject {
         case .groupInvite(let groupId):
             select(tab: .home)
             push(.groupInvite(groupId: groupId), on: .home)
+        case .trainerDashboard:
+            select(tab: .home)
+            push(.trainerDashboard, on: .home)
+        case .trainerChat:
+            select(tab: .home)
+            push(.trainerChat, on: .home)
         }
     }
 

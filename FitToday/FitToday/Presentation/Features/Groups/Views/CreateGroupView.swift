@@ -105,6 +105,7 @@ private final class MockAuthRepository: AuthenticationRepository, @unchecked Sen
     func signInWithGoogle() async throws -> SocialUser { fatalError() }
     func signInWithEmail(_ email: String, password: String) async throws -> SocialUser { fatalError() }
     func createAccount(email: String, password: String, displayName: String) async throws -> SocialUser { fatalError() }
+    func getIDToken() async throws -> String { "mock-token" }
     func signOut() async throws {}
     func observeAuthState() -> AsyncStream<SocialUser?> { AsyncStream { _ in } }
 }
