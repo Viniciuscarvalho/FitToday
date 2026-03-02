@@ -237,7 +237,9 @@ struct FlowLayout: Layout {
                 isActive: true,
                 inviteCode: "ABC123",
                 maxStudents: 20,
-                currentStudentCount: 5
+                currentStudentCount: 5,
+                rating: 4.8,
+                reviewCount: 42
             ),
             variant: .compact
         )
@@ -253,7 +255,9 @@ struct FlowLayout: Layout {
                 isActive: true,
                 inviteCode: "XYZ789",
                 maxStudents: 15,
-                currentStudentCount: 3
+                currentStudentCount: 3,
+                rating: 4.5,
+                reviewCount: 18
             ),
             variant: .compact
         )
@@ -274,7 +278,9 @@ struct FlowLayout: Layout {
             isActive: true,
             inviteCode: "ABC123",
             maxStudents: 20,
-            currentStudentCount: 5
+            currentStudentCount: 5,
+            rating: 4.9,
+            reviewCount: 67
         ),
         variant: .expanded
     )

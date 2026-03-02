@@ -15,12 +15,14 @@ enum CMSTrainerMapper {
             displayName: dto.displayName,
             email: dto.email ?? "",
             photoURL: dto.photoURL.flatMap { URL(string: $0) },
-            specializations: dto.specializations ?? [],
+            specializations: dto.specializations,
             bio: dto.bio,
             isActive: dto.isActive ?? true,
             inviteCode: dto.inviteCode,
             maxStudents: dto.maxStudents ?? 30,
-            currentStudentCount: dto.currentStudentCount ?? 0
+            currentStudentCount: dto.currentStudentCount ?? 0,
+            rating: dto.rating,
+            reviewCount: dto.reviewCount
         )
     }
 }

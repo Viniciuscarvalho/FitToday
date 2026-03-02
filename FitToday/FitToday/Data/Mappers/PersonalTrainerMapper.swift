@@ -32,7 +32,9 @@ struct PersonalTrainerMapper {
             isActive: fb.isActive,
             inviteCode: fb.inviteCode,
             maxStudents: fb.maxStudents,
-            currentStudentCount: fb.currentStudentCount
+            currentStudentCount: fb.currentStudentCount,
+            rating: nil,
+            reviewCount: nil
         )
     }
 
