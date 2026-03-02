@@ -2,8 +2,8 @@
   "cli_version": "0.4.4",
   "checkpoint_id": "17f4a26e4adb",
   "strategy": "manual-commit",
-  "branch": "feature/app-store-review-request",
-  "checkpoints_count": 1,
+  "branch": "feature/reorganize-screens-and-flows",
+  "checkpoints_count": 2,
   "files_touched": [
     ".claude/feature-state/prd-apple-review/plan.md",
     ".claude/feature-state/prd-pdf-reader/checkpoint.json",
@@ -31,8 +31,11 @@
     "FitToday/FitToday/Presentation/Features/PersonalTrainer/CMSWorkoutDetailView.swift",
     "FitToday/FitToday/Presentation/Features/PersonalTrainer/CMSWorkoutFeedbackView.swift",
     "FitToday/FitToday/Presentation/Features/PersonalTrainer/Components/ConnectionRequestSheet.swift",
+    "FitToday/FitToday/Presentation/Features/PersonalTrainer/Components/PersonalTrainerHomeCard.swift",
     "FitToday/FitToday/Presentation/Features/PersonalTrainer/PersonalTrainerView.swift",
     "FitToday/FitToday/Presentation/Features/PersonalTrainer/PersonalTrainerViewModel.swift",
+    "FitToday/FitToday/Presentation/Features/PersonalTrainer/TodayWorkoutTabView.swift",
+    "FitToday/FitToday/Presentation/Features/PersonalTrainer/TrainerDashboardView.swift",
     "FitToday/FitToday/Presentation/Features/PersonalTrainer/TrainerSearchView.swift",
     "FitToday/FitToday/Presentation/Features/PersonalWorkouts/Views/PersonalWorkoutsListView.swift",
     "FitToday/FitToday/Presentation/Features/Pro/Components/FeatureComparisonTable.swift",
@@ -69,13 +72,20 @@
       "context": "/17/f4a26e4adb/0/context.md",
       "content_hash": "/17/f4a26e4adb/0/content_hash.txt",
       "prompt": "/17/f4a26e4adb/0/prompt.txt"
+    },
+    {
+      "metadata": "/17/f4a26e4adb/1/metadata.json",
+      "transcript": "/17/f4a26e4adb/1/full.jsonl",
+      "context": "/17/f4a26e4adb/1/context.md",
+      "content_hash": "/17/f4a26e4adb/1/content_hash.txt",
+      "prompt": "/17/f4a26e4adb/1/prompt.txt"
     }
   ],
   "token_usage": {
-    "input_tokens": 1410,
-    "cache_creation_tokens": 214254,
-    "cache_read_tokens": 8499683,
-    "output_tokens": 886,
-    "api_call_count": 80
+    "input_tokens": 6131,
+    "cache_creation_tokens": 357027,
+    "cache_read_tokens": 16194445,
+    "output_tokens": 23619,
+    "api_call_count": 148
   }
 }

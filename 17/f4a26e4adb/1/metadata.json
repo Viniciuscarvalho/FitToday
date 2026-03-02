@@ -1,0 +1,37 @@
+{
+  "cli_version": "0.4.4",
+  "checkpoint_id": "17f4a26e4adb",
+  "session_id": "f23c66d9-903a-494c-add7-fe41df8cfa18",
+  "strategy": "manual-commit",
+  "created_at": "2026-03-02T22:18:01.909114Z",
+  "branch": "feature/reorganize-screens-and-flows",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "FitToday/FitToday/Presentation/Features/Home/HomeView.swift",
+    "FitToday/FitToday/Presentation/Features/Home/HomeViewModel.swift",
+    "FitToday/FitToday/Presentation/Features/PersonalTrainer/Components/PersonalTrainerHomeCard.swift",
+    "FitToday/FitToday/Presentation/Features/PersonalTrainer/PersonalTrainerView.swift",
+    "FitToday/FitToday/Presentation/Features/PersonalTrainer/TodayWorkoutTabView.swift",
+    "FitToday/FitToday/Presentation/Features/PersonalTrainer/TrainerDashboardView.swift",
+    "FitToday/FitToday/Presentation/Root/TabRootView.swift",
+    "FitToday/FitToday/Presentation/Router/AppRouter.swift"
+  ],
+  "agent": "Claude Code",
+  "token_usage": {
+    "input_tokens": 4721,
+    "cache_creation_tokens": 142773,
+    "cache_read_tokens": 7694762,
+    "output_tokens": 22733,
+    "api_call_count": 68
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-03-02T22:18:01.584949Z",
+    "agent_lines": 0,
+    "human_added": 693,
+    "human_modified": 14,
+    "human_removed": 0,
+    "total_committed": 694,
+    "agent_percentage": 0
+  },
+  "transcript_path": ".claude/projects/-Users-viniciuscarvalho-Documents-FitToday/f23c66d9-903a-494c-add7-fe41df8cfa18.jsonl"
+}
