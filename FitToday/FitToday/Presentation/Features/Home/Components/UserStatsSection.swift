@@ -29,12 +29,12 @@ struct UserStatsSection: View {
                     color: FitTodayColor.brandPrimary
                 )
 
-                // Calories burned
+                // Training Volume (Replacing Calories)
                 StatCard(
                     value: caloriesBurnedFormatted,
-                    label: "home.stats.calories".localized,
-                    icon: "flame.fill",
-                    color: .orange
+                    label: "Volume",
+                    icon: "dumbbell.fill",
+                    color: FitTodayColor.neonCyan
                 )
 
                 // Streak (only show if > 0)
@@ -43,7 +43,7 @@ struct UserStatsSection: View {
                         value: "\(streakDays)",
                         label: "home.stats.streak".localized,
                         icon: "bolt.fill",
-                        color: FitTodayColor.warning
+                        color: FitTodayColor.neonYellow
                     )
                 }
             }

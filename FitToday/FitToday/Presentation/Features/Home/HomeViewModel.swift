@@ -33,6 +33,9 @@ enum HomeJourneyState: Equatable {
     private(set) var dailyWorkoutState: DailyWorkoutState = DailyWorkoutState()
     private(set) var historyEntries: [WorkoutHistoryEntry] = []
     private(set) var isAiWorkoutEnabled = true
+    private(set) var todayWorkout: ProgramWorkout?
+    private(set) var todayProgramName: String?
+    private(set) var isLoadingWorkout: Bool = false
     var errorMessage: ErrorMessage? // ErrorPresenting protocol
 
     // User info - stored properties for proper @Observable tracking
@@ -152,6 +155,48 @@ enum HomeJourneyState: Equatable {
         }
 
         return streak
+    }
+
+    /// Days of the week with completed workouts (0=Sunday, 6=Saturday)
+    var weekCompletedDays: Set<Int> {
+        let calendar = Calendar.current
+        let now = Date()
+        guard let weekStart = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: now)) else {
+            return []
+        }
+        var days = Set<Int>()
+        for entry in historyEntries where entry.date >= weekStart {
+            let weekday = calendar.component(.weekday, from: entry.date) - 1 // 0=Sunday
+            days.insert(weekday)
+        }
+        return days
+    }
+
+    var weeklyTarget: Int {
+        userProfile?.weeklyFrequency ?? 4
+    }
+
+    var totalSetsThisWeek: Int {
+        let calendar = Calendar.current
+        let now = Date()
+        guard let weekStart = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: now)) else {
+            return 0
+        }
+        return historyEntries
+            .filter { $0.date >= weekStart }
+            .reduce(0) { $0 + ($1.completedExercises?.count ?? 0) }
+    }
+
+    var avgDurationMinutes: Int {
+        let calendar = Calendar.current
+        let now = Date()
+        guard let weekStart = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: now)) else {
+            return 0
+        }
+        let weekEntries = historyEntries.filter { $0.date >= weekStart }
+        guard !weekEntries.isEmpty else { return 0 }
+        let totalMinutes = weekEntries.reduce(0) { $0 + ($1.durationMinutes ?? 0) }
+        return totalMinutes / weekEntries.count
     }
 
     var ctaTitle: String {
@@ -285,6 +330,40 @@ enum HomeJourneyState: Equatable {
                 print("[Home] Erro ao carregar programas: \(error)")
                 #endif
             }
+        }
+
+        // Load today's workout from the best recommended program
+        await loadTodayWorkout()
+    }
+
+    private func loadTodayWorkout() async {
+        guard let bestProgram = topPrograms.first else { return }
+
+        todayProgramName = bestProgram.shortName
+
+        guard let programRepo = resolver.resolve(ProgramRepository.self),
+              let workoutRepo = resolver.resolve(WgerProgramWorkoutRepository.self) else {
+            return
+        }
+
+        let useCase = LoadProgramWorkoutsUseCase(
+            programRepository: programRepo,
+            workoutRepository: workoutRepo
+        )
+
+        isLoadingWorkout = true
+        defer { isLoadingWorkout = false }
+
+        do {
+            let workouts = try await useCase.execute(programId: bestProgram.id)
+            if !workouts.isEmpty {
+                let index = workoutsThisWeek % workouts.count
+                todayWorkout = workouts[index]
+            }
+        } catch {
+            #if DEBUG
+            print("[Home] Erro ao carregar treino do dia: \(error)")
+            #endif
         }
     }
 

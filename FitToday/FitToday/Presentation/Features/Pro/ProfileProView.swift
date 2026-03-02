@@ -16,6 +16,10 @@ struct ProfileProView: View {
     @State private var showingPaywall = false
     @State private var showingRestoreAlert = false
     @State private var restoreMessage = ""
+    @State private var userName: String = "Athlete"
+    @State private var streakDays: Int = 0
+    @State private var totalMinutes: Int = 0
+    @State private var completedWorkouts: Int = 0
 
     #if DEBUG
     @State private var debugModeEnabled = false
@@ -33,7 +37,15 @@ struct ProfileProView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: FitTodaySpacing.lg) {
-                headerSection
+                // User Profile Header
+                ProfileHeaderSection(name: userName)
+
+                // Stats Row
+                ProfileStatsRow(
+                    streak: streakDays,
+                    totalMinutes: totalMinutes,
+                    completedWorkouts: completedWorkouts
+                )
 
                 // Premium Card
                 premiumCard
@@ -69,7 +81,10 @@ struct ProfileProView: View {
         }
         .background(FitTodayColor.background.ignoresSafeArea())
         .toolbar(.hidden, for: .navigationBar)
-        .task { await loadEntitlement() }
+        .task {
+            await loadEntitlement()
+            await loadProfileData()
+        }
         .sheet(isPresented: $showingPaywall) {
             paywallSheet
         }
@@ -442,6 +457,49 @@ struct ProfileProView: View {
     }
 
     // MARK: - Actions
+
+    private func loadProfileData() async {
+        // Load user name
+        if let cachedName = UserDefaults.standard.string(forKey: "socialUserDisplayName"), !cachedName.isEmpty {
+            userName = cachedName
+        }
+
+        // Load workout history stats
+        if let historyRepo = resolver.resolve(WorkoutHistoryRepository.self) {
+            do {
+                let entries = try await historyRepo.listEntries()
+                completedWorkouts = entries.count
+                totalMinutes = entries.reduce(0) { $0 + ($1.durationMinutes ?? 0) }
+
+                // Calculate streak
+                let calendar = Calendar.current
+                let today = calendar.startOfDay(for: Date())
+                let sortedDates = entries.map { calendar.startOfDay(for: $0.date) }.sorted(by: >)
+                if let mostRecent = sortedDates.first,
+                   let yesterday = calendar.date(byAdding: .day, value: -1, to: today),
+                   mostRecent >= yesterday {
+                    var streak = 1
+                    var currentDate = mostRecent
+                    for date in sortedDates.dropFirst() {
+                        let expected = calendar.date(byAdding: .day, value: -1, to: currentDate)!
+                        if date == expected {
+                            streak += 1
+                            currentDate = date
+                        } else if date == currentDate {
+                            continue
+                        } else {
+                            break
+                        }
+                    }
+                    streakDays = streak
+                }
+            } catch {
+                #if DEBUG
+                print("[Profile] Error loading history: \(error)")
+                #endif
+            }
+        }
+    }
 
     private func loadEntitlement() async {
         #if DEBUG

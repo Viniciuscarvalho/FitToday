@@ -82,15 +82,15 @@ struct HomeHeroCard: View {
             HStack {
                 aiPoweredBadge
                 Spacer()
-                iconContainer(systemName: "person.badge.plus")
+                iconContainer(type: .strength, iconColor: .white)
             }
 
             Text("home.hero.welcome.title".localized)
-                .font(.system(size: 22, weight: .bold))
+                .font(FitTodayFont.display(size: 22, weight: .bold))
                 .foregroundStyle(.white)
 
             Text("home.hero.welcome.subtitle".localized)
-                .font(.system(size: 14, weight: .regular))
+                .font(FitTodayFont.ui(size: 14, weight: .medium))
                 .foregroundStyle(.white.opacity(0.85))
                 .lineSpacing(2)
                 .fixedSize(horizontal: false, vertical: true)
@@ -112,15 +112,15 @@ struct HomeHeroCard: View {
             HStack {
                 aiPoweredBadge
                 Spacer()
-                iconContainer(systemName: "brain.head.profile")
+                iconContainer(type: .intensity, iconColor: .white)
             }
 
             Text(title)
-                .font(.system(size: 22, weight: .bold))
+                .font(FitTodayFont.display(size: 22, weight: .bold))
                 .foregroundStyle(.white)
 
             Text(subtitle)
-                .font(.system(size: 14, weight: .regular))
+                .font(FitTodayFont.ui(size: 14, weight: .medium))
                 .foregroundStyle(.white.opacity(0.85))
                 .lineSpacing(2)
                 .fixedSize(horizontal: false, vertical: true)
@@ -138,22 +138,22 @@ struct HomeHeroCard: View {
                 Spacer()
                 if let errorMsg = heroErrorMessage {
                     Text(errorMsg)
-                        .font(.system(size: 11, weight: .medium))
+                        .font(FitTodayFont.ui(size: 11, weight: .bold))
                         .foregroundStyle(.red)
                         .padding(.horizontal, 8)
                         .padding(.vertical, 4)
                         .background(.white.opacity(0.15))
                         .clipShape(Capsule())
                 }
-                iconContainer(systemName: "figure.run")
+                iconContainer(type: .intensity, iconColor: FitTodayColor.neonCyan)
             }
 
             Text("home.hero.ready.title".localized)
-                .font(.system(size: 22, weight: .bold))
+                .font(FitTodayFont.display(size: 22, weight: .bold))
                 .foregroundStyle(.white)
 
             Text("home.hero.ready.subtitle".localized)
-                .font(.system(size: 14, weight: .regular))
+                .font(FitTodayFont.ui(size: 14, weight: .medium))
                 .foregroundStyle(.white.opacity(0.85))
                 .lineSpacing(2)
                 .fixedSize(horizontal: false, vertical: true)
@@ -171,7 +171,7 @@ struct HomeHeroCard: View {
             Image(systemName: "checkmark.circle.fill")
                 .font(.system(size: 12, weight: .semibold))
             Text("home.hero.badge.ready".localized)
-                .font(.system(size: 11, weight: .semibold))
+                .font(FitTodayFont.ui(size: 11, weight: .bold))
         }
         .foregroundStyle(.white)
         .padding(.horizontal, 10)
@@ -185,7 +185,7 @@ struct HomeHeroCard: View {
             ProgressView()
                 .tint(.white)
             Text("home.hero.generating".localized)
-                .font(.system(size: 14, weight: .medium))
+                .font(FitTodayFont.ui(size: 14, weight: .bold))
                 .foregroundStyle(.white.opacity(0.9))
         }
         .frame(maxWidth: .infinity)
@@ -201,15 +201,15 @@ struct HomeHeroCard: View {
             HStack {
                 completedBadge
                 Spacer()
-                iconContainer(systemName: "trophy.fill", iconColor: .yellow)
+                iconContainer(type: .performance, iconColor: .yellow)
             }
 
             Text("home.hero.completed.title".localized)
-                .font(.system(size: 22, weight: .bold))
+                .font(FitTodayFont.display(size: 22, weight: .bold))
                 .foregroundStyle(.white)
 
             Text("home.hero.completed.subtitle".localized)
-                .font(.system(size: 14, weight: .regular))
+                .font(FitTodayFont.ui(size: 14, weight: .medium))
                 .foregroundStyle(.white.opacity(0.85))
                 .lineSpacing(2)
                 .fixedSize(horizontal: false, vertical: true)
@@ -221,7 +221,7 @@ struct HomeHeroCard: View {
             Image(systemName: "checkmark.seal.fill")
                 .font(.system(size: 12, weight: .semibold))
             Text("home.hero.badge.completed".localized)
-                .font(.system(size: 11, weight: .semibold))
+                .font(FitTodayFont.ui(size: 11, weight: .bold))
         }
         .foregroundStyle(.white)
         .padding(.horizontal, 10)
@@ -237,15 +237,15 @@ struct HomeHeroCard: View {
             HStack {
                 errorBadge
                 Spacer()
-                iconContainer(systemName: "exclamationmark.triangle.fill", iconColor: .red)
+                iconContainer(type: .performance, iconColor: .red) // Reusing performance for error icon container style
             }
 
             Text("home.hero.error.title".localized)
-                .font(.system(size: 22, weight: .bold))
+                .font(FitTodayFont.display(size: 22, weight: .bold))
                 .foregroundStyle(.white)
 
             Text(message)
-                .font(.system(size: 14, weight: .regular))
+                .font(FitTodayFont.ui(size: 14, weight: .medium))
                 .foregroundStyle(.white.opacity(0.85))
                 .lineSpacing(2)
                 .fixedSize(horizontal: false, vertical: true)
@@ -259,7 +259,7 @@ struct HomeHeroCard: View {
             Image(systemName: "xmark.circle.fill")
                 .font(.system(size: 12, weight: .semibold))
             Text("common.error".localized)
-                .font(.system(size: 11, weight: .semibold))
+                .font(FitTodayFont.ui(size: 11, weight: .bold))
         }
         .foregroundStyle(.white)
         .padding(.horizontal, 10)
@@ -270,13 +270,15 @@ struct HomeHeroCard: View {
 
     // MARK: - Reusable Components
 
-    private func iconContainer(systemName: String, iconColor: Color = .white) -> some View {
-        Image(systemName: systemName)
-            .font(.system(size: 26, weight: .medium))
-            .foregroundStyle(iconColor)
-            .frame(width: 48, height: 48)
-            .background(.white.opacity(0.15))
-            .clipShape(RoundedRectangle(cornerRadius: 14))
+    private func iconContainer(type: FitnessIcon.IconType, iconColor: Color = .white) -> some View {
+        ZStack {
+            RoundedRectangle(cornerRadius: 14)
+                .fill(.white.opacity(0.15))
+                .frame(width: 52, height: 52)
+                .retroGridOverlay(lineColor: .white.opacity(0.05), spacing: 10)
+            
+            FitnessIcon(type: type, color: iconColor, size: 26)
+        }
     }
 
     private func primaryButton(title: String, icon: String, action: @escaping () -> Void) -> some View {
