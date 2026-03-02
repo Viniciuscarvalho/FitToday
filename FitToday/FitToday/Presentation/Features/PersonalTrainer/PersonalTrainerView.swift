@@ -14,9 +14,11 @@ struct PersonalTrainerView: View {
 
     @State private var viewModel: PersonalTrainerViewModel
     @State private var showSearchSheet = false
+    private let initialTab: TrainerDashboardTab
 
-    init(resolver: Resolver) {
+    init(resolver: Resolver, initialTab: TrainerDashboardTab = .today) {
         _viewModel = State(wrappedValue: PersonalTrainerViewModel(resolver: resolver))
+        self.initialTab = initialTab
     }
 
     var body: some View {
@@ -36,7 +38,8 @@ struct PersonalTrainerView: View {
                     isChatEnabled: viewModel.isChatEnabled,
                     onDisconnect: {
                         Task { await viewModel.cancelConnection() }
-                    }
+                    },
+                    initialTab: initialTab
                 )
             } else if !viewModel.hasTrainer {
                 TrainerListView(viewModel: viewModel) { trainer in

@@ -172,6 +172,10 @@ struct TabRootView: View {
                     message: "Unable to load workout builder."
                 )
             }
+        case .trainerDashboard:
+            PersonalTrainerView(resolver: resolver, initialTab: .today)
+        case .trainerChat:
+            PersonalTrainerView(resolver: resolver, initialTab: .chat)
         case .personalTrainer:
             PersonalTrainerView(resolver: resolver)
         case .trainerSearch:
