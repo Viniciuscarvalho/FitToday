@@ -102,6 +102,28 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    // Trainer Workouts collection - treinos criados pelo personal para alunos
+    match /trainerWorkouts/{workoutId} {
+      // get: students assigned to the workout or the trainer can read
+      allow get: if isAuthenticated() &&
+                    (request.auth.uid in resource.data.assignedStudents ||
+                     resource.data.trainerId == request.auth.uid);
+
+      // list: allow authenticated users to query (filtered by assignedStudents or trainerId)
+      allow list: if isAuthenticated();
+
+      // Only trainers create workouts (via CMS/Admin)
+      allow create: if false;
+
+      // Only the trainer can update their workouts
+      allow update: if isAuthenticated() &&
+                       resource.data.trainerId == request.auth.uid;
+
+      // Only the trainer can delete
+      allow delete: if isAuthenticated() &&
+                       resource.data.trainerId == request.auth.uid;
+    }
+
     // Trainer-Student relationships collection
     match /trainerStudents/{relationshipId} {
       // Students can read their own relationships
