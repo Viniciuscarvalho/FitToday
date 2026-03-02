@@ -12,6 +12,7 @@
     "ExportOptions-AppStore.plist",
     "FitToday/FitToday/Configuration.storekit",
     "FitToday/FitToday/Data/Mappers/CMSWorkoutMapper.swift",
+    "FitToday/FitToday/Data/Models/CMSTrainerModels.swift",
     "FitToday/FitToday/Data/Models/CMSWorkoutModels.swift",
     "FitToday/FitToday/Data/Repositories/FirebaseAuthenticationRepository.swift",
     "FitToday/FitToday/Data/Repositories/StoreKitEntitlementRepository.swift",
@@ -92,10 +93,10 @@
     }
   ],
   "token_usage": {
-    "input_tokens": 3226,
-    "cache_creation_tokens": 237501,
-    "cache_read_tokens": 11617349,
-    "output_tokens": 8055,
-    "api_call_count": 104
+    "input_tokens": 1450,
+    "cache_creation_tokens": 362354,
+    "cache_read_tokens": 11934358,
+    "output_tokens": 14061,
+    "api_call_count": 112
   }
 }

@@ -432,3 +432,256 @@ O erro continua o mesmo o endpoint está correto?
 [TrainerWorkoutService] Observe error: Missing or insufficient permissions.
 12.8.0 - [FirebaseFirestore][I-FST000001] Listen for query at trainerWorkouts|f:REDACTED|ob:createdAtdesc__name__desc failed: Missing or insufficient permissions.
 Todas as permissões foram concedidas? Precisa ser feito algo mais no CMS ou no painel do Firebase?
+
+---
+
+Possuo um outro problema na aplicação que não consegui sanar, que é a relação exercício e imagem, isso ainda está me ocasionando problema e uma péssima experiência para o usuário, onde não está mostrando as imagens ou está incompleta para o exercício. Estou buscando de uma api que é gratuita, WGER, porém gostaria que passasse a maior qualidade para o usuário e ele tivesse uma experiência onde pudesse ver o exercício que ele fosse fazer e o nome do exercício fosse fácil também. Busque por APIs ou soluções para facilitar isso nos treinos e nos programas existentes.
+
+---
+
+This session is being continued from a previous conversation that ran out of context. The summary below covers the earlier portion of the conversation.
+
+Analysis:
+Let me chronologically analyze the conversation:
+
+**Part 1: Prior conversation context (from summary)**
+The user had previously asked to implement GitHub issues #28-#31 for personal trainer features, which were completed. Then issue #33 was found (permissions bug), and investigation identified three root causes:
+1. `trainerStudents` collection missing from firestore.rules
+2. `personalWorkouts` list query rules not working
+3. CMS API getting no auth token
+
+**Part 2: Current conversation starts with continuation**
+The conversation continues from the prior context. The assistant implemented the fixes for issue #33:
+
+1. Fixed `firestore.rules` - Added `trainerStudents` rules and fixed `personalWorkouts` by splitting into get/list
+2. Added `getIDToken()` to `FirebaseAuthService`
+3. Added `getIDToken()` to `AuthenticationRepository` protocol
+4. Added `CMSTokenProvider` to `CMSWorkoutService`
+5. Updated `AppContainer.swift` to wire token provider
+6. Updated all mock conformances (3 preview mocks + 1 test mock)
+7. Build succeeded, committed as `18afd5e`, pushed to PR #34
+
+**Part 3: User reports errors persist**
+User provides new error logs showing:
+- `[CMSTrainerService] GET https://web-cms-pink.vercel.app/api/trainers?limit=20&offset=0` returns 500
+- `[PersonalTrainerService] Observe error: Missing or insufficient permissions` on `trainerStudents`
+- `[TrainerWorkoutService] Observe error: Missing or insufficient permissions` on `trainerWorkouts`
+
+The user asks: "Todas as permissões foram concedidas? Precisa ser feito algo mais no CMS ou no painel do Firebase?"
+
+**Part 4: Assistant investigates and finds additional problems**
+Investigation reveals:
+1. `trainerWorkouts` collection has NO rules in firestore.rules (was completely missed)
+2. `CMSTrainerService` also sends unauthenticated requests (same issue as `CMSWorkoutService`)
+3. The `/api/trainers` endpoint returns 500 (server-side error)
+4. Firestore rules haven't been deployed (`firebase deploy --only firestore:rules` needed)
+
+**Part 5: Assistant implements fixes**
+- Added `trainerWorkouts` rules to `firestore.rules`
+- Added `CMSTokenProvider` to `CMSTrainerService` (same pattern as CMSWorkoutService)
+- Moved `authRepo` resolution earlier in `AppContainer.swift` so both CMS services share it
+- Build succeeded, committed as `3e5cf31`, pushed to PR #34
+
+**Part 6: User reports exercise image problem**
+User explains a separate problem: exercises don't show images or show incomplete images. They use wger.de API (free) but want better quality. They want the user to see the exercise they'll do and have easy-to-read exercise names. They ask to search for APIs or solutions.
+
+**Part 7: Plan mode activated**
+The assistant enters plan mode and conducts extensive research:
+- Explored current exercise image/data flow (3 parallel agents)
+- Found current architecture: WgerAPIService → WgerExercise → WgerExerciseAdapter → ExerciseMedia → Views
+- ExerciseMedia already supports gifURL, videoURL, imageURL
+- ExerciseMediaImageURL already renders GIFs via WKWebView
+- Researched 10+ exercise APIs
+- Top options: ExerciseDB (1,300+ exercises with GIFs, free), MuscleWiki (1,800+ with video, pt-BR, $29/mo)
+- Wrote implementation plan recommending ExerciseDB + local Portuguese name mapping
+- Plan file created at `/Users/viniciuscarvalho/.claude/plans/vectorized-snuggling-orbit.md`
+
+Key files explored:
+- `WgerAPIService.swift` - current exercise service actor
+- `WgerConfiguration.swift` - base URL config
+- `WgerExerciseAdapter.swift` - DTO to domain mapping
+- `WgerModels.swift` - WgerExercise DTOs
+- `WorkoutModels.swift` - ExerciseMedia domain model
+- `ProgramWorkout.swift` - ProgramExercise
+- `ExerciseMediaImage.swift` - image display views
+- `AppContainer.swift` - DI wiring
+
+The plan was written to the plan file but plan mode was not exited yet when the summary was requested.
+
+Summary:
+1. Primary Request and Intent:
+
+   **Request 1 (Completed — from prior session):** Implement GitHub issues #28-#31 for personal trainer home screen flow. All were implemented and PR #34 was created.
+
+   **Request 2 (Completed):** Fix issue #33 — Firestore permission errors and CMS 401 Unauthorized preventing personal trainer features from working. The user said: "a investigação sugere: Revisar as Firestore Security Rules para as coleções personalWorkouts e trainerStudents, Verificar se o token de autenticação está sendo injetado corretamente no header das requisições ao CMS... Realize esse check e faça o commit no PR que foi aberto agora."
+
+   **Request 3 (Completed — second round of #33 fixes):** User reported errors persisting with new logs showing `trainerWorkouts` and `trainerStudents` permission errors plus CMS `/api/trainers` returning 500. User asked: "Todas as permissões foram concedidas? Precisa ser feito algo mais no CMS ou no painel do Firebase?"
+
+   **Request 4 (In Progress — Plan Mode):** User reports exercise-image quality problem: "a relação exercício e imagem, isso ainda está me ocasionando problema e uma péssima experiência para o usuário, onde não está mostrando as imagens ou está incompleta para o exercício. Estou buscando de uma api que é gratuita, WGER, porém gostaria que passasse a maior qualidade para o usuário e ele tivesse uma experiência onde pudesse ver o exercício que ele fosse fazer e o nome do exercício fosse fácil também. Busque por APIs ou soluções para facilitar isso nos treinos e nos programas existentes."
+
+2. Key Technical Concepts:
+   - SwiftUI + MVVM with `@Observable` (iOS 17+, Swift 6.0)
+   - Swinject DI via `Resolver`
+   - Firebase Firestore Security Rules — `get` vs `list` rule separation, `resource.data` unavailable in list queries
+   - Firebase Auth ID tokens for external API authentication (`getIDToken()`)
+   - `CMSTokenProvider` typealias (`@Sendable () async throws -> String`) for dynamic token injection
+   - Actor-based services (`CMSWorkoutService`, `CMSTrainerService`, `WgerAPIService`)
+   - `ExerciseServiceProtocol` — protocol for swappable exercise data sources
+   - `ExerciseMedia` domain model with `videoURL`, `imageURL`, `gifURL`, `source`
+   - `ExerciseMediaImageURL` — GIF rendering via WKWebView, static images via UIImage
+   - Two parallel exercise flows: Library (uses `WgerExerciseAdapter`) and Programs (inline `ProgramExercise` conversion)
+   - ExerciseDB API — 1,300+ exercises with animated GIFs
+   - MuscleWiki API — 1,800+ exercises with HD video, confirmed pt-BR support
+
+3. Files and Code Sections:
+
+   - **`firestore.rules`** — Critical for Firestore permissions
+     - Fixed `personalWorkouts` by splitting `allow read` into separate `allow get` (with `resource.data.userId` check) and `allow list` (authenticated with limit check)
+     - Added `trainerStudents` collection rules (was completely missing)
+     - Added `trainerWorkouts` collection rules (also was completely missing)
+     - User must run `firebase deploy --only firestore:rules` to activate these
+
+   - **`FitToday/Data/Services/Firebase/FirebaseAuthService.swift`** — Added `getIDToken()` method
+     ```swift
+     func getIDToken() async throws -> String {
+         guard let firebaseUser = Auth.auth().currentUser else {
+             throw AuthError.userNotFound
+         }
+         return try await firebaseUser.getIDToken()
+     }
+     ```
+
+   - **`FitToday/Domain/Protocols/SocialRepositories.swift`** — Added `getIDToken()` to protocol
+     ```swift
+     protocol AuthenticationRepository: Sendable {
+         func currentUser() async throws -> SocialUser?
+         func getIDToken() async throws -> String
+         // ... other methods
+     }
+     ```
+
+   - **`FitToday/Data/Repositories/FirebaseAuthenticationRepository.swift`** — Implemented `getIDToken()`
+     ```swift
+     func getIDToken() async throws -> String {
+         try await authService.getIDToken()
+     }
+     ```
+
+   - **`FitToday/Data/Services/CMS/CMSWorkoutService.swift`** — Added token provider
+     - Added `CMSTokenProvider` typealias: `typealias CMSTokenProvider = @Sendable () async throws -> String`
+     - Added `tokenProvider: CMSTokenProvider?` property
+     - Made `buildRequest()` async to fetch fresh token before each request
+     - Updated all 9 call sites from `try buildRequest(...)` to `try await buildRequest(...)`
+
+   - **`FitToday/Data/Services/CMS/CMSTrainerService.swift`** — Same token provider pattern
+     - Added `tokenProvider: CMSTokenProvider?` property
+     - Made `buildRequest()` async with token injection
+     - Updated all call sites to `try await buildRequest(...)`
+
+   - **`FitToday/Presentation/DI/AppContainer.swift`** — Wired token providers
+     - Moved `authRepo` resolution to before personal trainer section so both CMS services share it:
+       ```swift
+       let authRepo = container.resolve(AuthenticationRepository.self)!
+       ```
+     - `CMSTrainerService` wired with token: `CMSTrainerService(tokenProvider: { try await authRepo.getIDToken() })`
+     - `CMSWorkoutService` wired with token: `CMSWorkoutService(tokenProvider: { try await authRepo.getIDToken() })`
+
+   - **Mock conformances updated** (4 files):
+     - `FitTodayTests/Mocks/MockSocialRepositories.swift` — added `func getIDToken() async throws -> String { "mock-firebase-id-token" }`
+     - `Presentation/Features/Groups/Views/CreateGroupView.swift` — added `func getIDToken() async throws -> String { "mock-token" }`
+     - `Presentation/Features/Groups/Views/GroupsView.swift` — same
+     - `Presentation/Features/Groups/Views/JoinGroupView.swift` — same
+
+   - **Exercise system files explored (read-only, for plan):**
+     - `Data/Services/Wger/WgerAPIService.swift` — current `ExerciseServiceProtocol` definition and `WgerAPIService` actor
+     - `Data/Services/Wger/WgerConfiguration.swift` — hardcoded `https://wger.de/api/v2`
+     - `Data/Services/Wger/WgerExerciseAdapter.swift` — converts `WgerExerciseImage` → `ExerciseMedia`
+     - `Domain/Entities/WgerModels.swift` — `WgerExercise`, `WgerExerciseImage` DTOs
+     - `Domain/Entities/WorkoutModels.swift` — `ExerciseMedia` with `videoURL`, `imageURL`, `gifURL`, `source`
+     - `Domain/Entities/ProgramWorkout.swift` — `ProgramExercise` wrapping `WgerExercise`
+     - `Presentation/DesignSystem/ExerciseMediaImage.swift` — `ExerciseMediaImageURL`, `ExerciseThumbnail`, `ExerciseHeroImage`
+     - `Data/Services/Wger/WgerExerciseCacheManager.swift` — file-based exercise cache
+     - `Data/Services/Firebase/FirebaseTrainerWorkoutService.swift` — queries `trainerWorkouts` collection
+
+4. Errors and Fixes:
+
+   - **Build error: `MockAuthRepository` does not conform to `AuthenticationRepository`** (3 files):
+     - Caused by adding `getIDToken()` to the `AuthenticationRepository` protocol
+     - Fixed by adding `func getIDToken() async throws -> String { "mock-token" }` to all 3 preview mock classes in CreateGroupView, GroupsView, JoinGroupView, plus the test mock in MockSocialRepositories
+   
+   - **`authRepo` used before declaration in AppContainer.swift**:
+     - `CMSTrainerService` (line 484) referenced `authRepo` but it was declared later at line 570 for `CMSWorkoutService`
+     - Fixed by moving `let authRepo = container.resolve(AuthenticationRepository.self)!` to before the personal trainer section and removing the duplicate later declaration
+
+   - **User reported errors persisting after first fix round**:
+     - User showed new logs: `trainerStudents` still failing, `trainerWorkouts` (new collection) failing, `/api/trainers` returning 500
+     - Root cause: `trainerWorkouts` collection had NO firestore rules at all (missed in first pass), `CMSTrainerService` also had no auth token (only fixed `CMSWorkoutService` initially)
+     - Fixed by adding `trainerWorkouts` rules and adding `CMSTokenProvider` to `CMSTrainerService`
+
+   - **CMS `/api/trainers` returning 500 (server error)**:
+     - This is a server-side error in the CMS backend (`web-cms-pink.vercel.app`), not fixable from the app side
+     - Now that auth token is being sent, the 500 may resolve if the server needs auth context, or the backend may need debugging
+
+   - **Firestore rules not deployed**:
+     - Informed user that `firestore.rules` changes are in the code repo but need `firebase deploy --only firestore:rules` to take effect in Firebase
+
+5. Problem Solving:
+
+   **Solved:**
+   - Issue #33 (Firestore permissions + CMS auth): Three rounds of fixes addressing `personalWorkouts` list rules, missing `trainerStudents` rules, missing `trainerWorkouts` rules, Firebase Auth token injection into both CMS services
+   - All code changes build successfully and are committed to PR #34 (commits `18afd5e` and `3e5cf31`)
+
+   **Remaining for issue #33:**
+   - User needs to run `firebase deploy --only firestore:rules`
+   - CMS `/api/trainers` 500 error may need backend investigation
+
+   **In Progress (Plan Mode):**
+   - Exercise image/quality improvement — full research completed, plan written, awaiting user approval
+
+6. All User Messages:
+
+   - **Message 1** (issue #33 continued): "O erro continua o mesmo o endpoint está correto? [CMSTrainerService] GET https://web-cms-pink.vercel.app/api/trainers?limit=20&offset=0, o status está 500 [PersonalTrainerService] Observe error: Missing or insufficient permissions. 12.8.0 - [FirebaseFirestore][I-FST000001] Listen for query at trainerStudents|f:REDACTED[pending,active,paused]|ob:__name__asc|l:1|lt:f failed: Missing or insufficient permissions. [TrainerWorkoutService] Observe error: Missing or insufficient permissions. 12.8.0 - [FirebaseFirestore][I-FST000001] Listen for query at trainerWorkouts|f:REDACTED|ob:createdAtdesc__name__desc failed: Missing or insufficient permissions. Todas as permissões foram concedidas? Precisa ser feito algo mais no CMS ou no painel do Firebase?"
+
+   - **Message 2** (exercise images): "Possuo um outro problema na aplicação que não consegui sanar, que é a relação exercício e imagem, isso ainda está me ocasionando problema e uma péssima experiência para o usuário, onde não está mostrando as imagens ou está incompleta para o exercício. Estou buscando de uma api que é gratuita, WGER, porém gostaria que passasse a maior qualidade para o usuário e ele tivesse uma experiência onde pudesse ver o exercício que ele fosse fazer e o nome do exercício fosse fácil também. Busque por APIs ou soluções para facilitar isso nos treinos e nos programas existentes."
+
+7. Pending Tasks:
+   - **Exercise image/quality plan**: Plan file written at `/Users/viniciuscarvalho/.claude/plans/vectorized-snuggling-orbit.md`, awaiting user review and approval before implementation
+   - **Firebase rules deployment**: User needs to run `firebase deploy --only firestore:rules` (not a code task — infrastructure action)
+
+8. Current Work:
+
+   The assistant is in **Plan Mode** working on the exercise image quality improvement. Three parallel agents explored:
+   1. Current exercise image/data flow in the codebase
+   2. Exercise display components and how images render in UI
+   3. Alternative exercise APIs (10+ APIs researched)
+
+   A Plan agent designed the implementation approach. The final plan was written to `/Users/viniciuscarvalho/.claude/plans/vectorized-snuggling-orbit.md`.
+
+   **Plan recommends:** ExerciseDB API (1,300+ exercises with animated GIFs) + bundled Portuguese name translations (`ExercisePortugueseNames.json`). Key insight: the existing `ExerciseMedia.gifURL`, `ExerciseMediaImageURL` (WKWebView GIF rendering), and `ExerciseServiceProtocol` mean zero changes to domain models and views — only a new service implementation and DI swap.
+
+   **Files to create (from plan):**
+   - `Data/Services/ExerciseDB/ExerciseDBModels.swift`
+   - `Data/Services/ExerciseDB/ExerciseDBConfiguration.swift`
+   - `Data/Services/ExerciseDB/ExerciseDBService.swift` (conforming to `ExerciseServiceProtocol`)
+   - `Data/Services/ExerciseDB/ExerciseDBMappings.swift`
+   - `Data/Services/Translation/ExerciseNameLocalizationService.swift`
+   - `Resources/ExercisePortugueseNames.json`
+   
+   **File to modify:** `AppContainer.swift` (swap DI registration)
+
+   The plan was about to call `ExitPlanMode` for user approval when the summary was requested.
+
+9. Optional Next Step:
+
+   Present the plan to the user for approval via `ExitPlanMode`. The user's explicit request was: "Busque por APIs ou soluções para facilitar isso nos treinos e nos programas existentes." The plan has been written and needs user review before implementation begins. Once approved, implementation starts with Phase 1 (ExerciseDB Service data layer).
+
+If you need specific details from before compaction (like exact code snippets, error messages, or content you generated), read the full transcript at: /Users/viniciuscarvalho/.REDACTED.jsonl
+Please continue the conversation from where we left off without asking the user any further questions. Continue with the last task that you were asked to work on.
+
+---
+
+[Request interrupted by user]
+
+---
+
+@REDACTED.txt Fez a chamada deu 200 porém o mapeamento está incorreto,
