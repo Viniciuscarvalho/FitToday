@@ -2,7 +2,7 @@
   "cli_version": "0.4.4",
   "checkpoint_id": "17f4a26e4adb",
   "strategy": "manual-commit",
-  "branch": "feature/reorganize-screens-and-flows",
+  "branch": "fix/personal-trainer-issues-35-38",
   "checkpoints_count": 2,
   "files_touched": [
     ".claude/feature-state/prd-apple-review/plan.md",
@@ -11,9 +11,12 @@
     ".gitignore",
     "ExportOptions-AppStore.plist",
     "FitToday/FitToday/Configuration.storekit",
+    "FitToday/FitToday/Data/Mappers/CMSTrainerMapper.swift",
     "FitToday/FitToday/Data/Mappers/CMSWorkoutMapper.swift",
+    "FitToday/FitToday/Data/Mappers/PersonalTrainerMapper.swift",
     "FitToday/FitToday/Data/Models/CMSTrainerModels.swift",
     "FitToday/FitToday/Data/Models/CMSWorkoutModels.swift",
+    "FitToday/FitToday/Data/Repositories/CMSPersonalTrainerRepository.swift",
     "FitToday/FitToday/Data/Repositories/FirebaseAuthenticationRepository.swift",
     "FitToday/FitToday/Data/Repositories/StoreKitEntitlementRepository.swift",
     "FitToday/FitToday/Data/Services/CMS/CMSTrainerService.swift",
@@ -27,6 +30,7 @@
     "FitToday/FitToday/Domain/Protocols/SocialRepositories.swift",
     "FitToday/FitToday/Domain/Services/AppReviewService.swift",
     "FitToday/FitToday/Domain/UseCases/FeatureGatingUseCase.swift",
+    "FitToday/FitToday/Domain/UseCases/PersonalTrainerUseCases.swift",
     "FitToday/FitToday/FitTodayApp.swift",
     "FitToday/FitToday/Presentation/DI/AppContainer.swift",
     "FitToday/FitToday/Presentation/Features/Groups/Views/CreateGroupView.swift",
@@ -41,6 +45,7 @@
     "FitToday/FitToday/Presentation/Features/PersonalTrainer/CMSWorkoutFeedbackView.swift",
     "FitToday/FitToday/Presentation/Features/PersonalTrainer/Components/ConnectionRequestSheet.swift",
     "FitToday/FitToday/Presentation/Features/PersonalTrainer/Components/PersonalTrainerHomeCard.swift",
+    "FitToday/FitToday/Presentation/Features/PersonalTrainer/Components/TrainerCard.swift",
     "FitToday/FitToday/Presentation/Features/PersonalTrainer/PersonalTrainerView.swift",
     "FitToday/FitToday/Presentation/Features/PersonalTrainer/PersonalTrainerViewModel.swift",
     "FitToday/FitToday/Presentation/Features/PersonalTrainer/TodayWorkoutTabView.swift",
@@ -93,10 +98,10 @@
     }
   ],
   "token_usage": {
-    "input_tokens": 1450,
-    "cache_creation_tokens": 362354,
-    "cache_read_tokens": 11934358,
-    "output_tokens": 14061,
-    "api_call_count": 112
+    "input_tokens": 3456,
+    "cache_creation_tokens": 324833,
+    "cache_read_tokens": 15881741,
+    "output_tokens": 19906,
+    "api_call_count": 141
   }
 }

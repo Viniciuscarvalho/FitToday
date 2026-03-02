@@ -84,3 +84,11 @@ The user had previously asked to implement GitHub issues #28-#31 for personal tr
 
 @REDACTED.txt Fez a chamada deu 200 porém o mapeamento está incorreto,
 
+### Prompt 10
+
+Preciso deixar a main funcionando, deve aceitar as modificações de ambas, as ultimas integrações com o chatAI e também com as modificações de personal, verifique tudo isso
+
+### Prompt 11
+
+Todas as issues devem ser preenchidas seus criterios de aceites e testadas para serem aprovadas e realizar o commit e depois o PR, https://github.com/Viniciuscarvalho/FitToday/issues, além disso verifique se há issues para notificações caso o usuário receba uma mensagem no chat do personal, isso deve estar implementado.
+
