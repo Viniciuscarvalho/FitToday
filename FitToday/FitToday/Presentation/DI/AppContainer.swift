@@ -564,8 +564,11 @@ struct AppContainer {
 
         // ========== CMS WORKOUT API INTEGRATION ==========
 
-        // CMS Workout Service - REST API client
-        let cmsWorkoutService = CMSWorkoutService()
+        // CMS Workout Service - REST API client with Firebase Auth token injection
+        let authRepo = container.resolve(AuthenticationRepository.self)!
+        let cmsWorkoutService = CMSWorkoutService(
+            tokenProvider: { try await authRepo.getIDToken() }
+        )
         container.register(CMSWorkoutService.self) { _ in cmsWorkoutService }
             .inObjectScope(.container)
 

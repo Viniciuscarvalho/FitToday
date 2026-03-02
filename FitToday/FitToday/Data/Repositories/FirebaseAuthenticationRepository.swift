@@ -24,6 +24,10 @@ final class FirebaseAuthenticationRepository: AuthenticationRepository, @uncheck
         try await authService.getCurrentUser()
     }
 
+    func getIDToken() async throws -> String {
+        try await authService.getIDToken()
+    }
+
     func signInWithApple() async throws -> SocialUser {
         // This will be called from the UI layer after ASAuthorizationController completes
         // The actual credential handling is done via signInWithAppleCredential

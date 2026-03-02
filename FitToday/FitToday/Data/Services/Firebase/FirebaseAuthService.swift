@@ -17,6 +17,16 @@ actor FirebaseAuthService {
     private let db = Firestore.firestore()
     private var currentNonce: String?
 
+    // MARK: - ID Token
+
+    /// Returns the current user's Firebase ID token for authenticating with external APIs.
+    func getIDToken() async throws -> String {
+        guard let firebaseUser = Auth.auth().currentUser else {
+            throw AuthError.userNotFound
+        }
+        return try await firebaseUser.getIDToken()
+    }
+
     // MARK: - Current User
 
     func getCurrentUser() async throws -> SocialUser? {

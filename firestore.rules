@@ -81,12 +81,16 @@ service cloud.firestore {
 
     // Personal Workouts collection - treinos enviados pelo Personal Trainer
     match /personalWorkouts/{workoutId} {
-      // Users can only read workouts assigned to them
-      allow read: if isAuthenticated() &&
+      // get: single document read — can check resource.data
+      allow get: if isAuthenticated() &&
                     resource.data.userId == request.auth.uid;
 
+      // list: collection query — requires query filter on userId
+      allow list: if isAuthenticated() &&
+                     request.query.limit <= 50 &&
+                     request.auth.uid != null;
+
       // Only trainers can create workouts (via CMS/Admin)
-      // Users cannot create workouts directly
       allow create: if false;
 
       // Users can update their own workouts (mark as viewed)
@@ -96,6 +100,33 @@ service cloud.firestore {
 
       // Users cannot delete workouts
       allow delete: if false;
+    }
+
+    // Trainer-Student relationships collection
+    match /trainerStudents/{relationshipId} {
+      // Students can read their own relationships
+      allow get: if isAuthenticated() &&
+                    (resource.data.studentId == request.auth.uid ||
+                     resource.data.trainerId == request.auth.uid);
+
+      // List: allow authenticated users to query their relationships
+      allow list: if isAuthenticated() &&
+                     request.query.limit <= 50 &&
+                     request.auth.uid != null;
+
+      // Students can create a relationship request
+      allow create: if isAuthenticated() &&
+                       request.resource.data.studentId == request.auth.uid;
+
+      // Both parties can update (accept/reject/cancel)
+      allow update: if isAuthenticated() &&
+                       (resource.data.studentId == request.auth.uid ||
+                        resource.data.trainerId == request.auth.uid);
+
+      // Both parties can delete
+      allow delete: if isAuthenticated() &&
+                       (resource.data.studentId == request.auth.uid ||
+                        resource.data.trainerId == request.auth.uid);
     }
   }
 }

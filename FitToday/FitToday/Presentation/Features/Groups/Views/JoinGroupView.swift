@@ -163,6 +163,7 @@ private final class MockAuthRepository: AuthenticationRepository, @unchecked Sen
     func currentUser() async throws -> SocialUser? {
         SocialUser(id: "test", displayName: "Test User", email: nil, photoURL: nil, authProvider: .email, currentGroupId: nil, privacySettings: PrivacySettings(), createdAt: Date())
     }
+    func getIDToken() async throws -> String { "mock-token" }
     func signInWithApple() async throws -> SocialUser { fatalError() }
     func signInWithGoogle() async throws -> SocialUser { fatalError() }
     func signInWithEmail(_ email: String, password: String) async throws -> SocialUser { fatalError() }
