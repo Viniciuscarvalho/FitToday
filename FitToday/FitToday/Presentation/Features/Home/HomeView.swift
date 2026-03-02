@@ -51,6 +51,21 @@ struct HomeView: View {
                     avgDuration: viewModel.avgDurationMinutes
                 )
 
+                // Personal trainer card (only if flag enabled)
+                if viewModel.isPersonalTrainerEnabled {
+                    PersonalTrainerHomeCard(
+                        state: viewModel.personalTrainerCardState,
+                        onDiscoverTap: { router.push(.personalTrainer, on: .home) },
+                        onDashboardTap: { router.push(.trainerDashboard, on: .home) },
+                        onChatTap: { router.push(.trainerChat, on: .home) },
+                        onWorkoutTap: {
+                            if let workoutId = viewModel.todayWorkoutId {
+                                router.push(.cmsWorkoutDetail(workoutId), on: .home)
+                            }
+                        }
+                    )
+                }
+
                 // Today's workout section
                 if let todayWorkout = viewModel.todayWorkout,
                    case .workoutReady = viewModel.journeyState {
