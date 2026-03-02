@@ -172,3 +172,253 @@ Example of splitting commits:
 - If suggesting multiple commits, it will help you stage and commit the changes separately
 - Always reviews the commit diff to ensure the message matches the changes
 - Do NOT add Claude co-authorship footer to commits
+
+---
+
+Foi encontrado um erro na execução da verificação dos personais, https://github.com/Viniciuscarvalho/FitToday/issues/33, a investigação sugere,
+Revisar as Firestore Security Rules para as coleções personalWorkouts e trainerStudents
+Verificar se o token de autenticação está sendo injetado corretamente no header das requisições ao CMS
+Confirmar se o studentId está mapeado corretamente para o userId esperado pelas regras do Firestore
+Checar se houve alguma mudança recente nas rules ou no middleware de autenticação do CMS
+Realize esse check e faça o commit no PR que foi aberto agora.
+
+---
+
+This session is being continued from a previous conversation that ran out of context. The summary below covers the earlier portion of the conversation.
+
+Analysis:
+Let me analyze the conversation chronologically:
+
+1. **First user message**: The user explains that the first Firebase issue is already done (feature flags enabled at 100% in Firebase panel), and personal trainers should appear in the app when searching. They give a 5-step workflow:
+   1. Fetch all features from GitHub issues
+   2. Each feature has acceptance criteria that must all be met
+   3. After each task, commit
+   4. After all tasks, create a PR
+   5. After merge, close issues
+
+2. **My actions for issues #28-#31**:
+   - Fetched GitHub issues (6 open: #27, #28, #29, #30, #31, #32)
+   - Explored the codebase extensively using a subagent
+   - Read key files: HomeViewModel, AppRouter, TrainerDashboardView, PersonalTrainerViewModel, HomeView, TabRootView, PersonalTrainerView, PersonalTrainerModels
+   - Implemented in the suggested order: #29 → #30 → #31 → #28
+   
+3. **Issue #29 (HomeViewModel)**: 
+   - Added `PersonalTrainerHomeCardState` enum
+   - Added properties: `isPersonalTrainerEnabled`, `personalTrainerCardState`, `todayWorkoutId`
+   - Added `loadPersonalTrainerState()` method
+   - Added `startObservingTrainerRelationship()` method
+   - Integrated parallel loading in all code paths (noProfile, workoutCompleted, workoutReady)
+   - Committed as `3204b93`
+
+4. **Issue #30 (Routes)**:
+   - Added `.trainerDashboard` and `.trainerChat` to `AppRoute` enum
+   - Added deep link support for `fittoday://trainer/dashboard` and `fittoday://trainer/chat`
+   - Refactored `DashboardTab` to public `TrainerDashboardTab` with `.today` case
+   - Added `initialTab` parameter to `TrainerDashboardView` and `PersonalTrainerView`
+   - Registered routes in `TabRootView`
+   - Committed as `3848c97`
+
+5. **Issue #31 (Today tab)**:
+   - Created `TodayWorkoutTabView.swift` with workout display and empty state
+   - Updated `TrainerDashboardView` tab content to include `.today` case
+   - Auto-committed by checkpoint as `2ef0b56`
+
+6. **Issue #28 (Home card)**:
+   - Created `PersonalTrainerHomeCard.swift` with discover and connected states
+   - Integrated in `HomeView` after `DailyStatsCard`
+   - Auto-committed by checkpoint for the component file, then committed HomeView integration as `330d5df`
+
+7. **Build verification**: Ran `xcodebuild` successfully with exit code 0 (only pre-existing warnings)
+
+8. **PR creation**: Created PR #34 at https://github.com/Viniciuscarvalho/FitToday/pull/34
+
+9. **Second user message**: User reports issue #33 was found - a bug where personal trainer listing doesn't appear due to:
+   - Firestore permission errors on `personalWorkouts` and `trainerStudents` collections
+   - CMS API returning 401 Unauthorized
+   - Suggests investigating: Firestore Security Rules, auth token injection, studentId mapping, rules/middleware changes
+   - Asks to do the check and commit to the open PR
+
+10. **My investigation for issue #33**:
+    - Used subagent to explore all relevant files
+    - Read `firestore.rules` - found:
+      - `personalWorkouts`: has `allow read` with `resource.data.userId == request.auth.uid` but this doesn't work for collection list queries
+      - `trainerStudents`: **NO RULE EXISTS AT ALL** - completely missing from firestore.rules
+    - Read `CMSWorkoutService.swift` - found:
+      - `buildRequest()` only sets auth header if `configuration.apiKey` is non-nil
+      - `CMSConfiguration.default` has `apiKey: nil`
+      - No Firebase Auth token is ever fetched or injected
+    - Read `FirebaseAuthService.swift` - no `getIDToken()` method exists
+    - Read `FirebaseAuthenticationRepository.swift` - no token retrieval
+    - Read `CMSWorkoutUseCases.swift` and `CMSWorkoutRepositoryImpl.swift` - confirmed the full call chain has no token passing
+
+    Three root causes identified:
+    1. `trainerStudents` collection has no Firestore rules at all
+    2. `personalWorkouts` `allow read` rule with `resource.data` doesn't work for list queries
+    3. CMS API gets no auth token because `apiKey` is always nil and no Firebase ID token fetching exists
+
+    The assistant was in the middle of investigating and was about to start implementing fixes when the summary was requested.
+
+Files I need to track for the pending fix:
+- `firestore.rules` - needs trainerStudents rules and personalWorkouts fix
+- `CMSWorkoutService.swift` - needs Firebase Auth token injection
+- `FirebaseAuthService.swift` - needs `getIDToken()` method
+- `AuthenticationRepository` protocol - may need token method
+- `AppContainer.swift` - may need to wire up token provider
+
+Summary:
+1. Primary Request and Intent:
+   The user has two main requests:
+   
+   **Request 1 (Completed):** Implement the complete personal trainer flow on the Home screen, following GitHub issues #28-#31 from https://github.com/Viniciuscarvalho/FitToday/issues. The workflow was:
+   - Fetch all features/issues from GitHub
+   - Implement each with all acceptance criteria met
+   - Commit after each task (`/commit`)
+   - Create a PR after all tasks
+   - Close issues after PR is merged
+   
+   **Request 2 (In Progress):** Fix bug from issue #33 — personal trainer listing doesn't appear due to permission errors. The user says: "a investigação sugere: Revisar as Firestore Security Rules para as coleções personalWorkouts e trainerStudents, Verificar se o token de autenticação está sendo injetado corretamente no header das requisições ao CMS, Confirmar se o studentId está mapeado corretamente para o userId esperado pelas regras do Firestore, Checar se houve alguma mudança recente nas rules ou no middleware de autenticação do CMS. Realize esse check e faça o commit no PR que foi aberto agora."
+
+2. Key Technical Concepts:
+   - SwiftUI + MVVM with `@Observable` pattern (iOS 17+, Swift 6.0)
+   - Swinject for dependency injection via `Resolver`
+   - Firebase Firestore Security Rules for collection-level access control
+   - Firebase Remote Config feature flags (`personalTrainerEnabled`, `trainerChatEnabled`, `cmsWorkoutSyncEnabled`)
+   - Firebase Auth ID tokens for CMS API authentication
+   - CMS REST API integration (web-cms-pink.vercel.app)
+   - `async let` parallel loading pattern
+   - `AsyncStream` for real-time Firestore observation
+   - Deep linking (`fittoday://` scheme)
+   - Navigation via `AppRouter` with per-tab `NavigationPath`
+   - Design system tokens: `FitTodayColor`, `FitTodayFont`, `FitTodaySpacing`, `FitTodayRadius`
+
+3. Files and Code Sections:
+
+   - **`/Users/viniciuscarvalho/Documents/FitToday/FitToday/FitToday/Presentation/Features/Home/HomeViewModel.swift`**
+     - Central to Issue #29. Added personal trainer state loading in parallel with programs.
+     - Added `PersonalTrainerHomeCardState` enum:
+       ```swift
+       enum PersonalTrainerHomeCardState: Equatable {
+           case loading
+           case noTrainer
+           case hasTrainer(trainer: PersonalTrainer, todayWorkout: TrainerWorkout?)
+       }
+       ```
+     - Added properties: `isPersonalTrainerEnabled`, `personalTrainerCardState`, `todayWorkoutId`, `trainerObservationTask`
+     - Added `loadPersonalTrainerState()` — resolves `GetCurrentTrainerUseCaseProtocol` and `FetchAssignedWorkoutsUseCaseProtocol`, filters today's workout by `Calendar.current.isDateInToday(scheduledDate)`
+     - Added `startObservingTrainerRelationship()` — uses `useCase.observeRelationship()` AsyncStream
+     - Modified `loadUserData()` to check `personalTrainerEnabled` flag and load PT state in parallel via `async let` in all three code paths (noProfile, workoutCompleted, workoutReady)
+
+   - **`/Users/viniciuscarvalho/Documents/FitToday/FitToday/FitToday/Presentation/Router/AppRouter.swift`**
+     - Central to Issue #30. Added two new routes and deep link support.
+     - Added to `AppRoute`: `.trainerDashboard` and `.trainerChat`
+     - Added to `DeepLink.Destination`: `.trainerDashboard` and `.trainerChat`
+     - Added deep link parsing for `fittoday://trainer/dashboard` and `fittoday://trainer/chat`
+     - Added handling in `handle(deeplink:)` method
+
+   - **`/Users/viniciuscarvalho/Documents/FitToday/FitToday/FitToday/Presentation/Features/PersonalTrainer/TrainerDashboardView.swift`**
+     - Modified for Issues #30 and #31. Refactored tabs and added Today tab.
+     - Renamed `DashboardTab` (private) to `TrainerDashboardTab` (public) with cases: `.today`, `.chat`, `.history`, `.evolution`
+     - Added `initialTab` parameter with default `.today`
+     - Added `TodayWorkoutTabView` in tab content switch
+     - Updated `availableTabs` to always include `.today` first
+
+   - **`/Users/viniciuscarvalho/Documents/FitToday/FitToday/FitToday/Presentation/Features/PersonalTrainer/TodayWorkoutTabView.swift`** (NEW)
+     - Created for Issue #31. Shows today's trainer-assigned workout.
+     - Filters `workouts` by `Calendar.current.isDateInToday(scheduledDate)`
+     - Shows workout header (title, description, info chips for duration/intensity/focus)
+     - Shows exercises preview grouped by phases
+     - Shows empty state with "Ver treinos anteriores" button that calls `onViewHistory`
+     - Navigates to `.cmsWorkoutDetail(workout.id)` via "Ver treino completo" button
+
+   - **`/Users/viniciuscarvalho/Documents/FitToday/FitToday/FitToday/Presentation/Features/PersonalTrainer/Components/PersonalTrainerHomeCard.swift`** (NEW)
+     - Created for Issue #28. Home card with two states.
+     - Takes `PersonalTrainerHomeCardState`, `onDiscoverTap`, `onDashboardTap`, `onChatTap`, `onWorkoutTap` closures
+     - Loading state: simple progress indicator
+     - No trainer: discover card with CTA "Ver personais disponíveis"
+     - Has trainer: shows photo/name, "Treino de hoje disponível" badge, "Ver treino" and "Chat" buttons
+
+   - **`/Users/viniciuscarvalho/Documents/FitToday/FitToday/FitToday/Presentation/Features/Home/HomeView.swift`**
+     - Modified for Issue #28. Integrated `PersonalTrainerHomeCard` after `DailyStatsCard`.
+     - Card is gated by `viewModel.isPersonalTrainerEnabled`
+
+   - **`/Users/viniciuscarvalho/Documents/FitToday/FitToday/FitToday/Presentation/Features/PersonalTrainer/PersonalTrainerView.swift`**
+     - Modified for Issue #30. Added `initialTab: TrainerDashboardTab` parameter (default `.today`), passed through to `TrainerDashboardView`
+
+   - **`/Users/viniciuscarvalho/Documents/FitToday/FitToday/FitToday/Presentation/Root/TabRootView.swift`**
+     - Modified for Issue #30. Registered `.trainerDashboard` and `.trainerChat` routes with appropriate `initialTab`
+
+   - **`/Users/viniciuscarvalho/Documents/FitToday/firestore.rules`** (READ for Issue #33)
+     - Contains rules for `personalWorkouts` but uses `resource.data.userId == request.auth.uid` which fails for list queries
+     - **MISSING** rules for `trainerStudents` collection entirely — this causes permission denied errors
+
+   - **`/Users/viniciuscarvalho/Documents/FitToday/FitToday/FitToday/Data/Services/CMS/CMSWorkoutService.swift`** (READ for Issue #33)
+     - `CMSConfiguration.default` has `apiKey: nil`
+     - `buildRequest()` only sets Authorization header if `apiKey` is non-nil — so no auth header is ever sent
+     - This causes the 401 Unauthorized from the CMS
+
+   - **`/Users/viniciuscarvalho/Documents/FitToday/FitToday/FitToday/Data/Services/Firebase/FirebaseAuthService.swift`** (READ for Issue #33)
+     - Has no `getIDToken()` method — no way to retrieve Firebase Auth ID token for CMS requests
+
+   - **`/Users/viniciuscarvalho/Documents/FitToday/FitToday/FitToday/Data/Repositories/FirebaseAuthenticationRepository.swift`** (READ for Issue #33)
+     - Wraps `FirebaseAuthService`, no token retrieval method
+
+   - **`/Users/viniciuscarvalho/Documents/FitToday/FitToday/FitToday/Domain/Protocols/SocialRepositories.swift`** (READ for Issue #33)
+     - `AuthenticationRepository` protocol — has no `getIDToken()` method
+
+   - **`/Users/viniciuscarvalho/Documents/FitToday/FitToday/FitToday/Domain/UseCases/CMSWorkoutUseCases.swift`** (READ for Issue #33)
+     - `FetchCMSWorkoutsUseCase` uses `authRepository.currentUser()` only for getting `user.id`, not for getting a Bearer token
+
+   - **`/Users/viniciuscarvalho/Documents/FitToday/FitToday/FitToday/Data/Repositories/CMSWorkoutRepositoryImpl.swift`** (READ for Issue #33)
+     - Simple passthrough to `CMSWorkoutService`, no auth token handling
+
+   - **`/Users/viniciuscarvalho/Documents/FitToday/FitToday/FitToday/Domain/Entities/PersonalTrainerModels.swift`** (READ)
+     - Contains `PersonalTrainer`, `TrainerStudentRelationship`, `TrainerConnectionStatus`, `TrainerWorkout`, `TrainerWorkoutSchedule` models
+
+   - **`/Users/viniciuscarvalho/Documents/FitToday/FitToday/FitToday/Presentation/Features/PersonalTrainer/PersonalTrainerViewModel.swift`** (READ)
+     - Existing ViewModel with `@Observable @MainActor`, uses Swinject resolver, checks feature flags
+
+4. Errors and Fixes:
+   - **SourceKit transient errors**: Multiple "Cannot find type" and "No such module 'Swinject'" errors appeared during editing. These are false positives from SourceKit not having full module resolution in the editing context. Ignored them and verified with actual `xcodebuild` which succeeded with exit code 0.
+   - **Auto-checkpoint commits**: The system auto-committed `TodayWorkoutTabView.swift` and `PersonalTrainerHomeCard.swift` via checkpoint commits before I could commit them with proper messages. This resulted in commits `2ef0b56` and `3c851b2` with auto-generated messages. The actual content was correct, just the commit messages are suboptimal.
+   - **Simulator not found**: First build attempt failed because `iPhone 16` simulator didn't exist. Fixed by using `iPhone 17 Pro` which was available.
+   - **Empty commit**: After the auto-checkpoint committed the files, my manual commit for Issue #31 failed with "nothing to commit". Proceeded since the content was already committed.
+
+5. Problem Solving:
+   - **Completed**: Issues #28-#31 all implemented, built successfully, PR #34 created
+   - **In Progress (Issue #33)**: Three root causes identified for the permissions bug:
+     1. **`trainerStudents` Firestore rules missing**: No rule at all in `firestore.rules` for this collection → all access denied by default
+     2. **`personalWorkouts` Firestore rules**: `allow read` with `resource.data.userId` check doesn't work for collection list queries (Firestore can't evaluate document data before running the query)
+     3. **CMS 401 Unauthorized**: `CMSConfiguration.default.apiKey` is `nil`, and there is no Firebase Auth ID token fetching anywhere in the CMS service layer. `FirebaseAuthService` has no `getIDToken()` method. The entire request pipeline has zero authentication.
+
+6. All User Messages:
+   - **Message 1**: "A primeira issue que está sendo feita do Firebase já está realizada, no painel já está habilitado para 100% e deveriam aparecer os personais disponíveis na aplicação quando fizesse uma busca e tivesse visto essa integração com o CMS. 1. Buscar todas as features a serem executadas, https://github.com/Viniciuscarvalho/FitToday/issues 2. Cada uma das features possui detalhamento e os critérios de aceite bem definidos, esses critérios de aceite devem ser todos preenchidos em todas as tasks a serem realizadas 3. Ao finalizar cada uma das tasks deve realizar o /commit para deixar tudo bem segmentado e caso de problema consiga voltar 4. Após a finalização de todas as tasks crie o PR 5. Após a conclusão e o PR tenha sido mergeado, as issues devem ser fechadas."
+   - **Message 2**: "Foi encontrado um erro na execução da verificação dos personais, https://github.com/Viniciuscarvalho/FitToday/issues/33, a investigação sugere, Revisar as Firestore Security Rules para as coleções personalWorkouts e trainerStudents Verificar se o token de autenticação está sendo injetado corretamente no header das requisições ao CMS Confirmar se o studentId está mapeado corretamente para o userId esperado pelas regras do Firestore Checar se houve alguma mudança recente nas rules ou no middleware de autenticação do CMS Realize esse check e faça o commit no PR que foi aberto agora."
+
+7. Pending Tasks:
+   - **Fix Issue #33**: Implement the three fixes identified during investigation and commit to PR #34:
+     1. Add `trainerStudents` security rules to `firestore.rules`
+     2. Fix `personalWorkouts` rules for list queries
+     3. Add Firebase Auth ID token fetching and injection into CMS requests (requires changes to `FirebaseAuthService`, `AuthenticationRepository` protocol, `CMSWorkoutService`, and likely `AppContainer` wiring)
+   - **Close issues**: After PR is merged, issues #28-#31 and #33 should be closed (via GitHub auto-close from commit messages)
+
+8. Current Work:
+   I was investigating Issue #33 — the permissions bug preventing personal trainer listings from appearing. I had just finished reading all the relevant files to understand the three root causes:
+   
+   - Read `firestore.rules` — confirmed `trainerStudents` has NO rules and `personalWorkouts` has a problematic `resource.data` check for list queries
+   - Read `CMSWorkoutService.swift` — confirmed `apiKey: nil` and no token injection
+   - Read `FirebaseAuthService.swift` — confirmed no `getIDToken()` method
+   - Read `FirebaseAuthenticationRepository.swift`, `SocialRepositories.swift`, `CMSWorkoutUseCases.swift`, `CMSWorkoutRepositoryImpl.swift` — confirmed the full chain has no auth token passing
+   
+   I was about to start implementing the actual fixes when the summary was requested. The last file I read was `CMSWorkoutRepositoryImpl.swift`.
+
+9. Optional Next Step:
+   Implement the three fixes for Issue #33 and commit to PR #34, as the user explicitly requested: "Realize esse check e faça o commit no PR que foi aberto agora."
+   
+   The fixes needed are:
+   1. **`firestore.rules`**: Add `trainerStudents` rules allowing read when `resource.data.studentId == request.auth.uid` or `resource.data.trainerId == request.auth.uid`. Fix `personalWorkouts` by separating `get` and `list` rules.
+   2. **`FirebaseAuthService.swift`**: Add a `getIDToken()` method that calls `Auth.auth().currentUser?.getIDToken()`
+   3. **`CMSWorkoutService.swift`**: Modify to accept and inject a Firebase Auth token into the `Authorization` header via `buildRequest()`, replacing the static `apiKey` approach. This likely requires adding a token provider protocol/closure that `CMSWorkoutService` calls before each request.
+   4. Wire up the token provider through `AppContainer.swift` so the CMS service gets live Firebase tokens.
+
+If you need specific details from before compaction (like exact code snippets, error messages, or content you generated), read the full transcript at: /Users/viniciuscarvalho/.REDACTED.jsonl
+Please continue the conversation from where we left off without asking the user any further questions. Continue with the last task that you were asked to work on.
