@@ -15,6 +15,7 @@
     "FitToday/FitToday/Data/Models/CMSWorkoutModels.swift",
     "FitToday/FitToday/Data/Repositories/FirebaseAuthenticationRepository.swift",
     "FitToday/FitToday/Data/Repositories/StoreKitEntitlementRepository.swift",
+    "FitToday/FitToday/Data/Services/CMS/CMSTrainerService.swift",
     "FitToday/FitToday/Data/Services/CMS/CMSWorkoutService.swift",
     "FitToday/FitToday/Data/Services/Firebase/FirebaseAuthService.swift",
     "FitToday/FitToday/Data/Services/PDFCacheService.swift",
@@ -91,10 +92,10 @@
     }
   ],
   "token_usage": {
-    "input_tokens": 4841,
-    "cache_creation_tokens": 309339,
-    "cache_read_tokens": 14809051,
-    "output_tokens": 14744,
-    "api_call_count": 138
+    "input_tokens": 3226,
+    "cache_creation_tokens": 237501,
+    "cache_read_tokens": 11617349,
+    "output_tokens": 8055,
+    "api_call_count": 104
   }
 }
