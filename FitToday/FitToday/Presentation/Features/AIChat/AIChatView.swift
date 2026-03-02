@@ -2,7 +2,7 @@
 //  AIChatView.swift
 //  FitToday
 //
-//  Main AI chat screen with feature gating for FitPal.
+//  Main AI chat screen with feature gating for FitOrb.
 //
 
 import SwiftUI
@@ -15,6 +15,7 @@ struct AIChatView: View {
     @Environment(AppRouter.self) private var router
     @State private var viewModel: AIChatViewModel
     @State private var entitlement: ProEntitlement = .free
+    @State private var showClearConfirmation = false
 
     private let entitlementRepository: EntitlementRepository?
 
@@ -28,39 +29,61 @@ struct AIChatView: View {
         ZStack {
             FitTodayColor.background.ignoresSafeArea()
 
-            if entitlement.isPro {
-                proChatView
-            } else {
-                upsellView
+            VStack(spacing: 0) {
+                if viewModel.messages.isEmpty {
+                    emptyStateView
+                } else {
+                    messagesListView
+                }
+
+                inputBar
             }
         }
-        .navigationTitle("FitPal")
+        .navigationTitle("fitorb.title".localized)
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                HStack(spacing: FitTodaySpacing.sm) {
+                    if !viewModel.messages.isEmpty {
+                        Button {
+                            showClearConfirmation = true
+                        } label: {
+                            Image(systemName: "trash")
+                                .foregroundStyle(FitTodayColor.textSecondary)
+                        }
+                    }
+                    Button {
+                        router.push(.apiKeySettings)
+                    } label: {
+                        Image(systemName: "gearshape")
+                            .foregroundStyle(FitTodayColor.textSecondary)
+                    }
+                }
+            }
+        }
         .task {
             await loadEntitlement()
+            await viewModel.loadHistory()
         }
-        .alert("Error", isPresented: .init(
-            get: { viewModel.errorMessage != nil },
-            set: { if !$0 { viewModel.clearError() } }
-        )) {
-            Button("OK") { viewModel.clearError() }
+        .alert(
+            viewModel.errorMessage?.title ?? "",
+            isPresented: .init(
+                get: { viewModel.errorMessage != nil },
+                set: { if !$0 { viewModel.errorMessage = nil } }
+            )
+        ) {
+            Button("OK") { viewModel.errorMessage = nil }
         } message: {
-            Text(viewModel.errorMessage ?? "")
+            Text(viewModel.errorMessage?.message ?? "")
         }
-    }
-
-    // MARK: - Pro Chat View
-
-    @ViewBuilder
-    private var proChatView: some View {
-        VStack(spacing: 0) {
-            if viewModel.messages.isEmpty {
-                emptyStateView
-            } else {
-                messagesListView
+        .confirmationDialog(
+            "fitorb.clear_chat_confirm".localized,
+            isPresented: $showClearConfirmation,
+            titleVisibility: .visible
+        ) {
+            Button("fitorb.clear_chat".localized, role: .destructive) {
+                Task { await viewModel.clearHistory() }
             }
-
-            inputBar
         }
     }
 
@@ -71,20 +94,39 @@ struct AIChatView: View {
             VStack(spacing: FitTodaySpacing.xl) {
                 Spacer(minLength: FitTodaySpacing.xl)
 
-                FitPalOrbView()
+                FitOrbView()
+
+                // API key missing banner
+                if !viewModel.isChatAvailable {
+                    HStack(spacing: FitTodaySpacing.sm) {
+                        Image(systemName: "key.fill")
+                            .foregroundStyle(FitTodayColor.brandPrimary)
+                        Text("fitorb.error_no_api_key".localized)
+                            .font(FitTodayFont.ui(size: 13, weight: .medium))
+                            .foregroundStyle(FitTodayColor.textSecondary)
+                    }
+                    .padding(FitTodaySpacing.md)
+                    .background(FitTodayColor.surfaceElevated)
+                    .clipShape(RoundedRectangle(cornerRadius: FitTodayRadius.md))
+                    .padding(.horizontal, FitTodaySpacing.md)
+                }
 
                 // Quick action chips
                 VStack(spacing: FitTodaySpacing.sm) {
-                    Text("Try asking:")
+                    Text("fitorb.try_asking".localized)
                         .font(FitTodayFont.ui(size: 14, weight: .medium))
                         .foregroundStyle(FitTodayColor.textSecondary)
 
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: FitTodaySpacing.sm) {
-                            ForEach(AIChatViewModel.quickActions, id: \.self) { action in
+                            ForEach(viewModel.quickActions, id: \.self) { action in
                                 Button {
-                                    viewModel.inputText = action
-                                    viewModel.sendMessage()
+                                    if entitlement.isPro {
+                                        viewModel.inputText = action
+                                        viewModel.sendMessage()
+                                    } else {
+                                        router.push(.paywall)
+                                    }
                                 } label: {
                                     Text(action)
                                         .font(FitTodayFont.ui(size: 14, weight: .semiBold))
@@ -120,23 +162,40 @@ struct AIChatView: View {
                         HStack {
                             ProgressView()
                                 .tint(FitTodayColor.brandPrimary)
-                            Text("Thinking...")
+                            Text("fitorb.thinking".localized)
                                 .font(FitTodayFont.ui(size: 14, weight: .medium))
                                 .foregroundStyle(FitTodayColor.textSecondary)
                             Spacer()
                         }
                         .padding(.horizontal, FitTodaySpacing.md)
                         .id("loading")
+                    } else if viewModel.isTyping {
+                        HStack(spacing: 4) {
+                            ForEach(0..<3, id: \.self) { i in
+                                Circle()
+                                    .fill(FitTodayColor.brandPrimary)
+                                    .frame(width: 6, height: 6)
+                                    .opacity(0.6)
+                                    .animation(
+                                        .easeInOut(duration: 0.5)
+                                            .repeatForever()
+                                            .delay(Double(i) * 0.15),
+                                        value: viewModel.isTyping
+                                    )
+                            }
+                            Spacer()
+                        }
+                        .padding(.horizontal, FitTodaySpacing.md)
+                        .id("typing")
                     }
                 }
                 .padding(.vertical, FitTodaySpacing.sm)
             }
             .onChange(of: viewModel.messages.count) {
-                if let lastMessage = viewModel.messages.last {
-                    withAnimation {
-                        proxy.scrollTo(lastMessage.id, anchor: .bottom)
-                    }
-                }
+                scrollToBottom(proxy: proxy)
+            }
+            .onChange(of: viewModel.messages.last?.content) {
+                scrollToBottom(proxy: proxy)
             }
         }
     }
@@ -166,7 +225,7 @@ struct AIChatView: View {
 
     private var inputBar: some View {
         HStack(spacing: FitTodaySpacing.sm) {
-            TextField("Ask FitPal...", text: $viewModel.inputText)
+            TextField("fitorb.input_placeholder".localized, text: $viewModel.inputText)
                 .font(FitTodayFont.ui(size: 16, weight: .medium))
                 .foregroundStyle(FitTodayColor.textPrimary)
                 .padding(.horizontal, FitTodaySpacing.md)
@@ -174,11 +233,19 @@ struct AIChatView: View {
                 .background(FitTodayColor.surfaceElevated)
                 .clipShape(RoundedRectangle(cornerRadius: FitTodayRadius.lg))
                 .onSubmit {
-                    viewModel.sendMessage()
+                    if entitlement.isPro {
+                        viewModel.sendMessage()
+                    } else {
+                        router.push(.paywall)
+                    }
                 }
 
             Button {
-                viewModel.sendMessage()
+                if entitlement.isPro {
+                    viewModel.sendMessage()
+                } else {
+                    router.push(.paywall)
+                }
             } label: {
                 Image(systemName: "arrow.up.circle.fill")
                     .font(.system(size: 32))
@@ -188,62 +255,18 @@ struct AIChatView: View {
                             : FitTodayColor.brandPrimary
                     )
             }
-            .disabled(viewModel.inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || viewModel.isLoading)
+            .disabled(viewModel.inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || viewModel.isLoading || viewModel.isTyping)
         }
         .padding(.horizontal, FitTodaySpacing.md)
         .padding(.vertical, FitTodaySpacing.sm)
         .background(FitTodayColor.surface)
     }
 
-    // MARK: - Upsell View
-
-    private var upsellView: some View {
-        ScrollView {
-            VStack(spacing: FitTodaySpacing.xl) {
-                Spacer(minLength: FitTodaySpacing.xl)
-
-                FitPalOrbView()
-
-                // Benefits list
-                VStack(alignment: .leading, spacing: FitTodaySpacing.md) {
-                    benefitRow(icon: "brain.head.profile", text: "Personalized workout plans")
-                    benefitRow(icon: "figure.run", text: "Exercise suggestions & alternatives")
-                    benefitRow(icon: "heart.text.square", text: "Recovery & nutrition tips")
-                    benefitRow(icon: "clock.arrow.circlepath", text: "Warm-up & cool-down routines")
-                }
-                .padding(.horizontal, FitTodaySpacing.lg)
-
-                // Upgrade button
-                Button {
-                    router.push(.paywall)
-                } label: {
-                    Text("Upgrade to Pro")
-                        .font(FitTodayFont.ui(size: 18, weight: .bold))
-                        .foregroundStyle(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, FitTodaySpacing.md)
-                        .background(FitTodayColor.gradientPrimary)
-                        .clipShape(RoundedRectangle(cornerRadius: FitTodayRadius.md))
-                }
-                .padding(.horizontal, FitTodaySpacing.lg)
-
-                Spacer(minLength: FitTodaySpacing.xl)
+    private func scrollToBottom(proxy: ScrollViewProxy) {
+        if let lastMessage = viewModel.messages.last {
+            withAnimation {
+                proxy.scrollTo(lastMessage.id, anchor: .bottom)
             }
-        }
-    }
-
-    // MARK: - Helpers
-
-    private func benefitRow(icon: String, text: String) -> some View {
-        HStack(spacing: FitTodaySpacing.md) {
-            Image(systemName: icon)
-                .font(.system(size: 20))
-                .foregroundStyle(FitTodayColor.brandPrimary)
-                .frame(width: 32)
-
-            Text(text)
-                .font(FitTodayFont.ui(size: 16, weight: .medium))
-                .foregroundStyle(FitTodayColor.textPrimary)
         }
     }
 

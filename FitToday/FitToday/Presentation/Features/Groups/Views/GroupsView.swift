@@ -236,6 +236,7 @@ private final class MockUserRepository: UserRepository, @unchecked Sendable {
 
 private final class MockAuthRepository: AuthenticationRepository, @unchecked Sendable {
     func currentUser() async throws -> SocialUser? { nil }
+    func getIDToken() async throws -> String { "mock-token" }
     func signInWithApple() async throws -> SocialUser { fatalError() }
     func signInWithGoogle() async throws -> SocialUser { fatalError() }
     func signInWithEmail(_ email: String, password: String) async throws -> SocialUser { fatalError() }

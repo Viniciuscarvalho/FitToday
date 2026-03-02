@@ -85,6 +85,8 @@ struct RecommendedProgramsSection: View {
             return LinearGradient(colors: [.cyan, .blue.opacity(0.8)], startPoint: .topLeading, endPoint: .bottomTrailing)
         case .core:
             return LinearGradient(colors: [.green, .teal.opacity(0.8)], startPoint: .topLeading, endPoint: .bottomTrailing)
+        case .endurance:
+            return LinearGradient(colors: [.purple, .indigo.opacity(0.8)], startPoint: .topLeading, endPoint: .bottomTrailing)
         }
     }
 }

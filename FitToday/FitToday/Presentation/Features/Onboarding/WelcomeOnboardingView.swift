@@ -100,7 +100,7 @@ struct WelcomeOnboardingView: View {
                 .multilineTextAlignment(.center)
 
             Text(page.description.localized)
-                .font(FitTodayFont.ui(size: 16, weight: .regular))
+                .font(FitTodayFont.ui(size: 16, weight: .medium))
                 .foregroundStyle(FitTodayColor.textSecondary)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, FitTodaySpacing.xl)

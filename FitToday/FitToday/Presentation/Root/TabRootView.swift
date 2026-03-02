@@ -27,7 +27,7 @@ struct TabRootView: View {
                 WorkoutTabView(resolver: resolver)
             }
 
-            tabView(for: .fitpal) {
+            tabView(for: .fitorb) {
                 AIChatView(resolver: resolver)
             }
 
@@ -172,6 +172,10 @@ struct TabRootView: View {
                     message: "Unable to load workout builder."
                 )
             }
+        case .trainerDashboard:
+            PersonalTrainerView(resolver: resolver, initialTab: .today)
+        case .trainerChat:
+            PersonalTrainerView(resolver: resolver, initialTab: .chat)
         case .personalTrainer:
             PersonalTrainerView(resolver: resolver)
         case .trainerSearch:
@@ -181,8 +185,6 @@ struct TabRootView: View {
             CMSWorkoutDetailView(workoutId: workoutId, resolver: resolver)
         case .cmsWorkoutFeedback(let workoutId):
             CMSWorkoutFeedbackView(workoutId: workoutId, resolver: resolver)
-        case .libraryExplore:
-            LibraryView(resolver: resolver)
         case .aiChat:
             AIChatView(resolver: resolver)
         }

@@ -32,6 +32,9 @@ enum ProFeature: String, CaseIterable {
     // Social
     case simultaneousChallenges = "simultaneous_challenges"
 
+    // AI Chat
+    case aiChat = "ai_chat"
+
     var displayName: String {
         switch self {
         case .aiWorkoutGeneration: return "Treinos personalizados por IA"
@@ -43,6 +46,7 @@ enum ProFeature: String, CaseIterable {
         case .personalTrainer: return "Personal Trainer"
         case .trainerWorkouts: return "Treinos do Personal"
         case .simultaneousChallenges: return "Desafios simultâneos ilimitados"
+        case .aiChat: return "Assistente IA FitOrb"
         }
     }
 }
@@ -103,6 +107,9 @@ struct EntitlementPolicy {
     /// Número máximo de desafios simultâneos para Free
     static let freeChallengesLimit = 5
 
+    /// Numero de mensagens AI chat por dia para usuarios Free
+    static let freeAIChatMessagesPerDay = 5
+
     // MARK: - Verificação de Acesso
 
     /// Verifica se o usuário pode acessar uma feature
@@ -129,6 +136,8 @@ struct EntitlementPolicy {
                     return .limitReached(remaining: 0, limit: proAIWorkoutsPerDay)
                 }
                 return .allowed
+            case .aiChat:
+                return .allowed
             default:
                 return .allowed
             }
@@ -148,6 +157,12 @@ struct EntitlementPolicy {
             }
             return .allowed
 
+        case .aiChat:
+            if usageCount >= freeAIChatMessagesPerDay {
+                return .limitReached(remaining: 0, limit: freeAIChatMessagesPerDay)
+            }
+            return .allowed
+
         case .aiExerciseSubstitution,
              .unlimitedHistory,
              .advancedDOMSAdjustment,
@@ -162,7 +177,7 @@ struct EntitlementPolicy {
     /// Verifica se uma feature é totalmente bloqueada para Free
     static func isProOnly(_ feature: ProFeature) -> Bool {
         switch feature {
-        case .aiWorkoutGeneration, .simultaneousChallenges:
+        case .aiWorkoutGeneration, .simultaneousChallenges, .aiChat:
             return false // Free tem acesso limitado
         case .aiExerciseSubstitution,
              .unlimitedHistory,
@@ -190,6 +205,12 @@ struct EntitlementPolicy {
             } else {
                 return (freeChallengesLimit, "simultâneos")
             }
+        case .aiChat:
+            if entitlement.isPro {
+                return nil // ilimitado
+            } else {
+                return (freeAIChatMessagesPerDay, "dia")
+            }
         default:
             return nil
         }
@@ -206,7 +227,8 @@ struct EntitlementPolicy {
     static var limitedFreeFeatures: [(feature: ProFeature, freeLimit: String, proLimit: String)] {
         [
             (.aiWorkoutGeneration, "1/semana", "2/dia"),
-            (.simultaneousChallenges, "5", "∞")
+            (.simultaneousChallenges, "5", "∞"),
+            (.aiChat, "5/dia", "ilimitado")
         ]
     }
 }

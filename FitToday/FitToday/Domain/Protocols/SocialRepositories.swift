@@ -11,6 +11,7 @@ import Foundation
 
 protocol AuthenticationRepository: Sendable {
     func currentUser() async throws -> SocialUser?
+    func getIDToken() async throws -> String
     func signInWithApple() async throws -> SocialUser
     func signInWithGoogle() async throws -> SocialUser
     func signInWithEmail(_ email: String, password: String) async throws -> SocialUser

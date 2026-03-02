@@ -9,6 +9,16 @@ import Foundation
 import SwiftUI
 import Swinject
 
+/// Estado do card de personal trainer na Home.
+enum PersonalTrainerHomeCardState: Equatable {
+    /// Carregando dados do personal trainer.
+    case loading
+    /// Usuário não tem personal conectado.
+    case noTrainer
+    /// Usuário tem personal conectado (com ou sem treino hoje).
+    case hasTrainer(trainer: PersonalTrainer, todayWorkout: TrainerWorkout?)
+}
+
 /// Estado da jornada do usuário na Home.
 enum HomeJourneyState: Equatable {
     /// Carregando dados iniciais.
@@ -33,6 +43,12 @@ enum HomeJourneyState: Equatable {
     private(set) var dailyWorkoutState: DailyWorkoutState = DailyWorkoutState()
     private(set) var historyEntries: [WorkoutHistoryEntry] = []
     private(set) var isAiWorkoutEnabled = true
+    private(set) var isPersonalTrainerEnabled = false
+    private(set) var personalTrainerCardState: PersonalTrainerHomeCardState = .loading
+    private(set) var todayWorkoutId: String?
+    private(set) var todayWorkout: ProgramWorkout?
+    private(set) var todayProgramName: String?
+    private(set) var isLoadingWorkout: Bool = false
     var errorMessage: ErrorMessage? // ErrorPresenting protocol
 
     // User info - stored properties for proper @Observable tracking
@@ -41,6 +57,7 @@ enum HomeJourneyState: Equatable {
 
     private let resolver: Resolver
     private let dailyStateManager = DailyWorkoutStateManager.shared
+    private var trainerObservationTask: Task<Void, Never>?
 
     init(resolver: Resolver) {
         self.resolver = resolver
@@ -169,6 +186,33 @@ enum HomeJourneyState: Equatable {
         return days
     }
 
+    var weeklyTarget: Int {
+        userProfile?.weeklyFrequency ?? 4
+    }
+
+    var totalSetsThisWeek: Int {
+        let calendar = Calendar.current
+        let now = Date()
+        guard let weekStart = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: now)) else {
+            return 0
+        }
+        return historyEntries
+            .filter { $0.date >= weekStart }
+            .reduce(0) { $0 + ($1.completedExercises?.count ?? 0) }
+    }
+
+    var avgDurationMinutes: Int {
+        let calendar = Calendar.current
+        let now = Date()
+        guard let weekStart = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: now)) else {
+            return 0
+        }
+        let weekEntries = historyEntries.filter { $0.date >= weekStart }
+        guard !weekEntries.isEmpty else { return 0 }
+        let totalMinutes = weekEntries.reduce(0) { $0 + ($1.durationMinutes ?? 0) }
+        return totalMinutes / weekEntries.count
+    }
+
     var ctaTitle: String {
         switch journeyState {
         case .loading:
@@ -203,6 +247,9 @@ enum HomeJourneyState: Equatable {
     func onAppear() {
         Task {
             await loadUserData()
+            if isPersonalTrainerEnabled {
+                startObservingTrainerRelationship()
+            }
         }
     }
 
@@ -216,6 +263,7 @@ enum HomeJourneyState: Equatable {
         // Check feature flags
         if let featureFlags = resolver.resolve(FeatureFlagChecking.self) {
             isAiWorkoutEnabled = await featureFlags.isFeatureEnabled(.aiWorkoutGenerationEnabled)
+            isPersonalTrainerEnabled = await featureFlags.isFeatureEnabled(.personalTrainerEnabled)
         }
 
         // Load user info from UserDefaults or Firebase Auth
@@ -244,25 +292,31 @@ enum HomeJourneyState: Equatable {
 
             guard let profile = loadedProfile else {
                 journeyState = .noProfile
-                // Carregar programas mesmo sem perfil
-                await loadProgramsAndWorkouts(profile: nil)
+                // Carregar programas e personal trainer mesmo sem perfil
+                async let programsTask: Void = loadProgramsAndWorkouts(profile: nil)
+                async let ptTask: Void = loadPersonalTrainerState()
+                _ = await (programsTask, ptTask)
                 return
             }
 
             // Atualizar estado do treino diário
             dailyWorkoutState = dailyStateManager.loadTodayState()
-            
+
             // Verificar se já concluiu/pulou o treino hoje
             if dailyWorkoutState.isFinished {
                 journeyState = .workoutCompleted(profile: profile)
-                await loadProgramsAndWorkouts(profile: profile)
+                async let programsTask: Void = loadProgramsAndWorkouts(profile: profile)
+                async let ptTask: Void = loadPersonalTrainerState()
+                _ = await (programsTask, ptTask)
                 return
             }
 
             journeyState = .workoutReady(profile: profile)
 
-            // Carregar programas e treinos recomendados
-            await loadProgramsAndWorkouts(profile: profile)
+            // Carregar programas e personal trainer em paralelo
+            async let programsTask: Void = loadProgramsAndWorkouts(profile: profile)
+            async let personalTrainerTask: Void = loadPersonalTrainerState()
+            _ = await (programsTask, personalTrainerTask)
 
         } catch {
             journeyState = .error(message: "Não foi possível carregar seus dados.")
@@ -299,6 +353,94 @@ enum HomeJourneyState: Equatable {
                 #if DEBUG
                 print("[Home] Erro ao carregar programas: \(error)")
                 #endif
+            }
+        }
+
+        // Load today's workout from the best recommended program
+        await loadTodayWorkout()
+    }
+
+    private func loadTodayWorkout() async {
+        guard let bestProgram = topPrograms.first else { return }
+
+        todayProgramName = bestProgram.shortName
+
+        guard let programRepo = resolver.resolve(ProgramRepository.self),
+              let workoutRepo = resolver.resolve(WgerProgramWorkoutRepository.self) else {
+            return
+        }
+
+        let useCase = LoadProgramWorkoutsUseCase(
+            programRepository: programRepo,
+            workoutRepository: workoutRepo
+        )
+
+        isLoadingWorkout = true
+        defer { isLoadingWorkout = false }
+
+        do {
+            let workouts = try await useCase.execute(programId: bestProgram.id)
+            if !workouts.isEmpty {
+                let index = workoutsThisWeek % workouts.count
+                todayWorkout = workouts[index]
+            }
+        } catch {
+            #if DEBUG
+            print("[Home] Erro ao carregar treino do dia: \(error)")
+            #endif
+        }
+    }
+
+    // MARK: - Personal Trainer
+
+    private func loadPersonalTrainerState() async {
+        guard isPersonalTrainerEnabled else {
+            personalTrainerCardState = .noTrainer
+            return
+        }
+
+        guard let getCurrentTrainerUseCase = resolver.resolve(GetCurrentTrainerUseCaseProtocol.self) else {
+            personalTrainerCardState = .noTrainer
+            return
+        }
+
+        do {
+            guard let result = try await getCurrentTrainerUseCase.execute() else {
+                personalTrainerCardState = .noTrainer
+                return
+            }
+
+            let trainer = result.trainer
+
+            // Buscar treino do dia se conectado
+            var todayTrainerWorkout: TrainerWorkout?
+            if result.relationship.status == .active,
+               let fetchWorkoutsUseCase = resolver.resolve(FetchAssignedWorkoutsUseCaseProtocol.self) {
+                let workouts = try await fetchWorkoutsUseCase.execute()
+                todayTrainerWorkout = workouts.first { workout in
+                    guard let scheduledDate = workout.schedule.scheduledDate else { return false }
+                    return Calendar.current.isDateInToday(scheduledDate)
+                }
+                todayWorkoutId = todayTrainerWorkout?.id
+            }
+
+            personalTrainerCardState = .hasTrainer(trainer: trainer, todayWorkout: todayTrainerWorkout)
+
+        } catch {
+            personalTrainerCardState = .noTrainer
+            #if DEBUG
+            print("[Home] Personal trainer state load failed: \(error)")
+            #endif
+        }
+    }
+
+    func startObservingTrainerRelationship() {
+        trainerObservationTask?.cancel()
+        trainerObservationTask = Task {
+            guard let useCase = resolver.resolve(GetCurrentTrainerUseCaseProtocol.self) else { return }
+            for await _ in useCase.observeRelationship() {
+                guard !Task.isCancelled else { break }
+                await loadPersonalTrainerState()
             }
         }
     }

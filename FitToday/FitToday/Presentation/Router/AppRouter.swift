@@ -11,7 +11,7 @@ import SwiftUI
 enum AppTab: Hashable, CaseIterable {
     case home
     case workout
-    case fitpal
+    case fitorb
     case activity
     case profile
 
@@ -19,7 +19,7 @@ enum AppTab: Hashable, CaseIterable {
         switch self {
         case .home: return "tab.home".localized
         case .workout: return "tab.workout".localized
-        case .fitpal: return "tab.fitpal".localized
+        case .fitorb: return "tab.fitorb".localized
         case .activity: return "tab.activity".localized
         case .profile: return "tab.profile".localized
         }
@@ -29,7 +29,7 @@ enum AppTab: Hashable, CaseIterable {
         switch self {
         case .home: return "house.fill"
         case .workout: return "dumbbell.fill"
-        case .fitpal: return "sparkles"
+        case .fitorb: return "sparkles"
         case .activity: return "chart.bar.fill"
         case .profile: return "person.fill"
         }
@@ -61,10 +61,11 @@ enum AppRoute: Hashable {
     case customWorkoutBuilder(UUID?)  // Create or edit custom workout (nil = new)
     case personalTrainer  // Personal Trainer connection and workouts
     case trainerSearch  // Search for personal trainers
+    case trainerDashboard  // Trainer dashboard (tabs: Today, Chat, History)
+    case trainerChat  // Direct access to trainer chat tab
     case cmsWorkoutDetail(String)  // CMS workout detail by ID
     case cmsWorkoutFeedback(String)  // CMS workout feedback by ID
-    case libraryExplore  // Exercise library catalog
-    case aiChat  // AI Fitness Assistant (FitPal)
+    case aiChat  // AI Fitness Assistant (FitOrb)
 }
 
 struct DeepLink {
@@ -74,6 +75,8 @@ struct DeepLink {
         case setup
         case paywall
         case groupInvite(groupId: String)
+        case trainerDashboard
+        case trainerChat
     }
 
     let destination: Destination
@@ -91,6 +94,20 @@ struct DeepLink {
             let groupId = String(path.dropFirst("/invite/".count))
             destination = .groupInvite(groupId: groupId)
             return
+        }
+
+        // Handle trainer routes: fittoday://trainer/dashboard, fittoday://trainer/chat
+        if host == "trainer" {
+            switch path.lowercased() {
+            case "/dashboard":
+                destination = .trainerDashboard
+                return
+            case "/chat":
+                destination = .trainerChat
+                return
+            default:
+                break
+            }
         }
 
         // Handle other routes
@@ -170,6 +187,12 @@ protocol AppRouting: AnyObject {
         case .groupInvite(let groupId):
             select(tab: .home)
             push(.groupInvite(groupId: groupId), on: .home)
+        case .trainerDashboard:
+            select(tab: .home)
+            push(.trainerDashboard, on: .home)
+        case .trainerChat:
+            select(tab: .home)
+            push(.trainerChat, on: .home)
         }
     }
 

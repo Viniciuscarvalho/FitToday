@@ -13,12 +13,14 @@ actor CMSTrainerService {
 
     private let session: URLSession
     private let configuration: CMSConfiguration
+    private let tokenProvider: CMSTokenProvider?
     private let decoder: JSONDecoder
 
     // MARK: - Initialization
 
-    init(configuration: CMSConfiguration = .default) {
+    init(configuration: CMSConfiguration = .default, tokenProvider: CMSTokenProvider? = nil) {
         self.configuration = configuration
+        self.tokenProvider = tokenProvider
 
         let sessionConfig = URLSessionConfiguration.default
         sessionConfig.timeoutIntervalForRequest = configuration.timeout
@@ -50,21 +52,21 @@ actor CMSTrainerService {
             components.queryItems?.append(URLQueryItem(name: "city", value: city))
         }
         guard let url = components.url else { throw CMSServiceError.invalidURL }
-        let request = try buildRequest(url: url, method: "GET")
+        let request = try await buildRequest(url: url, method: "GET")
         return try await execute(request: request)
     }
 
     /// GET /api/trainers/count — Total active trainers.
     func fetchTrainerCount() async throws -> CMSTrainerCountResponse {
         let url = configuration.baseURL.appendingPathComponent("/api/trainers/count")
-        let request = try buildRequest(url: url, method: "GET")
+        let request = try await buildRequest(url: url, method: "GET")
         return try await execute(request: request)
     }
 
     /// GET /api/trainers/[id] — Public trainer profile.
     func fetchTrainer(id: String) async throws -> CMSTrainer {
         let url = configuration.baseURL.appendingPathComponent("/api/trainers/\(id)")
-        let request = try buildRequest(url: url, method: "GET")
+        let request = try await buildRequest(url: url, method: "GET")
         return try await execute(request: request)
     }
 
@@ -80,7 +82,7 @@ actor CMSTrainerService {
             URLQueryItem(name: "offset", value: String(offset))
         ]
         guard let url = components.url else { throw CMSServiceError.invalidURL }
-        let request = try buildRequest(url: url, method: "GET")
+        let request = try await buildRequest(url: url, method: "GET")
         return try await execute(request: request)
     }
 
@@ -103,27 +105,32 @@ actor CMSTrainerService {
             components.queryItems?.append(URLQueryItem(name: "category", value: category))
         }
         guard let url = components.url else { throw CMSServiceError.invalidURL }
-        let request = try buildRequest(url: url, method: "GET")
+        let request = try await buildRequest(url: url, method: "GET")
         return try await execute(request: request)
     }
 
     /// GET /api/programs/[id] — Program details.
     func fetchProgram(id: String) async throws -> CMSProgram {
         let url = configuration.baseURL.appendingPathComponent("/api/programs/\(id)")
-        let request = try buildRequest(url: url, method: "GET")
+        let request = try await buildRequest(url: url, method: "GET")
         return try await execute(request: request)
     }
 
     // MARK: - Private Helpers
 
-    private func buildRequest(url: URL, method: String) throws -> URLRequest {
+    private func buildRequest(url: URL, method: String) async throws -> URLRequest {
         var request = URLRequest(url: url)
         request.httpMethod = method
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue("application/json", forHTTPHeaderField: "Accept")
-        if let apiKey = configuration.apiKey {
+
+        if let tokenProvider {
+            let token = try await tokenProvider()
+            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        } else if let apiKey = configuration.apiKey {
             request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
         }
+
         return request
     }
 

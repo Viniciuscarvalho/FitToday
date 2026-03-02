@@ -13,15 +13,24 @@ import Foundation
 
 struct CMSTrainerListResponse: Codable, Sendable {
     let trainers: [CMSTrainer]
-    let total: Int
-    let limit: Int
-    let offset: Int
+    let total: Int?
+    let limit: Int?
+    let offset: Int?
 }
 
 // MARK: - Trainer Count Response
 
 struct CMSTrainerCountResponse: Codable, Sendable {
     let count: Int
+}
+
+// MARK: - CMS Trainer Profile (nested object in API response)
+
+struct CMSTrainerProfile: Codable, Sendable {
+    let bio: String?
+    let specializations: [String]?
+    let city: String?
+    let maxStudents: Int?
 }
 
 // MARK: - CMS Trainer DTO
@@ -31,25 +40,28 @@ struct CMSTrainer: Codable, Sendable, Identifiable {
     let displayName: String
     let email: String?
     let photoURL: String?
-    let specializations: [String]?
-    let bio: String?
+    let profile: CMSTrainerProfile?
     let isActive: Bool?
     let inviteCode: String?
-    let maxStudents: Int?
     let currentStudentCount: Int?
     let rating: Double?
     let reviewCount: Int?
-    let city: String?
     let createdAt: Date?
+
+    // Convenience accessors for nested profile fields
+    var bio: String? { profile?.bio }
+    var specializations: [String] { profile?.specializations ?? [] }
+    var city: String? { profile?.city }
+    var maxStudents: Int? { profile?.maxStudents }
 }
 
 // MARK: - Trainer Review List Response
 
 struct CMSTrainerReviewListResponse: Codable, Sendable {
     let reviews: [CMSTrainerReview]
-    let total: Int
-    let limit: Int
-    let offset: Int
+    let total: Int?
+    let limit: Int?
+    let offset: Int?
 }
 
 // MARK: - CMS Trainer Review DTO
@@ -68,7 +80,7 @@ struct CMSTrainerReview: Codable, Sendable, Identifiable {
 
 struct CMSProgramListResponse: Codable, Sendable {
     let programs: [CMSProgram]
-    let total: Int
+    let total: Int?
     let limit: Int?
 }
 

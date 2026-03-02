@@ -194,11 +194,25 @@ struct AppContainer {
         }
         .inObjectScope(.container)
 
-        // AI Chat Service (FitPal) - wraps OpenAI for conversational mode
-        container.register(AIChatService.self) { resolver in
-            try! AIChatService(resolver: resolver)
+        // Chat Repository (persistence)
+        container.register(ChatRepository.self) { _ in
+            SwiftDataChatRepository(modelContainer: modelContainer)
+        }.inObjectScope(.container)
+
+        // AI Chat Service (FitOrb) - wraps OpenAI for conversational mode
+        if let client = NewOpenAIClient.fromUserKey() {
+            container.register(NewOpenAIClient.self) { _ in client }
+                .inObjectScope(.container)
+
+            let chatService = AIChatService(
+                client: client,
+                profileRepository: container.resolve(UserProfileRepository.self)!,
+                statsRepository: container.resolve(UserStatsRepository.self)!,
+                historyRepository: container.resolve(WorkoutHistoryRepository.self)!
+            )
+            container.register(AIChatService.self) { _ in chatService }
+                .inObjectScope(.container)
         }
-        .inObjectScope(.container)
 
         // Firebase Analytics Service
         let analyticsService = FirebaseAnalyticsService()
@@ -461,13 +475,18 @@ struct AppContainer {
 
         // ========== PERSONAL TRAINER CMS INTEGRATION ==========
 
+        // Shared auth repo for CMS token injection
+        let authRepo = container.resolve(AuthenticationRepository.self)!
+
         // Personal Trainer Firebase Service (still used for relationships)
         let personalTrainerService = FirebasePersonalTrainerService()
         container.register(FirebasePersonalTrainerService.self) { _ in personalTrainerService }
             .inObjectScope(.container)
 
-        // CMS Trainer Service - REST API client for trainer marketplace
-        let cmsTrainerService = CMSTrainerService()
+        // CMS Trainer Service - REST API client for trainer marketplace (with Firebase Auth)
+        let cmsTrainerService = CMSTrainerService(
+            tokenProvider: { try await authRepo.getIDToken() }
+        )
         container.register(CMSTrainerService.self) { _ in cmsTrainerService }
             .inObjectScope(.container)
 
@@ -550,8 +569,10 @@ struct AppContainer {
 
         // ========== CMS WORKOUT API INTEGRATION ==========
 
-        // CMS Workout Service - REST API client
-        let cmsWorkoutService = CMSWorkoutService()
+        // CMS Workout Service - REST API client with Firebase Auth token injection
+        let cmsWorkoutService = CMSWorkoutService(
+            tokenProvider: { try await authRepo.getIDToken() }
+        )
         container.register(CMSWorkoutService.self) { _ in cmsWorkoutService }
             .inObjectScope(.container)
 
@@ -643,7 +664,8 @@ struct AppContainer {
             SDUserStats.self,
             SDCustomWorkoutTemplate.self,
             SDCustomWorkoutCompletion.self,
-            SDSavedRoutine.self
+            SDSavedRoutine.self,
+            SDChatMessage.self
         ])
         
         // Configuração com migração automática leve

@@ -43,6 +43,8 @@ final class FeatureGatingUseCase: FeatureGating, @unchecked Sendable {
                 } else {
                     usageCount = await tracker.weeklyUsageCount()
                 }
+            } else if feature == .aiChat, let tracker = usageTracker {
+                usageCount = await tracker.dailyChatUsageCount()
             }
 
             return EntitlementPolicy.canAccess(feature, entitlement: entitlement, usageCount: usageCount)
@@ -71,6 +73,12 @@ protocol AIUsageTracking: Sendable {
 
     /// Registra um uso de IA
     func registerUsage() async
+
+    /// Retorna o número de usos do AI Chat no dia atual
+    func dailyChatUsageCount() async -> Int
+
+    /// Registra um uso do AI Chat
+    func registerChatUsage() async
 }
 
 // MARK: - Simple AI Usage Tracker
@@ -82,6 +90,8 @@ actor SimpleAIUsageTracker: AIUsageTracking {
     private let weekKey = "ai_usage_week"
     private let dailyUsageKey = "ai_daily_usage"
     private let dayKey = "ai_usage_day"
+    private let chatDailyUsageKey = "ai_chat_daily_count"
+    private let chatDayKey = "ai_chat_last_date"
 
     init(userDefaults: UserDefaults = .standard) {
         self.userDefaults = userDefaults
@@ -147,5 +157,36 @@ actor SimpleAIUsageTracker: AIUsageTracking {
         let currentDay = Calendar.current.ordinality(of: .day, in: .year, for: Date()) ?? 0
         userDefaults.set(currentDay, forKey: dayKey)
         userDefaults.set(0, forKey: dailyUsageKey)
+    }
+
+    func dailyChatUsageCount() async -> Int {
+        let currentDay = Calendar.current.ordinality(of: .day, in: .year, for: Date()) ?? 0
+        let savedDay = userDefaults.integer(forKey: chatDayKey)
+
+        if currentDay != savedDay {
+            resetChatDailyUsage()
+            return 0
+        }
+
+        return userDefaults.integer(forKey: chatDailyUsageKey)
+    }
+
+    func registerChatUsage() async {
+        let currentDay = Calendar.current.ordinality(of: .day, in: .year, for: Date()) ?? 0
+        let savedDay = userDefaults.integer(forKey: chatDayKey)
+
+        if currentDay != savedDay {
+            userDefaults.set(currentDay, forKey: chatDayKey)
+            userDefaults.set(1, forKey: chatDailyUsageKey)
+        } else {
+            let current = userDefaults.integer(forKey: chatDailyUsageKey)
+            userDefaults.set(current + 1, forKey: chatDailyUsageKey)
+        }
+    }
+
+    private func resetChatDailyUsage() {
+        let currentDay = Calendar.current.ordinality(of: .day, in: .year, for: Date()) ?? 0
+        userDefaults.set(currentDay, forKey: chatDayKey)
+        userDefaults.set(0, forKey: chatDailyUsageKey)
     }
 }

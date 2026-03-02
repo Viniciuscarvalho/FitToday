@@ -31,6 +31,9 @@ struct CMSConfiguration: Sendable {
 
 // MARK: - CMS Workout Service
 
+/// Provides a Firebase Auth ID token for CMS API requests.
+typealias CMSTokenProvider = @Sendable () async throws -> String
+
 /// Actor-based service for CMS workout API operations.
 ///
 /// Provides type-safe access to all CMS workout endpoints:
@@ -44,13 +47,15 @@ actor CMSWorkoutService {
 
     private let session: URLSession
     private let configuration: CMSConfiguration
+    private let tokenProvider: CMSTokenProvider?
     private let decoder: JSONDecoder
     private let encoder: JSONEncoder
 
     // MARK: - Initialization
 
-    init(configuration: CMSConfiguration = .default) {
+    init(configuration: CMSConfiguration = .default, tokenProvider: CMSTokenProvider? = nil) {
         self.configuration = configuration
+        self.tokenProvider = tokenProvider
 
         let sessionConfig = URLSessionConfiguration.default
         sessionConfig.timeoutIntervalForRequest = configuration.timeout
@@ -96,7 +101,7 @@ actor CMSWorkoutService {
             throw CMSServiceError.invalidURL
         }
 
-        let request = try buildRequest(url: url, method: "GET")
+        let request = try await buildRequest(url: url, method: "GET")
         return try await execute(request: request)
     }
 
@@ -107,7 +112,7 @@ actor CMSWorkoutService {
     /// - Throws: CMSServiceError if the request fails.
     func fetchWorkout(id: String) async throws -> CMSWorkout {
         let url = configuration.baseURL.appendingPathComponent("/api/workouts/\(id)")
-        let request = try buildRequest(url: url, method: "GET")
+        let request = try await buildRequest(url: url, method: "GET")
         return try await execute(request: request)
     }
 
@@ -120,7 +125,7 @@ actor CMSWorkoutService {
     /// - Throws: CMSServiceError if the request fails.
     func updateWorkout(id: String, update: CMSWorkoutUpdateRequest) async throws -> CMSWorkout {
         let url = configuration.baseURL.appendingPathComponent("/api/workouts/\(id)")
-        var request = try buildRequest(url: url, method: "PATCH")
+        var request = try await buildRequest(url: url, method: "PATCH")
         request.httpBody = try encoder.encode(update)
         return try await execute(request: request)
     }
@@ -131,7 +136,7 @@ actor CMSWorkoutService {
     /// - Throws: CMSServiceError if the request fails.
     func deleteWorkout(id: String) async throws {
         let url = configuration.baseURL.appendingPathComponent("/api/workouts/\(id)")
-        let request = try buildRequest(url: url, method: "DELETE")
+        let request = try await buildRequest(url: url, method: "DELETE")
         let _: EmptyResponse = try await execute(request: request)
     }
 
@@ -144,7 +149,7 @@ actor CMSWorkoutService {
     /// - Throws: CMSServiceError if the request fails.
     func fetchProgress(workoutId: String) async throws -> CMSWorkoutProgress {
         let url = configuration.baseURL.appendingPathComponent("/api/workouts/\(workoutId)/progress")
-        let request = try buildRequest(url: url, method: "GET")
+        let request = try await buildRequest(url: url, method: "GET")
         return try await execute(request: request)
     }
 
@@ -157,7 +162,7 @@ actor CMSWorkoutService {
     /// - Throws: CMSServiceError if the request fails.
     func fetchFeedback(workoutId: String) async throws -> [CMSWorkoutFeedback] {
         let url = configuration.baseURL.appendingPathComponent("/api/workouts/\(workoutId)/feedback")
-        let request = try buildRequest(url: url, method: "GET")
+        let request = try await buildRequest(url: url, method: "GET")
         return try await execute(request: request)
     }
 
@@ -170,7 +175,7 @@ actor CMSWorkoutService {
     /// - Throws: CMSServiceError if the request fails.
     func postFeedback(workoutId: String, feedback: CMSFeedbackRequest) async throws -> CMSWorkoutFeedback {
         let url = configuration.baseURL.appendingPathComponent("/api/workouts/\(workoutId)/feedback")
-        var request = try buildRequest(url: url, method: "POST")
+        var request = try await buildRequest(url: url, method: "POST")
         request.httpBody = try encoder.encode(feedback)
         return try await execute(request: request)
     }
@@ -193,7 +198,7 @@ actor CMSWorkoutService {
         email: String?
     ) async throws -> CMSStudentRegistrationResponse {
         let url = configuration.baseURL.appendingPathComponent("/api/students")
-        var request = try buildRequest(url: url, method: "POST")
+        var request = try await buildRequest(url: url, method: "POST")
         let body = CMSStudentRegistrationRequest(
             firebaseUid: firebaseUid,
             trainerId: trainerId,
@@ -206,13 +211,17 @@ actor CMSWorkoutService {
 
     // MARK: - Private Helpers
 
-    private func buildRequest(url: URL, method: String) throws -> URLRequest {
+    private func buildRequest(url: URL, method: String) async throws -> URLRequest {
         var request = URLRequest(url: url)
         request.httpMethod = method
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue("application/json", forHTTPHeaderField: "Accept")
 
-        if let apiKey = configuration.apiKey {
+        // Prefer dynamic token from Firebase Auth; fall back to static apiKey
+        if let tokenProvider {
+            let token = try await tokenProvider()
+            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        } else if let apiKey = configuration.apiKey {
             request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
         }
 

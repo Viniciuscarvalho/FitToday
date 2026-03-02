@@ -35,7 +35,7 @@ Complete reorganization of FitToday app screens and flows across 6 areas: Welcom
 | **Phase 5 — AI Assistant FitPal** | | | | |
 | 16.0 | Create AIChatService | M | HIGH | pending |
 | 17.0 | Create AIChatViewModel | M | HIGH | pending |
-| 18.0 | Create FitPalOrbView | S | MEDIUM | pending |
+| 18.0 | Create FitTodayOrbView | S | MEDIUM | pending |
 | 19.0 | Create AIChatView | L | HIGH | pending |
 | 20.0 | Register AIChatService in AppContainer | S | HIGH | pending |
 | 21.0 | Update TabRootView for FitPal tab | M | HIGH | pending |
@@ -80,7 +80,7 @@ Complete reorganization of FitToday app screens and flows across 6 areas: Welcom
 
 ### Task 2.0 — Add routes to AppRouter (S)
 
-**Objective:** Add an `aiChat` route to the `AppRoute` enum so the FitPal AI chat screen is navigable.
+**Objective:** Add an `aiChat` route to the `AppRoute` enum so the FitTodayOrb AI chat screen is navigable.
 
 **Files:**
 - `FitToday/FitToday/Presentation/Router/AppRouter.swift`
@@ -409,7 +409,7 @@ Complete reorganization of FitToday app screens and flows across 6 areas: Welcom
 
 ---
 
-### Phase 5 — AI Assistant FitPal
+### Phase 5 — AI Assistant FitTodayOrb
 
 ---
 
@@ -430,7 +430,7 @@ Complete reorganization of FitToday app screens and flows across 6 areas: Welcom
 
 **Success Criteria:**
 - Service sends conversation history and returns assistant response
-- System prompt establishes FitPal as a knowledgeable fitness assistant
+- System prompt establishes FitTodayOrb as a knowledgeable fitness assistant
 - Proper error handling for missing API key, network errors
 - Thread-safe implementation compatible with Swift 6 concurrency
 
@@ -463,17 +463,17 @@ Complete reorganization of FitToday app screens and flows across 6 areas: Welcom
 
 ---
 
-### Task 18.0 — Create FitPalOrbView (S)
+### Task 18.0 — Create FitTodayOrbView (S)
 
 **Objective:** Create an animated orb graphic displayed as the empty state of the AI chat screen.
 
 **Files:**
-- `FitToday/FitToday/Presentation/Features/AIChat/Components/FitPalOrbView.swift` (new file)
+- `FitToday/FitToday/Presentation/Features/AIChat/Components/FitTodayOrbView.swift` (new file)
 
 **Subtasks:**
 - [ ] 18.1 Create an animated `Circle` with `FitTodayColor.gradientPrimary` gradient fill
 - [ ] 18.2 Add pulse animation (scale + opacity cycle)
-- [ ] 18.3 "FitPal" title text below the orb
+- [ ] 18.3 "FitTodayOrb" title text below the orb
 - [ ] 18.4 "Your AI Fitness Assistant" subtitle text
 - [ ] 18.5 Use `FitTodayFont.display` for title and `FitTodayFont.ui` for subtitle
 
@@ -497,7 +497,7 @@ Complete reorganization of FitToday app screens and flows across 6 areas: Welcom
 - [ ] 19.1 Gate screen with `EntitlementPolicy` (from `Domain/Entities/EntitlementPolicy.swift`) for Pro feature check
 - [ ] 19.2 Free users: show upsell screen with feature benefits list and "Subscribe" button navigating to paywall
 - [ ] 19.3 Pro users: show chat UI
-- [ ] 19.4 Empty state: `FitPalOrbView` centered with quick action chips below
+- [ ] 19.4 Empty state: `FitTodayOrbView` centered with quick action chips below
 - [ ] 19.5 Messages state: `ScrollView` with messages using `ChatBubble` (from `Presentation/Features/PersonalTrainer/Components/ChatBubble.swift`)
 - [ ] 19.6 Quick action chips as horizontal scroll at the top
 - [ ] 19.7 Input field + send button pinned at bottom with `safeAreaInset` or similar
@@ -536,9 +536,9 @@ Complete reorganization of FitToday app screens and flows across 6 areas: Welcom
 
 ---
 
-### Task 21.0 — Update TabRootView for FitPal tab (M)
+### Task 21.0 — Update TabRootView for FitTodayOrb tab (M)
 
-**Objective:** Replace the center "Create" tab (plus.circle.fill) with a "FitPal" tab (sparkles) that navigates to the AI chat screen.
+**Objective:** Replace the center "Create" tab (plus.circle.fill) with a "FitTodayOrb" tab (sparkles) that navigates to the AI chat screen.
 
 **Files:**
 - `FitToday/FitToday/Presentation/Root/TabRootView.swift`
@@ -553,8 +553,8 @@ Complete reorganization of FitToday app screens and flows across 6 areas: Welcom
 - [ ] 21.6 Ensure the "Create Workout" sheet is accessible from another location (e.g., Workout tab FAB or Programs section)
 
 **Success Criteria:**
-- Tab bar shows: Home, Programs, FitPal (sparkles), Activity, Profile
-- FitPal tab opens AIChatView
+- Tab bar shows: Home, Programs, FitTodayOrb (sparkles), Activity, Profile
+- FitTodayOrb tab opens AIChatView
 - "Create Workout" functionality is still accessible from the Workout tab
 - No navigation regressions
 
@@ -648,7 +648,7 @@ Complete reorganization of FitToday app screens and flows across 6 areas: Welcom
 **Subtasks:**
 - [ ] 25.1 Add Welcome Onboarding strings (page titles, descriptions, button labels)
 - [ ] 25.2 Add Home redesign strings (streak labels, suggestion card text, section titles)
-- [ ] 25.3 Add AI Chat strings ("FitPal", "Your AI Fitness Assistant", quick actions, input placeholder, error messages, upsell text)
+- [ ] 25.3 Add AI Chat strings ("FitTodayOrb", "Your AI Fitness Assistant", quick actions, input placeholder, error messages, upsell text)
 - [ ] 25.4 Add Profile strings (stats labels, header fallback text)
 - [ ] 25.5 Add Programs strings ("Recommended for You", category names if not already localized)
 - [ ] 25.6 Add FitPal tab name to tab localization keys
@@ -728,9 +728,9 @@ Complete reorganization of FitToday app screens and flows across 6 areas: Welcom
 - [ ] 28.4 Visual check: Home tab (streak row, suggestion card, exercise list)
 - [ ] 28.5 Visual check: Programs tab (recommended section, category groups, default segment)
 - [ ] 28.6 Visual check: Workout Detail (hero header, equipment section)
-- [ ] 28.7 Visual check: FitPal tab (upsell for free users, chat UI for pro)
+- [ ] 28.7 Visual check: FitTodayOrb tab (upsell for free users, chat UI for pro)
 - [ ] 28.8 Visual check: Profile (header, stats row, existing sections)
-- [ ] 28.9 Verify tab bar: Home, Programs, FitPal, Activity, Profile
+- [ ] 28.9 Verify tab bar: Home, Programs, FitTodayOrb, Activity, Profile
 
 **Success Criteria:**
 - Zero compilation errors and warnings
@@ -766,7 +766,7 @@ Phase 3 (Programs)
 Phase 4 (Workout Detail)
   Task 14.0 ──> Task 15.0
 
-Phase 5 (AI FitPal)
+Phase 5 (AI FitTodayOrb)
   Task 16.0 ──> Task 17.0, Task 20.0
   Task 17.0 ──> Task 19.0
   Task 18.0 ──> Task 19.0
