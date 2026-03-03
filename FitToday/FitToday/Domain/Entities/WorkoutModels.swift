@@ -48,7 +48,7 @@ struct ExerciseMedia: Codable, Hashable, Sendable {
     var imageURL: URL?
     var gifURL: URL?
     var placeholderMuscleGroup: MuscleGroup?
-    var source: String? // e.g. "wger", "placeholder"
+    var source: String? // e.g. "firebase", "placeholder"
 
     public init(
         videoURL: URL? = nil,

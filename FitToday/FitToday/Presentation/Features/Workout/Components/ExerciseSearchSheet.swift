@@ -2,7 +2,7 @@
 //  ExerciseSearchSheet.swift
 //  FitToday
 //
-//  Sheet for searching and selecting exercises from Wger API.
+//  Sheet for searching and selecting exercises from the catalog.
 //
 
 import SwiftUI
@@ -17,7 +17,7 @@ struct ExerciseSearchSheet: View {
     @State private var searchText = ""
     @State private var selectedCategory: Int?
     @State private var selectedEquipment: Int?
-    @State private var exercises: [WgerExercise] = []
+    @State private var exercises: [CatalogExercise] = []
     @State private var isLoading = false
     @State private var errorMessage: String?
     @State private var searchTask: Task<Void, Never>?
@@ -111,14 +111,14 @@ struct ExerciseSearchSheet: View {
                 // Category filter
                 Menu {
                     Button("Todos") { selectedCategory = nil }
-                    ForEach(WgerCategoryMapping.allCases, id: \.rawValue) { category in
+                    ForEach(ExerciseCategoryMapping.allCases, id: \.rawValue) { category in
                         Button(category.portugueseName) {
                             selectedCategory = category.rawValue
                         }
                     }
                 } label: {
                     filterChip(
-                        title: selectedCategory.flatMap { WgerCategoryMapping.from(id: $0)?.portugueseName } ?? "Músculo",
+                        title: selectedCategory.flatMap { ExerciseCategoryMapping.from(id: $0)?.portugueseName } ?? "Músculo",
                         isActive: selectedCategory != nil
                     )
                 }
@@ -126,14 +126,14 @@ struct ExerciseSearchSheet: View {
                 // Equipment filter
                 Menu {
                     Button("Todos") { selectedEquipment = nil }
-                    ForEach(WgerEquipmentMapping.allCases, id: \.rawValue) { equipment in
+                    ForEach(ExerciseEquipmentMapping.allCases, id: \.rawValue) { equipment in
                         Button(equipment.portugueseName) {
                             selectedEquipment = equipment.rawValue
                         }
                     }
                 } label: {
                     filterChip(
-                        title: selectedEquipment.flatMap { WgerEquipmentMapping.from(id: $0)?.portugueseName } ?? "Equipamento",
+                        title: selectedEquipment.flatMap { ExerciseEquipmentMapping.from(id: $0)?.portugueseName } ?? "Equipamento",
                         isActive: selectedEquipment != nil
                     )
                 }
@@ -323,12 +323,12 @@ struct ExerciseSearchSheet: View {
         isLoading = false
     }
 
-    private func currentLanguage() -> WgerLanguageCode {
+    private func currentLanguage() -> ExerciseLanguageCode {
         let preferredLanguage = Locale.current.language.languageCode?.identifier ?? "en"
-        return WgerLanguageCode.from(code: preferredLanguage)
+        return ExerciseLanguageCode.from(code: preferredLanguage)
     }
 
-    private func selectExercise(_ exercise: WgerExercise) {
+    private func selectExercise(_ exercise: CatalogExercise) {
         let entry = CustomExerciseEntry(from: exercise, orderIndex: 0)
         onSelect(entry)
         dismiss()
@@ -338,7 +338,7 @@ struct ExerciseSearchSheet: View {
 // MARK: - Exercise Search Result Row
 
 struct ExerciseSearchResultRow: View {
-    let exercise: WgerExercise
+    let exercise: CatalogExercise
     let onSelect: () -> Void
 
     var body: some View {
@@ -348,7 +348,7 @@ struct ExerciseSearchResultRow: View {
             HStack(spacing: FitTodaySpacing.md) {
                 // Placeholder image
                 ExercisePlaceholderView(
-                    muscleGroup: exercise.category.flatMap { WgerCategoryMapping.from(id: $0)?.muscleGroup } ?? .fullBody,
+                    muscleGroup: exercise.category.flatMap { ExerciseCategoryMapping.from(id: $0)?.muscleGroup } ?? .fullBody,
                     size: .medium
                 )
 
@@ -361,14 +361,14 @@ struct ExerciseSearchResultRow: View {
 
                     HStack(spacing: FitTodaySpacing.sm) {
                         if let category = exercise.category,
-                           let mapping = WgerCategoryMapping.from(id: category) {
+                           let mapping = ExerciseCategoryMapping.from(id: category) {
                             Text(mapping.portugueseName)
                                 .font(FitTodayFont.ui(size: 12, weight: .medium))
                                 .foregroundStyle(FitTodayColor.brandSecondary)
                         }
 
                         if let equipmentId = exercise.equipment.first,
-                           let mapping = WgerEquipmentMapping.from(id: equipmentId) {
+                           let mapping = ExerciseEquipmentMapping.from(id: equipmentId) {
                             Text(mapping.portugueseName)
                                 .font(FitTodayFont.ui(size: 12, weight: .medium))
                                 .foregroundStyle(FitTodayColor.textTertiary)
@@ -396,7 +396,7 @@ struct ExerciseSearchResultRow: View {
 
 #Preview {
     ExerciseSearchSheet(
-        exerciseService: WgerAPIService()
+        exerciseService: FirestoreExerciseService()
     ) { exercise in
         print("Selected: \(exercise.exerciseName)")
     }

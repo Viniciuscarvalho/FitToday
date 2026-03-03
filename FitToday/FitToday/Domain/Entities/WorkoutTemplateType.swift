@@ -2,13 +2,13 @@
 //  WorkoutTemplateType.swift
 //  FitToday
 //
-//  Tipo de template de treino para mapeamento com categorias da API Wger.
+//  Tipo de template de treino para mapeamento com categorias de exercício.
 //
 
 import Foundation
 
-/// Tipo de template de treino para mapeamento com categorias Wger.
-/// Usado para determinar quais exercícios buscar da API baseado no tipo de treino.
+/// Tipo de template de treino para mapeamento com categorias de exercício.
+/// Usado para determinar quais exercícios buscar baseado no tipo de treino.
 enum WorkoutTemplateType: String, CaseIterable, Sendable {
     case push
     case pull
@@ -29,10 +29,9 @@ enum WorkoutTemplateType: String, CaseIterable, Sendable {
     // Glute focused
     case glutes
 
-    /// IDs das categorias Wger correspondentes a este tipo de treino.
-    /// Referência: https://wger.de/api/v2/exercisecategory/
+    /// IDs das categorias correspondentes a este tipo de treino.
     /// Categorias válidas: 8=Arms, 9=Legs, 10=Abs, 11=Chest, 12=Back, 13=Shoulders, 14=Calves, 15=Cardio
-    var wgerCategoryIds: [Int] {
+    var categoryIds: [Int] {
         switch self {
         case .push:
             // Chest (11), Shoulders (13), Arms/Triceps (8)

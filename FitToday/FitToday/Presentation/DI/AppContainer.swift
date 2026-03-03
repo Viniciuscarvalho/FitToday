@@ -55,7 +55,7 @@ struct AppContainer {
             SwiftDataWorkoutCompositionCacheRepository(modelContainer: modelContainer)
         }.inObjectScope(.container)
 
-        // WorkoutBlocksRepository é registrado após configurar Wger (para permitir enriquecimento de mídia/instruções).
+        // WorkoutBlocksRepository é registrado após configurar exercícios (para permitir enriquecimento de mídia/instruções).
 
         // StoreKit Service e EntitlementRepository
         // Nota: StoreKitService é @MainActor, então precisa ser criado no main thread
@@ -105,11 +105,9 @@ struct AppContainer {
 
         // ========== END REMOTE CONFIG & FEATURE FLAGS ==========
 
-        // Wger Exercise Service (Free API - no API key needed)
-        let wgerService = WgerAPIService()
-        container.register(ExerciseServiceProtocol.self) { _ in wgerService }
-            .inObjectScope(.container)
-        container.register(WgerAPIService.self) { _ in wgerService }
+        // Firestore Exercise Service
+        let exerciseService = FirestoreExerciseService()
+        container.register(ExerciseServiceProtocol.self) { _ in exerciseService }
             .inObjectScope(.container)
 
         // Workout Blocks Repository
@@ -117,14 +115,9 @@ struct AppContainer {
         container.register(WorkoutBlocksRepository.self) { _ in blocksRepository }
             .inObjectScope(.container)
 
-        // Library Workouts Repository - Using enriched repository for Wger media/images
-        let enrichedLibraryRepository = WgerEnrichedLibraryWorkoutsRepository(
-            baseRepository: BundleLibraryWorkoutsRepository(),
-            wgerService: wgerService
-        )
-        container.register(LibraryWorkoutsRepository.self) { _ in enrichedLibraryRepository }
-            .inObjectScope(.container)
-        container.register(WgerEnrichedLibraryWorkoutsRepository.self) { _ in enrichedLibraryRepository }
+        // Library Workouts Repository - using base bundle repository (images from Firebase Storage)
+        let libraryRepository = BundleLibraryWorkoutsRepository()
+        container.register(LibraryWorkoutsRepository.self) { _ in libraryRepository }
             .inObjectScope(.container)
 
         // ProgramRepository - carrega programas do bundle
@@ -132,9 +125,9 @@ struct AppContainer {
         container.register(ProgramRepository.self) { _ in programRepository }
             .inObjectScope(.container)
 
-        // WgerProgramWorkoutRepository - carrega exercícios Wger para programas
-        let wgerProgramWorkoutRepository = DefaultWgerProgramWorkoutRepository(wgerService: wgerService)
-        container.register(WgerProgramWorkoutRepository.self) { _ in wgerProgramWorkoutRepository }
+        // ProgramWorkoutRepository - carrega exercícios do catálogo Firestore para programas
+        let programWorkoutRepository = FirestoreProgramWorkoutRepository(exerciseService: exerciseService)
+        container.register(ProgramWorkoutRepository.self) { _ in programWorkoutRepository }
             .inObjectScope(.container)
 
         // ProgramWorkoutCustomizationRepository - salva customizações do usuário (ordem, exclusões)
@@ -142,11 +135,11 @@ struct AppContainer {
         container.register(ProgramWorkoutCustomizationRepositoryProtocol.self) { _ in customizationRepository }
             .inObjectScope(.container)
 
-        // LoadProgramWorkoutsUseCase - carrega treinos de programa com exercícios Wger
+        // LoadProgramWorkoutsUseCase - carrega treinos de programa com exercícios do catálogo
         container.register(LoadProgramWorkoutsUseCase.self) { resolver in
             LoadProgramWorkoutsUseCase(
                 programRepository: resolver.resolve(ProgramRepository.self)!,
-                workoutRepository: resolver.resolve(WgerProgramWorkoutRepository.self)!
+                workoutRepository: resolver.resolve(ProgramWorkoutRepository.self)!
             )
         }
         .inObjectScope(.container)

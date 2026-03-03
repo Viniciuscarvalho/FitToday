@@ -48,7 +48,7 @@ enum AppRoute: Hashable {
     case workoutSummary
     case paywall
     case programDetail(String)  // Detalhe do programa
-    case programWorkoutDetail(ProgramWorkout)  // Detalhe de um treino dentro do programa (Wger exercises)
+    case programWorkoutDetail(ProgramWorkout)  // Detalhe de um treino dentro do programa
     case libraryWorkoutDetail(String)  // Detalhe de um treino da biblioteca (por ID)
     case programExerciseDetail(ExercisePrescription)  // Detalhe de exercício na biblioteca/programa
     case apiKeySettings  // Configuração de chave de API do usuário

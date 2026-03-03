@@ -8,11 +8,11 @@
 import Foundation
 
 /// Represents an exercise within a custom workout template.
-/// Contains reference to Wger API data plus user-configured sets.
+/// Contains reference to catalog exercise data plus user-configured sets.
 struct CustomExerciseEntry: Identifiable, Codable, Sendable, Hashable {
     let id: UUID
 
-    // Wger API reference
+    // Exercise catalog reference
     var exerciseId: String
     var exerciseName: String
     var exerciseGifURL: String?
@@ -28,7 +28,7 @@ struct CustomExerciseEntry: Identifiable, Codable, Sendable, Hashable {
     // Optional notes
     var notes: String?
 
-    /// Creates a new exercise entry from Wger API data
+    /// Creates a new exercise entry from catalog data
     init(
         id: UUID = UUID(),
         exerciseId: String,
@@ -86,23 +86,19 @@ struct CustomExerciseEntry: Identifiable, Codable, Sendable, Hashable {
     }
 }
 
-// MARK: - Convenience initializer from WgerExercise
+// MARK: - Convenience initializer from CatalogExercise
 
 extension CustomExerciseEntry {
-    /// Creates a new entry from a WgerExercise model
-    /// - Parameters:
-    ///   - wgerExercise: The WgerExercise from Wger API service
-    ///   - orderIndex: Position in the workout
-    ///   - imageURL: Optional image URL
-    init(from wgerExercise: WgerExercise, orderIndex: Int, imageURL: String? = nil) {
+    /// Creates a new entry from a CatalogExercise model.
+    init(from catalogExercise: CatalogExercise, orderIndex: Int) {
         self.id = UUID()
-        self.exerciseId = String(wgerExercise.id)
-        self.exerciseName = wgerExercise.name
-        self.exerciseGifURL = imageURL
-        self.bodyPart = wgerExercise.category.flatMap { WgerCategoryMapping.from(id: $0)?.portugueseName }
-        self.equipment = wgerExercise.equipment.first.flatMap { WgerEquipmentMapping.from(id: $0)?.portugueseName }
+        self.exerciseId = catalogExercise.id
+        self.exerciseName = catalogExercise.name
+        self.exerciseGifURL = nil
+        self.bodyPart = catalogExercise.category.flatMap { ExerciseCategoryMapping.from(id: $0)?.portugueseName }
+        self.equipment = catalogExercise.equipment.first.flatMap { ExerciseEquipmentMapping.from(id: $0)?.portugueseName }
         self.orderIndex = orderIndex
-        self.sets = [WorkoutSet()] // Start with 1 default set
+        self.sets = [WorkoutSet()]
         self.notes = nil
     }
 }

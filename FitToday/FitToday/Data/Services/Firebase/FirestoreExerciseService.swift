@@ -3,7 +3,7 @@
 //  FitToday
 //
 //  Fetches exercises from the Firestore catalog collection.
-//  Replaces WgerAPIService as the exercise data source.
+//  Primary exercise data source for the app.
 //
 
 import Foundation

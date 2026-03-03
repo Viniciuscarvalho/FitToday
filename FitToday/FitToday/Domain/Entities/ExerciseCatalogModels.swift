@@ -3,7 +3,7 @@
 //  FitToday
 //
 //  Category, equipment, and language mappings for the exercise catalog.
-//  Extracted from WgerModels.swift — same logic, no Wger dependency.
+//  Mappings for the exercise catalog used by Firestore data source.
 //
 
 import Foundation

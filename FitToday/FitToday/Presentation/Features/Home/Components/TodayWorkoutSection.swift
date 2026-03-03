@@ -52,10 +52,10 @@ struct TodayWorkoutSection: View {
                 ForEach(workout.exercises.prefix(6)) { exercise in
                     ExercisePreviewRow(
                         exerciseName: exercise.name,
-                        imageURL: exercise.imageURL,
+                        exerciseId: exercise.catalogExercise.id,
                         setsAndReps: exercise.setsRepsDescription,
-                        muscleGroup: WgerCategoryMapping.localizedName(
-                            for: exercise.wgerExercise.category ?? 0
+                        muscleGroup: ExerciseCategoryMapping.localizedName(
+                            for: exercise.catalogExercise.category ?? 0
                         )
                     )
                 }

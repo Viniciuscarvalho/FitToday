@@ -159,14 +159,14 @@ struct WorkoutPreviewView: View {
     /// Converts ProgramWorkout to WorkoutPlan for execution
     private func convertToWorkoutPlan() -> WorkoutPlan {
         let exercisePrescriptions = workout.exercises.map { programExercise -> ExercisePrescription in
-            let wgerExercise = programExercise.wgerExercise
+            let catalog = programExercise.catalogExercise
             let workoutExercise = WorkoutExercise(
-                id: String(wgerExercise.id),
-                name: wgerExercise.name,
-                mainMuscle: mapCategoryToMuscleGroup(wgerExercise.category),
-                equipment: mapEquipment(wgerExercise.equipment),
-                instructions: extractInstructions(from: wgerExercise),
-                media: createMedia(from: wgerExercise)
+                id: catalog.id,
+                name: catalog.name,
+                mainMuscle: mapCategoryToMuscleGroup(catalog.category),
+                equipment: mapEquipment(catalog.equipment),
+                instructions: extractInstructions(from: catalog),
+                media: nil
             )
 
             return ExercisePrescription(
@@ -197,7 +197,7 @@ struct WorkoutPreviewView: View {
     private func mapCategoryToMuscleGroup(_ categoryId: Int?) -> MuscleGroup {
         guard let categoryId else { return .fullBody }
 
-        // Map Wger category IDs to MuscleGroup
+        // Map category IDs to MuscleGroup
         switch categoryId {
         case 8:  return .arms          // Arms
         case 9:  return .quads         // Legs
@@ -214,7 +214,7 @@ struct WorkoutPreviewView: View {
     private func mapEquipment(_ equipmentIds: [Int]) -> EquipmentType {
         guard let first = equipmentIds.first else { return .bodyweight }
 
-        // Map Wger equipment IDs to EquipmentType
+        // Map equipment IDs to EquipmentType
         switch first {
         case 1: return .barbell
         case 3: return .dumbbell
@@ -227,8 +227,8 @@ struct WorkoutPreviewView: View {
         }
     }
 
-    private func extractInstructions(from wgerExercise: WgerExercise) -> [String] {
-        guard let description = wgerExercise.description, !description.isEmpty else {
+    private func extractInstructions(from catalog: CatalogExercise) -> [String] {
+        guard let description = catalog.description, !description.isEmpty else {
             return ["Realize o exercício com boa técnica."]
         }
 
@@ -238,14 +238,6 @@ struct WorkoutPreviewView: View {
             .filter { !$0.isEmpty }
 
         return lines.isEmpty ? ["Realize o exercício com boa técnica."] : lines
-    }
-
-    private func createMedia(from wgerExercise: WgerExercise) -> ExerciseMedia? {
-        let imageURL = wgerExercise.mainImageURL.flatMap { URL(string: $0) }
-            ?? wgerExercise.imageURLs.first.flatMap { URL(string: $0) }
-
-        guard imageURL != nil else { return nil }
-        return ExerciseMedia(videoURL: nil, imageURL: imageURL, gifURL: nil)
     }
 }
 
@@ -316,51 +308,30 @@ private struct ExercisePreviewCard: View {
         .clipShape(RoundedRectangle(cornerRadius: FitTodayRadius.md))
     }
 
-    @ViewBuilder
     private var exerciseImage: some View {
-        if let imageURL = exercise.imageURL {
-            ExerciseMediaImageURL(
-                url: imageURL,
-                size: CGSize(width: 56, height: 56),
-                contentMode: .fill,
-                cornerRadius: FitTodayRadius.sm
-            )
-        } else {
-            placeholderImage
-        }
-    }
-
-    private var placeholderImage: some View {
-        ZStack {
-            RoundedRectangle(cornerRadius: FitTodayRadius.sm)
-                .fill(FitTodayColor.brandPrimary.opacity(0.1))
-            Image(systemName: "figure.strengthtraining.traditional")
-                .font(.system(size: 24))
-                .foregroundStyle(FitTodayColor.brandPrimary)
-        }
+        ExerciseImageView(
+            exerciseId: exercise.catalogExercise.id,
+            imageIndex: 0,
+            cornerRadius: FitTodayRadius.sm
+        )
         .frame(width: 56, height: 56)
     }
 }
 
 #Preview {
-    let sampleExercise = WgerExercise(
-        id: 1,
-        uuid: UUID().uuidString,
+    let sampleExercise = CatalogExercise(
+        id: "exercise_192",
         name: "Supino Reto com Barra",
-        exerciseBaseId: 1,
         description: "Deite no banco com os pés apoiados no chão...",
         category: 11,
         muscles: [3],
         musclesSecondary: [],
-        equipment: [1],
-        language: 2,
-        mainImageURL: "https://wger.de/media/exercise-images/192/Bench-press-1.png",
-        imageURLs: ["https://wger.de/media/exercise-images/192/Bench-press-1.png"]
+        equipment: [1]
     )
 
     let programExercise = ProgramExercise(
         id: "test_1",
-        wgerExercise: sampleExercise,
+        catalogExercise: sampleExercise,
         sets: 4,
         repsRange: 8...12,
         restSeconds: 90,

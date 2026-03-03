@@ -292,14 +292,6 @@ struct WorkoutPlanView: View {
             await ExerciseImageCache.shared.prefetchWorkoutImages(exerciseIds: exerciseIds)
         }
 
-        // Prefetch Wger API images (first 3 only)
-        if let cacheService = imageCacheService {
-            let urls = Array(plan.imageURLs.prefix(3))
-            if !urls.isEmpty {
-                await cacheService.prefetchImages(urls)
-            }
-        }
-
         try? await Task.sleep(nanoseconds: 300_000_000) // 0.3s
         isPrefetchingImages = false
     }

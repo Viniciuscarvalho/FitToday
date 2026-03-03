@@ -2,7 +2,7 @@
 //  ProgramWorkoutDetailView.swift
 //  FitToday
 //
-//  Tela de detalhe de um treino de programa, mostrando exercícios da API Wger
+//  Tela de detalhe de um treino de programa, mostrando exercícios do catálogo
 //  com suporte a reordenação e persistência de customizações.
 //
 
@@ -232,24 +232,19 @@ struct ProgramWorkoutDetailView: View {
     }
 
     private func addExerciseEntry(_ entry: CustomExerciseEntry) {
-        // Convert CustomExerciseEntry back to WgerExercise + ProgramExercise
-        let wger = WgerExercise(
-            id: Int(entry.exerciseId) ?? 0,
-            uuid: entry.id.uuidString,
+        // Convert CustomExerciseEntry to CatalogExercise + ProgramExercise
+        let catalog = CatalogExercise(
+            id: entry.exerciseId,
             name: entry.exerciseName,
-            exerciseBaseId: Int(entry.exerciseId) ?? 0,
             description: nil,
             category: nil,
             muscles: [],
             musclesSecondary: [],
-            equipment: [],
-            language: 2,
-            mainImageURL: entry.exerciseGifURL,
-            imageURLs: entry.exerciseGifURL.map { [$0] } ?? []
+            equipment: []
         )
         let newExercise = ProgramExercise(
             id: "\(workout.id)_added_\(exercises.count)",
-            wgerExercise: wger,
+            catalogExercise: catalog,
             sets: 3,
             repsRange: 8...12,
             restSeconds: 60,
@@ -343,23 +338,12 @@ struct ProgramWorkoutDetailView: View {
     // MARK: - Conversion Helpers
 
     private func createWorkoutExercise(from programExercise: ProgramExercise) -> WorkoutExercise {
-        let wger = programExercise.wgerExercise
+        let catalog = programExercise.catalogExercise
 
-        // Map Wger category ID to MuscleGroup
-        let muscleGroup = mapCategoryToMuscleGroup(wger.category)
+        let muscleGroup = mapCategoryToMuscleGroup(catalog.category)
 
-        // Create ExerciseMedia from Wger image URLs
-        let media: ExerciseMedia? = {
-            // Prioritize main image, fallback to first image in list
-            let imageURL = wger.mainImageURL.flatMap { URL(string: $0) }
-                ?? wger.imageURLs.first.flatMap { URL(string: $0) }
-            guard imageURL != nil else { return nil }
-            return ExerciseMedia(imageURL: imageURL, gifURL: nil)
-        }()
-
-        // Map instructions from description
         let instructions: [String] = {
-            guard let desc = wger.description, !desc.isEmpty else {
+            guard let desc = catalog.description, !desc.isEmpty else {
                 return ["Realize o exercício com boa técnica."]
             }
             let lines = desc
@@ -370,20 +354,19 @@ struct ProgramWorkoutDetailView: View {
         }()
 
         return WorkoutExercise(
-            id: String(wger.id),
-            name: wger.name,
+            id: catalog.id,
+            name: catalog.name,
             mainMuscle: muscleGroup,
-            equipment: mapEquipment(wger.equipment),
+            equipment: mapEquipment(catalog.equipment),
             instructions: instructions,
-            media: media
+            media: nil
         )
     }
 
     private func mapCategoryToMuscleGroup(_ categoryId: Int?) -> MuscleGroup {
         guard let categoryId else { return .fullBody }
 
-        // Map Wger category IDs to MuscleGroup
-        // Valid categories: 8=Arms, 9=Legs, 10=Abs, 11=Chest, 12=Back, 13=Shoulders, 14=Calves, 15=Cardio
+        // Map category IDs to MuscleGroup
         switch categoryId {
         case 8:  return .arms          // Arms (biceps + triceps)
         case 9:  return .quads         // Legs
@@ -400,7 +383,7 @@ struct ProgramWorkoutDetailView: View {
     private func mapEquipment(_ equipmentIds: [Int]) -> EquipmentType {
         guard let first = equipmentIds.first else { return .bodyweight }
 
-        // Map Wger equipment IDs to EquipmentType
+        // Map equipment IDs to EquipmentType
         switch first {
         case 1: return .barbell        // Barbell
         case 3: return .dumbbell       // Dumbbell
@@ -419,7 +402,7 @@ struct ProgramWorkoutDetailView: View {
     }
 
     private func muscleIdToName(_ muscleId: Int) -> String? {
-        // Map Wger muscle IDs to readable names
+        // Map muscle IDs to readable names
         switch muscleId {
         case 1: return "Bíceps"
         case 2: return "Deltóides"
@@ -513,8 +496,8 @@ private struct ExerciseRowCard: View {
                                 .foregroundStyle(FitTodayColor.brandPrimary)
                                 .lineLimit(2)
 
-                            if !exercise.wgerExercise.muscles.isEmpty {
-                                Text(Self.muscleNames(for: exercise.wgerExercise.muscles))
+                            if !exercise.catalogExercise.muscles.isEmpty {
+                                Text(Self.muscleNames(for: exercise.catalogExercise.muscles))
                                     .font(.system(.caption2))
                                     .foregroundStyle(FitTodayColor.textTertiary)
                                     .lineLimit(1)
@@ -564,25 +547,13 @@ private struct ExerciseRowCard: View {
 
     @ViewBuilder
     private var exerciseCircleImage: some View {
-        ZStack {
-            Circle()
-                .fill(FitTodayColor.brandPrimary.opacity(0.1))
-                .frame(width: 52, height: 52)
-
-            if let imageURL = exercise.imageURL {
-                ExerciseMediaImageURL(
-                    url: imageURL,
-                    size: CGSize(width: 52, height: 52),
-                    contentMode: .fill,
-                    cornerRadius: 26
-                )
-                .clipShape(Circle())
-            } else {
-                Image(systemName: "figure.strengthtraining.traditional")
-                    .font(.system(size: 22))
-                    .foregroundStyle(FitTodayColor.brandPrimary)
-            }
-        }
+        ExerciseImageView(
+            exerciseId: exercise.catalogExercise.id,
+            imageIndex: 0,
+            cornerRadius: 26
+        )
+        .frame(width: 52, height: 52)
+        .clipShape(Circle())
     }
 
     // MARK: - Rest Timer Label
@@ -684,25 +655,19 @@ private struct ExerciseSetsTable: View {
 }
 
 #Preview {
-    // WgerExercise usa Int? para category e [Int] para muscles
-    let sampleExercise = WgerExercise(
-        id: 1,
-        uuid: UUID().uuidString,
+    let sampleExercise = CatalogExercise(
+        id: "exercise_192",
         name: "Supino Reto com Barra",
-        exerciseBaseId: 1,
         description: "Deite no banco com os pés apoiados no chão...",
-        category: 11, // Chest category ID
-        muscles: [3],  // Peitoral muscle ID
+        category: 11,
+        muscles: [3],
         musclesSecondary: [],
-        equipment: [1], // Barbell equipment ID
-        language: 2,
-        mainImageURL: "https://wger.de/media/exercise-images/192/Bench-press-1.png",
-        imageURLs: ["https://wger.de/media/exercise-images/192/Bench-press-1.png"]
+        equipment: [1]
     )
 
     let programExercise = ProgramExercise(
         id: "test_1",
-        wgerExercise: sampleExercise,
+        catalogExercise: sampleExercise,
         sets: 4,
         repsRange: 8...12,
         restSeconds: 90,

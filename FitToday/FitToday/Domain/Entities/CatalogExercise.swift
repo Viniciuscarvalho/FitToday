@@ -3,7 +3,7 @@
 //  FitToday
 //
 //  Exercise model backed by Firestore catalog.
-//  Replaces WgerExercise as the app's canonical exercise type.
+//  The app's canonical exercise type backed by Firestore catalog.
 //
 
 import Foundation

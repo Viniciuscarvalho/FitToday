@@ -75,7 +75,8 @@ struct WorkoutExerciseDetailView: View {
                     totalSteps: plan.exercises.count
                 )
 
-                ExerciseHeroImage(media: prescription.exercise.media)
+                ExerciseAnimatedView(exerciseId: prescription.exercise.id)
+                    .frame(height: 220)
                     .fitCardShadow()
                 
                 // Tracking de séries

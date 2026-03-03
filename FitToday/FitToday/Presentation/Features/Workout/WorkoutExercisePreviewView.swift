@@ -42,7 +42,7 @@ struct WorkoutExercisePreviewView: View {
                         .foregroundStyle(FitTodayColor.textPrimary)
                 }
                 
-                // Exercise Image — Firebase Storage animated or Wger fallback
+                // Exercise Image — Firebase Storage animated
                 ExerciseAnimatedView(
                     exerciseId: prescription.exercise.id,
                     cornerRadius: FitTodayRadius.md

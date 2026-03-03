@@ -366,7 +366,7 @@ enum HomeJourneyState: Equatable {
         todayProgramName = bestProgram.shortName
 
         guard let programRepo = resolver.resolve(ProgramRepository.self),
-              let workoutRepo = resolver.resolve(WgerProgramWorkoutRepository.self) else {
+              let workoutRepo = resolver.resolve(ProgramWorkoutRepository.self) else {
             return
         }
 

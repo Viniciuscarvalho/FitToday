@@ -35,7 +35,7 @@ struct DebugSection: View {
                     Divider().padding(.leading, 56)
                     resetAICounterButton
                     Divider().padding(.leading, 56)
-                    clearWgerCachesButton
+                    clearExerciseCachesButton
                     Divider().padding(.leading, 56)
                     clearWorkoutCompositionCachesButton
                     Divider().padding(.leading, 56)
@@ -119,15 +119,15 @@ struct DebugSection: View {
         }
     }
 
-    private var clearWgerCachesButton: some View {
+    private var clearExerciseCachesButton: some View {
         DebugActionButton(
             icon: "trash.fill",
             iconColor: .red,
-            title: "Limpar caches Wger",
-            subtitle: "Limpa cache de exercícios e imagens da API Wger",
+            title: "Limpar caches de exercícios",
+            subtitle: "Limpa cache de exercícios e imagens do Firestore",
             isBold: true
         ) {
-            clearWgerCaches()
+            clearExerciseCaches()
         }
     }
 
@@ -163,12 +163,12 @@ struct DebugSection: View {
         showingRestoreAlert = true
     }
 
-    private func clearWgerCaches() {
-        // Limpa caches do Wger API
-        UserDefaults.standard.removeObject(forKey: "wger_exercise_cache_v1")
-        UserDefaults.standard.removeObject(forKey: "wger_categories_cache_v1")
-        UserDefaults.standard.removeObject(forKey: "wger_equipment_cache_v1")
-        restoreMessage = "Caches do Wger foram limpos! O app fará novas buscas na próxima visualização."
+    private func clearExerciseCaches() {
+        // Limpa caches de exercícios
+        Task {
+            await ExerciseImageCache.shared.clearCache()
+        }
+        restoreMessage = "Caches de exercícios foram limpos! O app fará novas buscas na próxima visualização."
         showingRestoreAlert = true
     }
 

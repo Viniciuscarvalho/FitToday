@@ -9,7 +9,7 @@ import SwiftUI
 
 struct ExercisePreviewRow: View {
     let exerciseName: String
-    let imageURL: URL?
+    let exerciseId: String?
     let setsAndReps: String
     let muscleGroup: String?
 
@@ -17,15 +17,19 @@ struct ExercisePreviewRow: View {
 
     var body: some View {
         HStack(spacing: FitTodaySpacing.md) {
-            // Exercise image
-            CachedAsyncImage(
-                url: imageURL,
-                placeholder: Image(systemName: "dumbbell.fill"),
-                size: CGSize(width: imageSize, height: imageSize)
-            )
-            .frame(width: imageSize, height: imageSize)
-            .background(FitTodayColor.surfaceElevated)
-            .clipShape(RoundedRectangle(cornerRadius: FitTodayRadius.sm))
+            // Exercise image from Firebase Storage
+            if let exerciseId {
+                ExerciseImageView(exerciseId: exerciseId, imageIndex: 0, cornerRadius: FitTodayRadius.sm)
+                    .frame(width: imageSize, height: imageSize)
+            } else {
+                ZStack {
+                    RoundedRectangle(cornerRadius: FitTodayRadius.sm)
+                        .fill(FitTodayColor.surfaceElevated)
+                    Image(systemName: "dumbbell.fill")
+                        .foregroundStyle(FitTodayColor.textTertiary)
+                }
+                .frame(width: imageSize, height: imageSize)
+            }
 
             // Name and muscle group
             VStack(alignment: .leading, spacing: 2) {
@@ -64,19 +68,19 @@ struct ExercisePreviewRow: View {
     VStack(spacing: 8) {
         ExercisePreviewRow(
             exerciseName: "Bench Press",
-            imageURL: nil,
+            exerciseId: nil,
             setsAndReps: "3 x 12",
             muscleGroup: "Chest"
         )
         ExercisePreviewRow(
             exerciseName: "Running",
-            imageURL: nil,
+            exerciseId: nil,
             setsAndReps: "20 min",
             muscleGroup: nil
         )
         ExercisePreviewRow(
             exerciseName: "Lateral Raise",
-            imageURL: nil,
+            exerciseId: nil,
             setsAndReps: "4 x 15",
             muscleGroup: "Shoulders"
         )

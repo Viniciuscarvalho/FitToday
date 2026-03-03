@@ -3,7 +3,7 @@
 //  FitToday
 //
 //  Loads catalog exercises for program workouts via ExerciseServiceProtocol.
-//  Replaces DefaultWgerProgramWorkoutRepository.
+//  Primary implementation for loading program workout exercises.
 //
 
 import Foundation
@@ -31,7 +31,7 @@ actor FirestoreProgramWorkoutRepository: ProgramWorkoutRepository {
             return try await loadExercisesForCategories([11, 12, 9, 10], count: exerciseCount)
         }
 
-        let categoryIds = templateType.wgerCategoryIds
+        let categoryIds = templateType.categoryIds
         guard !categoryIds.isEmpty else {
             throw ProgramWorkoutError.noCategories
         }
