@@ -282,18 +282,24 @@ struct WorkoutPlanView: View {
     }
 
     private func prefetchWorkoutImages() async {
-        guard let plan = sessionStore.plan,
-              let cacheService = imageCacheService else {
-            return
-        }
-
-        // OPTIMIZATION: Only prefetch first 3 images to save API requests
-        // Remaining images load on-demand when user views each exercise
-        let urls = Array(plan.imageURLs.prefix(3))
-        guard !urls.isEmpty else { return }
+        guard let plan = sessionStore.plan else { return }
 
         isPrefetchingImages = true
-        await cacheService.prefetchImages(urls)
+
+        // Prefetch Firebase Storage exercise images (background priority)
+        let exerciseIds = plan.exercises.map(\.exercise.id)
+        if !exerciseIds.isEmpty {
+            await ExerciseImageCache.shared.prefetchWorkoutImages(exerciseIds: exerciseIds)
+        }
+
+        // Prefetch Wger API images (first 3 only)
+        if let cacheService = imageCacheService {
+            let urls = Array(plan.imageURLs.prefix(3))
+            if !urls.isEmpty {
+                await cacheService.prefetchImages(urls)
+            }
+        }
+
         try? await Task.sleep(nanoseconds: 300_000_000) // 0.3s
         isPrefetchingImages = false
     }
