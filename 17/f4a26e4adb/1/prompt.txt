@@ -1010,3 +1010,307 @@ Summary:
 
 If you need specific details from before compaction (like exact code snippets, error messages, or content you generated), read the full transcript at: /Users/viniciuscarvalho/.REDACTED.jsonl
 Please continue the conversation from where we left off without asking the user any further questions. Continue with the last task that you were asked to work on.
+
+---
+
+Verifique as três issues e realize as investigações e o check em todos os critérios de aceite de todas as tasks, https://github.com/Viniciuscarvalho/FitToday/issues/41, https://github.com/Viniciuscarvalho/FitToday/issues/42 e https://github.com/Viniciuscarvalho/FitToday/issues/43 essa última está relacionada a issue 42 pois todo o chat do FitOrb não está funcionando, se atentar as todas subtasks originadas e seguir os padrões do projeto corretamente seguindo o Swiftui-expert assim como ao guideline de concurrency. Ao finalizar, build correto, testes unitários, commit e push para a branch.
+
+---
+
+This session is being continued from a previous conversation that ran out of context. The summary below covers the earlier portion of the conversation.
+
+Analysis:
+Let me carefully analyze the conversation chronologically:
+
+**Part 1: Continuation from previous session**
+The conversation starts with a continuation from a prior context. The summary covers:
+- Issues #28-#31, #33-#38 were completed in previous sessions
+- CMS trainer decode errors were fixed
+- Merge conflicts were resolved
+- A plan for exercise image quality improvement exists but wasn't started
+- Two critical runtime bugs were found and fixed:
+  1. Trainer listing empty due to photoURL filter
+  2. FitOrb chat non-functional due to eager DI registration
+
+**Part 2: Build verification and push**
+I picked up from where the previous session left off - verifying the build for the three fixes:
+1. CMSPersonalTrainerRepository - sort instead of filter for photoURL
+2. AppContainer - lazy DI for AIChatService
+3. AIChatViewModel - computed property for chatService
+
+The build initially failed because Swinject's `register` closure can't return nil/optional:
+```
+error: value of optional type 'NewOpenAIClient?' must be unwrapped to a value of type 'NewOpenAIClient'
+error: 'nil' is not compatible with closure result type 'AIChatService'
+```
+
+I fixed this by:
+1. Removing the Swinject registration entirely from AppContainer
+2. Having AIChatViewModel create AIChatService directly with a cached instance pattern
+
+Build succeeded, committed as `6c289f1`, pushed to branch `fix/personal-trainer-issues-35-38`.
+
+**Part 3: User's new request**
+User asked to investigate three GitHub issues (#41, #42, #43) with full acceptance criteria checks, implementation, build, tests, commit, and push.
+
+**Part 4: Investigation of all three issues (parallel agents)**
+
+**Issue #41 investigation:**
+- `TrainerRatingCard.onRate` is wired to `onTrainerSelected` which opens ConnectionRequestSheet
+- No dedicated rating endpoint, view, or use case exists
+- The `notFound` error comes from `requestConnection` → `fetchTrainer` in Firebase when trainer doc doesn't exist
+- The "Avaliar" button incorrectly reuses the connection flow
+
+**Issue #42 investigation:**
+- FitOrb (AIChatView) has NO NavigationLinks - it uses `router.push()` 
+- The `navigationDestination(for: AppRoute.self)` is registered in TabRootView's `tabView(for:content:)` helper
+- The "variant selector" error likely comes from `TabView(.page)` internals
+- `ActivityTabView` creates a nested `NavigationStack` inside TabRootView's stack - this is the real source of issues
+- `GroupsView` also creates its own `NavigationStack`
+
+**Issue #43 investigation:**
+- Bug 1: `entitlement.isPro` gate in AIChatView blocks free users from using chips/send, but `EntitlementPolicy` explicitly allows free users 5 messages/day
+- Bug 2: `_cachedChatService` never invalidated when user saves a new API key
+- The ViewModel's `featureGating.checkAccess(to: .aiChat)` already handles proper gating
+
+**Part 5: Implementing fixes**
+
+**Fix #41:**
+1. Renamed `onRate` to `onConnect` in `TrainerRatingCard.swift`
+2. Changed button text from `"trainer.card.rate"` to `"trainer.card.connect"`
+3. Fixed hardcoded star rating (was showing "4.5" and "(128)" for all trainers) to use actual `trainer.rating` and `trainer.reviewCount`
+4. Updated `TrainerListView.swift` to use new `onConnect` parameter
+5. Added localization keys `"trainer.card.connect"` to both en and pt-BR strings files
+
+**Fix #42:**
+1. Removed nested `NavigationStack` from `ActivityTabView` - since it's already inside TabRootView's NavigationStack
+2. Was about to also look at GroupsView's NavigationStack when the summary was requested
+
+**Fix #43 (not yet implemented):**
+- Need to remove `entitlement.isPro` gate from chip taps, TextField submit, and send button in AIChatView
+- The proper gating already happens in AIChatViewModel via `featureGating.checkAccess(to: .aiChat)`
+
+**Current state when summary requested:**
+- #41 fixes implemented (TrainerRatingCard, TrainerListView, localization)
+- #42 partially fixed (ActivityTabView nested NavigationStack removed, GroupsView pending)
+- #43 NOT yet implemented (need to remove isPro gate from AIChatView)
+- Build NOT yet run
+- NOT yet committed or pushed
+
+Summary:
+1. Primary Request and Intent:
+
+   **Previous session (completed):** Fixed two critical runtime bugs - trainer listing empty (photoURL hard filter) and FitOrb chat non-functional (eager DI registration). The build needed verification, commit, and push.
+
+   **Current session request:** User said: "Verifique as três issues e realize as investigações e o check em todos os critérios de aceite de todas as tasks, https://github.com/Viniciuscarvalho/FitToday/issues/41, https://github.com/Viniciuscarvalho/FitToday/issues/42 e https://github.com/Viniciuscarvalho/FitToday/issues/43 essa última está relacionada a issue 42 pois todo o chat do FitOrb não está funcionando, se atentar as todas subtasks originadas e seguir os padrões do projeto corretamente seguindo o Swiftui-expert assim como ao guideline de concurrency. Ao finalizar, build correto, testes unitários, commit e push para a branch."
+
+   The user wants all three issues investigated, acceptance criteria verified, fixes implemented following SwiftUI expert and concurrency guidelines, with successful build, unit tests, commit, and push.
+
+2. Key Technical Concepts:
+   - SwiftUI + MVVM with `@Observable` (iOS 17+, Swift 6.0)
+   - Swinject DI — cannot return nil/optional from `register` closure
+   - Nested `NavigationStack` issues — inner stacks don't inherit `navigationDestination(for:)` from outer stacks
+   - `EntitlementPolicy` feature gating — `.aiChat` is NOT Pro-only; free users get 5 messages/day
+   - `FeatureGatingUseCase.checkAccess(to: .aiChat)` already handles proper metered access
+   - Actor-based `AIChatService` with cached system prompt
+   - Lazy service creation pattern with cached instance (`_cachedChatService`)
+   - `TabRootView` wraps each tab in `NavigationStack` with `navigationDestination(for: AppRoute.self)`
+   - `router.push()` for programmatic navigation vs `NavigationLink(value:)` for declarative
+
+3. Files and Code Sections:
+
+   - **`FitToday/FitToday/Presentation/DI/AppContainer.swift`**
+     - Fixed in previous continuation: removed Swinject registration for AIChatService since it can't return nil
+     - Now has comment explaining lazy resolution happens in ViewModel
+     ```swift
+     // AI Chat Service (FitOrb) — resolved lazily inside AIChatViewModel.
+     // Not registered here because the OpenAI API key may not exist at launch.
+     // The ViewModel creates AIChatService on-demand when a key is available.
+     ```
+
+   - **`FitToday/FitToday/Presentation/Features/AIChat/AIChatViewModel.swift`**
+     - Fixed in previous continuation: changed from Swinject resolution to direct creation with cache
+     ```swift
+     private var _cachedChatService: AIChatService?
+
+     /// Creates on-demand so API key saved after launch takes effect.
+     private var chatService: AIChatService? {
+         if let cached = _cachedChatService { return cached }
+         guard let client = NewOpenAIClient.fromUserKey(),
+               let profileRepo = resolver.resolve(UserProfileRepository.self),
+               let statsRepo = resolver.resolve(UserStatsRepository.self),
+               let historyRepo = resolver.resolve(WorkoutHistoryRepository.self)
+         else { return nil }
+         let service = AIChatService(
+             client: client,
+             profileRepository: profileRepo,
+             statsRepository: statsRepo,
+             historyRepository: historyRepo
+         )
+         _cachedChatService = service
+         return service
+     }
+     ```
+
+   - **`FitToday/FitToday/Presentation/Features/AIChat/AIChatView.swift`**
+     - NEEDS FIX (issue #43): Three locations gate on `entitlement.isPro` incorrectly:
+       - Lines 123-129: Quick action chip tap
+       - Lines 235-241: TextField `.onSubmit`
+       - Lines 243-248: Send button action
+     - All three should just call `viewModel.sendMessage()` directly since the ViewModel handles gating via `featureGating.checkAccess(to: .aiChat)`
+     - **NOT yet modified in this session**
+
+   - **`FitToday/FitToday/Presentation/Features/PersonalTrainer/Components/TrainerRatingCard.swift`**
+     - Issue #41 fix: Renamed `onRate` to `onConnect`, changed button text key
+     - Fixed hardcoded star rating to use actual trainer data:
+     ```swift
+     struct TrainerRatingCard: View {
+         let trainer: PersonalTrainer
+         let onConnect: () -> Void  // was onRate
+         let onSelect: () -> Void
+     ```
+     ```swift
+     private var starRating: some View {
+         let rating = trainer.rating ?? 0
+         let reviews = trainer.reviewCount ?? 0
+
+         return HStack(spacing: 2) {
+             ForEach(0..<5, id: \.self) { index in
+                 Image(systemName: Double(index) + 0.5 <= rating ? "star.fill" : (Double(index) < rating ? "star.leadinghalf.filled" : "star"))
+                     .font(.system(size: 12))
+                     .foregroundStyle(FitTodayColor.warning)
+             }
+             if rating > 0 {
+                 Text(String(format: "%.1f", rating))
+                     .font(FitTodayFont.ui(size: 12, weight: .medium))
+                     .foregroundStyle(FitTodayColor.textSecondary)
+                 Text("(\(reviews))")
+                     .font(FitTodayFont.ui(size: 12, weight: .medium))
+                     .foregroundStyle(FitTodayColor.textTertiary)
+             }
+         }
+     }
+     ```
+     ```swift
+     Button(action: onConnect) {  // was onRate
+         Text("trainer.card.connect".localized)  // was "trainer.card.rate"
+     ```
+
+   - **`FitToday/FitToday/Presentation/Features/PersonalTrainer/TrainerListView.swift`**
+     - Updated to use `onConnect` parameter instead of `onRate`:
+     ```swift
+     TrainerRatingCard(
+         trainer: trainer,
+         onConnect: { onTrainerSelected(trainer) },
+         onSelect: { onTrainerSelected(trainer) }
+     )
+     ```
+
+   - **`FitToday/FitToday/Resources/pt-BR.lproj/Localizable.strings`**
+     - Added: `"trainer.card.connect" = "Conectar";` after line 882
+
+   - **`FitToday/FitToday/Resources/en.lproj/Localizable.strings`**
+     - Added: `"trainer.card.connect" = "Connect";` after line 882
+
+   - **`FitToday/FitToday/Presentation/Features/Activity/Views/ActivityTabView.swift`**
+     - Issue #42 fix: Removed nested `NavigationStack` that created duplicate stack inside TabRootView's stack
+     - Before: `NavigationStack { VStack(spacing: 0) { ... } .navigationTitle("Atividade") }`
+     - After: `VStack(spacing: 0) { ... } .navigationTitle("Atividade")`
+
+   - **`FitToday/FitToday/Presentation/Features/Groups/Views/GroupsView.swift`**
+     - READ ONLY — has its own `NavigationStack` at line 28 but NO `navigationDestination(for: AppRoute.self)` 
+     - No `router.push` or `NavigationLink(value: AppRoute)` calls found inside Groups views
+     - Only one `NavigationLink` (closure-based) in `GroupStreakDetailView.swift:203` — compatible without `navigationDestination(for:)`
+     - **Decision pending**: GroupsView standalone NavigationStack may need fixing if it's ever embedded in TabRootView's stack
+
+   - **`FitToday/FitToday/Presentation/Root/TabRootView.swift`**
+     - READ ONLY — each tab wrapped in `NavigationStack` with `navigationDestination(for: AppRoute.self)`
+     - `routeDestination(for:)` handles all 69 `AppRoute` cases exhaustively
+     - `ActivityTabView` is on `.activity` tab — was creating nested NavigationStack
+
+   - **`FitToday/FitToday/Domain/Entities/EntitlementPolicy.swift`**
+     - READ ONLY — confirms `.aiChat` is NOT Pro-only:
+     ```swift
+     case .aiChat:
+         if usageCount >= freeAIChatMessagesPerDay {
+             return .limitReached(remaining: 0, limit: freeAIChatMessagesPerDay)
+         }
+         return .allowed
+     ```
+     - `freeAIChatMessagesPerDay = 5`
+     - `isProOnly(.aiChat)` returns `false`
+
+   - **`FitToday/FitToday/Domain/UseCases/FeatureGatingUseCase.swift`**
+     - READ ONLY — `checkAccess(to: .aiChat)` properly tracks daily chat usage via `usageTracker.dailyChatUsageCount()`
+
+   - **`FitToday/FitToday/Presentation/Features/PersonalTrainer/PersonalTrainerViewModel.swift`**
+     - READ ONLY — No `rateTrainer` or `submitRating` method exists; confirms rating was never implemented
+     - `requestConnection(to:)` at line 247 is what actually gets called when "Avaliar" was tapped
+
+   - **`FitToday/FitToday/Data/Repositories/CMSPersonalTrainerRepository.swift`**
+     - Previously fixed (prior continuation) — sort instead of filter for photoURL
+     - Committed in `6c289f1`
+
+   - **`FitToday/FitToday/Data/Services/AIChatService.swift`**
+     - READ ONLY — actor with `cachedSystemPrompt` state; creating new instances loses prompt cache
+     - This is why `_cachedChatService` caching pattern was used in ViewModel
+
+4. Errors and Fixes:
+
+   - **Swinject registration returning nil:**
+     - Error: `value of optional type 'NewOpenAIClient?' must be unwrapped` and `'nil' is not compatible with closure result type 'AIChatService'`
+     - Root cause: Swinject's `register` closure signature requires non-optional return type
+     - Fix: Removed Swinject registration entirely; ViewModel creates `AIChatService` directly with cached instance
+     
+   - **Build failed finding iPhone 16 simulator:**
+     - `xcodebuild` couldn't find `iPhone 16` or `iPhone 16 Pro` destinations
+     - Fix: Used `-sdk iphonesimulator` instead of specific simulator destination
+
+5. Problem Solving:
+
+   **Solved:**
+   - Previous continuation bugs committed and pushed (`6c289f1`)
+   - Issue #41 investigation complete — `onRate` → `onConnect`, star rating uses real data
+   - Issue #42 investigation complete — nested NavigationStack in ActivityTabView removed
+   - Issue #43 investigation complete — identified `entitlement.isPro` as incorrect gate
+
+   **In Progress:**
+   - Issue #42: GroupsView NavigationStack was being investigated when interrupted
+   - Issue #43: `AIChatView` isPro gate removal NOT yet implemented
+   - Build, tests, commit, push NOT yet done
+
+6. All User Messages:
+   - "Verifique as três issues e realize as investigações e o check em todos os critérios de aceite de todas as tasks, https://github.com/Viniciuscarvalho/FitToday/issues/41, https://github.com/Viniciuscarvalho/FitToday/issues/42 e https://github.com/Viniciuscarvalho/FitToday/issues/43 essa última está relacionada a issue 42 pois todo o chat do FitOrb não está funcionando, se atentar as todas subtasks originadas e seguir os padrões do projeto corretamente seguindo o Swiftui-expert assim como ao guideline de concurrency. Ao finalizar, build correto, testes unitários, commit e push para a branch."
+
+7. Pending Tasks:
+   - Fix issue #43: Remove `entitlement.isPro` gate from AIChatView chip taps (line 124), TextField onSubmit (line 236), and send button (line 244) — let ViewModel's `featureGating.checkAccess(to: .aiChat)` handle gating
+   - Fix issue #43: Add `_cachedChatService` invalidation when API key changes (e.g., expose `resetServiceCache()` or nil out cache on `clearHistory()`)
+   - Verify GroupsView NavigationStack situation for issue #42 (may need fix or may be fine standalone)
+   - Run `xcodebuild` to verify all changes compile
+   - Run unit tests
+   - Commit all changes
+   - Push to branch
+
+8. Current Work:
+   I was in the middle of implementing fixes for issue #42 (FitOrb NavigationLink + variant selector). I had just:
+   1. Removed the nested `NavigationStack` from `ActivityTabView.swift` (the actual source of the navigation warning)
+   2. Was investigating `GroupsView.swift` to determine if its standalone `NavigationStack` also needed fixing
+   
+   I had searched for `router.push` calls inside Groups views (none found) and `NavigationLink` usage (only closure-based, not value-based), and was about to conclude the GroupsView investigation when the summary was requested.
+
+   The todo list state was:
+   - ✅ #41: Fix TrainerRatingCard — rename onRate to onConnect, wire correctly
+   - 🔄 #42: Add navigationDestination to GroupsView NavigationStack (ActivityTabView fixed, GroupsView pending)
+   - ⬜ #43: Remove isPro gate from AIChatView chip/send actions
+   - ⬜ Build, test, commit and push
+
+9. Optional Next Step:
+   Continue implementing the remaining fixes:
+   1. **Complete #42**: GroupsView investigation shows no `AppRoute`-based navigation inside Groups, so the fix may just be the ActivityTabView change. However, should verify no other views have nested NavigationStacks.
+   2. **Implement #43**: Remove `entitlement.isPro` checks from `AIChatView.swift` at three locations (lines 124, 236, 244) and let the ViewModel handle gating. Add cache invalidation for `_cachedChatService`.
+   3. **Build, test, commit, push** as the user explicitly requested: "Ao finalizar, build correto, testes unitários, commit e push para a branch."
+
+   Current branch: `fix/personal-trainer-issues-35-38`
+
+If you need specific details from before compaction (like exact code snippets, error messages, or content you generated), read the full transcript at: /Users/viniciuscarvalho/.REDACTED.jsonl
+Please continue the conversation from where we left off without asking the user any further questions. Continue with the last task that you were asked to work on.

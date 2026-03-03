@@ -33,7 +33,9 @@
     "FitToday/FitToday/Domain/UseCases/PersonalTrainerUseCases.swift",
     "FitToday/FitToday/FitTodayApp.swift",
     "FitToday/FitToday/Presentation/DI/AppContainer.swift",
+    "FitToday/FitToday/Presentation/Features/AIChat/AIChatView.swift",
     "FitToday/FitToday/Presentation/Features/AIChat/AIChatViewModel.swift",
+    "FitToday/FitToday/Presentation/Features/Activity/Views/ActivityTabView.swift",
     "FitToday/FitToday/Presentation/Features/Groups/Views/CreateGroupView.swift",
     "FitToday/FitToday/Presentation/Features/Groups/Views/GroupsView.swift",
     "FitToday/FitToday/Presentation/Features/Groups/Views/JoinGroupView.swift",
@@ -47,10 +49,12 @@
     "FitToday/FitToday/Presentation/Features/PersonalTrainer/Components/ConnectionRequestSheet.swift",
     "FitToday/FitToday/Presentation/Features/PersonalTrainer/Components/PersonalTrainerHomeCard.swift",
     "FitToday/FitToday/Presentation/Features/PersonalTrainer/Components/TrainerCard.swift",
+    "FitToday/FitToday/Presentation/Features/PersonalTrainer/Components/TrainerRatingCard.swift",
     "FitToday/FitToday/Presentation/Features/PersonalTrainer/PersonalTrainerView.swift",
     "FitToday/FitToday/Presentation/Features/PersonalTrainer/PersonalTrainerViewModel.swift",
     "FitToday/FitToday/Presentation/Features/PersonalTrainer/TodayWorkoutTabView.swift",
     "FitToday/FitToday/Presentation/Features/PersonalTrainer/TrainerDashboardView.swift",
+    "FitToday/FitToday/Presentation/Features/PersonalTrainer/TrainerListView.swift",
     "FitToday/FitToday/Presentation/Features/PersonalTrainer/TrainerSearchView.swift",
     "FitToday/FitToday/Presentation/Features/PersonalWorkouts/Views/PersonalWorkoutsListView.swift",
     "FitToday/FitToday/Presentation/Features/Pro/Components/FeatureComparisonTable.swift",
@@ -99,10 +103,10 @@
     }
   ],
   "token_usage": {
-    "input_tokens": 1490,
-    "cache_creation_tokens": 283940,
-    "cache_read_tokens": 12305948,
-    "output_tokens": 9194,
-    "api_call_count": 115
+    "input_tokens": 12468,
+    "cache_creation_tokens": 408038,
+    "cache_read_tokens": 18027526,
+    "output_tokens": 19406,
+    "api_call_count": 159
   }
 }
