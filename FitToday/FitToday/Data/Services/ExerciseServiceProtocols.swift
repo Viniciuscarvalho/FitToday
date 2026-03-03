@@ -2,11 +2,19 @@
 //  ExerciseServiceProtocols.swift
 //  FitToday
 //
-//  Protocols for exercise name normalization and media resolution.
-//  Created on 29/01/26 - Uses Wger API for exercise data.
+//  Protocols for exercise catalog service, name normalization, and media resolution.
 //
 
 import Foundation
+
+// MARK: - Exercise Service Protocol
+
+/// Protocol for fetching exercises from the catalog (Firestore).
+protocol ExerciseServiceProtocol: Sendable {
+    func fetchExercises(language: ExerciseLanguageCode, category: Int?, equipment: [Int]?, limit: Int) async throws -> [CatalogExercise]
+    func fetchExercise(id: String) async throws -> CatalogExercise?
+    func searchExercises(query: String, language: ExerciseLanguageCode, limit: Int) async throws -> [CatalogExercise]
+}
 
 // MARK: - Exercise Name Normalizing
 
