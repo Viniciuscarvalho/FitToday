@@ -92,3 +92,20 @@ Preciso deixar a main funcionando, deve aceitar as modificações de ambas, as u
 
 Todas as issues devem ser preenchidas seus criterios de aceites e testadas para serem aprovadas e realizar o commit e depois o PR, https://github.com/Viniciuscarvalho/FitToday/issues, além disso verifique se há issues para notificações caso o usuário receba uma mensagem no chat do personal, isso deve estar implementado.
 
+### Prompt 12
+
+Identifiquei novos problemas, mesmo com o firebase deploy feito, a listagem de personais na plataforma não aparece, os que estão mais bem avaliados, e a busca pelo Renato que é o personal não acontece nada, está dando 200 mas sem retorno algum. está como uma busca não encontrada. Além de todas as features do chat no FitOrb não estarem funcionando nenhuma, nenhum dos campos estão levando para lugar nenhum e o chat com a OpenAI não está tendo nenhum retorno.
+
+### Prompt 13
+
+This session is being continued from a previous conversation that ran out of context. The summary below covers the earlier portion of the conversation.
+
+Analysis:
+Let me chronologically analyze the conversation:
+
+**Part 1: Continuation from previous session**
+The conversation starts with a continuation from a prior session. The summary from that session covers:
+- Issues #28-#31 (personal trainer features) were completed
+- Issue #33 (permissions bug) was found and fixed across two rounds
+- A plan...
+

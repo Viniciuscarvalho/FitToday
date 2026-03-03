@@ -33,6 +33,7 @@
     "FitToday/FitToday/Domain/UseCases/PersonalTrainerUseCases.swift",
     "FitToday/FitToday/FitTodayApp.swift",
     "FitToday/FitToday/Presentation/DI/AppContainer.swift",
+    "FitToday/FitToday/Presentation/Features/AIChat/AIChatViewModel.swift",
     "FitToday/FitToday/Presentation/Features/Groups/Views/CreateGroupView.swift",
     "FitToday/FitToday/Presentation/Features/Groups/Views/GroupsView.swift",
     "FitToday/FitToday/Presentation/Features/Groups/Views/JoinGroupView.swift",
@@ -98,10 +99,10 @@
     }
   ],
   "token_usage": {
-    "input_tokens": 3456,
-    "cache_creation_tokens": 324833,
-    "cache_read_tokens": 15881741,
-    "output_tokens": 19906,
-    "api_call_count": 141
+    "input_tokens": 1490,
+    "cache_creation_tokens": 283940,
+    "cache_read_tokens": 12305948,
+    "output_tokens": 9194,
+    "api_call_count": 115
   }
 }
