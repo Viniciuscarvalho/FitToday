@@ -22,11 +22,16 @@ final class CMSPersonalTrainerRepository: PersonalTrainerRepository, @unchecked 
     }
 
     func searchTrainers(query: String, limit: Int) async throws -> [PersonalTrainer] {
-        // CMS /api/trainers supports filtering; for name search we fetch
-        // the full list and filter locally since the API doesn't have a query param.
-        // If the backend adds a `query` param later this can be optimized.
         let response = try await service.fetchTrainers(limit: limit, offset: 0)
-        let trainers = response.trainers.map { CMSTrainerMapper.toDomain($0) }
+        // Sort: trainers with photos first, then alphabetically
+        let trainers = response.trainers
+            .sorted { lhs, rhs in
+                let lhasPhoto = lhs.photoURL != nil && !(lhs.photoURL?.isEmpty ?? true)
+                let rhasPhoto = rhs.photoURL != nil && !(rhs.photoURL?.isEmpty ?? true)
+                if lhasPhoto != rhasPhoto { return lhasPhoto }
+                return lhs.displayName < rhs.displayName
+            }
+            .map { CMSTrainerMapper.toDomain($0) }
 
         guard !query.isEmpty else { return trainers }
         let normalized = query.lowercased()

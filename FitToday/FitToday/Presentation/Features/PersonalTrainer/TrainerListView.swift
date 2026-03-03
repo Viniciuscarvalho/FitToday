@@ -31,7 +31,7 @@ struct TrainerListView: View {
                         ForEach(viewModel.searchResults) { trainer in
                             TrainerRatingCard(
                                 trainer: trainer,
-                                onRate: { onTrainerSelected(trainer) },
+                                onConnect: { onTrainerSelected(trainer) },
                                 onSelect: { onTrainerSelected(trainer) }
                             )
                         }

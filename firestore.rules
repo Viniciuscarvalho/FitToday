@@ -124,6 +124,15 @@ service cloud.firestore {
                        resource.data.trainerId == request.auth.uid;
     }
 
+    // Personal Trainers collection - perfis de personal trainers (gerenciado pelo CMS)
+    match /personalTrainers/{trainerId} {
+      // Any authenticated user can read trainer profiles (marketplace)
+      allow read: if isAuthenticated();
+
+      // Only managed by CMS/Admin
+      allow create, update, delete: if false;
+    }
+
     // Trainer-Student relationships collection
     match /trainerStudents/{relationshipId} {
       // Students can read their own relationships

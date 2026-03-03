@@ -60,11 +60,10 @@ final class DiscoverTrainersUseCase: DiscoverTrainersUseCaseProtocol, @unchecked
         }
 
         let trimmedQuery = query.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmedQuery.isEmpty else {
-            return []
-        }
+        let trainers = try await repository.searchTrainers(query: trimmedQuery, limit: limit)
 
-        return try await repository.searchTrainers(query: trimmedQuery, limit: limit)
+        // Sort by rating (highest first) for discovery
+        return trainers.sorted { ($0.rating ?? 0) > ($1.rating ?? 0) }
     }
 
     func findByInviteCode(_ code: String) async throws -> PersonalTrainer? {

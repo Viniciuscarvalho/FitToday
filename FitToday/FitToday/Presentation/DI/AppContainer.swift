@@ -199,20 +199,9 @@ struct AppContainer {
             SwiftDataChatRepository(modelContainer: modelContainer)
         }.inObjectScope(.container)
 
-        // AI Chat Service (FitOrb) - wraps OpenAI for conversational mode
-        if let client = NewOpenAIClient.fromUserKey() {
-            container.register(NewOpenAIClient.self) { _ in client }
-                .inObjectScope(.container)
-
-            let chatService = AIChatService(
-                client: client,
-                profileRepository: container.resolve(UserProfileRepository.self)!,
-                statsRepository: container.resolve(UserStatsRepository.self)!,
-                historyRepository: container.resolve(WorkoutHistoryRepository.self)!
-            )
-            container.register(AIChatService.self) { _ in chatService }
-                .inObjectScope(.container)
-        }
+        // AI Chat Service (FitOrb) — resolved lazily inside AIChatViewModel.
+        // Not registered here because the OpenAI API key may not exist at launch.
+        // The ViewModel creates AIChatService on-demand when a key is available.
 
         // Firebase Analytics Service
         let analyticsService = FirebaseAnalyticsService()

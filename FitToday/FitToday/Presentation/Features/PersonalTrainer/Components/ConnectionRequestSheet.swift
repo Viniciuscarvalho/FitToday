@@ -14,67 +14,67 @@ struct ConnectionRequestSheet: View {
     let onCancel: () -> Void
 
     var body: some View {
-        VStack(spacing: FitTodaySpacing.xl) {
-            // Header
-            VStack(spacing: FitTodaySpacing.md) {
-                // Trainer Photo
-                trainerPhoto
+        ScrollView {
+            VStack(spacing: FitTodaySpacing.xl) {
+                // Header
+                VStack(spacing: FitTodaySpacing.md) {
+                    // Trainer Photo
+                    trainerPhoto
 
-                // Trainer Name
-                HStack(spacing: FitTodaySpacing.xs) {
-                    Text(trainer.displayName)
-                        .font(FitTodayFont.ui(size: 24, weight: .bold))
-                        .foregroundStyle(FitTodayColor.textPrimary)
+                    // Trainer Name
+                    HStack(spacing: FitTodaySpacing.xs) {
+                        Text(trainer.displayName)
+                            .font(FitTodayFont.ui(size: 24, weight: .bold))
+                            .foregroundStyle(FitTodayColor.textPrimary)
 
-                    if trainer.isActive {
-                        Image(systemName: "checkmark.seal.fill")
-                            .font(.system(size: 18))
-                            .foregroundStyle(FitTodayColor.brandPrimary)
-                    }
-                }
-
-                // Specializations
-                if !trainer.specializations.isEmpty {
-                    Text(trainer.specializations.joined(separator: " - "))
-                        .font(FitTodayFont.ui(size: 14, weight: .medium))
-                        .foregroundStyle(FitTodayColor.textSecondary)
-                        .multilineTextAlignment(.center)
-                }
-            }
-
-            // Info Box
-            infoBox
-
-            Spacer()
-
-            // Actions
-            VStack(spacing: FitTodaySpacing.md) {
-                Button {
-                    onConfirm()
-                } label: {
-                    HStack {
-                        if isRequesting {
-                            ProgressView()
-                                .tint(.white)
-                        } else {
-                            Image(systemName: "paperplane.fill")
-                            Text("connection_request.send_button".localized)
+                        if trainer.isActive {
+                            Image(systemName: "checkmark.seal.fill")
+                                .font(.system(size: 18))
+                                .foregroundStyle(FitTodayColor.brandPrimary)
                         }
                     }
-                }
-                .fitPrimaryStyle()
-                .disabled(isRequesting)
 
-                Button {
-                    onCancel()
-                } label: {
-                    Text("common.cancel".localized)
+                    // Specializations
+                    if !trainer.specializations.isEmpty {
+                        Text(trainer.specializations.joined(separator: " - "))
+                            .font(FitTodayFont.ui(size: 14, weight: .medium))
+                            .foregroundStyle(FitTodayColor.textSecondary)
+                            .multilineTextAlignment(.center)
+                    }
                 }
-                .fitSecondaryStyle()
-                .disabled(isRequesting)
+
+                // Info Box
+                infoBox
+
+                // Actions
+                VStack(spacing: FitTodaySpacing.md) {
+                    Button {
+                        onConfirm()
+                    } label: {
+                        HStack {
+                            if isRequesting {
+                                ProgressView()
+                                    .tint(.white)
+                            } else {
+                                Image(systemName: "paperplane.fill")
+                                Text("connection_request.send_button".localized)
+                            }
+                        }
+                    }
+                    .fitPrimaryStyle()
+                    .disabled(isRequesting)
+
+                    Button {
+                        onCancel()
+                    } label: {
+                        Text("common.cancel".localized)
+                    }
+                    .fitSecondaryStyle()
+                    .disabled(isRequesting)
+                }
             }
+            .padding()
         }
-        .padding()
         .background(FitTodayColor.background.ignoresSafeArea())
     }
 
@@ -178,7 +178,9 @@ struct ConnectionRequestSheet: View {
             isActive: true,
             inviteCode: "ABC123",
             maxStudents: 20,
-            currentStudentCount: 5
+            currentStudentCount: 5,
+            rating: 4.8,
+            reviewCount: 42
         ),
         isRequesting: false,
         onConfirm: {},

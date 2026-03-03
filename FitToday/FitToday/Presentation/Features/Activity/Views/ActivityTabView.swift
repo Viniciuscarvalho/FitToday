@@ -23,30 +23,28 @@ struct ActivityTabView: View {
     @State private var selectedSegment: ActivitySegment = .history
 
     var body: some View {
-        NavigationStack {
-            VStack(spacing: 0) {
-                // Segmented Control
-                segmentedControl
-                    .padding(.horizontal, FitTodaySpacing.md)
-                    .padding(.vertical, FitTodaySpacing.sm)
+        VStack(spacing: 0) {
+            // Segmented Control
+            segmentedControl
+                .padding(.horizontal, FitTodaySpacing.md)
+                .padding(.vertical, FitTodaySpacing.sm)
 
-                // Content
-                TabView(selection: $selectedSegment) {
-                    WorkoutHistoryView(resolver: resolver)
-                        .tag(ActivitySegment.history)
+            // Content
+            TabView(selection: $selectedSegment) {
+                WorkoutHistoryView(resolver: resolver)
+                    .tag(ActivitySegment.history)
 
-                    ChallengesFullListView(resolver: resolver)
-                        .tag(ActivitySegment.challenges)
+                ChallengesFullListView(resolver: resolver)
+                    .tag(ActivitySegment.challenges)
 
-                    ActivityStatsView(resolver: resolver)
-                        .tag(ActivitySegment.stats)
-                }
-                .tabViewStyle(.page(indexDisplayMode: .never))
+                ActivityStatsView(resolver: resolver)
+                    .tag(ActivitySegment.stats)
             }
-            .background(FitTodayColor.background)
-            .navigationTitle("Atividade")
-            .navigationBarTitleDisplayMode(.large)
+            .tabViewStyle(.page(indexDisplayMode: .never))
         }
+        .background(FitTodayColor.background)
+        .navigationTitle("Atividade")
+        .navigationBarTitleDisplayMode(.large)
     }
 
     // MARK: - Segmented Control

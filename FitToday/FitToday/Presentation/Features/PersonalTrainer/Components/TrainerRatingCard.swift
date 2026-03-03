@@ -9,7 +9,7 @@ import SwiftUI
 
 struct TrainerRatingCard: View {
     let trainer: PersonalTrainer
-    let onRate: () -> Void
+    let onConnect: () -> Void
     let onSelect: () -> Void
 
     @State private var isBioExpanded = false
@@ -65,8 +65,8 @@ struct TrainerRatingCard: View {
                 }
                 .buttonStyle(.plain)
 
-                Button(action: onRate) {
-                    Text("trainer.card.rate".localized)
+                Button(action: onConnect) {
+                    Text("trainer.card.connect".localized)
                         .font(FitTodayFont.ui(size: 13, weight: .semiBold))
                         .foregroundStyle(.white)
                         .frame(maxWidth: .infinity)
@@ -115,18 +115,23 @@ struct TrainerRatingCard: View {
     // MARK: - Star Rating
 
     private var starRating: some View {
-        HStack(spacing: 2) {
+        let rating = trainer.rating ?? 0
+        let reviews = trainer.reviewCount ?? 0
+
+        return HStack(spacing: 2) {
             ForEach(0..<5, id: \.self) { index in
-                Image(systemName: index < 4 ? "star.fill" : "star")
+                Image(systemName: Double(index) + 0.5 <= rating ? "star.fill" : (Double(index) < rating ? "star.leadinghalf.filled" : "star"))
                     .font(.system(size: 12))
                     .foregroundStyle(FitTodayColor.warning)
             }
-            Text("4.5")
-                .font(FitTodayFont.ui(size: 12, weight: .medium))
-                .foregroundStyle(FitTodayColor.textSecondary)
-            Text("(128)")
-                .font(FitTodayFont.ui(size: 12, weight: .medium))
-                .foregroundStyle(FitTodayColor.textTertiary)
+            if rating > 0 {
+                Text(String(format: "%.1f", rating))
+                    .font(FitTodayFont.ui(size: 12, weight: .medium))
+                    .foregroundStyle(FitTodayColor.textSecondary)
+                Text("(\(reviews))")
+                    .font(FitTodayFont.ui(size: 12, weight: .medium))
+                    .foregroundStyle(FitTodayColor.textTertiary)
+            }
         }
     }
 }

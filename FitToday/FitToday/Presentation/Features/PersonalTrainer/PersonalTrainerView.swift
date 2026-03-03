@@ -83,7 +83,7 @@ struct PersonalTrainerView: View {
                         viewModel.dismissConnectionSheet()
                     }
                 )
-                .presentationDetents([.medium])
+                .presentationDetents([.medium, .large])
             }
         }
         .alert(

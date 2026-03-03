@@ -19,28 +19,47 @@ final class AIChatViewModel: ErrorPresenting {
     var isLoading: Bool = false
     var isTyping: Bool = false
     var errorMessage: ErrorMessage?
+    var showPaywall: Bool = false
     private(set) var quickActions: [String] = []
 
     // MARK: - Private
 
-    private let chatService: AIChatService?
+    private let resolver: Resolver
     private let chatRepository: ChatRepository?
     private let featureGating: FeatureGating?
     private let usageTracker: AIUsageTracking?
     private let profileRepository: UserProfileRepository?
     private let statsRepository: UserStatsRepository?
     private var typingTask: Task<Void, Never>?
+    private var _cachedChatService: AIChatService?
+
+    /// Creates on-demand so API key saved after launch takes effect.
+    private var chatService: AIChatService? {
+        if let cached = _cachedChatService { return cached }
+        guard let client = NewOpenAIClient.fromUserKey(),
+              let profileRepo = resolver.resolve(UserProfileRepository.self),
+              let statsRepo = resolver.resolve(UserStatsRepository.self),
+              let historyRepo = resolver.resolve(WorkoutHistoryRepository.self)
+        else { return nil }
+        let service = AIChatService(
+            client: client,
+            profileRepository: profileRepo,
+            statsRepository: statsRepo,
+            historyRepository: historyRepo
+        )
+        _cachedChatService = service
+        return service
+    }
 
     // MARK: - Initialization
 
     init(resolver: Resolver) {
-        self.chatService = resolver.resolve(AIChatService.self)
+        self.resolver = resolver
         self.chatRepository = resolver.resolve(ChatRepository.self)
         self.featureGating = resolver.resolve(FeatureGating.self)
         self.usageTracker = resolver.resolve(AIUsageTracking.self)
         self.profileRepository = resolver.resolve(UserProfileRepository.self)
         self.statsRepository = resolver.resolve(UserStatsRepository.self)
-        // Set default quick actions
         self.quickActions = Self.defaultQuickActions
     }
 
@@ -95,7 +114,7 @@ final class AIChatViewModel: ErrorPresenting {
                     if messages.last?.role == .user {
                         messages.removeLast()
                     }
-                    handleError(DomainError.chatMessageLimitReached)
+                    showPaywall = true
                     return
                 }
             }

@@ -44,6 +44,12 @@ struct PersonalTrainer: Sendable, Identifiable, Hashable, Codable {
     /// Current number of connected students.
     var currentStudentCount: Int
 
+    /// Average rating from reviews (0-5).
+    var rating: Double?
+
+    /// Number of reviews received.
+    var reviewCount: Int?
+
     /// Whether the trainer can accept more students.
     var canAcceptStudents: Bool {
         isActive && currentStudentCount < maxStudents
