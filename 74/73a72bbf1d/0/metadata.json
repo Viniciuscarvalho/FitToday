@@ -1,0 +1,30 @@
+{
+  "cli_version": "0.4.4",
+  "checkpoint_id": "7473a72bbf1d",
+  "session_id": "12c67500-ca0d-4dcf-b70e-35c4bd8715b9",
+  "strategy": "manual-commit",
+  "created_at": "2026-03-03T13:53:02.272183Z",
+  "branch": "fix/personal-trainer-issues-35-38",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "FitToday/FitToday/Presentation/Features/AIChat/AIChatView.swift"
+  ],
+  "agent": "Claude Code",
+  "token_usage": {
+    "input_tokens": 3256,
+    "cache_creation_tokens": 65090,
+    "cache_read_tokens": 3003710,
+    "output_tokens": 6986,
+    "api_call_count": 33
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-03-03T13:53:02.169795Z",
+    "agent_lines": 0,
+    "human_added": 23,
+    "human_modified": 29,
+    "human_removed": 0,
+    "total_committed": 52,
+    "agent_percentage": 0
+  },
+  "transcript_path": ".claude/projects/-Users-viniciuscarvalho-Documents-FitToday/12c67500-ca0d-4dcf-b70e-35c4bd8715b9.jsonl"
+}

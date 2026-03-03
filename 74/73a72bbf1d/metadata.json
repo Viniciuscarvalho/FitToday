@@ -1,0 +1,26 @@
+{
+  "cli_version": "0.4.4",
+  "checkpoint_id": "7473a72bbf1d",
+  "strategy": "manual-commit",
+  "branch": "fix/personal-trainer-issues-35-38",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "FitToday/FitToday/Presentation/Features/AIChat/AIChatView.swift"
+  ],
+  "sessions": [
+    {
+      "metadata": "/74/73a72bbf1d/0/metadata.json",
+      "transcript": "/74/73a72bbf1d/0/full.jsonl",
+      "context": "/74/73a72bbf1d/0/context.md",
+      "content_hash": "/74/73a72bbf1d/0/content_hash.txt",
+      "prompt": "/74/73a72bbf1d/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 3256,
+    "cache_creation_tokens": 65090,
+    "cache_read_tokens": 3003710,
+    "output_tokens": 6986,
+    "api_call_count": 33
+  }
+}
