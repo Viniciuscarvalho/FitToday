@@ -16,6 +16,10 @@ struct AIChatView: View {
     @State private var viewModel: AIChatViewModel
     @State private var showClearConfirmation = false
 
+    private var storeKitRepository: StoreKitEntitlementRepository? {
+        resolver.resolve(EntitlementRepository.self) as? StoreKitEntitlementRepository
+    }
+
     init(resolver: Resolver) {
         self.resolver = resolver
         self._viewModel = State(initialValue: AIChatViewModel(resolver: resolver))
@@ -78,6 +82,19 @@ struct AIChatView: View {
         ) {
             Button("fitorb.clear_chat".localized, role: .destructive) {
                 Task { await viewModel.clearHistory() }
+            }
+        }
+        .sheet(isPresented: $viewModel.showPaywall) {
+            if let repo = storeKitRepository {
+                OptimizedPaywallView(
+                    storeService: repo.service,
+                    onPurchaseSuccess: {
+                        viewModel.showPaywall = false
+                    },
+                    onDismiss: {
+                        viewModel.showPaywall = false
+                    }
+                )
             }
         }
     }

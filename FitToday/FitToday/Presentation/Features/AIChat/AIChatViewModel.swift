@@ -19,6 +19,7 @@ final class AIChatViewModel: ErrorPresenting {
     var isLoading: Bool = false
     var isTyping: Bool = false
     var errorMessage: ErrorMessage?
+    var showPaywall: Bool = false
     private(set) var quickActions: [String] = []
 
     // MARK: - Private
@@ -113,7 +114,7 @@ final class AIChatViewModel: ErrorPresenting {
                     if messages.last?.role == .user {
                         messages.removeLast()
                     }
-                    handleError(DomainError.chatMessageLimitReached)
+                    showPaywall = true
                     return
                 }
             }
