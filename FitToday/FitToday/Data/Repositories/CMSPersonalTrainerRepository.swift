@@ -23,8 +23,14 @@ final class CMSPersonalTrainerRepository: PersonalTrainerRepository, @unchecked 
 
     func searchTrainers(query: String, limit: Int) async throws -> [PersonalTrainer] {
         let response = try await service.fetchTrainers(limit: limit, offset: 0)
+        // Sort: trainers with photos first, then alphabetically
         let trainers = response.trainers
-            .filter { $0.photoURL != nil && !($0.photoURL?.isEmpty ?? true) }
+            .sorted { lhs, rhs in
+                let lhasPhoto = lhs.photoURL != nil && !(lhs.photoURL?.isEmpty ?? true)
+                let rhasPhoto = rhs.photoURL != nil && !(rhs.photoURL?.isEmpty ?? true)
+                if lhasPhoto != rhasPhoto { return lhasPhoto }
+                return lhs.displayName < rhs.displayName
+            }
             .map { CMSTrainerMapper.toDomain($0) }
 
         guard !query.isEmpty else { return trainers }
