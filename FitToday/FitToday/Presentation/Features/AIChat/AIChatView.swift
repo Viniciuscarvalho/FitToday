@@ -14,15 +14,11 @@ struct AIChatView: View {
 
     @Environment(AppRouter.self) private var router
     @State private var viewModel: AIChatViewModel
-    @State private var entitlement: ProEntitlement = .free
     @State private var showClearConfirmation = false
-
-    private let entitlementRepository: EntitlementRepository?
 
     init(resolver: Resolver) {
         self.resolver = resolver
         self._viewModel = State(initialValue: AIChatViewModel(resolver: resolver))
-        self.entitlementRepository = resolver.resolve(EntitlementRepository.self)
     }
 
     var body: some View {
@@ -62,7 +58,6 @@ struct AIChatView: View {
             }
         }
         .task {
-            await loadEntitlement()
             await viewModel.loadHistory()
         }
         .alert(
@@ -121,12 +116,8 @@ struct AIChatView: View {
                         HStack(spacing: FitTodaySpacing.sm) {
                             ForEach(viewModel.quickActions, id: \.self) { action in
                                 Button {
-                                    if entitlement.isPro {
-                                        viewModel.inputText = action
-                                        viewModel.sendMessage()
-                                    } else {
-                                        router.push(.paywall)
-                                    }
+                                    viewModel.inputText = action
+                                    viewModel.sendMessage()
                                 } label: {
                                     Text(action)
                                         .font(FitTodayFont.ui(size: 14, weight: .semiBold))
@@ -233,19 +224,11 @@ struct AIChatView: View {
                 .background(FitTodayColor.surfaceElevated)
                 .clipShape(RoundedRectangle(cornerRadius: FitTodayRadius.lg))
                 .onSubmit {
-                    if entitlement.isPro {
-                        viewModel.sendMessage()
-                    } else {
-                        router.push(.paywall)
-                    }
+                    viewModel.sendMessage()
                 }
 
             Button {
-                if entitlement.isPro {
-                    viewModel.sendMessage()
-                } else {
-                    router.push(.paywall)
-                }
+                viewModel.sendMessage()
             } label: {
                 Image(systemName: "arrow.up.circle.fill")
                     .font(.system(size: 32))
@@ -270,12 +253,4 @@ struct AIChatView: View {
         }
     }
 
-    private func loadEntitlement() async {
-        guard let repo = entitlementRepository else { return }
-        do {
-            entitlement = try await repo.currentEntitlement()
-        } catch {
-            entitlement = .free
-        }
-    }
 }

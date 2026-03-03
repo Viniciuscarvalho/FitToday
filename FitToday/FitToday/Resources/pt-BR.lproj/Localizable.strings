@@ -880,6 +880,7 @@
 "trainer.card.show_less" = "Ver menos";
 "trainer.card.view_profile" = "Ver Perfil";
 "trainer.card.rate" = "Avaliar";
+"trainer.card.connect" = "Conectar";
 
 // MARK: - Trainer List
 "trainer.list.search_placeholder" = "Buscar personal...";
