@@ -6,48 +6,89 @@
 //
 
 import SwiftUI
+import Swinject
 
 struct TrainerChatView: View {
     @State private var viewModel: TrainerChatViewModel
 
-    init(trainerId: String, trainerName: String) {
-        _viewModel = State(wrappedValue: TrainerChatViewModel(trainerId: trainerId, trainerName: trainerName))
+    init(trainerId: String, trainerName: String, currentUserId: String, resolver: Resolver) {
+        _viewModel = State(wrappedValue: TrainerChatViewModel(
+            trainerId: trainerId,
+            trainerName: trainerName,
+            currentUserId: currentUserId,
+            resolver: resolver
+        ))
     }
 
     var body: some View {
         VStack(spacing: 0) {
-            // Messages
-            ScrollViewReader { proxy in
-                ScrollView {
-                    LazyVStack(spacing: FitTodaySpacing.sm) {
-                        ForEach(viewModel.messages) { message in
-                            ChatBubble(
-                                message: message,
-                                isFromCurrentUser: !message.isFromTrainer
-                            )
-                            .id(message.id)
-                        }
-                    }
-                    .padding(.horizontal, FitTodaySpacing.md)
-                    .padding(.vertical, FitTodaySpacing.sm)
-                }
-                .scrollIndicators(.hidden)
-                .onChange(of: viewModel.messages.count) {
-                    if let lastId = viewModel.messages.last?.id {
-                        withAnimation {
-                            proxy.scrollTo(lastId, anchor: .bottom)
-                        }
-                    }
-                }
+            if viewModel.isLoading {
+                Spacer()
+                ProgressView()
+                    .tint(FitTodayColor.brandPrimary)
+                Spacer()
+            } else if viewModel.isEmpty {
+                Spacer()
+                emptyState
+                Spacer()
+            } else {
+                messagesView
             }
 
             Divider()
                 .overlay(FitTodayColor.outline)
 
-            // Input Bar
             inputBar
         }
         .background(FitTodayColor.background)
+        .task {
+            await viewModel.startListening()
+        }
+        .onDisappear {
+            viewModel.stopListening()
+        }
+    }
+
+    // MARK: - Messages
+
+    private var messagesView: some View {
+        ScrollViewReader { proxy in
+            ScrollView {
+                LazyVStack(spacing: FitTodaySpacing.sm) {
+                    ForEach(viewModel.messages) { message in
+                        ChatBubble(
+                            message: message,
+                            isFromCurrentUser: viewModel.isFromCurrentUser(message)
+                        )
+                        .id(message.id)
+                    }
+                }
+                .padding(.horizontal, FitTodaySpacing.md)
+                .padding(.vertical, FitTodaySpacing.sm)
+            }
+            .scrollIndicators(.hidden)
+            .onChange(of: viewModel.messages.count) {
+                if let lastId = viewModel.messages.last?.id {
+                    withAnimation {
+                        proxy.scrollTo(lastId, anchor: .bottom)
+                    }
+                }
+            }
+        }
+    }
+
+    // MARK: - Empty State
+
+    private var emptyState: some View {
+        VStack(spacing: FitTodaySpacing.md) {
+            Image(systemName: "message")
+                .font(.system(size: 40))
+                .foregroundStyle(FitTodayColor.textTertiary)
+
+            Text("trainer.chat.empty".localized)
+                .font(FitTodayFont.ui(size: 14, weight: .medium))
+                .foregroundStyle(FitTodayColor.textSecondary)
+        }
     }
 
     // MARK: - Input Bar

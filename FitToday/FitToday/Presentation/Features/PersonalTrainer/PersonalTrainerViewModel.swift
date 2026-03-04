@@ -28,6 +28,7 @@ final class PersonalTrainerViewModel {
     var selectedTrainer: PersonalTrainer?
     private(set) var isFeatureEnabled: Bool = false
     private(set) var isChatEnabled: Bool = false
+    private(set) var currentUserId: String = ""
 
     // MARK: - Dependencies
 
@@ -114,6 +115,7 @@ final class PersonalTrainerViewModel {
 
     func onAppear() {
         Task {
+            await loadCurrentUserId()
             await checkFeatureFlag()
             if isFeatureEnabled {
                 await loadCurrentTrainer()
@@ -121,6 +123,11 @@ final class PersonalTrainerViewModel {
                 startObservingWorkouts()
             }
         }
+    }
+
+    private func loadCurrentUserId() async {
+        guard let authRepo = authRepository else { return }
+        currentUserId = (try? await authRepo.currentUser()?.id) ?? ""
     }
 
     func onDisappear() {

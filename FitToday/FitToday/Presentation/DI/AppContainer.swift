@@ -541,6 +541,12 @@ struct AppContainer {
         }
         .inObjectScope(.container)
 
+        // Firebase Trainer Chat Service
+        let trainerChatService = FirebaseTrainerChatService()
+        container.register(TrainerChatServiceProtocol.self) { _ in
+            trainerChatService
+        }.inObjectScope(.container)
+
         // ========== END PERSONAL TRAINER CMS INTEGRATION ==========
 
         // ========== CMS WORKOUT API INTEGRATION ==========

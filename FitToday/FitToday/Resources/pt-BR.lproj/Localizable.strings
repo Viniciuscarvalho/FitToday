@@ -889,11 +889,7 @@
 
 // MARK: - Trainer Chat
 "trainer.chat.placeholder" = "Digite uma mensagem...";
-"trainer.chat.mock.msg1" = "Oi! Atualizei seu plano de treino para esta semana. Confira os novos exercícios!";
-"trainer.chat.mock.msg2" = "Ótimo, obrigado! Vou dar uma olhada agora.";
-"trainer.chat.mock.msg3" = "Foque em manter a postura correta durante os agachamentos. Adicionei um vídeo de referência nas notas.";
-"trainer.chat.mock.msg4" = "Entendi. Devo aumentar o peso esta semana?";
-"trainer.chat.mock.msg5" = "Sim, tente adicionar 2,5kg no supino e agachamento. Me conta como foi!";
+"trainer.chat.empty" = "Nenhuma mensagem ainda. Comece a conversa!";
 
 // MARK: - Trainer History
 "trainer.history.this_week" = "Esta Semana";
