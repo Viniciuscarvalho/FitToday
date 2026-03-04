@@ -1,0 +1,35 @@
+{
+  "cli_version": "0.4.4",
+  "checkpoint_id": "fec079c494b9",
+  "session_id": "42682e45-f1a0-45a7-9e2e-6bb37fc9b117",
+  "strategy": "manual-commit",
+  "created_at": "2026-03-04T23:23:49.480132Z",
+  "branch": "feat/exercise-image-cache-phase5",
+  "checkpoints_count": 0,
+  "files_touched": [
+    "FitToday/FitToday/Domain/Entities/EntitlementPolicy.swift",
+    "FitToday/FitToday/Presentation/Features/AIChat/AIChatView.swift",
+    "FitToday/FitToday/Presentation/Features/AIChat/AIChatViewModel.swift"
+  ],
+  "agent": "Claude Code",
+  "transcript_identifier_at_start": "7be7f199-2882-4d29-8681-2a6b7a8ed872",
+  "checkpoint_transcript_start": 187,
+  "transcript_lines_at_start": 187,
+  "token_usage": {
+    "input_tokens": 12,
+    "cache_creation_tokens": 103901,
+    "cache_read_tokens": 647386,
+    "output_tokens": 7888,
+    "api_call_count": 8
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-03-04T23:23:48.742243Z",
+    "agent_lines": 0,
+    "human_added": 1692,
+    "human_modified": 0,
+    "human_removed": 0,
+    "total_committed": 1692,
+    "agent_percentage": 0
+  },
+  "transcript_path": ".claude/projects/-Users-viniciuscarvalho-Documents-FitToday/42682e45-f1a0-45a7-9e2e-6bb37fc9b117.jsonl"
+}
