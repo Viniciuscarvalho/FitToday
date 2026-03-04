@@ -1,0 +1,41 @@
+{
+  "cli_version": "0.4.4",
+  "checkpoint_id": "41a42708f621",
+  "strategy": "manual-commit",
+  "branch": "feat/exercise-image-cache-phase5",
+  "checkpoints_count": 1,
+  "files_touched": [
+    ".claude/settings.local.json",
+    "FitToday/FitToday/Data/Repositories/FirebasePersonalTrainerRepository.swift",
+    "FitToday/FitToday/Data/Services/ExerciseServiceProtocols.swift",
+    "FitToday/FitToday/Data/Services/Firebase/FirebasePersonalTrainerService.swift",
+    "FitToday/FitToday/Data/Services/ImageCache/DiskImageCache.swift",
+    "FitToday/FitToday/Data/Services/ImageCache/ImageCacheConfiguration.swift",
+    "FitToday/FitToday/Data/Services/ImageCache/ImageCacheService.swift",
+    "FitToday/FitToday/FitTodayApp.swift",
+    "FitToday/FitToday/Presentation/DI/AppContainer.swift",
+    "FitToday/FitToday/Presentation/DesignSystem/CachedAsyncImage.swift",
+    "FitToday/FitToday/Presentation/Features/Workout/WorkoutPlanView.swift",
+    "FitToday/FitToday/Presentation/Infrastructure/ErrorMapper.swift",
+    "FitToday/FitToday/Support/Hashing.swift",
+    "FitToday/FitTodayTests/Data/Repositories/WorkoutCompositionCacheRepositoryTests.swift",
+    "FitToday/FitTodayTests/Data/Services/ImageCache/ImageCacheServiceTests.swift",
+    "FitToday/FitTodayTests/Presentation/ErrorPresentingTests.swift"
+  ],
+  "sessions": [
+    {
+      "metadata": "/41/a42708f621/0/metadata.json",
+      "transcript": "/41/a42708f621/0/full.jsonl",
+      "context": "/41/a42708f621/0/context.md",
+      "content_hash": "/41/a42708f621/0/content_hash.txt",
+      "prompt": "/41/a42708f621/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 3773,
+    "cache_creation_tokens": 251650,
+    "cache_read_tokens": 13514652,
+    "output_tokens": 29738,
+    "api_call_count": 123
+  }
+}

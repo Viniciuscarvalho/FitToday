@@ -1,0 +1,48 @@
+{
+  "cli_version": "0.4.4",
+  "checkpoint_id": "41a42708f621",
+  "session_id": "903b63f6-cc26-4016-b889-69091bba6d81",
+  "strategy": "manual-commit",
+  "created_at": "2026-03-04T11:37:52.039012Z",
+  "branch": "feat/exercise-image-cache-phase5",
+  "checkpoints_count": 1,
+  "files_touched": [
+    ".claude/settings.local.json",
+    "FitToday/FitToday/Data/Repositories/FirebasePersonalTrainerRepository.swift",
+    "FitToday/FitToday/Data/Services/ExerciseServiceProtocols.swift",
+    "FitToday/FitToday/Data/Services/Firebase/FirebasePersonalTrainerService.swift",
+    "FitToday/FitToday/Data/Services/ImageCache/DiskImageCache.swift",
+    "FitToday/FitToday/Data/Services/ImageCache/ImageCacheConfiguration.swift",
+    "FitToday/FitToday/Data/Services/ImageCache/ImageCacheService.swift",
+    "FitToday/FitToday/FitTodayApp.swift",
+    "FitToday/FitToday/Presentation/DI/AppContainer.swift",
+    "FitToday/FitToday/Presentation/DesignSystem/CachedAsyncImage.swift",
+    "FitToday/FitToday/Presentation/Features/Workout/WorkoutPlanView.swift",
+    "FitToday/FitToday/Presentation/Infrastructure/ErrorMapper.swift",
+    "FitToday/FitToday/Support/Hashing.swift",
+    "FitToday/FitTodayTests/Data/Repositories/WorkoutCompositionCacheRepositoryTests.swift",
+    "FitToday/FitTodayTests/Data/Services/ImageCache/ImageCacheServiceTests.swift",
+    "FitToday/FitTodayTests/Presentation/ErrorPresentingTests.swift"
+  ],
+  "agent": "Claude Code",
+  "transcript_identifier_at_start": "3d9c33c2-68c7-4dda-a3a2-b3fd4332d5cf",
+  "checkpoint_transcript_start": 1455,
+  "transcript_lines_at_start": 1455,
+  "token_usage": {
+    "input_tokens": 3773,
+    "cache_creation_tokens": 251650,
+    "cache_read_tokens": 13514652,
+    "output_tokens": 29738,
+    "api_call_count": 123
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-03-04T11:37:50.172106Z",
+    "agent_lines": 12,
+    "human_added": 1,
+    "human_modified": 48,
+    "human_removed": 0,
+    "total_committed": 13,
+    "agent_percentage": 92.3076923076923
+  },
+  "transcript_path": ".claude/projects/-Users-viniciuscarvalho-Documents-FitToday/903b63f6-cc26-4016-b889-69091bba6d81.jsonl"
+}
