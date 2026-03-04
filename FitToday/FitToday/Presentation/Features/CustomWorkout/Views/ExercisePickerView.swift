@@ -193,7 +193,7 @@ struct ExerciseListRow: View {
 
                 HStack(spacing: FitTodaySpacing.sm) {
                     if let categoryId = exercise.category,
-                       let category = ExerciseCategoryMapping.from(id: categoryId) {
+                       let category = ExerciseCategoryMapping.from(name: categoryId) {
                         Label(category.portugueseName, systemImage: "figure.stand")
                             .font(FitTodayFont.ui(size: 12, weight: .medium))
                             .foregroundStyle(FitTodayColor.textSecondary)
@@ -218,28 +218,11 @@ struct ExerciseListRow: View {
 
     private var iconForCategory: String {
         guard let categoryId = exercise.category,
-              let category = ExerciseCategoryMapping.from(id: categoryId) else {
+              let category = ExerciseCategoryMapping.from(name: categoryId) else {
             return "figure.strengthtraining.traditional"
         }
 
-        switch category {
-        case .arms:
-            return "figure.strengthtraining.traditional"
-        case .legs:
-            return "figure.run"
-        case .abs:
-            return "figure.core.training"
-        case .chest:
-            return "figure.strengthtraining.functional"
-        case .back:
-            return "figure.rowing"
-        case .shoulders:
-            return "figure.boxing"
-        case .calves:
-            return "figure.walk"
-        case .cardio:
-            return "figure.run.circle"
-        }
+        return category.icon
     }
 }
 

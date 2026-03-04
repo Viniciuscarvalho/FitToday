@@ -2,13 +2,12 @@
 //  ProgramsListView.swift
 //  FitToday
 //
-//  Catalog view of workout programs grouped by category.
+//  Catalog view of workout programs with search, featured, and category chips.
 //
 
 import SwiftUI
 import Swinject
 
-/// View displaying the catalog of workout programs grouped by category.
 struct ProgramsListView: View {
     @Environment(AppRouter.self) private var router
     @Environment(\.dependencyResolver) private var resolver
@@ -51,21 +50,26 @@ struct ProgramsListView: View {
     @ViewBuilder
     private func contentView(viewModel: ProgramsListViewModel) -> some View {
         ScrollView {
-            VStack(spacing: FitTodaySpacing.lg) {
-                // Recommended Programs (horizontal scroll)
-                if !viewModel.recommendedPrograms.isEmpty {
-                    RecommendedProgramsSection(
-                        programs: viewModel.recommendedPrograms,
-                        onSelect: { programId in
-                            router.push(.programDetail(programId), on: .workout)
-                        }
-                    )
+            VStack(alignment: .leading, spacing: FitTodaySpacing.lg) {
+                // Title
+                Text("Programas")
+                    .font(.system(.largeTitle, weight: .bold))
+                    .foregroundStyle(FitTodayColor.textPrimary)
+                    .padding(.horizontal, FitTodaySpacing.md)
+
+                // Search bar
+                searchBar(viewModel: viewModel)
+
+                // Featured program
+                if let featured = viewModel.featuredProgram {
+                    featuredSection(featured)
                 }
 
-                // Grouped Programs — vertical list per category
-                ForEach(viewModel.sortedGroupedPrograms, id: \.category) { group in
-                    categorySection(category: group.category, programs: group.programs)
-                }
+                // Category chips
+                categoryChips(viewModel: viewModel)
+
+                // Programs grid
+                programsGrid(viewModel: viewModel)
             }
             .padding(.vertical, FitTodaySpacing.md)
         }
@@ -75,129 +79,234 @@ struct ProgramsListView: View {
         }
     }
 
+    // MARK: - Search Bar
 
-    // MARK: - Category Section
+    private func searchBar(viewModel: ProgramsListViewModel) -> some View {
+        @Bindable var vm = viewModel
+        return HStack(spacing: FitTodaySpacing.sm) {
+            Image(systemName: "magnifyingglass")
+                .foregroundStyle(FitTodayColor.textTertiary)
+            TextField("Buscar programa...", text: $vm.searchText)
+                .font(.system(.body))
+                .foregroundStyle(FitTodayColor.textPrimary)
+        }
+        .padding(FitTodaySpacing.sm)
+        .background(FitTodayColor.surface)
+        .clipShape(RoundedRectangle(cornerRadius: FitTodayRadius.md))
+        .padding(.horizontal, FitTodaySpacing.md)
+    }
 
-    private func categorySection(
-        category: ProgramCategory,
-        programs: [Program]
-    ) -> some View {
+    // MARK: - Featured Section
+
+    private func featuredSection(_ program: Program) -> some View {
         VStack(alignment: .leading, spacing: FitTodaySpacing.sm) {
-            // Category Header with count
-            HStack {
-                Text("\(category.displayName) (\(programs.count))")
-                    .font(FitTodayFont.ui(size: 13, weight: .semiBold))
-                    .foregroundStyle(FitTodayColor.textSecondary)
-                    .textCase(.uppercase)
-                Spacer()
-            }
-            .padding(.horizontal, FitTodaySpacing.md)
+            Text("Em Destaque")
+                .font(.system(.headline, weight: .semibold))
+                .foregroundStyle(FitTodayColor.textPrimary)
+                .padding(.horizontal, FitTodaySpacing.md)
 
-            // Vertical list of program cards
-            LazyVStack(spacing: FitTodaySpacing.sm) {
-                ForEach(programs) { program in
-                    RoutineListCard(program: program) {
-                        router.push(.programDetail(program.id), on: .workout)
+            Button {
+                router.push(.programDetail(program.id), on: .workout)
+            } label: {
+                ZStack(alignment: .bottomLeading) {
+                    LinearGradient(
+                        colors: gradientColors(for: program.goalTag),
+                        startPoint: .topTrailing,
+                        endPoint: .bottomLeading
+                    )
+
+                    LinearGradient(
+                        colors: [.clear, .black.opacity(0.5)],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+
+                    VStack(alignment: .leading, spacing: FitTodaySpacing.xs) {
+                        Spacer()
+
+                        Text(program.durationDescription)
+                            .font(.system(.caption, weight: .bold))
+                            .padding(.horizontal, FitTodaySpacing.sm)
+                            .padding(.vertical, 4)
+                            .background(.white.opacity(0.25))
+                            .clipShape(Capsule())
+
+                        Text(program.name)
+                            .font(.system(.title2, weight: .bold))
+
+                        HStack(spacing: FitTodaySpacing.sm) {
+                            Label(program.durationDescription, systemImage: "calendar")
+                            Label(program.level.displayName, systemImage: "chart.bar")
+                            Label(program.equipment.displayName, systemImage: program.equipment.iconName)
+                        }
+                        .font(.system(.caption))
+                        .opacity(0.85)
+                    }
+                    .foregroundStyle(.white)
+                    .padding(FitTodaySpacing.md)
+                }
+                .frame(height: 200)
+                .clipShape(RoundedRectangle(cornerRadius: FitTodayRadius.lg))
+            }
+            .buttonStyle(.plain)
+            .padding(.horizontal, FitTodaySpacing.md)
+        }
+    }
+
+    // MARK: - Category Chips
+
+    private func categoryChips(viewModel: ProgramsListViewModel) -> some View {
+        VStack(alignment: .leading, spacing: FitTodaySpacing.sm) {
+            Text("Categorias")
+                .font(.system(.headline, weight: .semibold))
+                .foregroundStyle(FitTodayColor.textPrimary)
+                .padding(.horizontal, FitTodaySpacing.md)
+
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: FitTodaySpacing.sm) {
+                    chipButton(
+                        title: "Todos",
+                        icon: "square.grid.2x2",
+                        isSelected: viewModel.selectedGoalTag == nil
+                    ) {
+                        viewModel.selectedGoalTag = nil
+                    }
+
+                    ForEach(ProgramGoalTag.allCases, id: \.self) { tag in
+                        chipButton(
+                            title: tag.displayName,
+                            icon: tag.iconName,
+                            isSelected: viewModel.selectedGoalTag == tag
+                        ) {
+                            viewModel.selectedGoalTag = tag
+                        }
+                    }
+                }
+                .padding(.horizontal, FitTodaySpacing.md)
+            }
+        }
+    }
+
+    private func chipButton(title: String, icon: String, isSelected: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            HStack(spacing: FitTodaySpacing.xs) {
+                Image(systemName: icon)
+                    .font(.system(.caption2))
+                Text(title)
+                    .font(.system(.caption, weight: .medium))
+            }
+            .padding(.horizontal, FitTodaySpacing.sm)
+            .padding(.vertical, FitTodaySpacing.xs)
+            .background(isSelected ? FitTodayColor.brandPrimary : FitTodayColor.surface)
+            .foregroundStyle(isSelected ? .white : FitTodayColor.textSecondary)
+            .clipShape(Capsule())
+        }
+        .buttonStyle(.plain)
+    }
+
+    // MARK: - Programs Grid
+
+    private func programsGrid(viewModel: ProgramsListViewModel) -> some View {
+        VStack(alignment: .leading, spacing: FitTodaySpacing.sm) {
+            Text("Programas Recomendados")
+                .font(.system(.headline, weight: .semibold))
+                .foregroundStyle(FitTodayColor.textPrimary)
+                .padding(.horizontal, FitTodaySpacing.md)
+
+            if viewModel.filteredPrograms.isEmpty && !viewModel.isLoading {
+                Text("Nenhum programa encontrado")
+                    .font(.system(.subheadline))
+                    .foregroundStyle(FitTodayColor.textSecondary)
+                    .frame(maxWidth: .infinity, minHeight: 100)
+            } else if viewModel.isLoading {
+                ProgressView()
+                    .frame(maxWidth: .infinity, minHeight: 100)
+            } else {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    LazyHStack(spacing: FitTodaySpacing.md) {
+                        ForEach(viewModel.filteredPrograms) { program in
+                            ProgramCard(program: program) {
+                                router.push(.programDetail(program.id), on: .workout)
+                            }
+                        }
                     }
                     .padding(.horizontal, FitTodaySpacing.md)
                 }
+                .frame(height: 200)
             }
+        }
+    }
+
+    private func gradientColors(for goalTag: ProgramGoalTag) -> [Color] {
+        switch goalTag {
+        case .strength: return [.blue, .purple]
+        case .conditioning: return [.orange, .red]
+        case .aerobic: return [.green, .teal]
+        case .core: return [.cyan, .mint]
+        case .endurance: return [.indigo, .blue]
         }
     }
 }
 
-// MARK: - Routine List Card (Hevy-style)
+// MARK: - Program Card
 
-private struct RoutineListCard: View {
+private struct ProgramCard: View {
     let program: Program
     let onTap: () -> Void
 
-    private var workoutPreviews: [String] {
-        // Show the template IDs as workout count hint (no network call needed)
-        let count = program.totalWorkouts
-        let names = (1...max(1, min(count, 4))).map { "Treino \($0)" }
-        return names
-    }
-
     var body: some View {
-        VStack(alignment: .leading, spacing: FitTodaySpacing.sm) {
-            // Header row: level badge + name
-            HStack(spacing: FitTodaySpacing.sm) {
-                levelBadge
-                Text(program.shortName)
-                    .font(FitTodayFont.ui(size: 15, weight: .semiBold))
-                    .foregroundStyle(FitTodayColor.textPrimary)
-                    .lineLimit(1)
-                Spacer()
-                Text(program.equipment.displayName)
-                    .font(FitTodayFont.ui(size: 11, weight: .medium))
-                    .foregroundStyle(FitTodayColor.textTertiary)
-            }
+        Button(action: onTap) {
+            VStack(alignment: .leading, spacing: FitTodaySpacing.sm) {
+                ZStack(alignment: .topTrailing) {
+                    LinearGradient(
+                        colors: gradientColors(for: program.goalTag),
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                    .frame(height: 100)
 
-            // Workout preview lines
-            VStack(alignment: .leading, spacing: FitTodaySpacing.xs) {
-                ForEach(workoutPreviews, id: \.self) { name in
+                    Text(program.durationDescription)
+                        .font(.system(.caption2, weight: .bold))
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 3)
+                        .background(.black.opacity(0.4))
+                        .clipShape(Capsule())
+                        .foregroundStyle(.white)
+                        .padding(FitTodaySpacing.sm)
+                }
+
+                VStack(alignment: .leading, spacing: FitTodaySpacing.xs) {
+                    Text(program.shortName)
+                        .font(.system(.subheadline, weight: .semibold))
+                        .foregroundStyle(FitTodayColor.textPrimary)
+                        .lineLimit(2)
+
                     HStack(spacing: FitTodaySpacing.xs) {
-                        Circle()
-                            .fill(FitTodayColor.brandPrimary.opacity(0.5))
-                            .frame(width: 5, height: 5)
-                        Text(name)
-                            .font(FitTodayFont.ui(size: 13, weight: .medium))
-                            .foregroundStyle(FitTodayColor.textSecondary)
-                            .lineLimit(1)
+                        Text(program.level.displayName)
+                        Text("·")
+                        Text(program.equipment.displayName)
                     }
+                    .font(.system(.caption2))
+                    .foregroundStyle(FitTodayColor.textSecondary)
+                    .lineLimit(1)
                 }
-                if program.totalWorkouts > 4 {
-                    Text("+ \(program.totalWorkouts - 4) treinos")
-                        .font(FitTodayFont.ui(size: 12, weight: .medium))
-                        .foregroundStyle(FitTodayColor.brandPrimary)
-                }
+                .padding(.horizontal, FitTodaySpacing.sm)
+                .padding(.bottom, FitTodaySpacing.sm)
             }
-
-            // CTA Button
-            Button(action: onTap) {
-                Text("Iniciar Rotina")
-                    .font(FitTodayFont.ui(size: 14, weight: .semiBold))
-                    .foregroundStyle(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, FitTodaySpacing.sm)
-                    .background(FitTodayColor.brandPrimary)
-                    .clipShape(RoundedRectangle(cornerRadius: FitTodayRadius.sm))
-            }
-            .buttonStyle(.plain)
+            .frame(width: 170)
+            .background(FitTodayColor.surface)
+            .clipShape(RoundedRectangle(cornerRadius: FitTodayRadius.md))
         }
-        .padding(FitTodaySpacing.md)
-        .background(FitTodayColor.surface)
-        .clipShape(RoundedRectangle(cornerRadius: FitTodayRadius.md))
-        .overlay(
-            RoundedRectangle(cornerRadius: FitTodayRadius.md)
-                .stroke(FitTodayColor.outline.opacity(0.15), lineWidth: 1)
-        )
+        .buttonStyle(.plain)
     }
 
-    private var levelBadge: some View {
-        Text(levelText)
-            .font(FitTodayFont.ui(size: 10, weight: .bold))
-            .foregroundStyle(.white)
-            .padding(.horizontal, FitTodaySpacing.sm)
-            .padding(.vertical, 3)
-            .background(levelColor)
-            .clipShape(Capsule())
-    }
-
-    private var levelText: String {
-        switch program.level {
-        case .beginner: return "Iniciante"
-        case .intermediate: return "Intermed."
-        case .advanced: return "Avançado"
-        }
-    }
-
-    private var levelColor: Color {
-        switch program.level {
-        case .beginner: return .green
-        case .intermediate: return .orange
-        case .advanced: return .red
+    private func gradientColors(for goalTag: ProgramGoalTag) -> [Color] {
+        switch goalTag {
+        case .strength: return [.blue, .purple]
+        case .conditioning: return [.orange, .red]
+        case .aerobic: return [.green, .teal]
+        case .core: return [.cyan, .mint]
+        case .endurance: return [.indigo, .blue]
         }
     }
 }
@@ -210,6 +319,8 @@ private struct RoutineListCard: View {
     private(set) var recommendedPrograms: [Program] = []
     private(set) var isLoading = false
     var errorMessage: String?
+    var searchText: String = ""
+    var selectedGoalTag: ProgramGoalTag?
 
     private let repository: ProgramRepository
     private let profileRepository: UserProfileRepository?
@@ -228,61 +339,27 @@ private struct RoutineListCard: View {
         self.historyRepository = historyRepository
     }
 
-    // MARK: - Computed Properties
-
-    var beginnerCount: Int {
-        programs.filter { $0.level == .beginner }.count
+    var featuredProgram: Program? {
+        recommendedPrograms.first
     }
 
-    var intermediateCount: Int {
-        programs.filter { $0.level == .intermediate }.count
-    }
+    var filteredPrograms: [Program] {
+        var result = programs
 
-    var advancedCount: Int {
-        programs.filter { $0.level == .advanced }.count
-    }
-
-    struct ProgramGroup {
-        let category: ProgramCategory
-        let programs: [Program]
-    }
-
-    var groupedPrograms: [ProgramGroup] {
-        let grouped = Dictionary(grouping: programs) { $0.category }
-
-        return ProgramCategory.allCases
-            .compactMap { category -> ProgramGroup? in
-                guard let programs = grouped[category], !programs.isEmpty else {
-                    return nil
-                }
-                let sortedPrograms = programs.sorted { p1, p2 in
-                    let levelOrder: [ProgramLevel: Int] = [.beginner: 0, .intermediate: 1, .advanced: 2]
-                    return (levelOrder[p1.level] ?? 0) < (levelOrder[p2.level] ?? 0)
-                }
-                return ProgramGroup(category: category, programs: sortedPrograms)
-            }
-            .sorted { $0.category.sortOrder < $1.category.sortOrder }
-    }
-
-    /// Categories sorted by relevance to the user's profile goal.
-    var sortedGroupedPrograms: [ProgramGroup] {
-        guard let goal = userProfile?.mainGoal else {
-            return groupedPrograms
+        if let tag = selectedGoalTag {
+            result = result.filter { $0.goalTag == tag }
         }
 
-        let priorityCategories = Self.categoriesForGoal(goal)
-
-        return groupedPrograms.sorted { a, b in
-            let aPriority = priorityCategories.firstIndex(of: a.category) ?? Int.max
-            let bPriority = priorityCategories.firstIndex(of: b.category) ?? Int.max
-            if aPriority != bPriority {
-                return aPriority < bPriority
+        if !searchText.isEmpty {
+            let query = searchText.lowercased()
+            result = result.filter {
+                $0.name.lowercased().contains(query) ||
+                $0.subtitle.lowercased().contains(query)
             }
-            return a.category.sortOrder < b.category.sortOrder
         }
-    }
 
-    // MARK: - Methods
+        return result
+    }
 
     func loadPrograms() async {
         isLoading = true
@@ -291,7 +368,6 @@ private struct RoutineListCard: View {
         do {
             programs = try await repository.listPrograms()
 
-            // Load profile and history for recommendations
             userProfile = try? await profileRepository?.loadProfile()
             let history = (try? await historyRepository?.listEntries()) ?? []
 
@@ -306,25 +382,10 @@ private struct RoutineListCard: View {
             print("[ProgramsListViewModel] Loaded \(programs.count) programs, \(recommendedPrograms.count) recommended")
             #endif
         } catch {
-            errorMessage = "Não foi possível carregar os programas: \(error.localizedDescription)"
+            errorMessage = error.localizedDescription
             #if DEBUG
             print("[ProgramsListViewModel] Error: \(error)")
             #endif
-        }
-    }
-
-    // MARK: - Goal-to-Category Mapping
-
-    private static func categoriesForGoal(_ goal: FitnessGoal) -> [ProgramCategory] {
-        switch goal {
-        case .hypertrophy:
-            return [.pushPullLegs, .upperLower, .fullBody]
-        case .conditioning, .performance:
-            return [.fullBody, .specialized, .pushPullLegs]
-        case .weightLoss:
-            return [.fatLoss, .fullBody, .homeWorkout]
-        case .endurance:
-            return [.fullBody, .homeWorkout, .fatLoss]
         }
     }
 }

@@ -15,8 +15,8 @@ actor FirestoreProgramWorkoutRepository: ProgramWorkoutRepository {
     private let encoder = JSONEncoder()
     private let decoder = JSONDecoder()
 
-    /// Cache: [categoryId: [CatalogExercise]]
-    private var exerciseCache: [Int: [CatalogExercise]] = [:]
+    /// Cache: [categoryName: [CatalogExercise]]
+    private var exerciseCache: [String: [CatalogExercise]] = [:]
     private var exerciseByIdCache: [String: CatalogExercise] = [:]
 
     init(exerciseService: ExerciseServiceProtocol, storage: UserDefaults = .standard) {
@@ -28,15 +28,15 @@ actor FirestoreProgramWorkoutRepository: ProgramWorkoutRepository {
 
     func loadWorkoutExercises(templateId: String, exerciseCount: Int = 8) async throws -> [CatalogExercise] {
         guard let templateType = WorkoutTemplateType.from(templateId: templateId) else {
-            return try await loadExercisesForCategories([11, 12, 9, 10], count: exerciseCount)
+            return try await loadExercisesForCategories(["chest", "back", "legs", "core"], count: exerciseCount)
         }
 
-        let categoryIds = templateType.categoryIds
-        guard !categoryIds.isEmpty else {
+        let categoryNames = templateType.categoryNames
+        guard !categoryNames.isEmpty else {
             throw ProgramWorkoutError.noCategories
         }
 
-        return try await loadExercisesForCategories(categoryIds, count: exerciseCount)
+        return try await loadExercisesForCategories(categoryNames, count: exerciseCount)
     }
 
     func saveCustomization(programId: String, workoutId: String, exerciseIds: [String], order: [Int]) async throws {
@@ -80,12 +80,12 @@ actor FirestoreProgramWorkoutRepository: ProgramWorkoutRepository {
 
     // MARK: - Private Helpers
 
-    private func loadExercisesForCategories(_ categoryIds: [Int], count: Int) async throws -> [CatalogExercise] {
+    private func loadExercisesForCategories(_ categoryNames: [String], count: Int) async throws -> [CatalogExercise] {
         var allExercises: [CatalogExercise] = []
-        let exercisesPerCategory = max(1, count / categoryIds.count)
+        let exercisesPerCategory = max(1, count / categoryNames.count)
 
-        for categoryId in categoryIds {
-            let exercises = try await loadExercisesForCategory(categoryId)
+        for categoryName in categoryNames {
+            let exercises = try await loadExercisesForCategory(categoryName)
             let selected = exercises.shuffled().prefix(exercisesPerCategory + 2)
             allExercises.append(contentsOf: selected)
         }
@@ -99,20 +99,20 @@ actor FirestoreProgramWorkoutRepository: ProgramWorkoutRepository {
         return result
     }
 
-    private func loadExercisesForCategory(_ categoryId: Int) async throws -> [CatalogExercise] {
-        if let cached = exerciseCache[categoryId], !cached.isEmpty {
+    private func loadExercisesForCategory(_ categoryName: String) async throws -> [CatalogExercise] {
+        if let cached = exerciseCache[categoryName], !cached.isEmpty {
             return cached
         }
 
         do {
             let exercises = try await exerciseService.fetchExercises(
                 language: .portuguese,
-                category: categoryId,
+                category: categoryName,
                 equipment: nil,
                 limit: 50
             )
 
-            exerciseCache[categoryId] = exercises
+            exerciseCache[categoryName] = exercises
             for exercise in exercises {
                 exerciseByIdCache[exercise.id] = exercise
             }

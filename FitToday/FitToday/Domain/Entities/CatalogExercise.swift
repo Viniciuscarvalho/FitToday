@@ -13,7 +13,7 @@ struct CatalogExercise: Codable, Identifiable, Hashable, Sendable {
     let id: String
     let name: String
     let description: String?
-    let category: Int?
+    let category: String?
     let muscles: [Int]
     let musclesSecondary: [Int]
     let equipment: [Int]
@@ -22,7 +22,7 @@ struct CatalogExercise: Codable, Identifiable, Hashable, Sendable {
         id: String,
         name: String,
         description: String? = nil,
-        category: Int? = nil,
+        category: String? = nil,
         muscles: [Int] = [],
         musclesSecondary: [Int] = [],
         equipment: [Int] = []

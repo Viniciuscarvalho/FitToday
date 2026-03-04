@@ -15,7 +15,7 @@ struct ExerciseSearchSheet: View {
     let onSelect: (CustomExerciseEntry) -> Void
 
     @State private var searchText = ""
-    @State private var selectedCategory: Int?
+    @State private var selectedCategory: String?
     @State private var selectedEquipment: Int?
     @State private var exercises: [CatalogExercise] = []
     @State private var isLoading = false
@@ -118,7 +118,7 @@ struct ExerciseSearchSheet: View {
                     }
                 } label: {
                     filterChip(
-                        title: selectedCategory.flatMap { ExerciseCategoryMapping.from(id: $0)?.portugueseName } ?? "Músculo",
+                        title: selectedCategory.flatMap { ExerciseCategoryMapping.from(name: $0)?.portugueseName } ?? "Músculo",
                         isActive: selectedCategory != nil
                     )
                 }
@@ -348,7 +348,7 @@ struct ExerciseSearchResultRow: View {
             HStack(spacing: FitTodaySpacing.md) {
                 // Placeholder image
                 ExercisePlaceholderView(
-                    muscleGroup: exercise.category.flatMap { ExerciseCategoryMapping.from(id: $0)?.muscleGroup } ?? .fullBody,
+                    muscleGroup: exercise.category.flatMap { ExerciseCategoryMapping.from(name: $0)?.muscleGroup } ?? .fullBody,
                     size: .medium
                 )
 
@@ -361,7 +361,7 @@ struct ExerciseSearchResultRow: View {
 
                     HStack(spacing: FitTodaySpacing.sm) {
                         if let category = exercise.category,
-                           let mapping = ExerciseCategoryMapping.from(id: category) {
+                           let mapping = ExerciseCategoryMapping.from(name: category) {
                             Text(mapping.portugueseName)
                                 .font(FitTodayFont.ui(size: 12, weight: .medium))
                                 .foregroundStyle(FitTodayColor.brandSecondary)

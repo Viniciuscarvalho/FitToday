@@ -194,21 +194,9 @@ struct WorkoutPreviewView: View {
 
     // MARK: - Mapping Helpers
 
-    private func mapCategoryToMuscleGroup(_ categoryId: Int?) -> MuscleGroup {
-        guard let categoryId else { return .fullBody }
-
-        // Map category IDs to MuscleGroup
-        switch categoryId {
-        case 8:  return .arms          // Arms
-        case 9:  return .quads         // Legs
-        case 10: return .core          // Abs
-        case 11: return .chest         // Chest
-        case 12: return .back          // Back
-        case 13: return .shoulders     // Shoulders
-        case 14: return .calves        // Calves
-        case 15: return .cardioSystem  // Cardio
-        default: return .fullBody
-        }
+    private func mapCategoryToMuscleGroup(_ category: String?) -> MuscleGroup {
+        guard let category else { return .fullBody }
+        return MuscleGroup(rawValue: category) ?? .fullBody
     }
 
     private func mapEquipment(_ equipmentIds: [Int]) -> EquipmentType {
@@ -323,7 +311,7 @@ private struct ExercisePreviewCard: View {
         id: "exercise_192",
         name: "Supino Reto com Barra",
         description: "Deite no banco com os pés apoiados no chão...",
-        category: 11,
+        category: "chest",
         muscles: [3],
         musclesSecondary: [],
         equipment: [1]

@@ -2,8 +2,8 @@
 //  ProgramWorkoutDetailView.swift
 //  FitToday
 //
-//  Tela de detalhe de um treino de programa, mostrando exercícios do catálogo
-//  com suporte a reordenação e persistência de customizações.
+//  Tela de detalhe de um treino de programa, mostrando exercicios com imagens
+//  e suporte a reordenacao e persistencia de customizacoes.
 //
 
 import SwiftUI
@@ -28,10 +28,10 @@ struct ProgramWorkoutDetailView: View {
 
     var body: some View {
         ScrollView {
-            VStack(spacing: FitTodaySpacing.lg) {
-                headerSection
+            VStack(spacing: 0) {
+                heroSection
+                statsRow
                 exercisesSection
-                startWorkoutButton
             }
             .padding(.bottom, FitTodaySpacing.xl)
         }
@@ -46,7 +46,7 @@ struct ProgramWorkoutDetailView: View {
                         editMode = editMode == .active ? .inactive : .active
                     }
                 } label: {
-                    Text(editMode == .active ? "Concluído" : "Editar")
+                    Text(editMode == .active ? "Concluido" : "Editar")
                         .font(.system(.subheadline, weight: .medium))
                 }
             }
@@ -67,43 +67,85 @@ struct ProgramWorkoutDetailView: View {
         }
     }
 
-    // MARK: - Header Section
+    // MARK: - Hero Section
 
-    private var headerSection: some View {
-        VStack(alignment: .leading, spacing: FitTodaySpacing.sm) {
-            // Subtitle
-            Text(workout.subtitle)
-                .font(.system(.subheadline))
-                .foregroundStyle(FitTodayColor.textSecondary)
-
-            // Stats row
-            HStack(spacing: FitTodaySpacing.lg) {
-                StatBadge(
-                    icon: "clock",
-                    value: "\(workout.estimatedDurationMinutes)",
-                    label: "min"
+    private var heroSection: some View {
+        ZStack(alignment: .bottomLeading) {
+            // First exercise image or gradient
+            if let firstExercise = exercises.first {
+                ExerciseImageView(
+                    exerciseId: firstExercise.catalogExercise.id,
+                    imageIndex: 0,
+                    cornerRadius: 0
                 )
-
-                StatBadge(
-                    icon: "figure.run",
-                    value: "\(exercises.count)",
-                    label: "exercícios"
+                .frame(height: 250)
+                .clipped()
+            } else {
+                LinearGradient(
+                    colors: [.purple, .blue],
+                    startPoint: .topTrailing,
+                    endPoint: .bottomLeading
                 )
+                .frame(height: 250)
+            }
 
-                StatBadge(
-                    icon: "flame",
-                    value: "\(estimatedCalories)",
-                    label: "kcal"
-                )
+            // Gradient overlay
+            LinearGradient(
+                colors: [.clear, .black.opacity(0.7)],
+                startPoint: .center,
+                endPoint: .bottom
+            )
+
+            // Title
+            VStack(alignment: .leading, spacing: FitTodaySpacing.xs) {
+                Spacer()
+                Text(workout.title)
+                    .font(.system(.title, weight: .bold))
+                    .foregroundStyle(.white)
+
+                Text(workout.subtitle)
+                    .font(.system(.subheadline))
+                    .foregroundStyle(.white.opacity(0.8))
+            }
+            .padding(FitTodaySpacing.lg)
+        }
+        .frame(height: 250)
+    }
+
+    // MARK: - Stats Row
+
+    private var statsRow: some View {
+        HStack(spacing: FitTodaySpacing.xl) {
+            VStack(spacing: FitTodaySpacing.xs) {
+                HStack(spacing: FitTodaySpacing.xs) {
+                    Image(systemName: "flame")
+                    Text("\(estimatedCalories)")
+                        .font(.system(.title3, weight: .bold))
+                }
+                .foregroundStyle(FitTodayColor.brandPrimary)
+                Text("Kcal Media")
+                    .font(.system(.caption))
+                    .foregroundStyle(FitTodayColor.textTertiary)
+            }
+
+            VStack(spacing: FitTodaySpacing.xs) {
+                HStack(spacing: FitTodaySpacing.xs) {
+                    Image(systemName: "clock")
+                    Text("\(workout.estimatedDurationMinutes)")
+                        .font(.system(.title3, weight: .bold))
+                }
+                .foregroundStyle(FitTodayColor.brandPrimary)
+                Text("Minutos")
+                    .font(.system(.caption))
+                    .foregroundStyle(FitTodayColor.textTertiary)
             }
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .frame(maxWidth: .infinity)
         .padding(FitTodaySpacing.lg)
         .background(FitTodayColor.surface)
     }
 
     private var estimatedCalories: Int {
-        // Rough estimate: 5 kcal per minute of exercise
         workout.estimatedDurationMinutes * 5
     }
 
@@ -112,7 +154,7 @@ struct ProgramWorkoutDetailView: View {
     private var exercisesSection: some View {
         VStack(alignment: .leading, spacing: FitTodaySpacing.md) {
             HStack {
-                Text("Exercícios")
+                Text("Exercicios (\(exercises.count))")
                     .font(.system(.headline, weight: .semibold))
                     .foregroundStyle(FitTodayColor.textPrimary)
 
@@ -135,7 +177,7 @@ struct ProgramWorkoutDetailView: View {
                 exercisesList
             }
         }
-        .padding(.top, FitTodaySpacing.md)
+        .padding(.top, FitTodaySpacing.lg)
     }
 
     private var emptyExercisesView: some View {
@@ -143,14 +185,9 @@ struct ProgramWorkoutDetailView: View {
             Image(systemName: "exclamationmark.circle")
                 .font(.system(size: 40))
                 .foregroundStyle(FitTodayColor.textTertiary)
-
-            Text("Nenhum exercício encontrado")
+            Text("Nenhum exercicio encontrado")
                 .font(.system(.subheadline))
                 .foregroundStyle(FitTodayColor.textSecondary)
-
-            Text("Não foi possível carregar os exercícios da API")
-                .font(.system(.caption))
-                .foregroundStyle(FitTodayColor.textTertiary)
         }
         .frame(maxWidth: .infinity)
         .padding(FitTodaySpacing.xl)
@@ -159,9 +196,15 @@ struct ProgramWorkoutDetailView: View {
     private var exercisesList: some View {
         LazyVStack(spacing: FitTodaySpacing.sm) {
             ForEach(Array(exercises.enumerated()), id: \.element.id) { index, exercise in
+                // Insert CTA after 2nd exercise
+                if index == 2 {
+                    startWorkoutButton
+                        .padding(.horizontal)
+                        .padding(.vertical, FitTodaySpacing.sm)
+                }
+
                 ExerciseRowCard(
                     exercise: exercise,
-                    index: index + 1,
                     editMode: editMode,
                     onMoveUp: editMode == .active && index > 0 ? {
                         moveExercise(from: IndexSet(integer: index), to: index - 1)
@@ -186,6 +229,13 @@ struct ProgramWorkoutDetailView: View {
                 }
                 .padding(.horizontal)
             }
+
+            // CTA at bottom if less than 3 exercises
+            if exercises.count < 3 {
+                startWorkoutButton
+                    .padding(.horizontal)
+                    .padding(.top, FitTodaySpacing.md)
+            }
         }
     }
 
@@ -193,54 +243,27 @@ struct ProgramWorkoutDetailView: View {
 
     private func moveExercise(from source: IndexSet, to destination: Int) {
         exercises.move(fromOffsets: source, toOffset: destination)
-        // Update order values
         for (index, _) in exercises.enumerated() {
             exercises[index].order = index
         }
-
-        #if DEBUG
-        print("[ProgramWorkoutDetail] 📦 Moved exercises, new order:")
-        for (i, ex) in exercises.enumerated() {
-            print("  \(i+1). \(ex.name)")
-        }
-        #endif
-
-        Task {
-            await saveCustomization()
-        }
+        Task { await saveCustomization() }
     }
 
     private func deleteExercise(at offsets: IndexSet) {
-        // Track deleted exercises
         for index in offsets {
             deletedExerciseIds.insert(exercises[index].id)
         }
-
         exercises.remove(atOffsets: offsets)
-        // Update order values
         for (index, _) in exercises.enumerated() {
             exercises[index].order = index
         }
-
-        #if DEBUG
-        print("[ProgramWorkoutDetail] 🗑️ Deleted exercise(s)")
-        #endif
-
-        Task {
-            await saveCustomization()
-        }
+        Task { await saveCustomization() }
     }
 
     private func addExerciseEntry(_ entry: CustomExerciseEntry) {
-        // Convert CustomExerciseEntry to CatalogExercise + ProgramExercise
         let catalog = CatalogExercise(
             id: entry.exerciseId,
-            name: entry.exerciseName,
-            description: nil,
-            category: nil,
-            muscles: [],
-            musclesSecondary: [],
-            equipment: []
+            name: entry.exerciseName
         )
         let newExercise = ProgramExercise(
             id: "\(workout.id)_added_\(exercises.count)",
@@ -264,13 +287,9 @@ struct ProgramWorkoutDetailView: View {
         }
 
         if let customization = await repository.getCustomization(for: workout.id) {
-            // Apply saved customization
             deletedExerciseIds = customization.deletedExerciseIds
-
-            // Filter out deleted exercises
             var filteredExercises = workout.exercises.filter { !customization.deletedExerciseIds.contains($0.id) }
 
-            // Reorder based on saved order
             if !customization.exerciseOrder.isEmpty {
                 let orderMap = Dictionary(uniqueKeysWithValues: customization.exerciseOrder.enumerated().map { ($1, $0) })
                 filteredExercises.sort { ex1, ex2 in
@@ -281,10 +300,6 @@ struct ProgramWorkoutDetailView: View {
             }
 
             exercises = filteredExercises
-
-            #if DEBUG
-            print("[ProgramWorkoutDetail] 📂 Loaded customization: \(customization.exerciseOrder.count) ordered, \(customization.deletedExerciseIds.count) deleted")
-            #endif
         }
 
         isLoadingCustomization = false
@@ -308,7 +323,6 @@ struct ProgramWorkoutDetailView: View {
 
     private var startWorkoutButton: some View {
         Button {
-            // Create a workout with the current (potentially customized) exercise list
             let customizedWorkout = ProgramWorkout(
                 id: workout.id,
                 templateId: workout.templateId,
@@ -332,25 +346,23 @@ struct ProgramWorkoutDetailView: View {
         }
         .disabled(exercises.isEmpty || editMode == .active)
         .opacity(editMode == .active ? 0.5 : 1.0)
-        .padding(.horizontal)
     }
 
     // MARK: - Conversion Helpers
 
     private func createWorkoutExercise(from programExercise: ProgramExercise) -> WorkoutExercise {
         let catalog = programExercise.catalogExercise
-
-        let muscleGroup = mapCategoryToMuscleGroup(catalog.category)
+        let muscleGroup = MuscleGroup(rawValue: catalog.category ?? "") ?? .fullBody
 
         let instructions: [String] = {
             guard let desc = catalog.description, !desc.isEmpty else {
-                return ["Realize o exercício com boa técnica."]
+                return ["Realize o exercicio com boa tecnica."]
             }
             let lines = desc
                 .components(separatedBy: CharacterSet.newlines)
                 .map { $0.trimmingCharacters(in: .whitespaces) }
                 .filter { !$0.isEmpty }
-            return lines.isEmpty ? ["Realize o exercício com boa técnica."] : lines
+            return lines.isEmpty ? ["Realize o exercicio com boa tecnica."] : lines
         }()
 
         return WorkoutExercise(
@@ -363,96 +375,25 @@ struct ProgramWorkoutDetailView: View {
         )
     }
 
-    private func mapCategoryToMuscleGroup(_ categoryId: Int?) -> MuscleGroup {
-        guard let categoryId else { return .fullBody }
-
-        // Map category IDs to MuscleGroup
-        switch categoryId {
-        case 8:  return .arms          // Arms (biceps + triceps)
-        case 9:  return .quads         // Legs
-        case 10: return .core          // Abs
-        case 11: return .chest         // Chest
-        case 12: return .back          // Back
-        case 13: return .shoulders     // Shoulders
-        case 14: return .calves        // Calves
-        case 15: return .cardioSystem  // Cardio
-        default: return .fullBody
-        }
-    }
-
     private func mapEquipment(_ equipmentIds: [Int]) -> EquipmentType {
         guard let first = equipmentIds.first else { return .bodyweight }
-
-        // Map equipment IDs to EquipmentType
         switch first {
-        case 1: return .barbell        // Barbell
-        case 3: return .dumbbell       // Dumbbell
-        case 8: return .machine        // Gym mat (general gym)
-        case 10: return .kettlebell    // Kettlebell
-        case 7: return .bodyweight     // None (bodyweight)
-        case 9: return .resistanceBand // Incline bench
-        case 6: return .pullupBar      // Pull-up bar
+        case 1: return .barbell
+        case 3: return .dumbbell
+        case 8: return .machine
+        case 10: return .kettlebell
+        case 7: return .bodyweight
+        case 9: return .resistanceBand
+        case 6: return .pullupBar
         default: return .bodyweight
         }
     }
-
-    private func muscleNames(for muscleIds: [Int]) -> String {
-        let names = muscleIds.compactMap { muscleIdToName($0) }
-        return names.isEmpty ? "Vários músculos" : names.joined(separator: ", ")
-    }
-
-    private func muscleIdToName(_ muscleId: Int) -> String? {
-        // Map muscle IDs to readable names
-        switch muscleId {
-        case 1: return "Bíceps"
-        case 2: return "Deltóides"
-        case 3: return "Peito"
-        case 4: return "Tríceps"
-        case 5: return "Abdominais"
-        case 6: return "Glúteos"
-        case 7: return "Adutor"
-        case 8: return "Abdutores"
-        case 9: return "Quadríceps"
-        case 10: return "Isquiotibiais"
-        case 11: return "Panturrilhas"
-        case 12: return "Dorsais"
-        case 13: return "Trapézio"
-        case 14: return "Serrátil"
-        case 15: return "Lombar"
-        default: return nil
-        }
-    }
 }
 
-// MARK: - Stat Badge
-
-private struct StatBadge: View {
-    let icon: String
-    let value: String
-    let label: String
-
-    var body: some View {
-        VStack(spacing: FitTodaySpacing.xs) {
-            HStack(spacing: FitTodaySpacing.xs) {
-                Image(systemName: icon)
-                    .font(.system(.caption))
-                Text(value)
-                    .font(.system(.headline, weight: .bold))
-            }
-            .foregroundStyle(FitTodayColor.brandPrimary)
-
-            Text(label)
-                .font(.system(.caption))
-                .foregroundStyle(FitTodayColor.textTertiary)
-        }
-    }
-}
-
-// MARK: - Exercise Row Card (Hevy-style)
+// MARK: - Exercise Row Card
 
 private struct ExerciseRowCard: View {
     let exercise: ProgramExercise
-    let index: Int
     let editMode: EditMode
     var onMoveUp: (() -> Void)?
     var onMoveDown: (() -> Void)?
@@ -460,8 +401,7 @@ private struct ExerciseRowCard: View {
     let onTap: () -> Void
 
     var body: some View {
-        HStack(alignment: .top, spacing: FitTodaySpacing.sm) {
-            // Reorder controls in edit mode
+        HStack(alignment: .center, spacing: FitTodaySpacing.sm) {
             if editMode == .active {
                 VStack(spacing: FitTodaySpacing.xs) {
                     Button { onMoveUp?() } label: {
@@ -481,48 +421,36 @@ private struct ExerciseRowCard: View {
                     .disabled(onMoveDown == nil)
                 }
                 .frame(width: 24)
-                .padding(.top, FitTodaySpacing.sm)
             }
 
             Button(action: onTap) {
-                VStack(alignment: .leading, spacing: FitTodaySpacing.sm) {
-                    // Header: circle image + title + rest timer
-                    HStack(spacing: FitTodaySpacing.sm) {
-                        exerciseCircleImage
+                HStack(spacing: FitTodaySpacing.md) {
+                    // Circle image
+                    ExerciseImageView(
+                        exerciseId: exercise.catalogExercise.id,
+                        imageIndex: 0,
+                        cornerRadius: 26
+                    )
+                    .frame(width: 52, height: 52)
+                    .clipShape(Circle())
 
-                        VStack(alignment: .leading, spacing: FitTodaySpacing.xs) {
-                            Text(exercise.name)
-                                .font(.system(.subheadline, weight: .semibold))
-                                .foregroundStyle(FitTodayColor.brandPrimary)
-                                .lineLimit(2)
+                    // Exercise info
+                    VStack(alignment: .leading, spacing: FitTodaySpacing.xs) {
+                        Text(exercise.name)
+                            .font(.system(.subheadline, weight: .semibold))
+                            .foregroundStyle(FitTodayColor.textPrimary)
+                            .lineLimit(2)
 
-                            if !exercise.catalogExercise.muscles.isEmpty {
-                                Text(Self.muscleNames(for: exercise.catalogExercise.muscles))
-                                    .font(.system(.caption2))
-                                    .foregroundStyle(FitTodayColor.textTertiary)
-                                    .lineLimit(1)
-                            }
-                        }
-
-                        Spacer()
-
-                        // Rest timer badge
-                        HStack(spacing: 3) {
-                            Image(systemName: "timer")
-                                .font(.system(size: 11))
-                            Text(restTimerLabel)
-                                .font(.system(.caption2, weight: .medium))
-                        }
-                        .foregroundStyle(FitTodayColor.textSecondary)
-                        .padding(.horizontal, FitTodaySpacing.sm)
-                        .padding(.vertical, 4)
-                        .background(FitTodayColor.surface)
-                        .clipShape(Capsule())
-                        .overlay(Capsule().stroke(FitTodayColor.outline.opacity(0.2), lineWidth: 1))
+                        Text("\(exercise.sets) series \u{2022} \(exercise.repsRange.lowerBound)-\(exercise.repsRange.upperBound) reps")
+                            .font(.system(.caption))
+                            .foregroundStyle(FitTodayColor.textSecondary)
                     }
 
-                    // SET | KG | REP RANGE table
-                    ExerciseSetsTable(sets: exercise.sets, repsRange: exercise.repsRange)
+                    Spacer()
+
+                    Image(systemName: "chevron.right")
+                        .font(.system(.caption2, weight: .semibold))
+                        .foregroundStyle(FitTodayColor.textTertiary)
                 }
                 .padding(FitTodaySpacing.md)
                 .background(FitTodayColor.surface)
@@ -530,7 +458,6 @@ private struct ExerciseRowCard: View {
             }
             .buttonStyle(.plain)
 
-            // Delete button in edit mode
             if editMode == .active {
                 Button { onDelete?() } label: {
                     Image(systemName: "trash")
@@ -538,128 +465,17 @@ private struct ExerciseRowCard: View {
                         .foregroundStyle(FitTodayColor.error)
                 }
                 .buttonStyle(.plain)
-                .padding(.top, FitTodaySpacing.sm)
             }
         }
-    }
-
-    // MARK: - Circle Image
-
-    @ViewBuilder
-    private var exerciseCircleImage: some View {
-        ExerciseImageView(
-            exerciseId: exercise.catalogExercise.id,
-            imageIndex: 0,
-            cornerRadius: 26
-        )
-        .frame(width: 52, height: 52)
-        .clipShape(Circle())
-    }
-
-    // MARK: - Rest Timer Label
-
-    private var restTimerLabel: String {
-        let seconds = exercise.restSeconds
-        if seconds >= 60 {
-            let mins = seconds / 60
-            let secs = seconds % 60
-            return secs == 0 ? "\(mins)min" : "\(mins)m\(secs)s"
-        }
-        return "\(seconds)s"
-    }
-
-    // MARK: - Static Helpers
-
-    private static func muscleNames(for muscleIds: [Int]) -> String {
-        let names = muscleIds.compactMap { muscleIdToName($0) }
-        return names.isEmpty ? "Vários músculos" : names.joined(separator: ", ")
-    }
-
-    private static func muscleIdToName(_ muscleId: Int) -> String? {
-        switch muscleId {
-        case 1: return "Bíceps"
-        case 2: return "Deltóides"
-        case 3: return "Peito"
-        case 4: return "Tríceps"
-        case 5: return "Abdominais"
-        case 6: return "Glúteos"
-        case 7: return "Adutor"
-        case 8: return "Abdutores"
-        case 9: return "Quadríceps"
-        case 10: return "Isquiotibiais"
-        case 11: return "Panturrilhas"
-        case 12: return "Dorsais"
-        case 13: return "Trapézio"
-        case 14: return "Serrátil"
-        case 15: return "Lombar"
-        default: return nil
-        }
-    }
-}
-
-// MARK: - Exercise Sets Table
-
-private struct ExerciseSetsTable: View {
-    let sets: Int
-    let repsRange: ClosedRange<Int>
-
-    var body: some View {
-        VStack(spacing: 0) {
-            tableHeader
-            Divider().padding(.vertical, 4)
-            ForEach(1...sets, id: \.self) { setNumber in
-                tableRow(setNumber: setNumber)
-                if setNumber < sets {
-                    Divider().opacity(0.4)
-                }
-            }
-        }
-        .background(FitTodayColor.background.opacity(0.5))
-        .clipShape(RoundedRectangle(cornerRadius: FitTodayRadius.sm))
-    }
-
-    private var tableHeader: some View {
-        HStack {
-            Text("SET").frame(width: 36, alignment: .center)
-            Spacer()
-            Text("KG").frame(width: 60, alignment: .center)
-            Spacer()
-            Text("REPS").frame(width: 80, alignment: .center)
-        }
-        .font(.system(.caption2, weight: .bold))
-        .foregroundStyle(FitTodayColor.textTertiary)
-        .padding(.horizontal, FitTodaySpacing.sm)
-        .padding(.top, FitTodaySpacing.xs)
-    }
-
-    private func tableRow(setNumber: Int) -> some View {
-        HStack {
-            Text("\(setNumber)")
-                .frame(width: 36, alignment: .center)
-                .font(.system(.caption, weight: .semibold))
-                .foregroundStyle(FitTodayColor.brandPrimary)
-            Spacer()
-            Text("—")
-                .frame(width: 60, alignment: .center)
-                .font(.system(.caption))
-                .foregroundStyle(FitTodayColor.textTertiary)
-            Spacer()
-            Text("\(repsRange.lowerBound)–\(repsRange.upperBound)")
-                .frame(width: 80, alignment: .center)
-                .font(.system(.caption, weight: .medium))
-                .foregroundStyle(FitTodayColor.textPrimary)
-        }
-        .padding(.horizontal, FitTodaySpacing.sm)
-        .padding(.vertical, 5)
     }
 }
 
 #Preview {
     let sampleExercise = CatalogExercise(
-        id: "exercise_192",
+        id: "barbell_bench_press",
         name: "Supino Reto com Barra",
-        description: "Deite no banco com os pés apoiados no chão...",
-        category: 11,
+        description: "Deite no banco com os pes apoiados no chao...",
+        category: "chest",
         muscles: [3],
         musclesSecondary: [],
         equipment: [1]
@@ -679,7 +495,7 @@ private struct ExerciseSetsTable: View {
         id: "test_workout",
         templateId: "lib_push_beginner_gym",
         title: "Treino 1 - Push",
-        subtitle: "Peito, Ombros e Tríceps",
+        subtitle: "Peito, Ombros e Triceps",
         estimatedDurationMinutes: 45,
         exercises: [programExercise]
     )

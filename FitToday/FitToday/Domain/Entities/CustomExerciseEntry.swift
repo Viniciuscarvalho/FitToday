@@ -95,7 +95,7 @@ extension CustomExerciseEntry {
         self.exerciseId = catalogExercise.id
         self.exerciseName = catalogExercise.name
         self.exerciseGifURL = nil
-        self.bodyPart = catalogExercise.category.flatMap { ExerciseCategoryMapping.from(id: $0)?.portugueseName }
+        self.bodyPart = catalogExercise.category.flatMap { ExerciseCategoryMapping.from(name: $0)?.portugueseName }
         self.equipment = catalogExercise.equipment.first.flatMap { ExerciseEquipmentMapping.from(id: $0)?.portugueseName }
         self.orderIndex = orderIndex
         self.sets = [WorkoutSet()]

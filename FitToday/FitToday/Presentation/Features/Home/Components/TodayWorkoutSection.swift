@@ -55,7 +55,7 @@ struct TodayWorkoutSection: View {
                         exerciseId: exercise.catalogExercise.id,
                         setsAndReps: exercise.setsRepsDescription,
                         muscleGroup: ExerciseCategoryMapping.localizedName(
-                            for: exercise.catalogExercise.category ?? 0
+                            for: exercise.catalogExercise.category ?? ""
                         )
                     )
                 }

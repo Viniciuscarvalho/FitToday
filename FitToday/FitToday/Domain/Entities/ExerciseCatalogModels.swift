@@ -36,16 +36,23 @@ extension String {
 
 // MARK: - Exercise Category Mapping
 
-/// Maps category IDs to human-readable names.
-enum ExerciseCategoryMapping: Int, CaseIterable, Sendable {
-    case arms = 8
-    case legs = 9
-    case abs = 10
-    case chest = 11
-    case back = 12
-    case shoulders = 13
-    case calves = 14
-    case cardio = 15
+/// Maps category names to human-readable names.
+enum ExerciseCategoryMapping: String, CaseIterable, Sendable {
+    case arms
+    case legs
+    case abs = "core"
+    case chest
+    case back
+    case shoulders
+    case calves
+    case cardio = "cardioSystem"
+    case biceps
+    case triceps
+    case quads
+    case hamstrings
+    case glutes
+    case lats
+    case middleBack
 
     var englishName: String {
         switch self {
@@ -57,6 +64,13 @@ enum ExerciseCategoryMapping: Int, CaseIterable, Sendable {
         case .shoulders: return "Shoulders"
         case .calves: return "Calves"
         case .cardio: return "Cardio"
+        case .biceps: return "Biceps"
+        case .triceps: return "Triceps"
+        case .quads: return "Quads"
+        case .hamstrings: return "Hamstrings"
+        case .glutes: return "Glutes"
+        case .lats: return "Lats"
+        case .middleBack: return "Middle Back"
         }
     }
 
@@ -70,19 +84,26 @@ enum ExerciseCategoryMapping: Int, CaseIterable, Sendable {
         case .shoulders: return "Ombros"
         case .calves: return "Panturrilhas"
         case .cardio: return "Cardio"
+        case .biceps: return "Bíceps"
+        case .triceps: return "Tríceps"
+        case .quads: return "Quadríceps"
+        case .hamstrings: return "Posteriores"
+        case .glutes: return "Glúteos"
+        case .lats: return "Dorsais"
+        case .middleBack: return "Meio das Costas"
         }
     }
 
     var icon: String {
         switch self {
-        case .arms: return "figure.boxing"
-        case .legs: return "figure.run"
+        case .arms, .biceps, .triceps: return "figure.boxing"
+        case .legs, .quads, .hamstrings, .calves: return "figure.run"
         case .abs: return "figure.core.training"
         case .chest: return "figure.strengthtraining.traditional"
-        case .back: return "figure.rowing"
+        case .back, .lats, .middleBack: return "figure.rowing"
         case .shoulders: return "figure.arms.open"
-        case .calves: return "figure.run"
         case .cardio: return "heart.fill"
+        case .glutes: return "figure.run"
         }
     }
 
@@ -92,19 +113,24 @@ enum ExerciseCategoryMapping: Int, CaseIterable, Sendable {
         case .legs: return .quadriceps
         case .abs: return .core
         case .chest: return .chest
-        case .back: return .back
+        case .back, .lats, .middleBack: return .back
         case .shoulders: return .shoulders
         case .calves: return .calves
         case .cardio: return .cardioSystem
+        case .biceps: return .biceps
+        case .triceps: return .triceps
+        case .quads: return .quads
+        case .hamstrings: return .hamstrings
+        case .glutes: return .glutes
         }
     }
 
-    static func from(id: Int) -> ExerciseCategoryMapping? {
-        ExerciseCategoryMapping(rawValue: id)
+    static func from(name: String) -> ExerciseCategoryMapping? {
+        ExerciseCategoryMapping(rawValue: name)
     }
 
-    static func localizedName(for id: Int, language: String = "pt") -> String {
-        guard let category = ExerciseCategoryMapping(rawValue: id) else {
+    static func localizedName(for name: String, language: String = "pt") -> String {
+        guard let category = ExerciseCategoryMapping(rawValue: name) else {
             return "Outro"
         }
         return language == "pt" ? category.portugueseName : category.englishName

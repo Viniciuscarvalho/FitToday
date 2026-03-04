@@ -21,7 +21,7 @@ actor FirestoreExerciseService: ExerciseServiceProtocol {
 
     func fetchExercises(
         language: ExerciseLanguageCode,
-        category: Int?,
+        category: String?,
         equipment: [Int]?,
         limit: Int
     ) async throws -> [CatalogExercise] {
@@ -45,7 +45,7 @@ actor FirestoreExerciseService: ExerciseServiceProtocol {
         }
 
         #if DEBUG
-        print("[FirestoreExerciseService] Fetched \(exercises.count) exercises (category: \(category ?? -1))")
+        print("[FirestoreExerciseService] Fetched \(exercises.count) exercises (category: \(category ?? "all"))")
         #endif
 
         return exercises
@@ -104,7 +104,7 @@ actor FirestoreExerciseService: ExerciseServiceProtocol {
             id: doc.documentID,
             name: data["name"] as? String ?? "Exercise",
             description: data["description"] as? String,
-            category: data["category"] as? Int,
+            category: data["category"] as? String,
             muscles: data["muscles"] as? [Int] ?? [],
             musclesSecondary: data["musclesSecondary"] as? [Int] ?? [],
             equipment: data["equipment"] as? [Int] ?? []
