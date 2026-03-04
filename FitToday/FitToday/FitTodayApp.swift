@@ -66,7 +66,6 @@ struct FitTodayApp: App {
             .environment(appContainer.router)
             .environment(sessionStore)
             .environment(\.dependencyResolver, appContainer.container)
-            .imageCacheService(appContainer.container.resolve(ImageCaching.self)!)
             .preferredColorScheme(.dark)  // Forçar tema escuro
             .onOpenURL { url in
                 appContainer.router.handle(url: url)

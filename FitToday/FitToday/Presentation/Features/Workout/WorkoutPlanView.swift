@@ -52,7 +52,6 @@ struct WorkoutPlanView: View {
     @Environment(AppRouter.self) private var router
     @Environment(WorkoutSessionStore.self) private var sessionStore
     @Environment(\.dependencyResolver) private var resolver
-    @Environment(\.imageCacheService) private var imageCacheService
 
     @State private var timerStore = WorkoutTimerStore()
     @State private var restTimerStore = RestTimerStore()

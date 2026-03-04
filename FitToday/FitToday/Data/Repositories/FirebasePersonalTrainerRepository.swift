@@ -72,10 +72,6 @@ final class FirebasePersonalTrainerRepository: PersonalTrainerRepository, Traine
             )
         } catch let error as NSError {
             switch error.code {
-            case 400:
-                throw DomainError.invalidInput(reason: error.localizedDescription)
-            case 404:
-                throw DomainError.notFound(resource: "Personal Trainer")
             case 409:
                 throw DomainError.invalidInput(reason: "Connection already exists with this trainer")
             default:

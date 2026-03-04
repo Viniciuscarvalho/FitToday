@@ -31,12 +31,6 @@ struct AppContainer {
         container.register(AppRouting.self) { _ in router }
             .inObjectScope(.container)
 
-        // Image Cache Service
-        let imageCacheConfig = ImageCacheConfiguration.default
-        let imageCacheService = ImageCacheService(configuration: imageCacheConfig)
-        container.register(ImageCaching.self) { _ in imageCacheService }
-            .inObjectScope(.container)
-        
         // Repositórios
         container.register(UserProfileRepository.self) { _ in
             SwiftDataUserProfileRepository(modelContainer: modelContainer)
