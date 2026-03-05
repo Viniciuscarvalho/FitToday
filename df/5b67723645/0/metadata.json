@@ -1,0 +1,45 @@
+{
+  "cli_version": "0.4.4",
+  "checkpoint_id": "df5b67723645",
+  "session_id": "e37f6884-fa6f-49b0-a3d2-983cb526dc1f",
+  "strategy": "manual-commit",
+  "created_at": "2026-03-05T02:22:12.448427Z",
+  "branch": "feat/exercise-image-cache-phase5",
+  "checkpoints_count": 0,
+  "files_touched": [
+    "FitToday/FitToday/Data/Mappers/TrainerChatMessageMapper.swift",
+    "FitToday/FitToday/Data/Models/FBTrainerChatModels.swift",
+    "FitToday/FitToday/Data/Services/Firebase/FirebaseTrainerChatService.swift",
+    "FitToday/FitToday/Domain/Entities/TrainerChatMessage.swift",
+    "FitToday/FitToday/Domain/Protocols/TrainerChatServiceProtocol.swift",
+    "FitToday/FitToday/Presentation/DI/AppContainer.swift",
+    "FitToday/FitToday/Presentation/Features/PersonalTrainer/Components/ChatBubble.swift",
+    "FitToday/FitToday/Presentation/Features/PersonalTrainer/PersonalTrainerView.swift",
+    "FitToday/FitToday/Presentation/Features/PersonalTrainer/PersonalTrainerViewModel.swift",
+    "FitToday/FitToday/Presentation/Features/PersonalTrainer/TrainerChatView.swift",
+    "FitToday/FitToday/Presentation/Features/PersonalTrainer/TrainerChatViewModel.swift",
+    "FitToday/FitToday/Presentation/Features/PersonalTrainer/TrainerDashboardView.swift",
+    "FitToday/FitToday/Resources/en.lproj/Localizable.strings",
+    "FitToday/FitToday/Resources/pt-BR.lproj/Localizable.strings"
+  ],
+  "agent": "Claude Code",
+  "checkpoint_transcript_start": 1112,
+  "transcript_lines_at_start": 1112,
+  "token_usage": {
+    "input_tokens": 4,
+    "cache_creation_tokens": 115043,
+    "cache_read_tokens": 113803,
+    "output_tokens": 539,
+    "api_call_count": 2
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-03-05T02:22:11.70108Z",
+    "agent_lines": 378,
+    "human_added": 1196,
+    "human_modified": 0,
+    "human_removed": 0,
+    "total_committed": 1574,
+    "agent_percentage": 24.015247776365946
+  },
+  "transcript_path": ".claude/projects/-Users-viniciuscarvalho-Documents-FitToday/e37f6884-fa6f-49b0-a3d2-983cb526dc1f.jsonl"
+}

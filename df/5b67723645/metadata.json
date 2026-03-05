@@ -1,0 +1,39 @@
+{
+  "cli_version": "0.4.4",
+  "checkpoint_id": "df5b67723645",
+  "strategy": "manual-commit",
+  "branch": "feat/exercise-image-cache-phase5",
+  "checkpoints_count": 0,
+  "files_touched": [
+    "FitToday/FitToday/Data/Mappers/TrainerChatMessageMapper.swift",
+    "FitToday/FitToday/Data/Models/FBTrainerChatModels.swift",
+    "FitToday/FitToday/Data/Services/Firebase/FirebaseTrainerChatService.swift",
+    "FitToday/FitToday/Domain/Entities/TrainerChatMessage.swift",
+    "FitToday/FitToday/Domain/Protocols/TrainerChatServiceProtocol.swift",
+    "FitToday/FitToday/Presentation/DI/AppContainer.swift",
+    "FitToday/FitToday/Presentation/Features/PersonalTrainer/Components/ChatBubble.swift",
+    "FitToday/FitToday/Presentation/Features/PersonalTrainer/PersonalTrainerView.swift",
+    "FitToday/FitToday/Presentation/Features/PersonalTrainer/PersonalTrainerViewModel.swift",
+    "FitToday/FitToday/Presentation/Features/PersonalTrainer/TrainerChatView.swift",
+    "FitToday/FitToday/Presentation/Features/PersonalTrainer/TrainerChatViewModel.swift",
+    "FitToday/FitToday/Presentation/Features/PersonalTrainer/TrainerDashboardView.swift",
+    "FitToday/FitToday/Resources/en.lproj/Localizable.strings",
+    "FitToday/FitToday/Resources/pt-BR.lproj/Localizable.strings"
+  ],
+  "sessions": [
+    {
+      "metadata": "/df/5b67723645/0/metadata.json",
+      "transcript": "/df/5b67723645/0/full.jsonl",
+      "context": "/df/5b67723645/0/context.md",
+      "content_hash": "/df/5b67723645/0/content_hash.txt",
+      "prompt": "/df/5b67723645/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 4,
+    "cache_creation_tokens": 115043,
+    "cache_read_tokens": 113803,
+    "output_tokens": 539,
+    "api_call_count": 2
+  }
+}

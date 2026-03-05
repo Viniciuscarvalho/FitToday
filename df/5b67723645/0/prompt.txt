@@ -1,0 +1,193 @@
+Implement the following plan:
+
+# Plano: Integracao Chat Aluno-Personal via Firestore (Issue #51)
+
+## Context
+
+A UI do chat entre aluno e personal trainer ja esta pronta (`TrainerChatView`, `ChatBubble`, `TrainerDashboardView`), mas o backend e 100% mock — `TrainerChatViewModel` carrega mensagens hardcoded e o envio so adiciona ao array local. Esta issue cobre a integracao ponta a ponta com Firestore para mensagens em tempo real.
+
+**Nota:** FCM/Push Notifications NAO esta configurado no app (nenhum delegate, nenhum token registration). A implementacao de push sera deixada para uma issue separada para manter o escopo gerenciavel.
+
+---
+
+## Fase 1: Domain Layer — Protocolo e Entidades
+
+### 1.1 Criar `TrainerChatMessage` (Domain Entity)
+
+**Arquivo:** `Domain/Entities/TrainerChatMessage.swift`
+
+```swift
+struct TrainerChatMessage: Identifiable, Sendable, Hashable {
+    let id: String
+    let conversationId: String
+    let senderId: String
+    let content: String
+    let type: MessageType
+    let createdAt: Date
+    let isRead: Bool
+
+    enum MessageType: String, Sendable, Hashable {
+        case text
+    }
+}
+```
+
+### 1.2 Criar `TrainerChatServiceProtocol`
+
+**Arquivo:** `Domain/Protocols/TrainerChatServiceProtocol.swift`
+
+```swift
+protocol TrainerChatServiceProtocol: Sendable {
+    func observeMessages(conversationId: String) -> AsyncStream<[TrainerChatMessage]>
+    func sendMessage(conversationId: String, senderId: String, content: String) async throws
+    func markMessagesAsRead(conversationId: String, byUserId: String) async throws
+}
+```
+
+---
+
+## Fase 2: Data Layer — Firebase Service + DTO + Mapper
+
+### 2.1 Criar `FBConversation` e `FBChatMessage` (DTOs)
+
+**Arquivo:** `Data/Models/FBTrainerChatModels.swift`
+
+DTOs Firestore com `@DocumentID` e `@ServerTimestamp` seguindo o padrao existente em `FBPersonalTrainerModels.swift`.
+
+Estrutura Firestore conforme issue:
+```
+conversations/{conversationId}
+  ├── trainerId, studentId
+  ├── lastMessage, lastMessageAt
+  ├── unreadByTrainer, unreadByStudent
+  └── messages/{messageId}
+        ├── senderId, content, type, createdAt, isRead
+```
+
+`conversationId` deterministico: `"\(min(trainerId, studentId))_\(max(trainerId, studentId))"`
+
+### 2.2 Criar `FirebaseTrainerChatService` (Actor)
+
+**Arquivo:** `Data/Services/Firebase/FirebaseTrainerChatService.swift`
+
+Seguindo o padrao de `FirebasePersonalTrainerService` e `FirebaseNotificationService`:
+
+- `observeMessages(conversationId:)` — `AsyncStream` via `addSnapshotListener` na subcollection `messages/`
+- `sendMessage(conversationId:, senderId:, content:)` — Escreve em `conversations/{id}/messages` + atualiza `lastMessage`, `lastMessageAt` e `unreadBy*` no doc pai. Cria `conversations/{id}` se nao existir (primeira msg)
+- `markMessagesAsRead(conversationId:, byUserId:)` — Zera `unreadByStudent` ou `unreadByTrainer` conforme o userId
+
+### 2.3 Criar `TrainerChatMessageMapper`
+
+**Arquivo:** `Data/Mappers/TrainerChatMessageMapper.swift`
+
+Mapeia `FBChatMessage` <-> `TrainerChatMessage` seguindo padrao de `PersonalTrainerMapper`.
+
+---
+
+## Fase 3: Presentation Layer — Atualizar ViewModel
+
+### 3.1 Refatorar `TrainerChatViewModel`
+
+**Arquivo:** `Presentation/Features/PersonalTrainer/TrainerChatViewModel.swift`
+
+Mudancas:
+- Injetar `TrainerChatServiceProtocol` via `Resolver`
+- Remover `loadMockMessages()` completamente
+- Substituir `ChatMessage` local pelo `TrainerChatMessage` do domain
+- Adicionar estados: `isLoading`, `isEmpty`, `error`
+- `loadMessages()` — inicia `observeMessages()` e itera pelo `AsyncStream`
+- `sendMessage()` — append otimista + chamada ao service. Em caso de erro, remove a msg local
+- `markAsRead()` — chamado ao abrir o chat
+- Guardar `Task` do listener para cancelar no `deinit`
+
+### 3.2 Atualizar `TrainerChatView`
+
+**Arquivo:** `Presentation/Features/PersonalTrainer/TrainerChatView.swift`
+
+Mudancas:
+- Receber `Resolver` para injetar dependencias no ViewModel
+- Adicionar `.task { await viewModel.startListening() }` para iniciar listener
+- Adicionar loading state (ProgressView na primeira carga)
+- Adicionar empty state (quando nao ha mensagens)
+- Atualizar referencia de `ChatMessage` para `TrainerChatMessage`
+
+### 3.3 Atualizar `ChatBubble`
+
+**Arquivo:** `Presentation/Features/PersonalTrainer/Components/ChatBubble.swift`
+
+- Alterar tipo de `ChatMessage` para `TrainerChatMessage`
+- Ajustar propriedades (`.text` → `.content`, etc.)
+
+### 3.4 Atualizar `TrainerDashboardView`
+
+**Arquivo:** `Presentation/Features/PersonalTrainer/TrainerDashboardView.swift`
+
+- Passar `Resolver` para `TrainerChatView`
+- Passar `studentId` (current user) para o chat view
+
+---
+
+## Fase 4: DI Registration
+
+### 4.1 Registrar no `AppContainer`
+
+**Arquivo:** `Presentation/DI/AppContainer.swift`
+
+```swift
+// Firebase Trainer Chat Service
+let trainerChatService = FirebaseTrainerChatService()
+container.register(TrainerChatServiceProtocol.self) { _ in
+    trainerChatService
+}.inObjectScope(.container)
+```
+
+---
+
+## Fase 5: Atualizar PersonalTrainerView (passagem de dependencias)
+
+**Arquivo:** `Presentation/Features/PersonalTrainer/PersonalTrainerView.swift`
+
+- Garantir que `resolver` e `currentUserId` sao passados corretamente pela cadeia:
+  `PersonalTrainerView` → `TrainerDashboardView` → `TrainerChatView`
+
+---
+
+## Arquivos a Criar (4 novos)
+
+1. `Domain/Entities/TrainerChatMessage.swift`
+2. `Domain/Protocols/TrainerChatServiceProtocol.swift`
+3. `Data/Models/FBTrainerChatModels.swift`
+4. `Data/Services/Firebase/FirebaseTrainerChatService.swift`
+
+## Arquivos a Modificar (5 existentes)
+
+1. `Presentation/Features/PersonalTrainer/TrainerChatViewModel.swift` — substituir mock por Firestore
+2. `Presentation/Features/PersonalTrainer/TrainerChatView.swift` — adicionar Resolver, loading/empty states
+3. `Presentation/Features/PersonalTrainer/Components/ChatBubble.swift` — usar TrainerChatMessage
+4. `Presentation/Features/PersonalTrainer/TrainerDashboardView.swift` — passar Resolver
+5. `Presentation/DI/AppContainer.swift` — registrar chat service
+
+## Fora do Escopo (Issues Separadas)
+
+- Push Notifications (FCM) — requer setup completo de FCM no app
+- Deep links para abrir chat via notificacao
+- Firestore Security Rules (deploy manual no Firebase Console)
+- Firestore composite indexes (criados automaticamente pelo SDK ao executar queries)
+
+---
+
+## Verificacao
+
+1. Build com `mcp__xcodebuildmcp__build_sim_name_proj`
+2. Validar que `TrainerChatView` carrega sem crash
+3. Validar que o envio de mensagem aparece localmente (append otimista)
+4. Confirmar que o listener `AsyncStream` e cancelado ao sair da tela
+
+
+If you need specific details from before exiting plan mode (like exact code snippets, error messages, or content you generated), read the full transcript at: /Users/viniciuscarvalho/.REDACTED.jsonl
+
+If this plan can be broken down into multiple independent tasks, consider using the TeamCreate tool to create a team and parallelize the work.
+
+---
+
+Use the claude-code-guide agent to explain to me how remote-control works
