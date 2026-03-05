@@ -33,7 +33,15 @@ struct ProgramWorkoutDetailView: View {
                 statsRow
                 exercisesSection
             }
-            .padding(.bottom, FitTodaySpacing.xl)
+            .padding(.bottom, 80)
+        }
+        .safeAreaInset(edge: .bottom) {
+            if !exercises.isEmpty {
+                startWorkoutButton
+                    .padding(.horizontal, FitTodaySpacing.md)
+                    .padding(.vertical, FitTodaySpacing.sm)
+                    .background(.ultraThinMaterial)
+            }
         }
         .background(FitTodayColor.background.ignoresSafeArea())
         .navigationTitle(workout.title)
@@ -196,13 +204,6 @@ struct ProgramWorkoutDetailView: View {
     private var exercisesList: some View {
         LazyVStack(spacing: FitTodaySpacing.sm) {
             ForEach(Array(exercises.enumerated()), id: \.element.id) { index, exercise in
-                // Insert CTA after 2nd exercise
-                if index == 2 {
-                    startWorkoutButton
-                        .padding(.horizontal)
-                        .padding(.vertical, FitTodaySpacing.sm)
-                }
-
                 ExerciseRowCard(
                     exercise: exercise,
                     editMode: editMode,
@@ -228,13 +229,6 @@ struct ProgramWorkoutDetailView: View {
                     router.push(.programExerciseDetail(prescription), on: router.selectedTab)
                 }
                 .padding(.horizontal)
-            }
-
-            // CTA at bottom if less than 3 exercises
-            if exercises.count < 3 {
-                startWorkoutButton
-                    .padding(.horizontal)
-                    .padding(.top, FitTodaySpacing.md)
             }
         }
     }

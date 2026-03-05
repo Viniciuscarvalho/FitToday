@@ -39,7 +39,7 @@ actor FirestoreExerciseService: ExerciseServiceProtocol {
 
         let snapshot = try await query.getDocuments()
         let exercises = snapshot.documents.compactMap { doc -> CatalogExercise? in
-            let exercise = parseCatalogExercise(from: doc)
+            let exercise = parseCatalogExercise(from: doc, language: language)
             if let exercise { cache[exercise.id] = exercise }
             return exercise
         }
@@ -60,7 +60,7 @@ actor FirestoreExerciseService: ExerciseServiceProtocol {
 
         guard doc.exists else { return nil }
 
-        let exercise = parseCatalogExercise(from: doc)
+        let exercise = parseCatalogExercise(from: doc, language: .portuguese)
         if let exercise { cache[exercise.id] = exercise }
         return exercise
     }
@@ -83,7 +83,7 @@ actor FirestoreExerciseService: ExerciseServiceProtocol {
             .getDocuments()
 
         let exercises = snapshot.documents.compactMap { doc -> CatalogExercise? in
-            let exercise = parseCatalogExercise(from: doc)
+            let exercise = parseCatalogExercise(from: doc, language: language)
             if let exercise { cache[exercise.id] = exercise }
             return exercise
         }
@@ -97,18 +97,52 @@ actor FirestoreExerciseService: ExerciseServiceProtocol {
 
     // MARK: - Parsing
 
-    private func parseCatalogExercise(from doc: DocumentSnapshot) -> CatalogExercise? {
+    private func parseCatalogExercise(from doc: DocumentSnapshot, language: ExerciseLanguageCode) -> CatalogExercise? {
         guard let data = doc.data() else { return nil }
+
+        let name = resolveExerciseName(from: data, documentId: doc.documentID, language: language)
+        let description = resolveExerciseDescription(from: data, language: language)
+
+        #if DEBUG
+        if data["name"] == nil && data["name_\(language.code)"] == nil {
+            print("[FirestoreExerciseService] ⚠️ No name field found for \(doc.documentID). Keys: \(data.keys.sorted())")
+        }
+        #endif
 
         return CatalogExercise(
             id: doc.documentID,
-            name: data["name"] as? String ?? "Exercise",
-            description: data["description"] as? String,
+            name: name,
+            description: description,
             category: data["category"] as? String,
             muscles: data["muscles"] as? [Int] ?? [],
             musclesSecondary: data["musclesSecondary"] as? [Int] ?? [],
             equipment: data["equipment"] as? [Int] ?? []
         )
+    }
+
+    /// Resolves the exercise name trying language-specific fields first, then generic name,
+    /// then falls back to a human-readable form of the document ID.
+    private func resolveExerciseName(from data: [String: Any], documentId: String, language: ExerciseLanguageCode) -> String {
+        // Try language-specific name (e.g., "name_pt", "name_en")
+        if let localizedName = data["name_\(language.code)"] as? String, !localizedName.isEmpty {
+            return localizedName
+        }
+        // Try generic "name" field
+        if let name = data["name"] as? String, !name.isEmpty {
+            return name
+        }
+        // Fallback: convert document ID to readable name (e.g., "barbell_bench_press" → "Barbell Bench Press")
+        return documentId
+            .replacingOccurrences(of: "_", with: " ")
+            .capitalized
+    }
+
+    /// Resolves the exercise description trying language-specific fields first.
+    private func resolveExerciseDescription(from data: [String: Any], language: ExerciseLanguageCode) -> String? {
+        if let localized = data["description_\(language.code)"] as? String, !localized.isEmpty {
+            return localized
+        }
+        return data["description"] as? String
     }
 
     // MARK: - Cache

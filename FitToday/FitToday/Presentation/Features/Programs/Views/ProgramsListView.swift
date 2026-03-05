@@ -51,12 +51,6 @@ struct ProgramsListView: View {
     private func contentView(viewModel: ProgramsListViewModel) -> some View {
         ScrollView {
             VStack(alignment: .leading, spacing: FitTodaySpacing.lg) {
-                // Title
-                Text("Programas")
-                    .font(.system(.largeTitle, weight: .bold))
-                    .foregroundStyle(FitTodayColor.textPrimary)
-                    .padding(.horizontal, FitTodaySpacing.md)
-
                 // Search bar
                 searchBar(viewModel: viewModel)
 
