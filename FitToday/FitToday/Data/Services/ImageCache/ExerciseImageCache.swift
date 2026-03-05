@@ -165,24 +165,37 @@ actor ExerciseImageCache {
         }
 
         let task = Task<UIImage?, Error> {
-            let storagePath = "exercises/\(exerciseId)/\(imageIndex).jpg"
-            let ref = Storage.storage().reference().child(storagePath)
+            let storage = Storage.storage()
 
-            do {
-                let data = try await ref.data(maxSize: maxDownloadSize)
-                guard let image = UIImage(data: data) else { return nil }
+            // Try media/ path first (primary), then thumbnail/ as fallback
+            let paths = [
+                "exercises/\(exerciseId)/media/\(imageIndex).jpg",
+                "exercises/\(exerciseId)/thumbnail/\(imageIndex).webp"
+            ]
 
-                // Save to both caches
-                memoryCache.setObject(image, forKey: key as NSString)
-                saveToDisk(image: image, key: key)
+            for storagePath in paths {
+                let ref = storage.reference().child(storagePath)
+                do {
+                    let data = try await ref.data(maxSize: maxDownloadSize)
+                    guard let image = UIImage(data: data) else { continue }
 
-                return image
-            } catch {
-                #if DEBUG
-                print("[ExerciseImageCache] Download failed for \(storagePath): \(error.localizedDescription)")
-                #endif
-                return nil
+                    // Save to both caches
+                    memoryCache.setObject(image, forKey: key as NSString)
+                    saveToDisk(image: image, key: key)
+
+                    return image
+                } catch {
+                    #if DEBUG
+                    print("[ExerciseImageCache] Path not found: \(storagePath)")
+                    #endif
+                    continue
+                }
             }
+
+            #if DEBUG
+            print("[ExerciseImageCache] No image found for exercise: \(exerciseId)")
+            #endif
+            return nil
         }
 
         downloadTasks[key] = task
