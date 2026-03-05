@@ -1,0 +1,33 @@
+{
+  "cli_version": "0.4.4",
+  "checkpoint_id": "b7b382fd66ab",
+  "session_id": "06560e53-43ee-429c-955d-75914d3025f4",
+  "strategy": "manual-commit",
+  "created_at": "2026-03-05T02:30:07.152651Z",
+  "branch": "feat/exercise-image-cache-phase5",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "storage.rules"
+  ],
+  "agent": "Claude Code",
+  "transcript_identifier_at_start": "8f719b27-b4c8-4d54-bb85-b96af1353bf6",
+  "checkpoint_transcript_start": 109,
+  "transcript_lines_at_start": 109,
+  "token_usage": {
+    "input_tokens": 77,
+    "cache_creation_tokens": 48511,
+    "cache_read_tokens": 1238339,
+    "output_tokens": 4143,
+    "api_call_count": 9
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-03-05T02:30:06.744495Z",
+    "agent_lines": 0,
+    "human_added": 1,
+    "human_modified": 2,
+    "human_removed": 0,
+    "total_committed": 3,
+    "agent_percentage": 0
+  },
+  "transcript_path": ".claude/projects/-Users-viniciuscarvalho-Documents-FitToday/06560e53-43ee-429c-955d-75914d3025f4.jsonl"
+}

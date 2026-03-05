@@ -1,0 +1,26 @@
+{
+  "cli_version": "0.4.4",
+  "checkpoint_id": "b7b382fd66ab",
+  "strategy": "manual-commit",
+  "branch": "feat/exercise-image-cache-phase5",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "storage.rules"
+  ],
+  "sessions": [
+    {
+      "metadata": "/b7/b382fd66ab/0/metadata.json",
+      "transcript": "/b7/b382fd66ab/0/full.jsonl",
+      "context": "/b7/b382fd66ab/0/context.md",
+      "content_hash": "/b7/b382fd66ab/0/content_hash.txt",
+      "prompt": "/b7/b382fd66ab/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 77,
+    "cache_creation_tokens": 48511,
+    "cache_read_tokens": 1238339,
+    "output_tokens": 4143,
+    "api_call_count": 9
+  }
+}

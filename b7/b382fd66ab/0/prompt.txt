@@ -1,0 +1,26 @@
+Preciso equalizar o nome dos exercícios e os 25 programas existentes para tornar pelo menos 12 programas, está muito extenso e que contenha variações, iniciantes, intermediários e avançados, todos os nomes de exercícios devem ser iguais ao que estão no Storage e manter simples, exemplo de nome complexo e que provavelmente vá errar a imagem, chest strech on stability ball, isso com certeza vai gerar uma imagem incorreta para esse exercício. /feature-marker —interactive -prd-new-programas-area
+
+---
+
+Mesmo após ter feito o upload via cms e ter recebido o feedback que estava correto, continuo tomando o erro, 
+[ExerciseImageCache] Path not found: exercises/barbell_bench_press_nb/media/0.jpg
+[ExerciseImageCache] Path not found: exercises/barbell_bench_press_nb/thumbnail/0.webp
+[ExerciseImageCache] No image found for exercise: barbell_bench_press_nb
+[ExerciseImageCache] Path not found: exercises/barbell_bench_press_nb/media/1.jpg
+[ExerciseImageCache] Path not found: exercises/barbell_bench_press_nb/thumbnail/1.webp
+[ExerciseImageCache] No image found for exercise: barbell_bench_press_nb
+[ExerciseImageCache] Path not found: exercises/alternating_floor_press/media/0.jpg
+[ExerciseImageCache] Path not found: exercises/bag_training/media/0.jpg
+[ExerciseImageCache] Path not found: exercises/barbell_bench_press_nb/media/0.jpg
+[ExerciseImageCache] Path not found: exercises/arm_circles/media/0.jpg
+[ExerciseImageCache] Path not found: exercises/claps_over_the_head/media/0.jpg
+[ExerciseImageCache] Path not found: exercises/alternating_floor_press/thumbnail/0.webp
+[ExerciseImageCache] No image found for exercise: alternating_floor_press
+[ExerciseImageCache] Path not found: exercises/barbell_bench_press_nb/thumbnail/0.webp
+[ExerciseImageCache] No image found for exercise: barbell_bench_press_nb
+[ExerciseImageCache] Path not found: exercises/arm_circles/thumbnail/0.webp
+[ExerciseImageCache] No image found for exercise: arm_circles
+[ExerciseImageCache] Path not found: exercises/bag_training/thumbnail/0.webp
+[ExerciseImageCache] No image found for exercise: bag_training
+[ExerciseImageCache] Path not found: exercises/claps_over_the_head/thumbnail/0.webp
+[ExerciseImageCache] No image found for exercise: claps_over_the_head
