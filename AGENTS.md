@@ -31,3 +31,66 @@ Usage notes:
 <!-- SKILLS_TABLE_END -->
 
 </skills_system>
+
+---
+
+## Engineering Rules & Learnings
+
+> Extraídos de PR analysis — confirmados pelo autor em 2026-03-05.
+
+### [C001] Validar integridade referencial de seed data antes de commitar
+
+**Contexto:** PR #73 — 5 de 12 programas referenciavam 33 `workoutTemplateIds` inexistentes, causando 0 exercícios carregados silenciosamente (sem erro ou warning).
+
+**Regra:**
+> Antes de commitar seed data (JSON), cross-check todos os IDs referenciados contra os IDs existentes nos arquivos de origem. Um programa sem templates válidos não deve existir no seed.
+
+**Prevenção:** script de validação (ou assertion em unit test) que falhe se qualquer FK estiver quebrada. Exemplo mínimo:
+```swift
+// FitTodayTests — SeedIntegrityTests.swift
+func testAllProgramTemplatesExist() throws {
+    let programs = try loadPrograms()
+    let templateIds = Set(try loadWorkoutTemplates().map(\.id))
+    for program in programs {
+        for id in program.workoutTemplateIds {
+            XCTAssertTrue(templateIds.contains(id),
+                "Program '\(program.id)' references missing template '\(id)'")
+        }
+    }
+}
+```
+
+---
+
+### [C002] Alinhar tipos de contrato entre domínio local e Firestore no início da feature
+
+**Contexto:** PR #49 — `categoryIds` era `[Int]` no domain layer mas `String` no Firestore. Type mismatch retornava 0 exercícios silenciosamente, custando um refactor de 80+ arquivos.
+
+**Regra:**
+> Ao criar uma nova entidade que persiste no Firestore, definir e documentar o schema exato (tipos, field names) **antes** de implementar o domain layer. Validar com um teste de round-trip (encode → Firestore → decode) antes de construir a UI.
+
+**Template de documentação de schema (colocar no topo do DTO):**
+```swift
+/// Firestore schema: exercises/{id}
+/// Fields:
+///   - categoryIds: [String]   ← NUNCA [Int]
+///   - name: String
+///   - templateId: String
+struct ExerciseDTO: Codable { ... }
+```
+
+---
+
+### [C003] Migrations de design token devem ser totais, não parciais
+
+**Contexto:** PR #72 — tokens legados (neon/retro/glitch) se espalharam por 23 views antes de remoção em bulk. Fontes antigas (Orbitron, Rajdhani, Bungee) permaneceram no bundle mesmo após migração tipográfica.
+
+**Regra:**
+> Ao criar um novo design token que substitui um legado, remover ou marcar como `@available(*, deprecated)` o token antigo **na mesma PR**. Fontes registradas no `Info.plist` devem ser auditadas a cada mudança tipográfica.
+
+**Checklist de migração de token:**
+- [ ] Novo token criado em `DesignTokens.swift`
+- [ ] Token antigo removido ou marcado `deprecated`
+- [ ] Busca global pelo nome do token antigo — todas as referências migradas
+- [ ] Fontes no `Info.plist` batem com as realmente usadas no app
+- [ ] Build sem warnings de uso de símbolo deprecated
