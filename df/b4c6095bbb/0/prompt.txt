@@ -1,0 +1,607 @@
+Preciso equalizar o nome dos exercícios e os 25 programas existentes para tornar pelo menos 12 programas, está muito extenso e que contenha variações, iniciantes, intermediários e avançados, todos os nomes de exercícios devem ser iguais ao que estão no Storage e manter simples, exemplo de nome complexo e que provavelmente vá errar a imagem, chest strech on stability ball, isso com certeza vai gerar uma imagem incorreta para esse exercício. /feature-marker —interactive -prd-new-programas-area
+
+---
+
+Mesmo após ter feito o upload via cms e ter recebido o feedback que estava correto, continuo tomando o erro, 
+[ExerciseImageCache] Path not found: exercises/barbell_bench_press_nb/media/0.jpg
+[ExerciseImageCache] Path not found: exercises/barbell_bench_press_nb/thumbnail/0.webp
+[ExerciseImageCache] No image found for exercise: barbell_bench_press_nb
+[ExerciseImageCache] Path not found: exercises/barbell_bench_press_nb/media/1.jpg
+[ExerciseImageCache] Path not found: exercises/barbell_bench_press_nb/thumbnail/1.webp
+[ExerciseImageCache] No image found for exercise: barbell_bench_press_nb
+[ExerciseImageCache] Path not found: exercises/alternating_floor_press/media/0.jpg
+[ExerciseImageCache] Path not found: exercises/bag_training/media/0.jpg
+[ExerciseImageCache] Path not found: exercises/barbell_bench_press_nb/media/0.jpg
+[ExerciseImageCache] Path not found: exercises/arm_circles/media/0.jpg
+[ExerciseImageCache] Path not found: exercises/claps_over_the_head/media/0.jpg
+[ExerciseImageCache] Path not found: exercises/alternating_floor_press/thumbnail/0.webp
+[ExerciseImageCache] No image found for exercise: alternating_floor_press
+[ExerciseImageCache] Path not found: exercises/barbell_bench_press_nb/thumbnail/0.webp
+[ExerciseImageCache] No image found for exercise: barbell_bench_press_nb
+[ExerciseImageCache] Path not found: exercises/arm_circles/thumbnail/0.webp
+[ExerciseImageCache] No image found for exercise: arm_circles
+[ExerciseImageCache] Path not found: exercises/bag_training/thumbnail/0.webp
+[ExerciseImageCache] No image found for exercise: bag_training
+[ExerciseImageCache] Path not found: exercises/claps_over_the_head/thumbnail/0.webp
+[ExerciseImageCache] No image found for exercise: claps_over_the_head
+
+---
+
+Faça o commit de tudo que está em staged
+
+---
+
+This session is being continued from a previous conversation that ran out of context. The summary below covers the earlier portion of the conversation.
+
+Summary:
+1. Primary Request and Intent:
+   - **Main Request**: Consolidate 26 workout programs to ~12 programs with beginner/intermediate/advanced variations, standardize exercise names to match Firebase Storage IDs (keep simple snake_case English names), and create a new PRD (`prd-new-programas-area`) using the feature-marker workflow.
+   - **Secondary Issue (mid-session)**: Fix exercise image loading errors where `[ExerciseImageCache] Path not found: exercises/barbell_bench_press_nb/media/0.jpg` appeared in logs even after images were uploaded via CMS.
+   - **Final Request**: Commit all staged changes.
+
+2. Key Technical Concepts:
+   - **Firebase Storage path structure**: `exercises/{exerciseId}/media/{imageIndex}.jpg` (primary) and `exercises/{exerciseId}/thumbnail/{imageIndex}.webp` (fallback)
+   - **Firebase Storage Rules**: Wildcard matching — `{fileName}` only matches one path segment, `{allPaths=**}` matches recursively
+   - **ExerciseImageCache** (`actor`): Three-tier cache — memory (NSCache) → disk (Caches/exercise_images/) → Firebase Storage
+   - **Exercise IDs**: Firestore `doc.documentID` is used directly as Storage folder name; IDs from Wger import have suffixes like `_nb`
+   - **ProgramCategory inference**: Computed property in `ProgramModels.swift` uses `lowerId.contains()` to infer category from program ID
+   - **LibraryWorkoutsSeed.json**: 16 workout templates (11 original + 5 new) referenced by programs via `workout_template_ids`
+   - **Hero images**: Only 12 exist in Assets.xcassets (`program_fullbody_01–04`, `program_recovery_01–04`, `program_strength_01–04`)
+
+3. Files and Code Sections:
+
+   - **`/Users/viniciuscarvalho/Documents/FitToday/FitToday/FitToday/Data/Resources/ProgramsSeed.json`**
+     - Replaced 26 programs with exactly 12, each using only existing hero images
+     - 12 programs: PPL (3 levels), Full Body (2), Upper/Lower (2), Home (2), Conditioning (3)
+     - All reference only existing or newly-created `lib_*` templates
+
+   - **`/Users/viniciuscarvalho/Documents/FitToday/FitToday/FitToday/Data/Resources/LibraryWorkoutsSeed.json`**
+     - Added 5 new templates at end of file:
+       - `lib_fullbody_beginner_gym` (barbell_squat, barbell_bench_press, barbell_row, leg_press, lat_pulldown, plank)
+       - `lib_upper_beginner_gym` (chest_press_machine, lat_pulldown, seated_dumbbell_shoulder_press, machine_curl, tricep_rope_pushdown, face_pull)
+       - `lib_lower_beginner_gym` (leg_press, leg_curl_lying, leg_extension, goblet_squat, standing_calf_raise, glute_bridge)
+       - `lib_upper_strength_gym` (barbell_bench_press, barbell_row, incline_dumbbell_press, seated_cable_row, lateral_raise, barbell_curl)
+       - `lib_lower_strength_gym` (barbell_squat, romanian_deadlift, hack_squat, leg_curl_lying, leg_extension, standing_calf_raise)
+
+   - **`/Users/viniciuscarvalho/Documents/FitToday/FitToday/FitToday/Data/Resources/WorkoutBlocksSeed.json`**
+     - Single fix: replaced opaque Firestore ID `41n2hZZdH9uyYFGZ` with descriptive `lever_pec_deck_fly`
+
+   - **`/Users/viniciuscarvalho/Documents/FitToday/FitToday/FitToday/Domain/Entities/ProgramModels.swift`** (~L173)
+     - Added `lowerId.contains("conditioning")` and `lowerName.contains("condicionamento")` to `.fatLoss` category check:
+     ```swift
+     if lowerId.contains("weightloss") || lowerId.contains("hiit") ||
+        lowerId.contains("conditioning") ||
+        lowerName.contains("hiit") || lowerName.contains("queima") ||
+        lowerName.contains("metabolic") || lowerName.contains("fat burn") ||
+        lowerName.contains("condicionamento") {
+         return .fatLoss
+     }
+     ```
+
+   - **`/Users/viniciuscarvalho/Documents/FitToday/storage.rules`**
+     - **Root cause fix for image loading errors**
+     - Old (broken):
+     ```
+     match /exercises/{exerciseId}/{fileName} {
+       allow read: if isAuthenticated();
+     ```
+     - New (fixed):
+     ```
+     match /exercises/{exerciseId}/{allPaths=**} {
+       allow read: if isAuthenticated();
+       allow write: if false;
+     }
+     ```
+     - The single-segment wildcard `{fileName}` only matched `exercises/{id}/file.jpg` but NOT `exercises/{id}/media/0.jpg` (3 segments). The recursive `{allPaths=**}` covers all sub-paths.
+
+   - **`/Users/viniciuscarvalho/Documents/FitToday/tasks/prd-new-programas-area/prd.md`** (NEW)
+     - PRD documenting the consolidation requirements, user stories, technical requirements, success criteria, dependencies
+
+   - **`/Users/viniciuscarvalho/Documents/FitToday/tasks/prd-new-programas-area/techspec.md`** (NEW)
+     - Technical spec with files to modify, JSON schema, risk assessment, testing strategy
+
+   - **`/Users/viniciuscarvalho/Documents/FitToday/tasks/prd-new-programas-area/tasks.md`** (NEW)
+     - 5 tasks tracking the implementation work
+
+   - **`/Users/viniciuscarvalho/Documents/FitToday/FitToday/FitToday/Data/Services/ImageCache/ExerciseImageCache.swift`** (READ ONLY)
+     - Confirmed path structure: `exercises/\(exerciseId)/media/\(imageIndex).jpg`
+     - `actor` with memory + disk + Firebase Storage three-tier cache
+     - Uses `doc.documentID` as exerciseId directly
+
+   - **`/Users/viniciuscarvalho/Documents/FitToday/FitToday/FitToday/Data/Services/Firebase/FirestoreExerciseService.swift`** (READ ONLY)
+     - Confirmed `id: doc.documentID` — Firestore document ID becomes exercise ID
+     - Exercises imported from Wger have IDs like `barbell_bench_press_nb`, `arm_circles`, etc.
+
+4. Errors and Fixes:
+   - **Exercise images not loading** (`[ExerciseImageCache] Path not found: exercises/barbell_bench_press_nb/media/0.jpg`):
+     - **Cause**: `storage.rules` used `match /exercises/{exerciseId}/{fileName}` which only matches 2-segment paths. The app fetches `exercises/{id}/media/0.jpg` which has 3 segments (`media/` is a subdirectory).
+     - **Fix**: Changed to `match /exercises/{exerciseId}/{allPaths=**}` for recursive matching
+     - **Deploy needed**: `firebase deploy --only storage`
+   - **Missing hero images**: 14 of 26 original hero images didn't exist in Assets.xcassets
+     - **Fix**: Reduced to exactly 12 programs using only the 12 existing asset names
+   - **Missing workout templates**: 33 of 44 original `lib_*` template IDs were referenced but didn't exist
+     - **Fix**: Created 5 new templates; reduced programs to only reference existing templates
+
+5. Problem Solving:
+   - **Program consolidation**: 26 → 12 programs with full coverage (beginner/intermediate/advanced, gym/home/bodyweight, strength/conditioning)
+   - **Template gap**: Went from 11 existing to 16 total templates (added 5 new ones)
+   - **Asset gap**: All 12 programs now map exactly to the 12 available hero images
+   - **Storage rules bug**: Found and fixed the critical path matching issue that was blocking all exercise images in `media/` subfolders
+   - **Category inference**: `conditioning_*` program IDs now correctly map to `.fatLoss` category for filter chips
+
+6. All User Messages:
+   - "Preciso equalizar o nome dos exercícios e os 25 programas existentes para tornar pelo menos 12 programas, está muito extenso e que contenha variações, iniciantes, intermediários e avançados, todos os nomes de exercícios devem ser iguais ao que estão no Storage e manter simples, exemplo de nome complexo e que provavelmente vá errar a imagem, chest strech on stability ball, isso com certeza vai gerar uma imagem incorreta para esse exercício. /feature-marker —interactive -prd-new-programas-area"
+   - (Answered questions): Concordo com a distribuição PPL(3)+FullBody(2)+Upper/Lower(2)+Casa(2)+Condicionamento(3), manter nomes em inglês, criar novo PRD separado
+   - "Mesmo após ter feito o upload via cms e ter recebido o feedback que estava correto, continuo tomando o erro, [ExerciseImageCache] Path not found: exercises/barbell_bench_press_nb/media/0.jpg ..." (pasted full error log)
+   - (Answered questions): Images are at same Firestore IDs in Storage, exercises were imported from Wger
+   - "Faça o commit de tudo que está em staged"
+
+7. Pending Tasks:
+   - **Commit all staged changes** — user's most recent explicit request
+   - **Deploy storage rules** — must run `firebase deploy --only storage` for the Storage rules fix to take effect in production
+
+8. Current Work:
+   The last completed work was fixing `storage.rules` to use `{allPaths=**}` recursive wildcard instead of `{fileName}` single-segment wildcard, resolving the exercise image loading failure. The fix was applied to `/Users/viniciuscarvalho/Documents/FitToday/storage.rules`.
+
+   The user then requested: **"Faça o commit de tudo que está em staged"**
+
+9. Optional Next Step:
+   Commit all staged changes. The user explicitly said: "Faça o commit de tudo que está em staged"
+   
+   This requires running:
+   ```bash
+   git -C /Users/viniciuscarvalho/Documents/FitToday add -A
+   git -C /Users/viniciuscarvalho/Documents/FitToday commit -m "feat: consolidate 26 programs to 12, fix storage rules for exercise images"
+   ```
+   The staged files include: `ProgramsSeed.json`, `LibraryWorkoutsSeed.json`, `WorkoutBlocksSeed.json`, `ProgramModels.swift`, `storage.rules`, and the new `tasks/prd-new-programas-area/` directory.
+
+If you need specific details from before compaction (like exact code snippets, error messages, or content you generated), read the full transcript at: /Users/viniciuscarvalho/.REDACTED.jsonl
+Continue the conversation from where it left off without asking the user any further questions. Resume directly — do not acknowledge the summary, do not recap what was happening, do not preface with "I'll continue" or similar. Pick up the last task as if the break never happened.
+
+---
+
+Execute a mudança visual da aplicação seguindo a issue e todos os seus critérios de aceite, https://github.com/Viniciuscarvalho/FitToday/issues/65 faça um /feature-marker prd-new-design-system
+
+---
+
+Base directory for this skill: /Users/viniciuscarvalho/.claude/skills/feature-marker
+
+# feature-marker
+
+Automates feature development with a 5-phase workflow:
+
+1. **Inputs Gate** - Validates `prd.md`, `techspec.md`, `tasks.md` exist; generates them via `~/.claude/commands/` if missing.
+2. **Analysis & Planning** - Auto-installs product-manager skill if missing; reads docs, creates implementation plan.
+3. **Implementation** - Executes tasks with progress tracking.
+4. **Tests & Validation** - Runs platform-appropriate test suites and build validation.
+   Auto-detects: Swift/Xcode (+ XcodeBuildMCP simulator), Node.js, Rust, Python, Go.
+5. **Commit & PR** - Auto-installs enhanced commit command if missing; commits changes using professional workflow and creates PR (auto-detects git platform).
+
+## Platform Support
+
+feature-marker works with any tech stack:
+
+- 🍎 **iOS/Swift** — `swift test` + SwiftLint + XcodeBuildMCP simulator validation
+- 🟨 **Node.js/TypeScript** — auto-detects npm/yarn/pnpm/bun + Jest/Vitest
+- 🦀 **Rust** — `cargo test` + `cargo clippy`
+- 🐍 **Python** — `pytest` + ruff/flake8
+- 🐹 **Go** — `go test` + `go vet`
+
+iOS/Xcode projects get additional simulator validation via XcodeBuildMCP (optional, non-blocking).
+The platform is auto-detected once at workflow start and cached — no configuration required.
+
+## Usage
+
+```
+/feature-marker <feature-slug>
+```
+
+**Example**:
+```
+/feature-marker prd-user-authentication
+```
+
+### Interactive Mode
+
+```
+/feature-marker --interactive <feature-slug>
+```
+
+Opens a menu to select execution mode:
+- **Full Workflow** - Default, generates missing files and executes all phases
+- **Tasks Only** - Uses existing files, skips generation phase
+- **Ralph Loop** - Autonomous continuous execution with ralph-wiggum
+- **Spec-Driven** - Multi-agent review + worktree isolation via spec-workflow
+- **Test Only** - Runs tests phase exclusively using platform-appropriate test guidance (Swift Testing for iOS, Jest/Vitest for Node.js, etc.)
+
+Works both in terminal (TTY menu) and Claude CLI (AskUserQuestion prompt).
+
+**Direct mode selection** (skip menu):
+```
+/feature-marker --mode full <feature-slug>
+/feature-marker --mode tasks-only <feature-slug>
+/feature-marker --mode ralph-loop <feature-slug>
+/feature-marker --mode spec-driven <feature-slug>
+/feature-marker --mode test-only <feature-slug>
+```
+
+## Prerequisites
+
+### Commands
+
+The following commands must be available in `~/.claude/commands/`:
+
+- `create-prd.md` - Creates a new PRD from requirements discussion
+- `generate-spec.md` - Generates technical specification from PRD
+- `generate-tasks.md` - Breaks down feature spec into implementable tasks
+
+### Templates
+
+The commands above read templates from `~/.claude/docs/specs/` to generate structured documents.
+
+Required templates:
+- `~/.claude/docs/specs/prd-template.md` - Product Requirements Document template
+- `~/.claude/docs/specs/techspec-template.md` - Technical Specification template
+- `~/.claude/docs/specs/tasks-template.md` - Tasks breakdown template
+
+**Template Format**: Templates should be markdown files with placeholders and structure that commands will use to generate feature-specific documents.
+
+**Setup**: Ensure these templates exist before running feature-marker:
+```bash
+ls ~/.claude/docs/specs/
+# Should show: prd-template.md, techspec-template.md, tasks-template.md
+```
+
+**Note**: If templates are missing, commands in `~/.claude/commands/` will fail to generate files.
+
+### Project Structure
+
+**Feature Documents** (generated in project):
+```
+./tasks/
+└── prd-{feature-name}/
+    ├── prd.md            ← Generated from ~/.claude/docs/specs/prd-template.md
+    ├── techspec.md       ← Generated from ~/.claude/docs/specs/techspec-template.md
+    ├── tasks.md          ← Generated from ~/.claude/docs/specs/tasks-template.md
+    └── {num}_task.md     ← Individual task files (optional)
+```
+
+**State Directory** (checkpoint & progress):
+```
+.claude/feature-state/{feature-name}/
+├── checkpoint.json
+├── analysis.md
+├── plan.md
+├── progress.md
+├── test-results.md
+└── pr-url.txt
+```
+
+**User Configuration** (required setup):
+```
+~/.claude/
+├── commands/           ← Commands that generate files
+│   ├── create-prd.md
+│   ├── generate-spec.md
+│   └── generate-tasks.md
+└── docs/
+    └── specs/          ← Templates used by commands
+        ├── prd-template.md
+        ├── techspec-template.md
+        └── tasks-template.md
+```
+
+## Behavior
+
+When invoked, the skill:
+
+1. **Validates inputs** - Checks if `./tasks/prd-{feature-slug}/` contains required files
+   - If all files exist → Skips to step 3
+   - If any file is missing → Proceeds to step 2
+2. **Generates ONLY missing files** - Existing files are never overwritten:
+   - Missing PRD → `/create-prd`
+   - Missing Tech Spec → `/generate-spec {feature-slug}`
+   - Missing Tasks → `/generate-tasks {feature-slug}`
+3. **Auto-installs missing dependencies**:
+   - **Phase 1**: Checks for `product-manager` skill
+     - If missing: Installs via `npx skills add https://github.com/aj-geddes/claude-code-bmad-skills --skill product-manager`
+     - If user already has it: Uses user's version
+     - If installation fails: Continues without it (non-blocking)
+   - **Phase 4**: Checks for `/commit` command
+     - If missing: Copies from bundled `resources/commit.md` to `~/.claude/commands/commit.md`
+     - If user already has it: Uses user's version
+     - If installation fails: Falls back to standard commit workflow
+4. **Executes 5-phase workflow** via the `feature-marker` agent
+5. **Persists state** - Saves checkpoints after each phase/task for resume capability
+
+**Important**: The workflow is smart about file detection and dependencies:
+- ✅ Files/skills/commands exist → Uses them directly, no regeneration or reinstallation
+- ⚠️ Missing → Installs/generates only what's needed
+- 🔒 Never overwrites existing content
+- 👤 **User's versions always have priority** over bundled/auto-installed versions
+
+## Auto-Installed Dependencies
+
+Feature-marker automatically installs missing dependencies to enhance the workflow:
+
+### Product Manager Skill (Phase 1)
+
+**What it does**: Provides advanced PRD analysis, requirements validation, and product management capabilities.
+
+**Installation**:
+- **Check**: Phase 1 checks for `~/.claude/skills/product-manager/SKILL.md`
+- **Install**: If missing and `npx` available, runs:
+  ```bash
+  npx skills add https://github.com/aj-geddes/claude-code-bmad-skills --skill product-manager
+  ```
+- **Priority**: Uses user's existing skill if already installed
+- **Fallback**: Continues without it if installation fails (non-blocking)
+
+**Benefits**:
+- Enhanced requirement analysis
+- Better PRD validation
+- Improved feature planning
+
+### Enhanced Commit Command (Phase 4)
+
+**What it does**: Professional commit workflow with validation, splitting, and conventional commit format.
+
+**Installation**:
+- **Check**: Phase 4 checks for `~/.claude/commands/commit.md`
+- **Install**: If missing, copies from bundled `resources/commit.md` to `~/.claude/commands/commit.md`
+- **Priority**: Uses user's existing command if already installed
+- **Fallback**: Uses standard commit workflow if installation fails
+
+**Features**:
+- Pre-commit validation (lint, build, docs)
+- Intelligent commit splitting
+- Conventional commit format with emojis
+- Smart file staging
+- No Co-Authored-By footer (as per command design)
+
+**Example Output**:
+```bash
+✨ feat: add user authentication system
+🐛 fix: resolve memory leak in rendering process
+📝 docs: update API documentation
+♻️ refactor: simplify error handling logic
+```
+
+### Manual Installation
+
+If auto-installation fails, you can install manually:
+
+**Product Manager Skill**:
+```bash
+npx skills add https://github.com/aj-geddes/claude-code-bmad-skills --skill product-manager
+```
+
+**Commit Command**:
+```bash
+cp ~/.claude/skills/feature-marker/resources/commit.md ~/.claude/commands/commit.md
+```
+
+## Template Setup Guide
+
+### Template Directory Structure
+
+Commands in `~/.claude/commands/` read templates from a centralized location:
+
+```
+~/.claude/docs/specs/
+├── prd-template.md          # Product Requirements Document template
+├── techspec-template.md     # Technical Specification template
+└── tasks-template.md        # Task breakdown template
+```
+
+### Why Templates in ~/.claude/docs/specs?
+
+- **Centralized**: All projects share the same templates
+- **User-controlled**: Users can customize their own templates
+- **Portable**: Commands reference templates via standard path
+- **Separation**: Templates are not in project repositories
+
+### Template Content
+
+Each template should be a markdown file with:
+- Clear section structure
+- Placeholder text or variables
+- Examples and formatting guidelines
+
+Commands read these templates and populate them with feature-specific content.
+
+### Setup Verification
+
+To verify your setup is complete:
+
+```bash
+# Check templates exist
+ls -l ~/.claude/docs/specs/
+
+# Check commands exist
+ls -l ~/.claude/commands/
+
+# Test feature-marker
+/feature-marker --interactive prd-test-feature
+```
+
+If templates are missing, create them in `~/.claude/docs/specs/` before running feature-marker.
+
+## Plan Mode Integration
+
+When the user has used Claude's built-in plan mode before invoking feature-marker, the agent automatically:
+
+1. **Detects the most recent plan** from `~/.claude/plans/` (sorted by modification time)
+2. **Reads project conventions** from `./CLAUDE.md` at the project root (if present)
+3. **Uses both as rich context** to enhance PRD generation and reduce redundant clarification questions
+
+This is automatic and requires no additional flags or options. If no plan or CLAUDE.md exists, the workflow proceeds normally.
+
+**Recommended flow**:
+```
+1. Use Claude plan mode to explore the codebase and think through the feature
+2. Exit plan mode
+3. Run /feature-marker --interactive <feature-slug>
+4. Select "Full Workflow"
+5. The plan content automatically enriches PRD generation
+```
+
+## Checkpoint & Resume
+
+If interrupted (Ctrl+C, session crash, etc.), re-invoke with the same feature slug to resume:
+
+```
+/feature-marker prd-user-authentication
+```
+
+The skill will:
+- Detect existing checkpoint
+- Show current progress (phase, task index)
+- Ask if you want to resume or start fresh
+
+## Platform Detection
+
+In Phase 4, the skill auto-detects your git platform and selects the appropriate PR skill:
+
+| Platform | Detection | PR Skill |
+|----------|-----------|----------|
+| GitHub | `github.com` in remote URL | `checking-pr` |
+| Azure DevOps | `dev.azure.com` in remote URL | `azure-pr` |
+| GitLab | `gitlab.com` in remote URL | `checking-pr` |
+| Bitbucket | `bitbucket.org` in remote URL | `checking-pr` |
+| Other | (fallback) | `checking-pr` |
+
+## Configuration
+
+Override default behavior with `.feature-marker.json` in your repository root:
+
+```json
+{
+  "pr_skill": "custom-pr-skill",
+  "skip_pr": false,
+  "test_command": "npm run test:ci",
+  "docs_path": "./tasks",
+  "state_path": ".claude/feature-state"
+}
+```
+
+## Error Handling
+
+| Scenario | Behavior |
+|----------|----------|
+| Missing files | Auto-generate via commands |
+| No git repo | Fail early with helpful message |
+| No tests | Skip Phase 3 with warning |
+| Test failures | Report issues, allow fix, offer retry |
+| Unknown platform | Fallback to `checking-pr` |
+| PR skill unavailable | Commit only, log manual instructions |
+
+## Example Sessions
+
+### Example 1: All Files Exist (No Generation Needed)
+```
+> /feature-marker prd-user-authentication
+
+Checking for existing checkpoint...
+No checkpoint found. Starting new workflow.
+
+Phase 0: Inputs Gate
+✓ prd.md exists
+✓ techspec.md exists
+✓ tasks.md exists
+✅ All files present. Skipping generation.
+
+Phase 1: Analysis & Planning
+Reading existing documents...
+Creating implementation plan...
+Checkpoint saved.
+
+Phase 2: Implementation
+[1/6] Create User entity... ✓
+[2/6] Add authentication service... ✓
+...
+```
+
+### Example 2: Partial Files (Generates Only Missing)
+```
+> /feature-marker prd-payment-integration
+
+Checking for existing checkpoint...
+No checkpoint found. Starting new workflow.
+
+Phase 0: Inputs Gate
+✓ prd.md exists
+✗ techspec.md missing → Generating via /generate-spec...
+✓ tasks.md exists
+
+✅ Generated missing file. All inputs ready.
+
+Phase 1: Analysis & Planning
+Reading documents...
+Creating implementation plan...
+Checkpoint saved.
+...
+```
+
+### Example 3: Complete Workflow with Auto-Install
+```
+> /feature-marker prd-new-feature
+
+Phase 0: Inputs Gate
+✗ prd.md missing → Generating via /create-prd...
+✗ techspec.md missing → Generating via /generate-spec...
+✗ tasks.md missing → Generating via /generate-tasks...
+
+Phase 1: Analysis & Planning
+⚙️  Installing product-manager skill...
+✓ product-manager skill installed successfully
+Reading PRD, Tech Spec, and Tasks...
+Creating implementation plan...
+Checkpoint saved.
+
+Phase 2: Implementation
+[1/6] Create User entity... ✓
+[2/6] Add authentication service... ✓
+[3/6] Implement login endpoint... ✓
+[4/6] Add JWT token handling... ✓
+[5/6] Create logout endpoint... ✓
+[6/6] Add session management... ✓
+Checkpoint saved.
+
+Phase 3: Tests & Validation
+✅ Platform detected: Node.js / Next.js (pnpm)
+Running: jest --findRelatedTests src/api/users.ts
+✅ 14 passed, 0 failed
+Lint: pnpm run lint ✅
+Checkpoint saved.
+
+Phase 4: Commit & PR
+⚙️  Installing commit command...
+✓ commit command installed successfully
+Using enhanced commit workflow (/commit)...
+✨ feat: implement user authentication system
+Detected platform: GitHub
+Creating PR via /checking-pr...
+
+✓ Feature complete!
+PR URL: https://github.com/user/repo/pull/42
+```
+
+### Example 4: Using Existing User Tools
+```
+> /feature-marker prd-payment-feature
+
+Phase 0: Inputs Gate
+✓ All inputs validated.
+
+Phase 1: Analysis & Planning
+✓ product-manager skill already installed (using user's version)
+...
+
+Phase 4: Commit & PR
+✓ commit command already exists (using user's version)
+...
+```
+
+
+ARGUMENTS: prd-new-design-system
