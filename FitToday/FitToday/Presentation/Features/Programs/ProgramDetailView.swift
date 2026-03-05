@@ -357,8 +357,8 @@ struct ProgramDetailView: View {
         switch goalTag {
         case .strength: return [.blue, .purple]
         case .conditioning: return [.orange, .red]
-        case .aerobic: return [.green, .teal]
-        case .core: return [.cyan, .mint]
+        case .hypertrophy: return [.green, .teal]
+        case .wellness: return [.cyan, .mint]
         case .endurance: return [.indigo, .blue]
         }
     }

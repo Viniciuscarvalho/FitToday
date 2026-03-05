@@ -15,7 +15,7 @@ enum ProgramFilter: String, CaseIterable, Identifiable {
     case all
     case strength
     case conditioning
-    case aerobic
+    case hypertrophy
     case endurance
     case wellness
 
@@ -26,7 +26,7 @@ enum ProgramFilter: String, CaseIterable, Identifiable {
         case .all: return "programs.category.all".localized
         case .strength: return "programs.category.strength".localized
         case .conditioning: return "programs.category.conditioning".localized
-        case .aerobic: return "programs.category.aerobic".localized
+        case .hypertrophy: return "programs.goal.hypertrophy".localized
         case .endurance: return "programs.category.endurance".localized
         case .wellness: return "programs.category.wellness".localized
         }
@@ -37,7 +37,7 @@ enum ProgramFilter: String, CaseIterable, Identifiable {
         case .all: return "square.grid.2x2"
         case .strength: return "dumbbell.fill"
         case .conditioning: return "flame.fill"
-        case .aerobic: return "heart.fill"
+        case .hypertrophy: return "figure.strengthtraining.traditional"
         case .endurance: return "figure.run"
         case .wellness: return "leaf.fill"
         }
@@ -48,7 +48,7 @@ enum ProgramFilter: String, CaseIterable, Identifiable {
         case .all: return FitTodayColor.gradientPrimary
         case .strength: return FitTodayColor.gradientStrength
         case .conditioning: return FitTodayColor.gradientConditioning
-        case .aerobic: return FitTodayColor.gradientAerobic
+        case .hypertrophy: return FitTodayColor.gradientAerobic
         case .endurance: return FitTodayColor.gradientEndurance
         case .wellness: return FitTodayColor.gradientWellness
         }
@@ -59,7 +59,7 @@ enum ProgramFilter: String, CaseIterable, Identifiable {
         case .all: return FitTodayColor.brandPrimary
         case .strength: return Color(hex: "#7C3AED")
         case .conditioning: return Color(hex: "#F97316")
-        case .aerobic: return Color(hex: "#EC4899")
+        case .hypertrophy: return Color(hex: "#EC4899")
         case .endurance: return Color(hex: "#3B82F6")
         case .wellness: return Color(hex: "#22C55E")
         }
@@ -196,15 +196,14 @@ struct ProgramsView: View {
     }
 
     private func filterForProgram(_ program: Program) -> ProgramFilter {
-        // Map program goal to filter
         switch program.goalTag {
         case .strength:
             return .strength
         case .conditioning:
             return .conditioning
-        case .aerobic:
-            return .aerobic
-        case .core:
+        case .hypertrophy:
+            return .hypertrophy
+        case .wellness:
             return .wellness
         case .endurance:
             return .endurance
@@ -358,8 +357,8 @@ struct ProgramFilterCard: View {
         switch goalTag {
         case .strength: return [.blue, .purple]
         case .conditioning: return [.orange, .red]
-        case .aerobic: return [.green, .teal]
-        case .core: return [.cyan, .mint]
+        case .hypertrophy: return [.green, .teal]
+        case .wellness: return [.cyan, .mint]
         case .endurance: return [.indigo, .blue]
         }
     }

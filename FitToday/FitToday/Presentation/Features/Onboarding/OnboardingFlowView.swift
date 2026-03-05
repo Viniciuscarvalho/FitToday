@@ -22,10 +22,13 @@ struct OnboardingFlowView: View {
 
     private var activeSteps: [SetupStep] { SetupStep.allCases }
 
+    private let profileRepository: UserProfileRepository?
+
     init(resolver: Resolver, isEditing: Bool = false, onFinished: @escaping () -> Void) {
         let repository = resolver.resolve(UserProfileRepository.self)!
         let useCase = CreateOrUpdateProfileUseCase(repository: repository)
         viewModel = OnboardingFlowViewModel(createProfileUseCase: useCase)
+        self.profileRepository = repository
         self.onFinished = onFinished
         self.isEditing = isEditing
     }
@@ -46,6 +49,11 @@ struct OnboardingFlowView: View {
         })
         .onChange(of: viewModel.errorMessage) { _, newValue in
             showError = newValue != nil
+        }
+        .task {
+            if isEditing, let profile = try? await profileRepository?.loadProfile() {
+                viewModel.loadFromProfile(profile)
+            }
         }
     }
 

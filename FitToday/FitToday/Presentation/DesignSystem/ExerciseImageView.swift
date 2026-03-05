@@ -24,6 +24,8 @@ struct ExerciseImageView: View {
                 Image(uiImage: image)
                     .resizable()
                     .aspectRatio(contentMode: .fill)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .clipped()
             } else if isLoading {
                 ZStack {
                     RoundedRectangle(cornerRadius: cornerRadius)

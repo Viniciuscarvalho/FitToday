@@ -53,22 +53,32 @@ struct ProgramRecommender: ProgramRecommending {
         // Score para cada programa
         let scored = programs.map { program -> (Program, Int) in
             var score = 0
-            
+
             // +10 pontos se o objetivo combina
             if program.goalTag == preferredTag {
                 score += 10
             }
-            
+
             // -5 pontos se treinou ontem com mesmo tipo (evitar repetir)
             if trainedYesterday, let yesterdayTag = yesterdayGoalTag, program.goalTag == yesterdayTag {
                 score -= 5
             }
-            
-            // +3 pontos se nível combina
+
+            // +5 pontos se nível combina
             if program.level == mapLevelToProgram(profile.level) {
+                score += 5
+            }
+
+            // +4 pontos se equipamento disponível combina
+            if structureMatchesProgram(profile.availableStructure, program) {
+                score += 4
+            }
+
+            // +3 pontos se método preferido combina
+            if methodMatchesProgram(profile.preferredMethod, program) {
                 score += 3
             }
-            
+
             return (program, score)
         }
         
@@ -194,11 +204,11 @@ struct ProgramRecommender: ProgramRecommending {
     private func convertFocusToProgramTag(_ focus: DailyFocus) -> ProgramGoalTag {
         switch focus {
         case .cardio:
-            return .aerobic
+            return .conditioning
         case .upper, .lower, .fullBody:
             return .strength
         case .core:
-            return .core
+            return .wellness
         case .surprise:
             return .conditioning
         }
@@ -230,13 +240,42 @@ struct ProgramRecommender: ProgramRecommending {
         }
     }
     
+    private func structureMatchesProgram(_ structure: TrainingStructure, _ program: Program) -> Bool {
+        let programId = program.id.lowercased()
+        switch structure {
+        case .fullGym:
+            return programId.contains("gym")
+        case .basicGym:
+            return programId.contains("gym") || programId.contains("dumbbell")
+        case .homeDumbbells:
+            return programId.contains("dumbbell") || programId.contains("home")
+        case .bodyweight:
+            return programId.contains("bodyweight") || programId.contains("home")
+        }
+    }
+
+    private func methodMatchesProgram(_ method: TrainingMethod, _ program: Program) -> Bool {
+        switch method {
+        case .traditional:
+            return program.goalTag == .strength || program.goalTag == .hypertrophy
+        case .circuit:
+            return program.goalTag == .conditioning
+        case .hiit:
+            return program.goalTag == .conditioning || program.goalTag == .endurance
+        case .mixed:
+            return true
+        }
+    }
+
     private func mapGoalToTag(_ goal: FitnessGoal) -> ProgramGoalTag {
         switch goal {
+        case .hypertrophy:
+            return .hypertrophy
         case .weightLoss:
-            return .aerobic
+            return .conditioning
         case .conditioning:
             return .conditioning
-        case .hypertrophy, .performance:
+        case .performance:
             return .strength
         case .endurance:
             return .endurance

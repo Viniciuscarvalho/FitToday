@@ -81,9 +81,9 @@ struct RecommendedProgramsSection: View {
             return FitTodayColor.gradientPrimary
         case .conditioning:
             return LinearGradient(colors: [.orange, .red.opacity(0.8)], startPoint: .topLeading, endPoint: .bottomTrailing)
-        case .aerobic:
+        case .hypertrophy:
             return LinearGradient(colors: [.cyan, .blue.opacity(0.8)], startPoint: .topLeading, endPoint: .bottomTrailing)
-        case .core:
+        case .wellness:
             return LinearGradient(colors: [.green, .teal.opacity(0.8)], startPoint: .topLeading, endPoint: .bottomTrailing)
         case .endurance:
             return LinearGradient(colors: [.purple, .indigo.opacity(0.8)], startPoint: .topLeading, endPoint: .bottomTrailing)

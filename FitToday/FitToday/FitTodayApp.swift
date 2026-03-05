@@ -16,6 +16,7 @@ struct FitTodayApp: App {
     // 💡 Learn: Com @Observable, use @State em vez de @StateObject
     @State private var sessionStore: WorkoutSessionStore
     @AppStorage(AppStorageKeys.hasSeenWelcome) private var hasSeenWelcome = false
+    @AppStorage(AppStorageKeys.hasCompletedOnboarding) private var hasCompletedOnboarding = false
     @AppStorage(AppStorageKeys.themePreference) private var themePreferenceRaw: String = ThemePreference.dark.rawValue
     @Environment(\.scenePhase) private var scenePhase
 
@@ -57,10 +58,20 @@ struct FitTodayApp: App {
     var body: some Scene {
         WindowGroup {
             Group {
-                if hasSeenWelcome {
-                    TabRootView()
-                } else {
+                if !hasSeenWelcome {
                     WelcomeOnboardingView()
+                } else if !hasCompletedOnboarding {
+                    NavigationStack {
+                        OnboardingFlowView(
+                            resolver: appContainer.container,
+                            isEditing: false,
+                            onFinished: {
+                                hasCompletedOnboarding = true
+                            }
+                        )
+                    }
+                } else {
+                    TabRootView()
                 }
             }
             // 💡 Learn: Com @Observable, use .environment() em vez de .environmentObject()
