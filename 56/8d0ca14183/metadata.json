@@ -1,0 +1,50 @@
+{
+  "cli_version": "0.4.4",
+  "checkpoint_id": "568d0ca14183",
+  "strategy": "manual-commit",
+  "branch": "fix/consolidate-12-programs",
+  "checkpoints_count": 2,
+  "files_touched": [
+    ".claude/settings.local.json",
+    "Config/AppInfo.plist",
+    "FitToday/FitToday/Data/Resources/LibraryWorkoutsSeed.json",
+    "FitToday/FitToday/Data/Resources/ProgramsSeed.json",
+    "FitToday/FitToday/Data/Resources/WorkoutBlocksSeed.json",
+    "FitToday/FitToday/Domain/Entities/ProgramModels.swift",
+    "FitToday/FitToday/FitTodayApp.swift",
+    "FitToday/FitToday/Presentation/DesignSystem/CardsAndBadges.swift",
+    "FitToday/FitToday/Presentation/DesignSystem/DesignTokens.swift",
+    "FitToday/FitToday/Presentation/Features/Pro/ProfileProView.swift",
+    "FitToday/FitToday/Presentation/Support/AppStorageKeys.swift",
+    "FitToday/FitToday/Presentation/Support/ThemePreference.swift",
+    "FitToday/FitToday/Resources/en.lproj/Localizable.strings",
+    "FitToday/FitToday/Resources/pt-BR.lproj/Localizable.strings",
+    "ops/sessions/20260305-135426.json",
+    "ops/sessions/20260305-140305.json",
+    "ops/sessions/20260305-140519.json",
+    "ops/sessions/20260305-142048.json",
+    "storage.rules",
+    "tasks/prd-new-design-system/prd.md",
+    "tasks/prd-new-design-system/tasks.md",
+    "tasks/prd-new-design-system/techspec.md",
+    "tasks/prd-new-programas-area/prd.md",
+    "tasks/prd-new-programas-area/tasks.md",
+    "tasks/prd-new-programas-area/techspec.md"
+  ],
+  "sessions": [
+    {
+      "metadata": "/56/8d0ca14183/0/metadata.json",
+      "transcript": "/56/8d0ca14183/0/full.jsonl",
+      "context": "/56/8d0ca14183/0/context.md",
+      "content_hash": "/56/8d0ca14183/0/content_hash.txt",
+      "prompt": "/56/8d0ca14183/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 1420,
+    "cache_creation_tokens": 44509,
+    "cache_read_tokens": 5961455,
+    "output_tokens": 16332,
+    "api_call_count": 43
+  }
+}
