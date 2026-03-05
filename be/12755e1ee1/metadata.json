@@ -1,0 +1,28 @@
+{
+  "cli_version": "0.4.4",
+  "checkpoint_id": "be12755e1ee1",
+  "strategy": "manual-commit",
+  "branch": "feat/fitness-preferences",
+  "checkpoints_count": 2,
+  "files_touched": [
+    "app-marketing-context.md",
+    "ops/sessions/20260305-235500.json",
+    "ops/sessions/20260305-235920.json"
+  ],
+  "sessions": [
+    {
+      "metadata": "/be/12755e1ee1/0/metadata.json",
+      "transcript": "/be/12755e1ee1/0/full.jsonl",
+      "context": "/be/12755e1ee1/0/context.md",
+      "content_hash": "/be/12755e1ee1/0/content_hash.txt",
+      "prompt": "/be/12755e1ee1/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 11,
+    "cache_creation_tokens": 125086,
+    "cache_read_tokens": 717590,
+    "output_tokens": 6361,
+    "api_call_count": 7
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "cli_version": "0.4.4",
+  "checkpoint_id": "be12755e1ee1",
+  "session_id": "06560e53-43ee-429c-955d-75914d3025f4",
+  "strategy": "manual-commit",
+  "created_at": "2026-03-05T23:59:27.427949Z",
+  "branch": "feat/fitness-preferences",
+  "checkpoints_count": 2,
+  "files_touched": [
+    "app-marketing-context.md",
+    "ops/sessions/20260305-235500.json",
+    "ops/sessions/20260305-235920.json"
+  ],
+  "agent": "Claude Code",
+  "transcript_identifier_at_start": "2bf441d4-1f95-492d-ac03-d26a66df34fe",
+  "checkpoint_transcript_start": 2581,
+  "transcript_lines_at_start": 2581,
+  "token_usage": {
+    "input_tokens": 11,
+    "cache_creation_tokens": 125086,
+    "cache_read_tokens": 717590,
+    "output_tokens": 6361,
+    "api_call_count": 7
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-03-05T23:59:25.318929Z",
+    "agent_lines": 123,
+    "human_added": 30,
+    "human_modified": 1,
+    "human_removed": 0,
+    "total_committed": 154,
+    "agent_percentage": 79.87012987012987
+  },
+  "transcript_path": ".claude/projects/-Users-viniciuscarvalho-Documents-FitToday/06560e53-43ee-429c-955d-75914d3025f4.jsonl"
+}
