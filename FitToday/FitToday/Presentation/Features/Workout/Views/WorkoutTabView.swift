@@ -55,7 +55,7 @@ struct WorkoutTabView: View {
                     ProgramsListView()
                         .tag(WorkoutSegment.programs)
 
-                    PersonalWorkoutsListView()
+                    LazyPersonalWorkoutsTab(isSelected: selectedSegment == .personal)
                         .tag(WorkoutSegment.personal)
                 }
                 .tabViewStyle(.page(indexDisplayMode: .never))
@@ -168,6 +168,30 @@ struct WorkoutTabView: View {
         }
         .buttonStyle(.plain)
         .accessibilityLabel("Criar novo treino")
+    }
+}
+
+// MARK: - Lazy Personal Workouts Tab
+
+/// Defers initialization of PersonalWorkoutsListView until the tab is selected,
+/// preventing premature CMS requests that get cancelled by TabView(.page).
+private struct LazyPersonalWorkoutsTab: View {
+    let isSelected: Bool
+    @State private var hasAppeared = false
+
+    var body: some View {
+        Group {
+            if hasAppeared {
+                PersonalWorkoutsListView()
+            } else {
+                Color.clear
+            }
+        }
+        .onChange(of: isSelected) { _, newValue in
+            if newValue && !hasAppeared {
+                hasAppeared = true
+            }
+        }
     }
 }
 

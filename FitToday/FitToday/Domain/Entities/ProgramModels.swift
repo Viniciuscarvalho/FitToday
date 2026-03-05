@@ -171,8 +171,10 @@ public struct Program: Identifiable, Hashable, Sendable {
 
         // Fat loss / conditioning programs
         if lowerId.contains("weightloss") || lowerId.contains("hiit") ||
+           lowerId.contains("conditioning") ||
            lowerName.contains("hiit") || lowerName.contains("queima") ||
-           lowerName.contains("metabolic") || lowerName.contains("fat burn") {
+           lowerName.contains("metabolic") || lowerName.contains("fat burn") ||
+           lowerName.contains("condicionamento") || lowerName.contains("metabólico") {
             return .fatLoss
         }
 
