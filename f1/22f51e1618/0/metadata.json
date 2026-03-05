@@ -1,0 +1,40 @@
+{
+  "cli_version": "0.4.4",
+  "checkpoint_id": "f122f51e1618",
+  "session_id": "06560e53-43ee-429c-955d-75914d3025f4",
+  "strategy": "manual-commit",
+  "created_at": "2026-03-05T13:38:44.552748Z",
+  "branch": "feat/new-design-system",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "FitToday/FitToday/Resources/Fonts/Bungee-Regular.ttf",
+    "FitToday/FitToday/Resources/Fonts/Orbitron-Black.ttf",
+    "FitToday/FitToday/Resources/Fonts/Orbitron-Bold.ttf",
+    "FitToday/FitToday/Resources/Fonts/Orbitron-ExtraBold.ttf",
+    "FitToday/FitToday/Resources/Fonts/Rajdhani-Bold.ttf",
+    "FitToday/FitToday/Resources/Fonts/Rajdhani-Medium.ttf",
+    "FitToday/FitToday/Resources/Fonts/Rajdhani-SemiBold.ttf",
+    "ops/sessions/20260305-133838.json"
+  ],
+  "agent": "Claude Code",
+  "transcript_identifier_at_start": "6cdab6f0-8a5a-42d2-9460-4f383efcff3d",
+  "checkpoint_transcript_start": 914,
+  "transcript_lines_at_start": 914,
+  "token_usage": {
+    "input_tokens": 13,
+    "cache_creation_tokens": 165428,
+    "cache_read_tokens": 1632261,
+    "output_tokens": 1639,
+    "api_call_count": 11
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-03-05T13:38:43.729803Z",
+    "agent_lines": 0,
+    "human_added": 340,
+    "human_modified": 1,
+    "human_removed": 0,
+    "total_committed": 341,
+    "agent_percentage": 0
+  },
+  "transcript_path": ".claude/projects/-Users-viniciuscarvalho-Documents-FitToday/06560e53-43ee-429c-955d-75914d3025f4.jsonl"
+}
