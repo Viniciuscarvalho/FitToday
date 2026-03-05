@@ -12,6 +12,7 @@ import Swinject
 struct ProfileProView: View {
     @Environment(\.dependencyResolver) private var resolver
     @Environment(AppRouter.self) private var router
+    @AppStorage(AppStorageKeys.themePreference) private var themePreferenceRaw: String = ThemePreference.dark.rawValue
     @State private var entitlement: ProEntitlement = .free
     @State private var showingPaywall = false
     @State private var showingRestoreAlert = false
@@ -353,10 +354,63 @@ struct ProfileProView: View {
                 Divider().padding(.leading, 56)
 
                 languageRow
+
+                Divider().padding(.leading, 56)
+
+                themeRow
             }
             .background(FitTodayColor.surface)
             .clipShape(RoundedRectangle(cornerRadius: 16))
         }
+    }
+
+    // MARK: - Theme Row
+
+    private var themeRow: some View {
+        let selected = ThemePreference(rawValue: themePreferenceRaw) ?? .dark
+        return HStack(spacing: FitTodaySpacing.md) {
+            ZStack {
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(FitTodayColor.brandPrimary.opacity(0.15))
+                    .frame(width: 36, height: 36)
+                Image(systemName: selected.icon)
+                    .font(.system(size: 16))
+                    .foregroundStyle(FitTodayColor.brandPrimary)
+            }
+
+            Text("settings.theme".localized)
+                .font(.system(.body))
+                .foregroundStyle(FitTodayColor.textPrimary)
+
+            Spacer()
+
+            Menu {
+                ForEach(ThemePreference.allCases) { theme in
+                    Button {
+                        themePreferenceRaw = theme.rawValue
+                    } label: {
+                        HStack {
+                            Image(systemName: theme.icon)
+                            Text(theme.localizationKey.localized)
+                            if selected == theme {
+                                Image(systemName: "checkmark")
+                            }
+                        }
+                    }
+                }
+            } label: {
+                HStack(spacing: 4) {
+                    Text(selected.localizationKey.localized)
+                        .font(.system(size: 14))
+                        .foregroundStyle(FitTodayColor.textSecondary)
+                    Image(systemName: "chevron.up.chevron.down")
+                        .font(.system(size: 10))
+                        .foregroundStyle(FitTodayColor.textTertiary)
+                }
+            }
+        }
+        .padding(.horizontal, FitTodaySpacing.md)
+        .padding(.vertical, FitTodaySpacing.sm)
     }
 
     // MARK: - Language Row

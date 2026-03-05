@@ -15,6 +15,9 @@ enum AppStorageKeys {
     // Onboarding
     static let hasSeenWelcome = "hasSeenWelcome"
 
+    // Theme
+    static let themePreference = "themePreference"
+
     // App Store Review
     static let lastReviewRequestDate = "lastReviewRequestDate"
     static let firstLaunchDate = "firstLaunchDate"

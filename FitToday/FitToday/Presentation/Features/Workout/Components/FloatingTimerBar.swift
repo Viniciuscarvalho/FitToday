@@ -33,11 +33,9 @@ struct FloatingTimerBar: View {
         .background(
             RoundedRectangle(cornerRadius: FitTodayRadius.lg)
                 .fill(FitTodayColor.surface)
-                .retroGridOverlay(spacing: 20)
-                .shadow(color: FitTodayColor.neonCyan.opacity(0.2), radius: 12, x: 0, y: -4)
+                .shadow(color: FitTodayColor.brandPrimary.opacity(0.2), radius: 12, x: 0, y: -4)
         )
-        .techCornerBorders(color: FitTodayColor.neonCyan, length: 20, thickness: 2)
-        .scanlineOverlay()
+        .fitCardBorder()
         .padding(.horizontal)
         .padding(.bottom, FitTodaySpacing.sm)
     }
@@ -48,8 +46,8 @@ struct FloatingTimerBar: View {
         HStack(spacing: FitTodaySpacing.xs) {
             Image(systemName: "timer")
                 .font(.system(.body, weight: .semibold))
-                .foregroundStyle(FitTodayColor.neonCyan)
-                .fitGlowEffect(color: FitTodayColor.neonCyan.opacity(0.5))
+                .foregroundStyle(FitTodayColor.brandPrimary)
+                .fitGlowEffect(color: FitTodayColor.brandPrimary.opacity(0.5))
 
             Text(timerStore.formattedTime)
                 .font(FitTodayFont.display(size: 22, weight: .black))

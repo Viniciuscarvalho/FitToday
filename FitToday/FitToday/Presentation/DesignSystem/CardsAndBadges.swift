@@ -24,18 +24,15 @@ struct FitCard<Content: View>: View {
             .background(
                 RoundedRectangle(cornerRadius: FitTodayRadius.md)
                     .fill(FitTodayColor.surface)
-                    .retroGridOverlay(spacing: 30)  // Grid overlay
                     .overlay(
                         RoundedRectangle(cornerRadius: FitTodayRadius.md)
                             .stroke(
-                                isHighlighted ? FitTodayColor.neonCyan.opacity(0.6) : FitTodayColor.outline.opacity(0.3),  // Neon cyan when highlighted
+                                isHighlighted ? FitTodayColor.brandPrimary.opacity(0.6) : FitTodayColor.outline.opacity(0.3),
                                 lineWidth: isHighlighted ? 2 : 1
                             )
                     )
             )
-            .techCornerBorders(color: isHighlighted ? FitTodayColor.neonCyan : FitTodayColor.techBorder)  // Tech corners
             .fitCardShadow()
-            .scanlineOverlay()  // VHS scanline effect
     }
 }
 
@@ -48,12 +45,10 @@ struct OptionCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: FitTodaySpacing.xs) {
             Text(title)
-                .font(FitTodayFont.ui(size: 17, weight: .semiBold))  // Retro font
-                .foregroundStyle(FitTodayColor.textPrimary)
+                .font(FitTodayFont.ui(size: 17, weight: .semiBold))                .foregroundStyle(FitTodayColor.textPrimary)
             if let subtitle {
                 Text(subtitle)
-                    .font(FitTodayFont.ui(size: 13, weight: .medium))  // Retro font
-                    .foregroundStyle(FitTodayColor.textSecondary)
+                    .font(FitTodayFont.ui(size: 13, weight: .medium))                    .foregroundStyle(FitTodayColor.textSecondary)
             }
         }
         .padding()
@@ -63,22 +58,12 @@ struct OptionCard: View {
                 .fill(isSelected ? FitTodayColor.brandPrimary.opacity(0.12) : FitTodayColor.surface)
                 .overlay(
                     RoundedRectangle(cornerRadius: FitTodayRadius.md)
-                        .stroke(isSelected ? FitTodayColor.neonCyan : FitTodayColor.outline.opacity(0.4), lineWidth: isSelected ? 2 : 1)  // Neon cyan border
+                        .stroke(isSelected ? FitTodayColor.brandPrimary : FitTodayColor.outline.opacity(0.4), lineWidth: isSelected ? 2 : 1)
                 )
         )
-        .overlay(  // Diagonal accent on selection
-            Group {
-                if isSelected {
-                    RoundedRectangle(cornerRadius: FitTodayRadius.md)
-                        .fill(Color.clear)
-                        .diagonalStripes(color: FitTodayColor.neonCyan, spacing: 12, opacity: 0.08)
-                }
-            }
-        )
-        .techCornerBorders(color: isSelected ? FitTodayColor.neonCyan.opacity(0.6) : FitTodayColor.techBorder.opacity(0.3), length: 12, thickness: 1.5)  // Tech corners
         .animation(reduceMotion ? nil : .easeOut(duration: 0.15), value: isSelected)
         .contentShape(RoundedRectangle(cornerRadius: FitTodayRadius.md))
-        .fitGlowEffect(color: isSelected ? FitTodayColor.neonCyan.opacity(0.3) : Color.clear.opacity(0))  // Glow when selected
+        .fitGlowEffect(color: isSelected ? FitTodayColor.brandPrimary.opacity(0.3) : Color.clear.opacity(0))
     }
 }
 
@@ -107,14 +92,12 @@ struct FitBadge: View {
 
     var body: some View {
         Text(text.uppercased())
-            .font(FitTodayFont.accent(size: 11))  // Bungee retro font
-            .tracking(0.8)
+            .font(FitTodayFont.accent(size: 11))            .tracking(0.8)
             .padding(.horizontal, FitTodaySpacing.sm + 2)
             .padding(.vertical, FitTodaySpacing.xs + 2)
             .background(
                 Capsule()
                     .fill(style.colors.background)
-                    .diagonalStripes(color: style.colors.foreground, spacing: 6, opacity: 0.1)  // Diagonal stripes
             )
             .foregroundColor(style.colors.foreground)
             .clipShape(Capsule())
@@ -129,14 +112,12 @@ struct SectionHeader: View {
     var body: some View {
         HStack {
             Text(title)
-                .font(FitTodayFont.ui(size: 20, weight: .bold))  // Retro font
-                .tracking(0.8)
+                .font(FitTodayFont.ui(size: 20, weight: .bold))                .tracking(0.8)
                 .foregroundStyle(FitTodayColor.textPrimary)
             Spacer()
             if let actionTitle, let action {
                 Button(actionTitle, action: action)
-                    .font(FitTodayFont.ui(size: 16, weight: .medium))  // Retro font
-                    .foregroundStyle(FitTodayColor.neonCyan)  // Neon cyan action
+                    .font(FitTodayFont.ui(size: 16, weight: .medium))                    .foregroundStyle(FitTodayColor.brandPrimary)
             }
         }
         .padding(.horizontal)
@@ -153,23 +134,21 @@ struct EmptyStateView: View {
         VStack(spacing: FitTodaySpacing.lg) {
             Image(systemName: systemIcon)
                 .font(.system(size: 64))
-                .foregroundStyle(FitTodayColor.neonCyan.opacity(0.7))  // Neon cyan icon
-                .fitGlowEffect(color: FitTodayColor.neonCyan.opacity(0.3))  // Neon glow
+                .foregroundStyle(FitTodayColor.brandPrimary.opacity(0.7))
+                .fitGlowEffect(color: FitTodayColor.brandPrimary.opacity(0.3))
 
             VStack(spacing: FitTodaySpacing.sm) {
                 Text(title)
-                    .font(FitTodayFont.display(size: 20, weight: .bold))  // Retro display font
-                    .foregroundStyle(FitTodayColor.textPrimary)
+                    .font(FitTodayFont.display(size: 20, weight: .bold))                    .foregroundStyle(FitTodayColor.textPrimary)
                 Text(message)
-                    .font(FitTodayFont.ui(size: 17, weight: .medium))  // Retro UI font
-                    .foregroundStyle(FitTodayColor.textSecondary)
+                    .font(FitTodayFont.ui(size: 17, weight: .medium))                    .foregroundStyle(FitTodayColor.textSecondary)
                     .multilineTextAlignment(.center)
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
         .padding()
         .background(
-            Color.clear.retroGridOverlay(lineColor: FitTodayColor.gridLine.opacity(0.5), spacing: 40)  // Grid background
+            Color.clear
         )
     }
 }
@@ -190,25 +169,22 @@ struct StatCard: View {
                 .fitGlowEffect(color: color.opacity(0.5))  // Icon glow
 
             Text(value)
-                .font(FitTodayFont.display(size: 22, weight: .bold))  // Retro display font
-                .foregroundStyle(FitTodayColor.textPrimary)
+                .font(FitTodayFont.display(size: 22, weight: .bold))                .foregroundStyle(FitTodayColor.textPrimary)
 
             Text(label)
-                .font(FitTodayFont.ui(size: 12, weight: .medium))  // Retro UI font
-                .foregroundStyle(FitTodayColor.textSecondary)
+                .font(FitTodayFont.ui(size: 12, weight: .medium))                .foregroundStyle(FitTodayColor.textSecondary)
         }
         .frame(maxWidth: .infinity)
         .padding(FitTodaySpacing.md)
         .background(
             RoundedRectangle(cornerRadius: FitTodayRadius.md)
                 .fill(FitTodayColor.surface)
-                .retroGridOverlay(spacing: 25)  // Grid overlay
                 .overlay(
                     RoundedRectangle(cornerRadius: FitTodayRadius.md)
                         .stroke(FitTodayColor.outline.opacity(0.3), lineWidth: 1)
                 )
         )
-        .techCornerBorders()  // Tech corner borders
+        .fitCardBorder()
     }
 }
 

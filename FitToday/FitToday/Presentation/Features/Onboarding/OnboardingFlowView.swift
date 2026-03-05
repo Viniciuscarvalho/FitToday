@@ -34,11 +34,8 @@ struct OnboardingFlowView: View {
         setupView
         .padding()
         .background(
-            ZStack {
-                FitTodayColor.background
-                RetroGridPattern(lineColor: FitTodayColor.gridLine.opacity(0.3), spacing: 40)  // Grid background
-            }
-            .ignoresSafeArea()
+            FitTodayColor.background
+                .ignoresSafeArea()
         )
         .navigationTitle(isEditing ? "Editar Perfil" : "Configuração")
         .navigationBarTitleDisplayMode(.inline)

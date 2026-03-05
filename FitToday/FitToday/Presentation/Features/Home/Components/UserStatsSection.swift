@@ -34,7 +34,7 @@ struct UserStatsSection: View {
                     value: caloriesBurnedFormatted,
                     label: "Volume",
                     icon: "dumbbell.fill",
-                    color: FitTodayColor.neonCyan
+                    color: FitTodayColor.brandPrimary
                 )
 
                 // Streak (only show if > 0)
@@ -43,7 +43,7 @@ struct UserStatsSection: View {
                         value: "\(streakDays)",
                         label: "home.stats.streak".localized,
                         icon: "bolt.fill",
-                        color: FitTodayColor.neonYellow
+                        color: FitTodayColor.warning
                     )
                 }
             }

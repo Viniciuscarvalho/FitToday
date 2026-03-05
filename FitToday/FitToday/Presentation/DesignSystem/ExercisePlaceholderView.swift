@@ -82,7 +82,7 @@ struct ExercisePlaceholderView: View {
         case .shoulders:
             return FitTodayColor.warning
         case .arms, .biceps, .triceps, .forearms:
-            return FitTodayColor.neonCyan
+            return FitTodayColor.brandPrimary
         case .core:
             return FitTodayColor.success
         case .glutes, .quads, .quadriceps, .hamstrings, .calves:
@@ -90,7 +90,7 @@ struct ExercisePlaceholderView: View {
         case .cardioSystem:
             return FitTodayColor.error
         case .fullBody:
-            return FitTodayColor.neonPurple
+            return FitTodayColor.brandSecondary
         }
     }
 }

@@ -245,6 +245,10 @@
 "settings.pro.connect_sync" = "Connect to sync workouts";
 "settings.personal_trainer" = "Personal Trainer";
 "settings.personal_trainer_desc" = "Connect with your trainer";
+"settings.theme" = "Theme";
+"settings.theme.system" = "System";
+"settings.theme.dark" = "Dark";
+"settings.theme.light" = "Light";
 
 // MARK: - Privacy Settings
 "privacy.title" = "Privacy Settings";

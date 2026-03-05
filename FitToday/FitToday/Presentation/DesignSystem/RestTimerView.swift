@@ -144,9 +144,8 @@ struct RestTimerView: View {
         .background(
             RoundedRectangle(cornerRadius: FitTodayRadius.lg)
                 .fill(FitTodayColor.surfaceElevated)
-                .retroGridOverlay(spacing: 20)
         )
-        .techCornerBorders(length: 12, thickness: 1.5)
+        .fitCardBorder()
     }
 }
 

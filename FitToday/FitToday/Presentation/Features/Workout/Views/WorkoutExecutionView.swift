@@ -471,9 +471,8 @@ struct WorkoutExecutionView: View {
             .background(
                 RoundedRectangle(cornerRadius: FitTodayRadius.lg)
                     .fill(FitTodayColor.surfaceElevated)
-                    .retroGridOverlay(spacing: 20)
             )
-            .techCornerBorders(length: 16, thickness: 2)
+            .fitCardBorder()
             .padding(FitTodaySpacing.xl)
         }
     }
