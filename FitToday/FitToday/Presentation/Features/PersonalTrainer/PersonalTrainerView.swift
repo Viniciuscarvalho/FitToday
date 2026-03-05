@@ -39,6 +39,8 @@ struct PersonalTrainerView: View {
                     onDisconnect: {
                         Task { await viewModel.cancelConnection() }
                     },
+                    currentUserId: viewModel.currentUserId,
+                    resolver: resolver,
                     initialTab: initialTab
                 )
             } else if !viewModel.hasTrainer {

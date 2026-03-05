@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct ChatBubble: View {
-    let message: ChatMessage
+    let message: TrainerChatMessage
     let isFromCurrentUser: Bool
 
     var body: some View {
@@ -16,7 +16,7 @@ struct ChatBubble: View {
             if isFromCurrentUser { Spacer(minLength: 60) }
 
             VStack(alignment: isFromCurrentUser ? .trailing : .leading, spacing: 4) {
-                Text(message.text)
+                Text(message.content)
                     .font(FitTodayFont.ui(size: 14, weight: .medium))
                     .foregroundStyle(isFromCurrentUser ? .white : FitTodayColor.textPrimary)
                     .padding(.horizontal, FitTodaySpacing.md)
@@ -24,7 +24,7 @@ struct ChatBubble: View {
                     .background(isFromCurrentUser ? FitTodayColor.brandPrimary : FitTodayColor.surfaceElevated)
                     .clipShape(RoundedRectangle(cornerRadius: FitTodayRadius.md))
 
-                Text(message.timestamp.formatted(date: .omitted, time: .shortened))
+                Text(message.createdAt.formatted(date: .omitted, time: .shortened))
                     .font(FitTodayFont.ui(size: 11, weight: .medium))
                     .foregroundStyle(FitTodayColor.textTertiary)
             }

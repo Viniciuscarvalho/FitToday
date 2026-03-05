@@ -70,8 +70,8 @@ final class CustomWorkoutBuilderViewModel {
 
     // MARK: - Actions
 
-    func addExercise(from exercise: WgerExercise, imageURL: String? = nil) {
-        let entry = CustomExerciseEntry(from: exercise, orderIndex: exercises.count, imageURL: imageURL)
+    func addExercise(from exercise: CatalogExercise) {
+        let entry = CustomExerciseEntry(from: exercise, orderIndex: exercises.count)
         exercises.append(entry)
     }
 

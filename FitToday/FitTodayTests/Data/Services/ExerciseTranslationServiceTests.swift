@@ -250,7 +250,7 @@ final class ExerciseTranslationServiceTests: XCTestCase {
     // MARK: - Real-World Exercise Descriptions
 
     func testRealBenchPressDescription() async {
-        // Given - typical bench press description from Wger API
+        // Given - typical bench press description
         let description = "Lie on the bench with your feet flat on the floor. Grip the bar with hands slightly wider than shoulder-width apart. Lower the bar to your chest, then push it back up."
 
         // When

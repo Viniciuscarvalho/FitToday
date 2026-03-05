@@ -8,7 +8,7 @@
 import SwiftUI
 
 /// View para configuração da chave de API do usuário (OpenAI)
-/// A API do Wger é gratuita e não requer chave
+/// Os exercícios vêm do Firestore e não requerem chave
 struct APIKeySettingsView: View {
     @StateObject private var keyStore = UserAPIKeyStore()
     @State private var apiKeyInput: String = ""

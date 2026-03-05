@@ -2,61 +2,113 @@
 //  TrainerChatViewModel.swift
 //  FitToday
 //
-//  ViewModel for trainer chat interface.
-//  Currently uses mock data — real chat backend to be integrated later.
+//  ViewModel for trainer chat interface with Firestore real-time messaging.
 //
 
 import Foundation
-
-/// A single chat message between trainer and student.
-struct ChatMessage: Identifiable, Sendable {
-    let id: String
-    let text: String
-    let senderId: String
-    let timestamp: Date
-    let isFromTrainer: Bool
-}
+import Swinject
 
 @MainActor
 @Observable final class TrainerChatViewModel {
-    private(set) var messages: [ChatMessage] = []
+    private(set) var messages: [TrainerChatMessage] = []
     var newMessageText = ""
+    private(set) var isLoading = false
+    private(set) var isEmpty = false
+    private(set) var error: Error?
 
     private let trainerId: String
     private let trainerName: String
+    private let currentUserId: String
+    private let chatService: TrainerChatServiceProtocol?
+
+    nonisolated(unsafe) private var listenerTask: Task<Void, Never>?
+
+    var conversationId: String {
+        let ids = [trainerId, currentUserId].sorted()
+        return "\(ids[0])_\(ids[1])"
+    }
 
     var canSend: Bool {
         !newMessageText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
-    init(trainerId: String, trainerName: String) {
+    init(trainerId: String, trainerName: String, currentUserId: String, resolver: Resolver) {
         self.trainerId = trainerId
         self.trainerName = trainerName
-        loadMockMessages()
+        self.currentUserId = currentUserId
+        self.chatService = resolver.resolve(TrainerChatServiceProtocol.self)
     }
+
+    deinit {
+        let task = listenerTask
+        task?.cancel()
+    }
+
+    // MARK: - Start Listening
+
+    func startListening() async {
+        guard let chatService, listenerTask == nil else { return }
+
+        isLoading = true
+
+        // Mark messages as read when opening
+        try? await chatService.markMessagesAsRead(
+            conversationId: conversationId,
+            byUserId: currentUserId
+        )
+
+        listenerTask = Task {
+            for await newMessages in chatService.observeMessages(conversationId: conversationId) {
+                guard !Task.isCancelled else { break }
+                self.messages = newMessages
+                self.isEmpty = newMessages.isEmpty
+                self.isLoading = false
+            }
+        }
+    }
+
+    // MARK: - Send Message
 
     func sendMessage() {
-        guard canSend else { return }
-        let message = ChatMessage(
-            id: UUID().uuidString,
-            text: newMessageText.trimmingCharacters(in: .whitespacesAndNewlines),
-            senderId: "current_user",
-            timestamp: Date(),
-            isFromTrainer: false
-        )
-        messages.append(message)
+        guard canSend, let chatService else { return }
+        let content = newMessageText.trimmingCharacters(in: .whitespacesAndNewlines)
         newMessageText = ""
+
+        // Optimistic append
+        let optimisticMessage = TrainerChatMessage(
+            id: UUID().uuidString,
+            conversationId: conversationId,
+            senderId: currentUserId,
+            content: content,
+            type: .text,
+            createdAt: Date(),
+            isRead: false
+        )
+        messages.append(optimisticMessage)
+
+        Task {
+            do {
+                try await chatService.sendMessage(
+                    conversationId: conversationId,
+                    senderId: currentUserId,
+                    content: content
+                )
+            } catch {
+                // Remove optimistic message on failure
+                messages.removeAll { $0.id == optimisticMessage.id }
+                self.error = error
+            }
+        }
     }
 
-    private func loadMockMessages() {
-        let calendar = Calendar.current
-        let now = Date()
-        messages = [
-            ChatMessage(id: "1", text: "trainer.chat.mock.msg1".localized, senderId: trainerId, timestamp: calendar.date(byAdding: .hour, value: -2, to: now)!, isFromTrainer: true),
-            ChatMessage(id: "2", text: "trainer.chat.mock.msg2".localized, senderId: "current_user", timestamp: calendar.date(byAdding: .hour, value: -1, to: now)!, isFromTrainer: false),
-            ChatMessage(id: "3", text: "trainer.chat.mock.msg3".localized, senderId: trainerId, timestamp: calendar.date(byAdding: .minute, value: -45, to: now)!, isFromTrainer: true),
-            ChatMessage(id: "4", text: "trainer.chat.mock.msg4".localized, senderId: "current_user", timestamp: calendar.date(byAdding: .minute, value: -30, to: now)!, isFromTrainer: false),
-            ChatMessage(id: "5", text: "trainer.chat.mock.msg5".localized, senderId: trainerId, timestamp: calendar.date(byAdding: .minute, value: -10, to: now)!, isFromTrainer: true),
-        ]
+    func isFromCurrentUser(_ message: TrainerChatMessage) -> Bool {
+        message.senderId == currentUserId
+    }
+
+    // MARK: - Stop Listening
+
+    func stopListening() {
+        listenerTask?.cancel()
+        listenerTask = nil
     }
 }

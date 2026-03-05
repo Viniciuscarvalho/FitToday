@@ -42,9 +42,13 @@ struct WorkoutExercisePreviewView: View {
                         .foregroundStyle(FitTodayColor.textPrimary)
                 }
                 
-                // Hero Image/GIF
-                ExerciseHeroImage(media: prescription.exercise.media)
-                    .fitCardShadow()
+                // Exercise Image — Firebase Storage animated
+                ExerciseAnimatedView(
+                    exerciseId: prescription.exercise.id,
+                    cornerRadius: FitTodayRadius.md
+                )
+                .frame(height: 220)
+                .fitCardShadow()
                 
                 // Badges de músculo e equipamento
                 HStack(spacing: FitTodaySpacing.sm) {

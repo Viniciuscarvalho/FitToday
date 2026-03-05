@@ -112,7 +112,8 @@ struct PhaseSectionView: View {
         VStack(alignment: .leading, spacing: FitTodaySpacing.sm) {
             // Exercise header
             HStack(alignment: .top, spacing: FitTodaySpacing.md) {
-                ExerciseThumbnail(media: prescription.exercise.media, size: 56)
+                ExerciseImageView(exerciseId: prescription.exercise.id, imageIndex: 0, cornerRadius: FitTodayRadius.sm)
+                    .frame(width: 56, height: 56)
 
                 VStack(alignment: .leading, spacing: FitTodaySpacing.xs) {
                     Text("\(localIndex). \(prescription.exercise.name)")

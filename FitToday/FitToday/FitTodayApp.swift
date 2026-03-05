@@ -36,6 +36,11 @@ struct FitTodayApp: App {
         if UserDefaults.standard.object(forKey: AppStorageKeys.firstLaunchDate) == nil {
             UserDefaults.standard.set(Date(), forKey: AppStorageKeys.firstLaunchDate)
         }
+
+        // Prune stale exercise image cache (background, no impact on cold start)
+        Task.detached(priority: .background) {
+            await ExerciseImageCache.shared.pruneOldCache()
+        }
         
         #if DEBUG
         // Log de inicialização
@@ -61,7 +66,6 @@ struct FitTodayApp: App {
             .environment(appContainer.router)
             .environment(sessionStore)
             .environment(\.dependencyResolver, appContainer.container)
-            .imageCacheService(appContainer.container.resolve(ImageCaching.self)!)
             .preferredColorScheme(.dark)  // Forçar tema escuro
             .onOpenURL { url in
                 appContainer.router.handle(url: url)

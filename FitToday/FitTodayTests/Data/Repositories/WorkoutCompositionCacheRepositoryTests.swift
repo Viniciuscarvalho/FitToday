@@ -81,6 +81,7 @@ final class WorkoutCompositionCacheRepositoryTests: XCTestCase {
     // MARK: - Hash Stability Tests
     
     func testBlueprintInputCacheKeyIsStable() {
+        let seed: UInt64 = 42
         let input1 = BlueprintInput(
             goal: .hypertrophy,
             structure: .fullGym,
@@ -89,11 +90,7 @@ final class WorkoutCompositionCacheRepositoryTests: XCTestCase {
             sorenessLevel: .light,
             sorenessAreas: [.chest],
             energyLevel: 7,
-            dayOfWeek: 2,
-            weekOfYear: 1,
-            hourOfDay: 10,
-            minuteOfHour: 0,
-            secondOfMinute: 0
+            variationSeed: seed
         )
 
         let input2 = BlueprintInput(
@@ -104,11 +101,7 @@ final class WorkoutCompositionCacheRepositoryTests: XCTestCase {
             sorenessLevel: .light,
             sorenessAreas: [.chest],
             energyLevel: 7,
-            dayOfWeek: 2,
-            weekOfYear: 1,
-            hourOfDay: 10,
-            minuteOfHour: 0,
-            secondOfMinute: 0
+            variationSeed: seed
         )
 
         XCTAssertEqual(input1.cacheKey, input2.cacheKey, "Same inputs should produce same cache key")
@@ -123,11 +116,7 @@ final class WorkoutCompositionCacheRepositoryTests: XCTestCase {
             sorenessLevel: .light,
             sorenessAreas: [],
             energyLevel: 7,
-            dayOfWeek: 2,
-            weekOfYear: 1,
-            hourOfDay: 10,
-            minuteOfHour: 0,
-            secondOfMinute: 0
+            variationSeed: 42
         )
 
         let input2 = BlueprintInput(
@@ -138,17 +127,14 @@ final class WorkoutCompositionCacheRepositoryTests: XCTestCase {
             sorenessLevel: .light,
             sorenessAreas: [],
             energyLevel: 7,
-            dayOfWeek: 2,
-            weekOfYear: 1,
-            hourOfDay: 10,
-            minuteOfHour: 0,
-            secondOfMinute: 0
+            variationSeed: 42
         )
 
         XCTAssertNotEqual(input1.cacheKey, input2.cacheKey, "Different inputs should produce different cache keys")
     }
 
-    func testVariationSeedIsDeterministic() {
+    func testVariationSeedIsStored() {
+        let seed: UInt64 = 12345
         let input = BlueprintInput(
             goal: .hypertrophy,
             structure: .fullGym,
@@ -157,17 +143,10 @@ final class WorkoutCompositionCacheRepositoryTests: XCTestCase {
             sorenessLevel: .none,
             sorenessAreas: [],
             energyLevel: 7,
-            dayOfWeek: 3,
-            weekOfYear: 5,
-            hourOfDay: 10,
-            minuteOfHour: 0,
-            secondOfMinute: 0
+            variationSeed: seed
         )
-        
-        let seed1 = input.variationSeed
-        let seed2 = input.variationSeed
-        
-        XCTAssertEqual(seed1, seed2, "Variation seed should be deterministic")
+
+        XCTAssertEqual(input.variationSeed, seed, "Variation seed should be stored correctly")
     }
     
     // MARK: - Cache Hit/Miss Tests

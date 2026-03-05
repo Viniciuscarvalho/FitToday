@@ -133,6 +133,12 @@ service cloud.firestore {
       allow create, update, delete: if false;
     }
 
+    // Exercises catalog collection (read-only, populated by admin/scripts)
+    match /exercises/{exerciseId} {
+      allow read: if isAuthenticated();
+      allow write: if false;
+    }
+
     // Trainer-Student relationships collection
     match /trainerStudents/{relationshipId} {
       // Students can read their own relationships

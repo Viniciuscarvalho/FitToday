@@ -17,7 +17,8 @@ struct LibraryExerciseDetailView: View {
     ScrollView {
       VStack(alignment: .leading, spacing: FitTodaySpacing.lg) {
         // Hero Image
-        ExerciseHeroImage(media: prescription.exercise.media, height: 260)
+        ExerciseAnimatedView(exerciseId: prescription.exercise.id)
+          .frame(height: 260)
           .fitCardShadow()
 
         // Título e músculo principal

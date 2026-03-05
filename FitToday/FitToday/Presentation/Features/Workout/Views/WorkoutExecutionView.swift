@@ -142,7 +142,8 @@ struct WorkoutExecutionView: View {
                 .foregroundStyle(FitTodayColor.textPrimary)
 
             // Exercise Image
-            ExerciseHeroImage(media: prescription.exercise.media)
+            ExerciseAnimatedView(exerciseId: prescription.exercise.id, cornerRadius: FitTodayRadius.md)
+                .frame(height: 220)
                 .fitCardShadow()
 
             // Exercise Info

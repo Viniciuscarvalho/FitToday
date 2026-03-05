@@ -106,31 +106,12 @@ actor FirebasePersonalTrainerService {
     ///   - studentId: The student's user ID.
     ///   - studentDisplayName: The student's display name (for notifications).
     /// - Returns: The document ID of the created relationship.
-    /// - Throws: An error if the trainer is not found or cannot accept students.
+    /// - Throws: An error if a connection already exists with this trainer.
     func requestConnection(
         trainerId: String,
         studentId: String,
         studentDisplayName: String
     ) async throws -> String {
-        // Verify trainer exists and can accept students
-        let trainer = try await fetchTrainer(id: trainerId)
-
-        guard trainer.isActive else {
-            throw NSError(
-                domain: "FirebasePersonalTrainerService",
-                code: 400,
-                userInfo: [NSLocalizedDescriptionKey: "Trainer is not currently accepting students"]
-            )
-        }
-
-        guard trainer.currentStudentCount < trainer.maxStudents else {
-            throw NSError(
-                domain: "FirebasePersonalTrainerService",
-                code: 400,
-                userInfo: [NSLocalizedDescriptionKey: "Trainer has reached maximum student capacity"]
-            )
-        }
-
         // Check if relationship already exists
         let existingRelationship = try await getCurrentRelationship(studentId: studentId)
         if let existing = existingRelationship {
