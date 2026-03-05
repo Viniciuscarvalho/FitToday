@@ -20,11 +20,11 @@ enum ThemePreference: String, CaseIterable, Identifiable {
         }
     }
 
-    var displayName: String {
+    var localizationKey: String {
         switch self {
-        case .system: return "settings.theme.system".localized
-        case .dark: return "settings.theme.dark".localized
-        case .light: return "settings.theme.light".localized
+        case .system: return "settings.theme.system"
+        case .dark: return "settings.theme.dark"
+        case .light: return "settings.theme.light"
         }
     }
 
