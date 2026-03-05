@@ -10,10 +10,10 @@ struct LifetimeValueHighlight: View {
         VStack(spacing: FitTodaySpacing.sm) {
             HStack(spacing: FitTodaySpacing.xs) {
                 Image(systemName: "infinity")
-                    .foregroundStyle(FitTodayColor.neonCyan)
+                    .foregroundStyle(FitTodayColor.brandPrimary)
                 Text("PAGUE UMA VEZ, USE PARA SEMPRE")
                     .font(FitTodayFont.accent(size: 16))
-                    .foregroundStyle(FitTodayColor.neonCyan)
+                    .foregroundStyle(FitTodayColor.brandPrimary)
             }
 
             Text("Sem assinatura. Sem renovação. Acesso vitalício.")
@@ -24,10 +24,10 @@ struct LifetimeValueHighlight: View {
         .frame(maxWidth: .infinity)
         .background(
             RoundedRectangle(cornerRadius: FitTodayRadius.md)
-                .fill(FitTodayColor.neonCyan.opacity(0.1))
+                .fill(FitTodayColor.brandPrimary.opacity(0.1))
                 .overlay(
                     RoundedRectangle(cornerRadius: FitTodayRadius.md)
-                        .stroke(FitTodayColor.neonCyan.opacity(0.3), lineWidth: 1)
+                        .stroke(FitTodayColor.brandPrimary.opacity(0.3), lineWidth: 1)
                 )
         )
     }

@@ -145,7 +145,7 @@ struct HomeHeroCard: View {
                         .background(.white.opacity(0.15))
                         .clipShape(Capsule())
                 }
-                iconContainer(type: .intensity, iconColor: FitTodayColor.neonCyan)
+                iconContainer(type: .intensity, iconColor: FitTodayColor.brandPrimary)
             }
 
             Text("home.hero.ready.title".localized)
@@ -275,7 +275,6 @@ struct HomeHeroCard: View {
             RoundedRectangle(cornerRadius: 14)
                 .fill(.white.opacity(0.15))
                 .frame(width: 52, height: 52)
-                .retroGridOverlay(lineColor: .white.opacity(0.05), spacing: 10)
             
             FitnessIcon(type: type, color: iconColor, size: 26)
         }

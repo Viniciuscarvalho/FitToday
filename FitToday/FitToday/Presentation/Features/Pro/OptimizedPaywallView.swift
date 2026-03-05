@@ -53,11 +53,8 @@ struct OptimizedPaywallView: View {
                 .padding()
             }
             .background(
-                ZStack {
-                    FitTodayColor.background
-                    RetroGridPattern(lineColor: FitTodayColor.gridLine.opacity(0.2), spacing: 40)
-                }
-                .ignoresSafeArea()
+                FitTodayColor.background
+                    .ignoresSafeArea()
             )
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -106,7 +103,7 @@ struct OptimizedPaywallView: View {
                     RoundedRectangle(cornerRadius: FitTodayRadius.lg)
                         .stroke(FitTodayColor.brandPrimary.opacity(0.3), lineWidth: 2)
                 )
-                .techCornerBorders(color: FitTodayColor.neonCyan, length: 16, thickness: 2)
+                .fitCardBorder()
             } else if storeService.purchaseState == .loading {
                 ProgressView()
                     .frame(height: 100)

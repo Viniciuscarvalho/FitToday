@@ -35,12 +35,8 @@ struct AuthenticationView: View {
 
     var body: some View {
         ZStack {
-            // Retro background with grid
-            ZStack {
-                FitTodayColor.background
-                RetroGridPattern(lineColor: FitTodayColor.gridLine.opacity(0.2), spacing: 40)
-            }
-            .ignoresSafeArea()
+            FitTodayColor.background
+                .ignoresSafeArea()
 
             ScrollView {
                 VStack(spacing: FitTodaySpacing.xl) {
@@ -52,7 +48,7 @@ struct AuthenticationView: View {
                         Image(systemName: "figure.strengthtraining.traditional")
                             .font(.system(size: 80, weight: .bold))
                             .foregroundStyle(FitTodayColor.brandPrimary)
-                            .fitGlowEffect(color: FitTodayColor.neonCyan.opacity(0.4))
+                            .fitGlowEffect(color: FitTodayColor.brandPrimary.opacity(0.4))
 
                         Text("FIT TODAY")
                             .font(FitTodayFont.display(size: 32, weight: .extraBold))
@@ -98,7 +94,6 @@ struct AuthenticationView: View {
                         .signInWithAppleButtonStyle(.white)
                         .frame(height: 50)
                         .cornerRadius(FitTodayRadius.sm)
-                        .techCornerBorders(length: 14, thickness: 1.5)
 
                         // Google Sign-In (placeholder)
                         Button {
@@ -118,7 +113,6 @@ struct AuthenticationView: View {
                         .background(Color.white)
                         .foregroundStyle(.black)
                         .cornerRadius(FitTodayRadius.sm)
-                        .techCornerBorders(color: FitTodayColor.textTertiary, length: 14, thickness: 1.5)
 
                         // Email/Password toggle
                         Button {
@@ -143,7 +137,7 @@ struct AuthenticationView: View {
                             RoundedRectangle(cornerRadius: FitTodayRadius.sm)
                                 .stroke(FitTodayColor.outline, lineWidth: 1)
                         )
-                        .techCornerBorders(color: FitTodayColor.techBorder, length: 14, thickness: 1.5)
+                        .fitCardBorder()
                     }
                     .padding(.horizontal, FitTodaySpacing.lg)
 
@@ -229,7 +223,7 @@ struct AuthenticationView: View {
             }
             .scrollIndicators(.hidden)
 
-            // Loading overlay with retro style
+            // Loading overlay
             if viewModel?.isLoading == true {
                 ZStack {
                     FitTodayColor.background.opacity(0.9)
@@ -246,7 +240,7 @@ struct AuthenticationView: View {
                             .tracking(1.5)
                             .foregroundStyle(FitTodayColor.textSecondary)
                     }
-                    .fitGlowEffect(color: FitTodayColor.neonCyan.opacity(0.3))
+                    .fitGlowEffect(color: FitTodayColor.brandPrimary.opacity(0.3))
                 }
             }
         }

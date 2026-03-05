@@ -3,7 +3,7 @@
 //  FitToday
 //
 //  Custom fitness-focused icons for the Home screen and stats cards.
-//  Following the Retro-Futuristic / Purple Design System.
+//  Following the FitToday Design System.
 //
 
 import SwiftUI
@@ -78,7 +78,6 @@ struct MetricIconContainer: View {
                     RoundedRectangle(cornerRadius: 12)
                         .stroke(color.opacity(0.3), lineWidth: 1)
                 )
-                .retroGridOverlay(lineColor: color.opacity(0.1), spacing: 12)
             
             FitnessIcon(type: type, color: color, size: 22)
         }
@@ -91,9 +90,9 @@ struct MetricIconContainer: View {
     VStack(spacing: 20) {
         HStack(spacing: 20) {
             MetricIconContainer(type: .strength, color: FitTodayColor.brandPrimary)
-            MetricIconContainer(type: .intensity, color: FitTodayColor.neonMagenta)
-            MetricIconContainer(type: .endurance, color: FitTodayColor.neonCyan)
-            MetricIconContainer(type: .consistency, color: FitTodayColor.neonYellow)
+            MetricIconContainer(type: .intensity, color: FitTodayColor.brandAccent)
+            MetricIconContainer(type: .endurance, color: FitTodayColor.brandPrimary)
+            MetricIconContainer(type: .consistency, color: FitTodayColor.warning)
             MetricIconContainer(type: .performance, color: FitTodayColor.success)
         }
         
@@ -103,11 +102,11 @@ struct MetricIconContainer: View {
                 Text("Volume de Treino")
             }
             HStack {
-                FitnessIcon(type: .intensity, color: FitTodayColor.neonMagenta)
+                FitnessIcon(type: .intensity, color: FitTodayColor.brandAccent)
                 Text("Intensidade")
             }
             HStack {
-                FitnessIcon(type: .endurance, color: FitTodayColor.neonCyan)
+                FitnessIcon(type: .endurance, color: FitTodayColor.brandPrimary)
                 Text("Duração")
             }
         }

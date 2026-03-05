@@ -28,13 +28,12 @@
 	<string>O FitToday usa o Apple Health para exportar seus treinos concluídos e manter seu histórico unificado.</string>
 	<key>UIAppFonts</key>
 	<array>
-		<string>Orbitron-Bold.ttf</string>
-		<string>Orbitron-ExtraBold.ttf</string>
-		<string>Orbitron-Black.ttf</string>
-		<string>Rajdhani-Medium.ttf</string>
-		<string>Rajdhani-SemiBold.ttf</string>
-		<string>Rajdhani-Bold.ttf</string>
-		<string>Bungee-Regular.ttf</string>
+		<string>PlusJakartaSans-Bold.ttf</string>
+		<string>PlusJakartaSans-SemiBold.ttf</string>
+		<string>PlusJakartaSans-Medium.ttf</string>
+		<string>Inter-Regular.ttf</string>
+		<string>Inter-Medium.ttf</string>
+		<string>Inter-SemiBold.ttf</string>
 	</array>
 	<key>UIApplicationSceneManifest</key>
 	<dict>

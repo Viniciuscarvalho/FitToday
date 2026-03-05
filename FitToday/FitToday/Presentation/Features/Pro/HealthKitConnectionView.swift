@@ -211,7 +211,7 @@ private struct StatusCard: View {
         .padding()
         .background(FitTodayColor.surface)
         .cornerRadius(FitTodayRadius.md)
-        .techCornerBorders(length: 12, thickness: 1.5)
+        .fitCardBorder()
         .fitCardShadow()
     }
 }

@@ -93,7 +93,6 @@ struct PhaseModePicker: View {
                     if isPro {
                         RoundedRectangle(cornerRadius: FitTodayRadius.sm)
                             .fill(FitTodayColor.brandPrimary)
-                            .diagonalStripes(color: FitTodayColor.neonCyan, spacing: 8, opacity: 0.2)
                     } else {
                         RoundedRectangle(cornerRadius: FitTodayRadius.sm)
                             .fill(FitTodayColor.surface)
@@ -104,7 +103,7 @@ struct PhaseModePicker: View {
                 RoundedRectangle(cornerRadius: FitTodayRadius.sm)
                     .stroke(FitTodayColor.brandPrimary, lineWidth: isPro ? 0 : 1.5)
             )
-            .techCornerBorders(length: 12, thickness: 1.5)
+            .fitCardBorder()
         }
         .disabled(isRegenerating || timerHasStarted)
         .opacity(timerHasStarted ? 0.5 : 1)

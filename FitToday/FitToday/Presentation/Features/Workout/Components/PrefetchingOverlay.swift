@@ -35,10 +35,9 @@ struct PrefetchingOverlay: View {
             .background(
                 RoundedRectangle(cornerRadius: FitTodayRadius.md)
                     .fill(FitTodayColor.surface)
-                    .retroGridOverlay(spacing: 25)
                     .shadow(color: .black.opacity(0.3), radius: 20, x: 0, y: 10)
             )
-            .techCornerBorders(length: 16, thickness: 2)
+            .fitCardBorder()
             .padding()
         }
         .transition(.opacity)

@@ -139,11 +139,8 @@ struct WorkoutExerciseDetailView: View {
             .padding()
         }
         .background(
-            ZStack {
-                FitTodayColor.background
-                RetroGridPattern(lineColor: FitTodayColor.gridLine.opacity(0.3), spacing: 40)
-            }
-            .ignoresSafeArea()
+            FitTodayColor.background
+                .ignoresSafeArea()
         )
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {

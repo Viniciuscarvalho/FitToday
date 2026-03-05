@@ -60,7 +60,7 @@ struct DailyStatsCard: View {
                         .foregroundStyle(FitTodayColor.textSecondary)
 
                     HStack(spacing: FitTodaySpacing.xs) {
-                        FitnessIcon(type: .consistency, color: FitTodayColor.neonYellow, size: 18)
+                        FitnessIcon(type: .consistency, color: FitTodayColor.warning, size: 18)
                         Text("\(streakDays)")
                             .font(FitTodayFont.ui(size: 20, weight: .bold))
                             .foregroundStyle(FitTodayColor.textPrimary)
@@ -77,7 +77,7 @@ struct DailyStatsCard: View {
             HStack(spacing: FitTodaySpacing.sm) {
                 statPill(icon: "dumbbell.fill", value: caloriesBurned, label: "vol", color: FitTodayColor.brandPrimary)
                 statPill(icon: "figure.strengthtraining.traditional", value: "\(totalSets)", label: "home.stats.total_sets".localized, color: FitTodayColor.brandSecondary)
-                statPill(icon: "clock.fill", value: "\(avgDuration)", label: "home.stats.avg_duration".localized, color: FitTodayColor.neonCyan)
+                statPill(icon: "clock.fill", value: "\(avgDuration)", label: "home.stats.avg_duration".localized, color: FitTodayColor.brandPrimary)
             }
         }
         .padding(FitTodaySpacing.lg)

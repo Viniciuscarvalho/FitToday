@@ -386,7 +386,7 @@ struct WorkoutTemplateCard: View {
                         .stroke(FitTodayColor.outline.opacity(0.3), lineWidth: 1)
                 )
         )
-        .techCornerBorders(color: FitTodayColor.brandPrimary.opacity(0.3))
+        .fitCardBorder()
     }
 
     private func statItem(icon: String, value: String, label: String) -> some View {
