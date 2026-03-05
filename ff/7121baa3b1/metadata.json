@@ -1,0 +1,26 @@
+{
+  "cli_version": "0.4.4",
+  "checkpoint_id": "ff7121baa3b1",
+  "strategy": "manual-commit",
+  "branch": "feat/new-design-system",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "ops/sessions/20260305-140305.json"
+  ],
+  "sessions": [
+    {
+      "metadata": "/ff/7121baa3b1/0/metadata.json",
+      "transcript": "/ff/7121baa3b1/0/full.jsonl",
+      "context": "/ff/7121baa3b1/0/context.md",
+      "content_hash": "/ff/7121baa3b1/0/content_hash.txt",
+      "prompt": "/ff/7121baa3b1/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 29,
+    "cache_creation_tokens": 14707,
+    "cache_read_tokens": 2875909,
+    "output_tokens": 5575,
+    "api_call_count": 27
+  }
+}
