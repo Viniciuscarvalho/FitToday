@@ -203,6 +203,30 @@ final class OnboardingViewModelTests: XCTestCase {
         XCTAssertFalse(viewModel.selectedConditions.contains(.knee))
     }
     
+    // MARK: - Load From Profile Tests
+
+    @MainActor
+    func testLoadFromProfilePrefillsAllFields() {
+        let profile = UserProfile(
+            mainGoal: .conditioning,
+            availableStructure: .homeDumbbells,
+            preferredMethod: .hiit,
+            level: .advanced,
+            healthConditions: [.knee, .shoulder],
+            weeklyFrequency: 5
+        )
+
+        viewModel.loadFromProfile(profile)
+
+        XCTAssertEqual(viewModel.selectedGoal, .conditioning)
+        XCTAssertEqual(viewModel.selectedStructure, .homeDumbbells)
+        XCTAssertEqual(viewModel.selectedMethod, .hiit)
+        XCTAssertEqual(viewModel.selectedLevel, .advanced)
+        XCTAssertEqual(viewModel.selectedConditions, [.knee, .shoulder])
+        XCTAssertEqual(viewModel.weeklyFrequency, 5)
+        XCTAssertTrue(viewModel.canSubmitFull)
+    }
+
     // MARK: - Default Values Tests
     
     @MainActor
