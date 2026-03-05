@@ -16,6 +16,7 @@ struct FitTodayApp: App {
     // 💡 Learn: Com @Observable, use @State em vez de @StateObject
     @State private var sessionStore: WorkoutSessionStore
     @AppStorage(AppStorageKeys.hasSeenWelcome) private var hasSeenWelcome = false
+    @AppStorage(AppStorageKeys.themePreference) private var themePreferenceRaw: String = ThemePreference.dark.rawValue
     @Environment(\.scenePhase) private var scenePhase
 
     init() {
@@ -35,6 +36,11 @@ struct FitTodayApp: App {
         // Record first launch date (once)
         if UserDefaults.standard.object(forKey: AppStorageKeys.firstLaunchDate) == nil {
             UserDefaults.standard.set(Date(), forKey: AppStorageKeys.firstLaunchDate)
+        }
+
+        // Prune stale exercise image cache (background, no impact on cold start)
+        Task.detached(priority: .background) {
+            await ExerciseImageCache.shared.pruneOldCache()
         }
         
         #if DEBUG
@@ -61,8 +67,7 @@ struct FitTodayApp: App {
             .environment(appContainer.router)
             .environment(sessionStore)
             .environment(\.dependencyResolver, appContainer.container)
-            .imageCacheService(appContainer.container.resolve(ImageCaching.self)!)
-            .preferredColorScheme(.dark)  // Forçar tema escuro
+            .preferredColorScheme(ThemePreference(rawValue: themePreferenceRaw)?.colorScheme ?? .dark)
             .onOpenURL { url in
                 appContainer.router.handle(url: url)
             }
@@ -161,45 +166,43 @@ struct FitTodayApp: App {
         }
     }
 
-    /// Configura a aparência global de UIKit components para tema escuro
+    /// Configura a aparência global de UIKit components (adaptive para dark/light)
     private func configureGlobalAppearance() {
+        let bgColor = UIColor(FitTodayColor.background)
+        let textColor = UIColor(FitTodayColor.textPrimary)
+        let normalColor = UIColor(FitTodayColor.textSecondary)
+        let selectedColor = UIColor(FitTodayColor.brandPrimary)
+
         // Tab Bar
         let tabBarAppearance = UITabBarAppearance()
         tabBarAppearance.configureWithOpaqueBackground()
-        tabBarAppearance.backgroundColor = UIColor(FitTodayColor.background)
-        
-        // Cores dos ícones
-        let normalColor = UIColor(FitTodayColor.textSecondary)
-        let selectedColor = UIColor(FitTodayColor.brandPrimary)
-        
+        tabBarAppearance.backgroundColor = bgColor
         tabBarAppearance.stackedLayoutAppearance.normal.iconColor = normalColor
         tabBarAppearance.stackedLayoutAppearance.normal.titleTextAttributes = [.foregroundColor: normalColor]
         tabBarAppearance.stackedLayoutAppearance.selected.iconColor = selectedColor
         tabBarAppearance.stackedLayoutAppearance.selected.titleTextAttributes = [.foregroundColor: selectedColor]
-        
         UITabBar.appearance().standardAppearance = tabBarAppearance
         UITabBar.appearance().scrollEdgeAppearance = tabBarAppearance
-        
+
         // Navigation Bar
         let navBarAppearance = UINavigationBarAppearance()
         navBarAppearance.configureWithOpaqueBackground()
-        navBarAppearance.backgroundColor = UIColor(FitTodayColor.background)
+        navBarAppearance.backgroundColor = bgColor
         navBarAppearance.titleTextAttributes = [
-            .foregroundColor: UIColor.white,
+            .foregroundColor: textColor,
             .font: UIFont.systemFont(ofSize: 17, weight: .semibold)
         ]
         navBarAppearance.largeTitleTextAttributes = [
-            .foregroundColor: UIColor.white,
+            .foregroundColor: textColor,
             .font: UIFont.systemFont(ofSize: 34, weight: .bold)
         ]
-        
         UINavigationBar.appearance().standardAppearance = navBarAppearance
         UINavigationBar.appearance().compactAppearance = navBarAppearance
         UINavigationBar.appearance().scrollEdgeAppearance = navBarAppearance
-        UINavigationBar.appearance().tintColor = UIColor(FitTodayColor.brandPrimary)
-        
+        UINavigationBar.appearance().tintColor = selectedColor
+
         // Scroll View e TableView backgrounds
-        UITableView.appearance().backgroundColor = UIColor(FitTodayColor.background)
-        UICollectionView.appearance().backgroundColor = UIColor(FitTodayColor.background)
+        UITableView.appearance().backgroundColor = bgColor
+        UICollectionView.appearance().backgroundColor = bgColor
     }
 }

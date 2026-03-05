@@ -53,7 +53,7 @@ struct SavedRoutineCard: View {
                         .stroke(goalColor.opacity(0.3), lineWidth: 1)
                 )
         )
-        .techCornerBorders(color: goalColor.opacity(0.4))
+        .fitCardBorder()
         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
             Button(role: .destructive) {
                 showDeleteConfirmation = true
@@ -236,7 +236,7 @@ struct SavedRoutineCardRow: View {
                         .stroke(goalColor.opacity(0.3), lineWidth: 1)
                 )
         )
-        .techCornerBorders(color: goalColor.opacity(0.4))
+        .fitCardBorder()
     }
 
     // MARK: - Subviews

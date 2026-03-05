@@ -75,6 +75,13 @@ service firebase.storage {
       allow delete: if false;
     }
 
+    // Exercise images: /exercises/{exerciseId}/{filename}
+    // Read-only for authenticated users; uploaded via admin tooling
+    match /exercises/{exerciseId}/{fileName} {
+      allow read: if isAuthenticated();
+      allow write: if false;
+    }
+
     // Deny all other access by default
     match /{allPaths=**} {
       allow read, write: if false;

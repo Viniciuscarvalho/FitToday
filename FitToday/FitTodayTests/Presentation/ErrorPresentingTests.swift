@@ -231,39 +231,6 @@ final class ErrorPresentingTests: XCTestCase {
     XCTAssertEqual(message.title, "IA temporariamente indisponível")
   }
   
-  // MARK: - ErrorMapper ImageCacheError Tests
-  
-  func testImageCacheErrorInvalidResponse() {
-    let error = ImageCacheError.invalidResponse(statusCode: 404)
-    let message = ErrorMapper.userFriendlyMessage(for: error)
-    
-    XCTAssertEqual(message.title, "Erro ao carregar imagem")
-    XCTAssertTrue(message.message.contains("404"))
-  }
-  
-  func testImageCacheErrorDiskWriteFailed() {
-    let nsError = NSError(domain: "test", code: 1)
-    let error = ImageCacheError.diskWriteFailed(underlying: nsError)
-    let message = ErrorMapper.userFriendlyMessage(for: error)
-    
-    XCTAssertEqual(message.title, "Erro ao salvar")
-  }
-  
-  func testImageCacheErrorSizeExceeded() {
-    let error = ImageCacheError.cacheSizeExceeded
-    let message = ErrorMapper.userFriendlyMessage(for: error)
-    
-    XCTAssertEqual(message.title, "Cache cheio")
-    XCTAssertTrue(message.message.contains("cache"))
-  }
-  
-  func testImageCacheErrorInvalidImageData() {
-    let error = ImageCacheError.invalidImageData
-    let message = ErrorMapper.userFriendlyMessage(for: error)
-    
-    XCTAssertEqual(message.title, "Imagem inválida")
-  }
-  
   // MARK: - ErrorMapper Unknown Error Tests
   
   func testUnknownError() {
@@ -342,8 +309,7 @@ final class ErrorPresentingTests: XCTestCase {
     let errors: [Error] = [
       URLError(.notConnectedToInternet),
       DomainError.profileNotFound,
-      OpenAIClientError.invalidResponse,
-      ImageCacheError.invalidImageData
+      OpenAIClientError.invalidResponse
     ]
     
     for error in errors {

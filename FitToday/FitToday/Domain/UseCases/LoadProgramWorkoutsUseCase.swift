@@ -2,22 +2,22 @@
 //  LoadProgramWorkoutsUseCase.swift
 //  FitToday
 //
-//  Use case para carregar treinos de um programa com exercícios da API Wger.
+//  Use case para carregar treinos de um programa com exercícios da API catalog.
 //
 
 import Foundation
 
-/// Use case que carrega os treinos de um programa com exercícios da API Wger.
+/// Use case que carrega os treinos de um programa com exercícios da API catalog.
 struct LoadProgramWorkoutsUseCase: Sendable {
     private let programRepository: ProgramRepository
-    private let workoutRepository: WgerProgramWorkoutRepository
+    private let workoutRepository: ProgramWorkoutRepository
 
-    init(programRepository: ProgramRepository, workoutRepository: WgerProgramWorkoutRepository) {
+    init(programRepository: ProgramRepository, workoutRepository: ProgramWorkoutRepository) {
         self.programRepository = programRepository
         self.workoutRepository = workoutRepository
     }
 
-    /// Carrega todos os treinos de um programa com exercícios da Wger.
+    /// Carrega todos os treinos de um programa com exercícios da catalog.
     /// - Parameter programId: ID do programa
     /// - Returns: Array de ProgramWorkout com exercícios carregados
     func execute(programId: String) async throws -> [ProgramWorkout] {
@@ -59,7 +59,7 @@ struct LoadProgramWorkoutsUseCase: Sendable {
                     print("[LoadProgramWorkouts] 📖 Loaded customized workout: \(workout.title)")
                     #endif
                 } else {
-                    // Carregar exercícios padrão da API Wger
+                    // Carregar exercícios padrão da API catalog
                     let exercises = try await workoutRepository.loadWorkoutExercises(
                         templateId: templateId,
                         exerciseCount: 8
@@ -109,7 +109,7 @@ struct LoadProgramWorkoutsUseCase: Sendable {
         index: Int,
         templateId: String,
         estimatedMinutes: Int,
-        exercises: [WgerExercise],
+        exercises: [CatalogExercise],
         customOrder: [Int]?
     ) -> ProgramWorkout {
         let templateType = WorkoutTemplateType.from(templateId: templateId)
@@ -117,7 +117,7 @@ struct LoadProgramWorkoutsUseCase: Sendable {
         var programExercises = exercises.enumerated().map { offset, exercise in
             ProgramExercise(
                 id: "\(templateId)_\(exercise.id)",
-                wgerExercise: exercise,
+                catalogExercise: exercise,
                 sets: defaultSets(for: templateType),
                 repsRange: defaultRepsRange(for: templateType),
                 restSeconds: defaultRestSeconds(for: templateType),

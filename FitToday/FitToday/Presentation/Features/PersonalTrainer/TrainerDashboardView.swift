@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Swinject
 
 struct TrainerDashboardView: View {
     let trainer: PersonalTrainer
@@ -13,6 +14,8 @@ struct TrainerDashboardView: View {
     let isChatEnabled: Bool
     let onDisconnect: () -> Void
     let initialTab: TrainerDashboardTab
+    let currentUserId: String
+    let resolver: Resolver
 
     @State private var selectedTab: TrainerDashboardTab
 
@@ -21,12 +24,16 @@ struct TrainerDashboardView: View {
         workouts: [TrainerWorkout],
         isChatEnabled: Bool,
         onDisconnect: @escaping () -> Void,
+        currentUserId: String,
+        resolver: Resolver,
         initialTab: TrainerDashboardTab = .today
     ) {
         self.trainer = trainer
         self.workouts = workouts
         self.isChatEnabled = isChatEnabled
         self.onDisconnect = onDisconnect
+        self.currentUserId = currentUserId
+        self.resolver = resolver
         self.initialTab = initialTab
         self._selectedTab = State(wrappedValue: initialTab)
     }
@@ -149,7 +156,12 @@ struct TrainerDashboardView: View {
                 onViewHistory: { selectedTab = .history }
             )
         case .chat:
-            TrainerChatView(trainerId: trainer.id, trainerName: trainer.displayName)
+            TrainerChatView(
+                trainerId: trainer.id,
+                trainerName: trainer.displayName,
+                currentUserId: currentUserId,
+                resolver: resolver
+            )
         case .history:
             TrainerHistoryView(workouts: workouts)
         case .evolution:

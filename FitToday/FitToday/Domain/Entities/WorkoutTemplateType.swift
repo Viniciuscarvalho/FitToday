@@ -2,13 +2,13 @@
 //  WorkoutTemplateType.swift
 //  FitToday
 //
-//  Tipo de template de treino para mapeamento com categorias da API Wger.
+//  Tipo de template de treino para mapeamento com categorias de exercício.
 //
 
 import Foundation
 
-/// Tipo de template de treino para mapeamento com categorias Wger.
-/// Usado para determinar quais exercícios buscar da API baseado no tipo de treino.
+/// Tipo de template de treino para mapeamento com categorias de exercício.
+/// Usado para determinar quais exercícios buscar baseado no tipo de treino.
 enum WorkoutTemplateType: String, CaseIterable, Sendable {
     case push
     case pull
@@ -29,50 +29,37 @@ enum WorkoutTemplateType: String, CaseIterable, Sendable {
     // Glute focused
     case glutes
 
-    /// IDs das categorias Wger correspondentes a este tipo de treino.
-    /// Referência: https://wger.de/api/v2/exercisecategory/
-    /// Categorias válidas: 8=Arms, 9=Legs, 10=Abs, 11=Chest, 12=Back, 13=Shoulders, 14=Calves, 15=Cardio
-    var wgerCategoryIds: [Int] {
+    /// Nomes das categorias no Firestore correspondentes a este tipo de treino.
+    var categoryNames: [String] {
         switch self {
         case .push:
-            // Chest (11), Shoulders (13), Arms/Triceps (8)
-            return [11, 13, 8]
+            return ["chest", "shoulders", "triceps"]
         case .pull:
-            // Back (12), Arms/Biceps (8)
-            return [12, 8]
+            return ["back", "biceps"]
         case .legs:
-            // Legs (9), Calves (14)
-            return [9, 14]
+            return ["legs", "quads", "hamstrings", "calves"]
         case .fullbody:
-            // All major muscle groups
-            return [11, 12, 9, 10, 13, 8]
+            return ["chest", "back", "legs", "shoulders", "core"]
         case .core:
-            // Abs (10)
-            return [10]
+            return ["core"]
         case .hiit, .conditioning:
-            // Compound movements: Chest, Legs, Abs
-            return [11, 9, 10]
+            return ["chest", "legs", "core"]
         case .upper:
-            // All upper body: Chest, Back, Shoulders, Arms
-            return [11, 12, 13, 8]
+            return ["chest", "back", "shoulders", "biceps", "triceps"]
         case .lower:
-            // All lower body: Legs, Calves
-            return [9, 14]
-        // Bro Split specific - isolated muscle groups
+            return ["legs", "quads", "hamstrings", "calves"]
         case .chest:
-            return [11]
+            return ["chest"]
         case .back:
-            return [12]
+            return ["back"]
         case .shoulders:
-            return [13]
+            return ["shoulders"]
         case .arms:
-            return [8]
-        // Strength focused - compound movement groups
+            return ["biceps", "triceps"]
         case .strength:
-            return [11, 12, 9]
-        // Glute focused
+            return ["chest", "back", "legs"]
         case .glutes:
-            return [9]
+            return ["glutes", "legs"]
         }
     }
 

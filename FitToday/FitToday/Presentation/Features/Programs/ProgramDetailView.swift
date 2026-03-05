@@ -2,7 +2,7 @@
 //  ProgramDetailView.swift
 //  FitToday
 //
-//  Tela de detalhe de um programa, listando os treinos com exercícios da API Wger.
+//  Tela de detalhe de um programa, listando os treinos com exercícios do catálogo.
 //
 
 import SwiftUI
@@ -333,7 +333,7 @@ struct ProgramDetailView: View {
         VStack(spacing: FitTodaySpacing.md) {
             ProgressView()
                 .tint(FitTodayColor.brandPrimary)
-            Text("Carregando exercícios da API Wger...")
+            Text("Carregando exercícios...")
                 .font(.system(.caption))
                 .foregroundStyle(FitTodayColor.textSecondary)
         }
@@ -412,7 +412,7 @@ struct ProgramDetailView: View {
 
             guard program != nil else { return }
 
-            // Load workouts with Wger exercises
+            // Load workouts with catalog exercises
             workouts = try await loadProgramWorkoutsUseCase.execute(programId: programId)
 
             #if DEBUG

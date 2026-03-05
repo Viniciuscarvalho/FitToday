@@ -257,11 +257,20 @@ struct ProgramFilterCard: View {
             VStack(spacing: 0) {
                 // Image Section
                 ZStack(alignment: .topLeading) {
-                    Image(program.heroImageName)
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
+                    if UIImage(named: program.heroImageName) != nil {
+                        Image(program.heroImageName)
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                            .frame(height: 160)
+                            .clipped()
+                    } else {
+                        LinearGradient(
+                            colors: gradientFallback(for: program.goalTag),
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
                         .frame(height: 160)
-                        .clipped()
+                    }
 
                     // Gradient overlay
                     LinearGradient(
@@ -342,6 +351,16 @@ struct ProgramFilterCard: View {
             Text(value)
                 .font(.system(size: 12, weight: .medium))
                 .foregroundStyle(FitTodayColor.textSecondary)
+        }
+    }
+
+    private func gradientFallback(for goalTag: ProgramGoalTag) -> [Color] {
+        switch goalTag {
+        case .strength: return [.blue, .purple]
+        case .conditioning: return [.orange, .red]
+        case .aerobic: return [.green, .teal]
+        case .core: return [.cyan, .mint]
+        case .endurance: return [.indigo, .blue]
         }
     }
 }

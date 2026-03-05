@@ -114,7 +114,7 @@ struct CustomWorkoutBuilderView: View {
             }
             .sheet(isPresented: $viewModel.showExercisePicker) {
                 ExercisePickerView(exerciseService: viewModel.exerciseService) { exercise in
-                    viewModel.addExercise(from: exercise, imageURL: nil)
+                    viewModel.addExercise(from: exercise)
                 }
             }
             .alert("Error", isPresented: .init(

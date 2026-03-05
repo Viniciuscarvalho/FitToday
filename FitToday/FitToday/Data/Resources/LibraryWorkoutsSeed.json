@@ -1844,5 +1844,750 @@
         "tip": "Alternador de braço em cada série"
       }
     ]
+  },
+  {
+    "id": "lib_fullbody_beginner_gym",
+    "title": "Full Body - Iniciante",
+    "subtitle": "Treino completo para iniciantes com exercícios compostos",
+    "goal": "hypertrophy",
+    "structure": "fullGym",
+    "estimated_duration_minutes": 40,
+    "intensity": "moderate",
+    "exercises": [
+      {
+        "exercise": {
+          "id": "barbell_squat",
+          "name": "Barbell Squat",
+          "main_muscle": "quads",
+          "equipment": "barbell",
+          "instructions": [
+            "Posicione a barra no trapézio alto",
+            "Pés na largura dos ombros, pontas levemente para fora",
+            "Desça até as coxas ficarem paralelas ao chão",
+            "Suba explosivamente mantendo os joelhos alinhados"
+          ],
+          "media": {
+            "image_url": null,
+            "gif_url": null
+          }
+        },
+        "sets": 3,
+        "reps_lower": 10,
+        "reps_upper": 12,
+        "rest_interval": 90,
+        "tip": "Rei dos exercícios - mantenha a técnica perfeita"
+      },
+      {
+        "exercise": {
+          "id": "barbell_bench_press",
+          "name": "Barbell Bench Press",
+          "main_muscle": "chest",
+          "equipment": "barbell",
+          "instructions": [
+            "Deite no banco com os pés firmemente apoiados no chão",
+            "Pegada um pouco mais larga que a largura dos ombros",
+            "Desça a barra controladamente até tocar o peito",
+            "Empurre explosivamente mantendo as escápulas retraídas"
+          ],
+          "media": {
+            "image_url": null,
+            "gif_url": null
+          }
+        },
+        "sets": 3,
+        "reps_lower": 10,
+        "reps_upper": 12,
+        "rest_interval": 90,
+        "tip": "Mantenha as escápulas retraídas e o peito projetado durante todo movimento"
+      },
+      {
+        "exercise": {
+          "id": "barbell_row",
+          "name": "Barbell Bent Over Row",
+          "main_muscle": "back",
+          "equipment": "barbell",
+          "instructions": [
+            "Incline o tronco cerca de 45 graus, coluna neutra",
+            "Segure a barra com pegada pronada na largura dos ombros",
+            "Puxe a barra em direção ao abdômen baixo",
+            "Desça controladamente mantendo a postura"
+          ],
+          "media": {
+            "image_url": null,
+            "gif_url": null
+          }
+        },
+        "sets": 3,
+        "reps_lower": 10,
+        "reps_upper": 12,
+        "rest_interval": 90,
+        "tip": "Mantenha o core contraído para proteger a lombar"
+      },
+      {
+        "exercise": {
+          "id": "leg_press",
+          "name": "Leg Press",
+          "main_muscle": "quads",
+          "equipment": "machine",
+          "instructions": [
+            "Ajuste o banco e posicione os pés na plataforma",
+            "Destrave o peso e desça controladamente",
+            "Desça até 90 graus de flexão nos joelhos",
+            "Empurre sem travar completamente os joelhos"
+          ],
+          "media": {
+            "image_url": null,
+            "gif_url": null
+          }
+        },
+        "sets": 3,
+        "reps_lower": 12,
+        "reps_upper": 15,
+        "rest_interval": 90,
+        "tip": "Varie a posição dos pés para diferentes estímulos"
+      },
+      {
+        "exercise": {
+          "id": "lat_pulldown",
+          "name": "Lat Pulldown",
+          "main_muscle": "back",
+          "equipment": "cable",
+          "instructions": [
+            "Sente-se com as coxas travadas sob o apoio",
+            "Segure a barra com pegada pronada mais larga que os ombros",
+            "Puxe a barra até o peito, contraindo as escápulas",
+            "Retorne controladamente à posição inicial"
+          ],
+          "media": {
+            "image_url": null,
+            "gif_url": null
+          }
+        },
+        "sets": 3,
+        "reps_lower": 10,
+        "reps_upper": 12,
+        "rest_interval": 90,
+        "tip": "Inicie o movimento puxando com as costas, não com os braços"
+      },
+      {
+        "exercise": {
+          "id": "plank_forearm",
+          "name": "Plank",
+          "main_muscle": "core",
+          "equipment": "bodyweight",
+          "instructions": [
+            "Apoie os antebraços e ponta dos pés no chão",
+            "Mantenha o corpo em linha reta",
+            "Contraia abdômen e glúteos",
+            "Segure sem deixar o quadril cair ou subir"
+          ],
+          "media": {
+            "image_url": null,
+            "gif_url": null
+          }
+        },
+        "sets": 3,
+        "reps_lower": 30,
+        "reps_upper": 45,
+        "rest_interval": 60,
+        "tip": "Respire normalmente durante a execução"
+      }
+    ]
+  },
+  {
+    "id": "lib_upper_beginner_gym",
+    "title": "Upper Body - Iniciante",
+    "subtitle": "Treino de membros superiores para iniciantes",
+    "goal": "hypertrophy",
+    "structure": "fullGym",
+    "estimated_duration_minutes": 35,
+    "intensity": "moderate",
+    "exercises": [
+      {
+        "exercise": {
+          "id": "chest_press_machine",
+          "name": "Chest Press Machine",
+          "main_muscle": "chest",
+          "equipment": "machine",
+          "instructions": [
+            "Ajuste o banco para que os pegadores fiquem na altura do peito",
+            "Segure os pegadores com os cotovelos a 90 graus",
+            "Empurre para frente estendendo os braços",
+            "Retorne controladamente sem deixar o peso descansar"
+          ],
+          "media": {
+            "image_url": null,
+            "gif_url": null
+          }
+        },
+        "sets": 3,
+        "reps_lower": 10,
+        "reps_upper": 12,
+        "rest_interval": 90,
+        "tip": "Excelente para iniciantes aprenderem o movimento do supino"
+      },
+      {
+        "exercise": {
+          "id": "lat_pulldown",
+          "name": "Lat Pulldown",
+          "main_muscle": "back",
+          "equipment": "cable",
+          "instructions": [
+            "Sente-se com as coxas travadas sob o apoio",
+            "Segure a barra com pegada pronada mais larga que os ombros",
+            "Puxe a barra até o peito, contraindo as escápulas",
+            "Retorne controladamente à posição inicial"
+          ],
+          "media": {
+            "image_url": null,
+            "gif_url": null
+          }
+        },
+        "sets": 3,
+        "reps_lower": 10,
+        "reps_upper": 12,
+        "rest_interval": 90,
+        "tip": "Puxe com as costas, não com os braços"
+      },
+      {
+        "exercise": {
+          "id": "seated_dumbbell_shoulder_press",
+          "name": "Seated Dumbbell Shoulder Press",
+          "main_muscle": "shoulders",
+          "equipment": "dumbbell",
+          "instructions": [
+            "Sente com as costas apoiadas no banco reto",
+            "Inicie com os halteres na altura dos ombros",
+            "Empurre para cima até quase estender os braços",
+            "Desça controladamente até a posição inicial"
+          ],
+          "media": {
+            "image_url": null,
+            "gif_url": null
+          }
+        },
+        "sets": 3,
+        "reps_lower": 10,
+        "reps_upper": 12,
+        "rest_interval": 90,
+        "tip": "Mantenha o core ativado para estabilizar a coluna"
+      },
+      {
+        "exercise": {
+          "id": "machine_curl",
+          "name": "Machine Bicep Curl",
+          "main_muscle": "biceps",
+          "equipment": "machine",
+          "instructions": [
+            "Ajuste o banco e os apoios para os braços",
+            "Segure os pegadores com pegada supinada",
+            "Flexione os braços trazendo os pegadores aos ombros",
+            "Desça controladamente"
+          ],
+          "media": {
+            "image_url": null,
+            "gif_url": null
+          }
+        },
+        "sets": 3,
+        "reps_lower": 12,
+        "reps_upper": 15,
+        "rest_interval": 60,
+        "tip": "Foque na contração do bíceps"
+      },
+      {
+        "exercise": {
+          "id": "tricep_rope_pushdown",
+          "name": "Triceps Rope Pushdown",
+          "main_muscle": "triceps",
+          "equipment": "cable",
+          "instructions": [
+            "Segure a corda com pegada neutra",
+            "Mantenha os cotovelos fixos ao lado do corpo",
+            "Estenda os braços separando as pontas da corda",
+            "Retorne controladamente mantendo a tensão"
+          ],
+          "media": {
+            "image_url": null,
+            "gif_url": null
+          }
+        },
+        "sets": 3,
+        "reps_lower": 12,
+        "reps_upper": 15,
+        "rest_interval": 60,
+        "tip": "Separe as pontas da corda ao final para maior contração"
+      },
+      {
+        "exercise": {
+          "id": "face_pull",
+          "name": "Face Pull",
+          "main_muscle": "shoulders",
+          "equipment": "cable",
+          "instructions": [
+            "Ajuste a polia na altura do rosto",
+            "Segure a corda com pegada neutra",
+            "Puxe em direção ao rosto separando as mãos",
+            "Foque na rotação externa dos ombros"
+          ],
+          "media": {
+            "image_url": null,
+            "gif_url": null
+          }
+        },
+        "sets": 3,
+        "reps_lower": 15,
+        "reps_upper": 20,
+        "rest_interval": 60,
+        "tip": "Excelente para saúde dos ombros e postura"
+      }
+    ]
+  },
+  {
+    "id": "lib_lower_beginner_gym",
+    "title": "Lower Body - Iniciante",
+    "subtitle": "Treino de membros inferiores para iniciantes",
+    "goal": "hypertrophy",
+    "structure": "fullGym",
+    "estimated_duration_minutes": 35,
+    "intensity": "moderate",
+    "exercises": [
+      {
+        "exercise": {
+          "id": "leg_press",
+          "name": "Leg Press",
+          "main_muscle": "quads",
+          "equipment": "machine",
+          "instructions": [
+            "Ajuste o banco e posicione os pés na plataforma",
+            "Destrave o peso e desça controladamente",
+            "Desça até 90 graus de flexão nos joelhos",
+            "Empurre sem travar completamente os joelhos"
+          ],
+          "media": {
+            "image_url": null,
+            "gif_url": null
+          }
+        },
+        "sets": 3,
+        "reps_lower": 12,
+        "reps_upper": 15,
+        "rest_interval": 90,
+        "tip": "Não trave os joelhos completamente no topo"
+      },
+      {
+        "exercise": {
+          "id": "leg_curl_lying",
+          "name": "Lying Leg Curl",
+          "main_muscle": "hamstrings",
+          "equipment": "machine",
+          "instructions": [
+            "Deite de bruços com os calcanhares sob o rolo",
+            "Flexione os joelhos trazendo o rolo em direção aos glúteos",
+            "Segure por 1 segundo no pico da contração",
+            "Retorne controladamente"
+          ],
+          "media": {
+            "image_url": null,
+            "gif_url": null
+          }
+        },
+        "sets": 3,
+        "reps_lower": 12,
+        "reps_upper": 15,
+        "rest_interval": 90,
+        "tip": "Evite levantar o quadril durante o movimento"
+      },
+      {
+        "exercise": {
+          "id": "leg_extension",
+          "name": "Leg Extension",
+          "main_muscle": "quads",
+          "equipment": "machine",
+          "instructions": [
+            "Ajuste o encosto e o rolo na altura dos tornozelos",
+            "Estenda os joelhos elevando o rolo",
+            "Segure por 1 segundo no topo",
+            "Desça controladamente"
+          ],
+          "media": {
+            "image_url": null,
+            "gif_url": null
+          }
+        },
+        "sets": 3,
+        "reps_lower": 12,
+        "reps_upper": 15,
+        "rest_interval": 60,
+        "tip": "Foque na contração do quadríceps no topo"
+      },
+      {
+        "exercise": {
+          "id": "barbell_squat",
+          "name": "Barbell Squat",
+          "main_muscle": "quads",
+          "equipment": "barbell",
+          "instructions": [
+            "Posicione a barra no trapézio alto",
+            "Pés na largura dos ombros, pontas levemente para fora",
+            "Desça até as coxas ficarem paralelas ao chão",
+            "Suba explosivamente mantendo os joelhos alinhados"
+          ],
+          "media": {
+            "image_url": null,
+            "gif_url": null
+          }
+        },
+        "sets": 3,
+        "reps_lower": 10,
+        "reps_upper": 12,
+        "rest_interval": 60,
+        "tip": "Rei dos exercícios - mantenha a técnica perfeita"
+      },
+      {
+        "exercise": {
+          "id": "standing_calf_raise",
+          "name": "Standing Calf Raise",
+          "main_muscle": "calves",
+          "equipment": "machine",
+          "instructions": [
+            "Posicione os ombros sob os apoios",
+            "Fique na ponta dos pés no step",
+            "Desça os calcanhares abaixo do step",
+            "Suba até a máxima extensão dos tornozelos"
+          ],
+          "media": {
+            "image_url": null,
+            "gif_url": null
+          }
+        },
+        "sets": 3,
+        "reps_lower": 15,
+        "reps_upper": 20,
+        "rest_interval": 60,
+        "tip": "Faça a amplitude completa do movimento"
+      },
+      {
+        "exercise": {
+          "id": "glute_bridge",
+          "name": "Glute Bridge",
+          "main_muscle": "glutes",
+          "equipment": "bodyweight",
+          "instructions": [
+            "Deite de costas com joelhos flexionados",
+            "Pés apoiados no chão na largura do quadril",
+            "Eleve o quadril contraindo os glúteos",
+            "Segure no topo e desça controladamente"
+          ],
+          "media": {
+            "image_url": null,
+            "gif_url": null
+          }
+        },
+        "sets": 3,
+        "reps_lower": 12,
+        "reps_upper": 15,
+        "rest_interval": 60,
+        "tip": "Aperte os glúteos no topo por 2 segundos"
+      }
+    ]
+  },
+  {
+    "id": "lib_upper_strength_gym",
+    "title": "Upper Body - Força",
+    "subtitle": "Treino de força para membros superiores",
+    "goal": "strength",
+    "structure": "fullGym",
+    "estimated_duration_minutes": 45,
+    "intensity": "high",
+    "exercises": [
+      {
+        "exercise": {
+          "id": "barbell_bench_press",
+          "name": "Barbell Bench Press",
+          "main_muscle": "chest",
+          "equipment": "barbell",
+          "instructions": [
+            "Deite no banco com os pés firmemente apoiados no chão",
+            "Pegada um pouco mais larga que a largura dos ombros",
+            "Desça a barra controladamente até tocar o peito",
+            "Empurre explosivamente mantendo as escápulas retraídas"
+          ],
+          "media": {
+            "image_url": null,
+            "gif_url": null
+          }
+        },
+        "sets": 4,
+        "reps_lower": 5,
+        "reps_upper": 6,
+        "rest_interval": 120,
+        "tip": "Mantenha as escápulas retraídas e o peito projetado durante todo movimento"
+      },
+      {
+        "exercise": {
+          "id": "barbell_row",
+          "name": "Barbell Bent Over Row",
+          "main_muscle": "back",
+          "equipment": "barbell",
+          "instructions": [
+            "Incline o tronco cerca de 45 graus, coluna neutra",
+            "Segure a barra com pegada pronada na largura dos ombros",
+            "Puxe a barra em direção ao abdômen baixo",
+            "Desça controladamente mantendo a postura"
+          ],
+          "media": {
+            "image_url": null,
+            "gif_url": null
+          }
+        },
+        "sets": 4,
+        "reps_lower": 5,
+        "reps_upper": 6,
+        "rest_interval": 120,
+        "tip": "Mantenha o core contraído para proteger a lombar"
+      },
+      {
+        "exercise": {
+          "id": "incline_dumbbell_press",
+          "name": "Incline Dumbbell Press",
+          "main_muscle": "chest",
+          "equipment": "dumbbell",
+          "instructions": [
+            "Ajuste o banco em 30-45 graus de inclinação",
+            "Inicie com os halteres na altura dos ombros",
+            "Empurre para cima unindo os halteres no topo",
+            "Desça controladamente sentindo o alongamento"
+          ],
+          "media": {
+            "image_url": null,
+            "gif_url": null
+          }
+        },
+        "sets": 3,
+        "reps_lower": 8,
+        "reps_upper": 10,
+        "rest_interval": 90,
+        "tip": "Não deixe os cotovelos abrirem demais para proteger os ombros"
+      },
+      {
+        "exercise": {
+          "id": "seated_cable_row",
+          "name": "Seated Cable Row",
+          "main_muscle": "back",
+          "equipment": "cable",
+          "instructions": [
+            "Sente com os pés apoiados e joelhos levemente flexionados",
+            "Segure o triângulo ou barra com braços estendidos",
+            "Puxe em direção ao abdômen, abrindo o peito",
+            "Retorne controladamente sem perder a postura"
+          ],
+          "media": {
+            "image_url": null,
+            "gif_url": null
+          }
+        },
+        "sets": 3,
+        "reps_lower": 8,
+        "reps_upper": 10,
+        "rest_interval": 90,
+        "tip": "Foque em apertar as escápulas no final do movimento"
+      },
+      {
+        "exercise": {
+          "id": "lateral_raise",
+          "name": "Dumbbell Lateral Raise",
+          "main_muscle": "shoulders",
+          "equipment": "dumbbell",
+          "instructions": [
+            "Fique em pé com halteres ao lado do corpo",
+            "Levante os braços lateralmente até a altura dos ombros",
+            "Mantenha leve flexão dos cotovelos",
+            "Desça controladamente sem balançar"
+          ],
+          "media": {
+            "image_url": null,
+            "gif_url": null
+          }
+        },
+        "sets": 3,
+        "reps_lower": 12,
+        "reps_upper": 15,
+        "rest_interval": 90,
+        "tip": "Use pesos moderados para manter a técnica perfeita"
+      },
+      {
+        "exercise": {
+          "id": "barbell_curl",
+          "name": "Barbell Curl",
+          "main_muscle": "biceps",
+          "equipment": "barbell",
+          "instructions": [
+            "Fique em pé com a barra e pegada supinada",
+            "Mantenha os cotovelos fixos ao lado do corpo",
+            "Flexione os braços trazendo a barra aos ombros",
+            "Desça controladamente sem balançar"
+          ],
+          "media": {
+            "image_url": null,
+            "gif_url": null
+          }
+        },
+        "sets": 3,
+        "reps_lower": 8,
+        "reps_upper": 10,
+        "rest_interval": 90,
+        "tip": "Controle a fase negativa para maior hipertrofia"
+      }
+    ]
+  },
+  {
+    "id": "lib_lower_strength_gym",
+    "title": "Lower Body - Força",
+    "subtitle": "Treino de força para membros inferiores",
+    "goal": "strength",
+    "structure": "fullGym",
+    "estimated_duration_minutes": 45,
+    "intensity": "high",
+    "exercises": [
+      {
+        "exercise": {
+          "id": "barbell_squat",
+          "name": "Barbell Squat",
+          "main_muscle": "quads",
+          "equipment": "barbell",
+          "instructions": [
+            "Posicione a barra no trapézio alto",
+            "Pés na largura dos ombros, pontas levemente para fora",
+            "Desça até as coxas ficarem paralelas ao chão",
+            "Suba explosivamente mantendo os joelhos alinhados"
+          ],
+          "media": {
+            "image_url": null,
+            "gif_url": null
+          }
+        },
+        "sets": 4,
+        "reps_lower": 5,
+        "reps_upper": 6,
+        "rest_interval": 120,
+        "tip": "Rei dos exercícios - mantenha a técnica perfeita"
+      },
+      {
+        "exercise": {
+          "id": "romanian_deadlift",
+          "name": "Barbell Romanian Deadlift",
+          "main_muscle": "hamstrings",
+          "equipment": "barbell",
+          "instructions": [
+            "Segure a barra com pegada pronada",
+            "Mantenha os joelhos levemente flexionados",
+            "Incline o tronco empurrando o quadril para trás",
+            "Desça até sentir alongamento nos posteriores"
+          ],
+          "media": {
+            "image_url": null,
+            "gif_url": null
+          }
+        },
+        "sets": 4,
+        "reps_lower": 6,
+        "reps_upper": 8,
+        "rest_interval": 120,
+        "tip": "Mantenha a barra próxima às pernas durante todo o movimento"
+      },
+      {
+        "exercise": {
+          "id": "hack_squat",
+          "name": "Hack Squat",
+          "main_muscle": "quads",
+          "equipment": "machine",
+          "instructions": [
+            "Posicione as costas contra o encosto",
+            "Pés na plataforma na altura dos ombros",
+            "Desça dobrando os joelhos mantendo as costas apoiadas",
+            "Suba estendendo as pernas completamente"
+          ],
+          "media": {
+            "image_url": null,
+            "gif_url": null
+          }
+        },
+        "sets": 3,
+        "reps_lower": 8,
+        "reps_upper": 10,
+        "rest_interval": 90,
+        "tip": "Ótima alternativa ao agachamento livre"
+      },
+      {
+        "exercise": {
+          "id": "leg_curl_lying",
+          "name": "Lying Leg Curl",
+          "main_muscle": "hamstrings",
+          "equipment": "machine",
+          "instructions": [
+            "Deite de bruços com os calcanhares sob o rolo",
+            "Flexione os joelhos trazendo o rolo em direção aos glúteos",
+            "Segure por 1 segundo no pico da contração",
+            "Retorne controladamente"
+          ],
+          "media": {
+            "image_url": null,
+            "gif_url": null
+          }
+        },
+        "sets": 3,
+        "reps_lower": 10,
+        "reps_upper": 12,
+        "rest_interval": 90,
+        "tip": "Evite levantar o quadril durante o movimento"
+      },
+      {
+        "exercise": {
+          "id": "leg_extension",
+          "name": "Leg Extension",
+          "main_muscle": "quads",
+          "equipment": "machine",
+          "instructions": [
+            "Ajuste o encosto e o rolo na altura dos tornozelos",
+            "Estenda os joelhos elevando o rolo",
+            "Segure por 1 segundo no topo",
+            "Desça controladamente"
+          ],
+          "media": {
+            "image_url": null,
+            "gif_url": null
+          }
+        },
+        "sets": 3,
+        "reps_lower": 10,
+        "reps_upper": 12,
+        "rest_interval": 90,
+        "tip": "Excelente para finalizar o treino de quadríceps"
+      },
+      {
+        "exercise": {
+          "id": "standing_calf_raise",
+          "name": "Standing Calf Raise",
+          "main_muscle": "calves",
+          "equipment": "machine",
+          "instructions": [
+            "Posicione os ombros sob os apoios",
+            "Fique na ponta dos pés no step",
+            "Desça os calcanhares abaixo do step",
+            "Suba até a máxima extensão dos tornozelos"
+          ],
+          "media": {
+            "image_url": null,
+            "gif_url": null
+          }
+        },
+        "sets": 4,
+        "reps_lower": 12,
+        "reps_upper": 15,
+        "rest_interval": 90,
+        "tip": "Faça a amplitude completa do movimento"
+      }
+    ]
   }
 ]

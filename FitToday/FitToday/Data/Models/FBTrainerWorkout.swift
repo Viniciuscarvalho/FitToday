@@ -108,7 +108,7 @@ struct FBWorkoutPhase: Codable {
 
 /// Represents an individual exercise within a workout phase.
 struct FBWorkoutItem: Codable {
-    /// Optional exercise ID from Wger or other sources.
+    /// Optional exercise ID from catalog or other sources.
     var exerciseId: Int?
 
     /// Exercise name (always present).

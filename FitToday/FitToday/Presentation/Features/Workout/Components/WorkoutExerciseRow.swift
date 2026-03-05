@@ -16,7 +16,8 @@ struct WorkoutExerciseRow: View {
 
     var body: some View {
         HStack(alignment: .top, spacing: FitTodaySpacing.md) {
-            ExerciseThumbnail(media: prescription.exercise.media, size: 64)
+            ExerciseImageView(exerciseId: prescription.exercise.id, imageIndex: 0, cornerRadius: FitTodayRadius.sm)
+                .frame(width: 64, height: 64)
 
             VStack(alignment: .leading, spacing: FitTodaySpacing.xs) {
                 Text("\(index). \(prescription.exercise.name)")

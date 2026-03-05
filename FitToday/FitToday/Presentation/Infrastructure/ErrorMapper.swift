@@ -27,9 +27,6 @@ enum ErrorMapper {
     case let chatError as AIChatService.ServiceError:
       return handleChatError(chatError)
 
-    case let imageCacheError as ImageCacheError:
-      return handleImageCacheError(imageCacheError)
-
     default:
       return ErrorMessage(
         title: "error.generic.title".localized,
@@ -321,38 +318,5 @@ enum ErrorMapper {
     }
   }
 
-  // MARK: - ImageCacheError Handling
-
-  private static func handleImageCacheError(_ error: ImageCacheError) -> ErrorMessage {
-    switch error {
-    case .invalidResponse(let statusCode):
-      return ErrorMessage(
-        title: "error.image.load_failed.title".localized,
-        message: String(format: "error.image.load_failed.message".localized, statusCode),
-        action: .dismiss
-      )
-
-    case .diskWriteFailed:
-      return ErrorMessage(
-        title: "error.image.save_failed.title".localized,
-        message: "error.image.save_failed.message".localized,
-        action: .dismiss
-      )
-
-    case .cacheSizeExceeded:
-      return ErrorMessage(
-        title: "error.image.cache_full.title".localized,
-        message: "error.image.cache_full.message".localized,
-        action: .dismiss
-      )
-
-    case .invalidImageData:
-      return ErrorMessage(
-        title: "error.image.invalid_data.title".localized,
-        message: "error.image.invalid_data.message".localized,
-        action: .dismiss
-      )
-    }
-  }
 }
 

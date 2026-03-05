@@ -2,12 +2,12 @@
 //  ExercisePickerViewModel.swift
 //  FitToday
 //
-//  ViewModel for searching and selecting exercises from Wger API.
+//  ViewModel for searching and selecting exercises from the catalog.
 //
 
 import Foundation
 
-/// ViewModel for searching and selecting exercises from Wger API.
+/// ViewModel for searching and selecting exercises from the catalog.
 @Observable
 @MainActor
 final class ExercisePickerViewModel {
@@ -17,18 +17,18 @@ final class ExercisePickerViewModel {
         didSet { debounceSearch() }
     }
 
-    var selectedCategory: WgerCategoryMapping?
-    var selectedEquipment: WgerEquipmentMapping?
+    var selectedCategory: ExerciseCategoryMapping?
+    var selectedEquipment: ExerciseEquipmentMapping?
 
-    var exercises: [WgerExercise] = []
+    var exercises: [CatalogExercise] = []
     var isLoading = false
     var error: Error?
 
-    // Categories for filtering (from Wger API)
-    var categories: [WgerCategoryMapping] = WgerCategoryMapping.allCases
+    // Categories for filtering (from the catalog)
+    var categories: [ExerciseCategoryMapping] = ExerciseCategoryMapping.allCases
 
-    // Equipment for filtering (from Wger API)
-    var equipmentTypes: [WgerEquipmentMapping] = WgerEquipmentMapping.allCases
+    // Equipment for filtering (from the catalog)
+    var equipmentTypes: [ExerciseEquipmentMapping] = ExerciseEquipmentMapping.allCases
 
     // MARK: - Dependencies
 
@@ -97,7 +97,7 @@ final class ExercisePickerViewModel {
         }
     }
 
-    func selectCategory(_ category: WgerCategoryMapping?) {
+    func selectCategory(_ category: ExerciseCategoryMapping?) {
         if selectedCategory == category {
             selectedCategory = nil
         } else {
@@ -106,7 +106,7 @@ final class ExercisePickerViewModel {
         Task { await search() }
     }
 
-    func selectEquipment(_ equipment: WgerEquipmentMapping?) {
+    func selectEquipment(_ equipment: ExerciseEquipmentMapping?) {
         if selectedEquipment == equipment {
             selectedEquipment = nil
         } else {

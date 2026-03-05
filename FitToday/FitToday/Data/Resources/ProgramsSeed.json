@@ -41,13 +41,28 @@
     "duration_weeks": 12,
     "hero_image_name": "program_strength_03",
     "workout_template_ids": [
-      "lib_strength_compound_gym",
       "lib_push_hypertrophy_gym",
       "lib_pull_hypertrophy_gym",
-      "lib_legs_hypertrophy_gym"
+      "lib_legs_hypertrophy_gym",
+      "lib_core_strength_home"
     ],
     "estimated_minutes_per_session": 60,
     "sessions_per_week": 6
+  },
+  {
+    "id": "upperlower_beginner_muscle_gym",
+    "name": "Upper Lower Básico",
+    "subtitle": "Divisão superior/inferior 4 dias por semana",
+    "goal_tag": "strength",
+    "level": "beginner",
+    "duration_weeks": 8,
+    "hero_image_name": "program_strength_04",
+    "workout_template_ids": [
+      "lib_upper_beginner_gym",
+      "lib_lower_beginner_gym"
+    ],
+    "estimated_minutes_per_session": 35,
+    "sessions_per_week": 4
   },
   {
     "id": "fullbody_beginner_muscle_gym",
@@ -64,13 +79,43 @@
     "sessions_per_week": 3
   },
   {
-    "id": "fullbody_beginner_muscle_dumbbell",
-    "name": "Full Body com Halteres",
-    "subtitle": "Treino completo usando apenas halteres",
+    "id": "fullbody_intermediate_muscle_gym",
+    "name": "Full Body Intermediário",
+    "subtitle": "Treino de corpo inteiro com foco em força e hipertrofia",
+    "goal_tag": "strength",
+    "level": "intermediate",
+    "duration_weeks": 10,
+    "hero_image_name": "program_fullbody_02",
+    "workout_template_ids": [
+      "lib_upper_strength_gym",
+      "lib_lower_strength_gym"
+    ],
+    "estimated_minutes_per_session": 45,
+    "sessions_per_week": 4
+  },
+  {
+    "id": "upperlower_intermediate_strength_gym",
+    "name": "Upper Lower Força",
+    "subtitle": "Divisão superior/inferior focada em força",
+    "goal_tag": "strength",
+    "level": "intermediate",
+    "duration_weeks": 10,
+    "hero_image_name": "program_fullbody_03",
+    "workout_template_ids": [
+      "lib_upper_strength_gym",
+      "lib_lower_strength_gym"
+    ],
+    "estimated_minutes_per_session": 45,
+    "sessions_per_week": 4
+  },
+  {
+    "id": "home_beginner_dumbbell",
+    "name": "Treino em Casa Halteres",
+    "subtitle": "Treino completo usando apenas halteres em casa",
     "goal_tag": "strength",
     "level": "beginner",
     "duration_weeks": 8,
-    "hero_image_name": "program_fullbody_02",
+    "hero_image_name": "program_fullbody_04",
     "workout_template_ids": [
       "lib_upper_dumbbells_home",
       "lib_lower_dumbbells_home"
@@ -79,331 +124,64 @@
     "sessions_per_week": 3
   },
   {
-    "id": "fullbody_intermediate_weightloss_gym",
-    "name": "Full Body Fat Burn",
-    "subtitle": "Circuito de corpo inteiro para queima de gordura",
+    "id": "home_intermediate_bodyweight",
+    "name": "Treino em Casa Corpo",
+    "subtitle": "Treino funcional sem equipamentos com core e condicionamento",
     "goal_tag": "conditioning",
     "level": "intermediate",
     "duration_weeks": 8,
-    "hero_image_name": "program_fullbody_03",
-    "workout_template_ids": [
-      "lib_hiit_weightloss_home",
-      "lib_conditioning_circuit_gym"
-    ],
-    "estimated_minutes_per_session": 45,
-    "sessions_per_week": 4
-  },
-  {
-    "id": "fullbody_beginner_muscle_bodyweight",
-    "name": "Full Body Calistenia",
-    "subtitle": "Treino sem equipamentos para fazer em qualquer lugar",
-    "goal_tag": "conditioning",
-    "level": "beginner",
-    "duration_weeks": 6,
-    "hero_image_name": "program_fullbody_04",
-    "workout_template_ids": [
-      "lib_fullbody_conditioning_home"
-    ],
-    "estimated_minutes_per_session": 35,
-    "sessions_per_week": 3
-  },
-  {
-    "id": "upperlower_beginner_muscle_gym",
-    "name": "Upper Lower Básico",
-    "subtitle": "Divisão superior/inferior 4 dias por semana",
-    "goal_tag": "strength",
-    "level": "beginner",
-    "duration_weeks": 8,
-    "hero_image_name": "program_strength_04",
-    "workout_template_ids": [
-      "lib_upper_beginner_gym",
-      "lib_lower_beginner_gym"
-    ],
-    "estimated_minutes_per_session": 40,
-    "sessions_per_week": 4
-  },
-  {
-    "id": "upperlower_intermediate_strength_gym",
-    "name": "Upper Lower Força",
-    "subtitle": "Foco em movimentos compostos para força",
-    "goal_tag": "strength",
-    "level": "intermediate",
-    "duration_weeks": 10,
-    "hero_image_name": "program_strength_05",
-    "workout_template_ids": [
-      "lib_upper_strength_gym",
-      "lib_lower_strength_gym"
-    ],
-    "estimated_minutes_per_session": 50,
-    "sessions_per_week": 4
-  },
-  {
-    "id": "upperlower_advanced_muscle_gym",
-    "name": "Upper Lower Hipertrofia",
-    "subtitle": "Alto volume para ganho muscular máximo",
-    "goal_tag": "strength",
-    "level": "advanced",
-    "duration_weeks": 12,
-    "hero_image_name": "program_strength_06",
-    "workout_template_ids": [
-      "lib_upper_hypertrophy_gym",
-      "lib_lower_hypertrophy_gym",
-      "lib_arms_isolation_gym"
-    ],
-    "estimated_minutes_per_session": 60,
-    "sessions_per_week": 5
-  },
-  {
-    "id": "upperlower_intermediate_muscle_dumbbell",
-    "name": "Upper Lower Halteres",
-    "subtitle": "Divisão superior/inferior apenas com halteres",
-    "goal_tag": "strength",
-    "level": "intermediate",
-    "duration_weeks": 8,
-    "hero_image_name": "program_fullbody_05",
-    "workout_template_ids": [
-      "lib_upper_dumbbells_home",
-      "lib_lower_dumbbells_home",
-      "lib_core_strength_home"
-    ],
-    "estimated_minutes_per_session": 40,
-    "sessions_per_week": 4
-  },
-  {
-    "id": "brosplit_intermediate_muscle_gym",
-    "name": "Bro Split Clássico",
-    "subtitle": "Um grupo muscular por dia, 5x por semana",
-    "goal_tag": "strength",
-    "level": "intermediate",
-    "duration_weeks": 8,
-    "hero_image_name": "program_strength_07",
-    "workout_template_ids": [
-      "lib_chest_isolation_gym",
-      "lib_back_isolation_gym",
-      "lib_shoulders_isolation_gym",
-      "lib_arms_isolation_gym",
-      "lib_legs_hypertrophy_gym"
-    ],
-    "estimated_minutes_per_session": 50,
-    "sessions_per_week": 5
-  },
-  {
-    "id": "brosplit_advanced_muscle_gym",
-    "name": "Bro Split Volume",
-    "subtitle": "Alto volume por grupo muscular",
-    "goal_tag": "strength",
-    "level": "advanced",
-    "duration_weeks": 10,
-    "hero_image_name": "program_strength_08",
-    "workout_template_ids": [
-      "lib_chest_volume_gym",
-      "lib_back_volume_gym",
-      "lib_shoulders_volume_gym",
-      "lib_arms_volume_gym",
-      "lib_legs_volume_gym"
-    ],
-    "estimated_minutes_per_session": 60,
-    "sessions_per_week": 5
-  },
-  {
-    "id": "strength_beginner_gym",
-    "name": "Fundamentos de Força",
-    "subtitle": "Baseado em Starting Strength para iniciantes",
-    "goal_tag": "strength",
-    "level": "beginner",
-    "duration_weeks": 12,
-    "hero_image_name": "program_strength_09",
-    "workout_template_ids": [
-      "lib_strength_compound_gym"
-    ],
-    "estimated_minutes_per_session": 40,
-    "sessions_per_week": 3
-  },
-  {
-    "id": "strength_intermediate_5x5_gym",
-    "name": "5x5 Força",
-    "subtitle": "Programa clássico 5x5 para força intermediária",
-    "goal_tag": "strength",
-    "level": "intermediate",
-    "duration_weeks": 12,
-    "hero_image_name": "program_strength_10",
-    "workout_template_ids": [
-      "lib_strength_5x5_gym_a",
-      "lib_strength_5x5_gym_b"
-    ],
-    "estimated_minutes_per_session": 45,
-    "sessions_per_week": 3
-  },
-  {
-    "id": "weightloss_beginner_gym",
-    "name": "Queima Total Iniciante",
-    "subtitle": "Circuitos para queima de gordura",
-    "goal_tag": "conditioning",
-    "level": "beginner",
-    "duration_weeks": 8,
-    "hero_image_name": "program_conditioning_01",
-    "workout_template_ids": [
-      "lib_hiit_beginner_home",
-      "lib_conditioning_beginner_gym"
-    ],
-    "estimated_minutes_per_session": 35,
-    "sessions_per_week": 4
-  },
-  {
-    "id": "weightloss_intermediate_bodyweight",
-    "name": "HIIT Peso Corporal",
-    "subtitle": "Treinos intensos sem equipamentos",
-    "goal_tag": "conditioning",
-    "level": "intermediate",
-    "duration_weeks": 6,
-    "hero_image_name": "program_conditioning_02",
-    "workout_template_ids": [
-      "lib_hiit_weightloss_home",
-      "lib_hiit_tabata_home"
-    ],
-    "estimated_minutes_per_session": 30,
-    "sessions_per_week": 5
-  },
-  {
-    "id": "weightloss_advanced_gym",
-    "name": "Metabolic Conditioning",
-    "subtitle": "Treino metabólico avançado",
-    "goal_tag": "conditioning",
-    "level": "advanced",
-    "duration_weeks": 8,
-    "hero_image_name": "program_conditioning_03",
-    "workout_template_ids": [
-      "lib_hiit_advanced_gym",
-      "lib_conditioning_circuit_gym",
-      "lib_core_strength_home"
-    ],
-    "estimated_minutes_per_session": 40,
-    "sessions_per_week": 5
-  },
-  {
-    "id": "home_beginner_muscle",
-    "name": "Home Gym Básico",
-    "subtitle": "Treino em casa com equipamentos mínimos",
-    "goal_tag": "strength",
-    "level": "beginner",
-    "duration_weeks": 8,
-    "hero_image_name": "program_home_01",
+    "hero_image_name": "program_recovery_01",
     "workout_template_ids": [
       "lib_fullbody_conditioning_home",
       "lib_core_strength_home"
     ],
     "estimated_minutes_per_session": 35,
+    "sessions_per_week": 4
+  },
+  {
+    "id": "conditioning_beginner_home",
+    "name": "Condicionamento Iniciante",
+    "subtitle": "Circuitos para queima de gordura e condicionamento",
+    "goal_tag": "conditioning",
+    "level": "beginner",
+    "duration_weeks": 8,
+    "hero_image_name": "program_recovery_02",
+    "workout_template_ids": [
+      "lib_hiit_weightloss_home",
+      "lib_core_strength_home"
+    ],
+    "estimated_minutes_per_session": 30,
     "sessions_per_week": 3
   },
   {
-    "id": "home_intermediate_muscle",
-    "name": "Home Gym Avançado",
-    "subtitle": "Maximizando resultados com equipamentos limitados",
-    "goal_tag": "strength",
+    "id": "conditioning_intermediate_gym",
+    "name": "HIIT e Circuito",
+    "subtitle": "Treinos intensos de alta intensidade para condicionamento",
+    "goal_tag": "conditioning",
     "level": "intermediate",
-    "duration_weeks": 10,
-    "hero_image_name": "program_home_02",
+    "duration_weeks": 8,
+    "hero_image_name": "program_recovery_03",
     "workout_template_ids": [
-      "lib_upper_dumbbells_home",
-      "lib_lower_dumbbells_home",
-      "lib_hiit_weightloss_home"
+      "lib_hiit_weightloss_home",
+      "lib_fullbody_conditioning_home"
     ],
-    "estimated_minutes_per_session": 45,
+    "estimated_minutes_per_session": 35,
     "sessions_per_week": 4
   },
   {
-    "id": "arnold_advanced_muscle_gym",
-    "name": "Arnold Split",
-    "subtitle": "O programa clássico do Arnold Schwarzenegger",
-    "goal_tag": "strength",
+    "id": "conditioning_advanced_gym",
+    "name": "Metabólico Avançado",
+    "subtitle": "Programa avançado de condicionamento e queima máxima",
+    "goal_tag": "conditioning",
     "level": "advanced",
-    "duration_weeks": 12,
-    "hero_image_name": "program_strength_11",
-    "workout_template_ids": [
-      "lib_chest_back_arnold_gym",
-      "lib_shoulders_arms_arnold_gym",
-      "lib_legs_arnold_gym"
-    ],
-    "estimated_minutes_per_session": 60,
-    "sessions_per_week": 6
-  },
-  {
-    "id": "phul_intermediate_gym",
-    "name": "PHUL",
-    "subtitle": "Combinação de força e hipertrofia",
-    "goal_tag": "strength",
-    "level": "intermediate",
     "duration_weeks": 10,
-    "hero_image_name": "program_strength_12",
+    "hero_image_name": "program_recovery_04",
     "workout_template_ids": [
-      "lib_upper_strength_gym",
-      "lib_lower_strength_gym",
-      "lib_upper_hypertrophy_gym",
-      "lib_lower_hypertrophy_gym"
-    ],
-    "estimated_minutes_per_session": 55,
-    "sessions_per_week": 4
-  },
-  {
-    "id": "minimalist_beginner_gym",
-    "name": "Treino Minimalista",
-    "subtitle": "Para quem tem pouco tempo - apenas 2x por semana",
-    "goal_tag": "strength",
-    "level": "beginner",
-    "duration_weeks": 12,
-    "hero_image_name": "program_fullbody_06",
-    "workout_template_ids": [
-      "lib_fullbody_minimal_gym"
-    ],
-    "estimated_minutes_per_session": 45,
-    "sessions_per_week": 2
-  },
-  {
-    "id": "glute_intermediate_gym",
-    "name": "Glúteos & Pernas",
-    "subtitle": "Foco em glúteos e membros inferiores",
-    "goal_tag": "strength",
-    "level": "intermediate",
-    "duration_weeks": 8,
-    "hero_image_name": "program_legs_01",
-    "workout_template_ids": [
-      "lib_glutes_focused_gym",
-      "lib_legs_hypertrophy_gym"
-    ],
-    "estimated_minutes_per_session": 50,
-    "sessions_per_week": 4
-  },
-  {
-    "id": "functional_intermediate_gym",
-    "name": "Funcional",
-    "subtitle": "Treino funcional para atletas e dia a dia",
-    "goal_tag": "endurance",
-    "level": "intermediate",
-    "duration_weeks": 8,
-    "hero_image_name": "program_functional_01",
-    "workout_template_ids": [
-      "lib_fullbody_functional_gym",
-      "lib_core_functional_gym",
-      "lib_conditioning_functional_gym"
-    ],
-    "estimated_minutes_per_session": 45,
-    "sessions_per_week": 4
-  },
-  {
-    "id": "beginner_complete_gym",
-    "name": "Programa Completo Iniciante",
-    "subtitle": "O melhor programa para quem está começando",
-    "goal_tag": "strength",
-    "level": "beginner",
-    "duration_weeks": 12,
-    "hero_image_name": "program_beginner_01",
-    "workout_template_ids": [
-      "lib_push_beginner_gym",
-      "lib_pull_beginner_gym",
-      "lib_legs_beginner_gym",
-      "lib_core_beginner_gym"
+      "lib_hiit_weightloss_home",
+      "lib_fullbody_conditioning_home",
+      "lib_core_strength_home"
     ],
     "estimated_minutes_per_session": 40,
-    "sessions_per_week": 3
+    "sessions_per_week": 5
   }
 ]

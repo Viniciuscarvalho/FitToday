@@ -280,7 +280,8 @@ private struct ExerciseRow: View {
                 .background(FitTodayColor.brandPrimary.opacity(0.15))
                 .clipShape(Circle())
 
-            ExerciseThumbnail(media: prescription.exercise.media, size: 56)
+            ExerciseImageView(exerciseId: prescription.exercise.id, imageIndex: 0, cornerRadius: FitTodayRadius.sm)
+                .frame(width: 56, height: 56)
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(prescription.exercise.name)

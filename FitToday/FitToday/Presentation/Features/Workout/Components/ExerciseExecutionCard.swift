@@ -35,26 +35,17 @@ struct ExerciseExecutionCard: View {
         .background(
             RoundedRectangle(cornerRadius: FitTodayRadius.lg)
                 .fill(FitTodayColor.surfaceElevated)
-                .retroGridOverlay(spacing: 20)
         )
-        .techCornerBorders(length: 12, thickness: 1.5)
+        .fitCardBorder()
     }
 
     // MARK: - Exercise Media Section
 
     private var exerciseMediaSection: some View {
-        Group {
-            if let media = prescription.exercise.media, let mediaURL = media.bestMediaURL {
-                ExerciseMediaImageURL(
-                    url: mediaURL,
-                    size: CGSize(width: UIScreen.main.bounds.width - 80, height: 240),
-                    contentMode: .fit,
-                    cornerRadius: FitTodayRadius.md
-                )
-            } else {
-                placeholderMedia
-            }
-        }
+        ExerciseAnimatedView(
+            exerciseId: prescription.exercise.id,
+            cornerRadius: FitTodayRadius.md
+        )
         .frame(height: 240)
     }
 
@@ -217,11 +208,7 @@ private struct DetailBadge: View {
                 "Desça a barra lentamente até tocar o peito.",
                 "Empurre a barra para cima até estender os braços completamente."
             ],
-            media: ExerciseMedia(
-                videoURL: nil,
-                imageURL: URL(string: "https://wger.de/media/exercise-images/192/Bench-press-1.png"),
-                gifURL: nil
-            )
+            media: nil
         ),
         sets: 4,
         reps: IntRange(8, 12),

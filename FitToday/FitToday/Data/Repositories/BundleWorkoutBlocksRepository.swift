@@ -3,13 +3,13 @@
 //  FitToday
 //
 //  Created by AI on 04/01/26.
-//  Simplified on 29/01/26 - Uses Wger API for exercise data
+//  Simplified on 29/01/26 - Uses Firestore for exercise data
 //
 
 import Foundation
 
 /// Repository for loading workout blocks from bundle.
-/// Note: Exercise enrichment is now handled by Wger API service separately.
+/// Note: Exercise enrichment is now handled by Firestore service separately.
 actor BundleWorkoutBlocksRepository: WorkoutBlocksRepository {
     private let loader: WorkoutBlocksLoader
     private var cachedBlocks: [WorkoutBlock]?
@@ -28,7 +28,7 @@ actor BundleWorkoutBlocksRepository: WorkoutBlocksRepository {
     }
 
     /// Carrega blocos específicos para um objetivo.
-    /// Note: Dynamic block creation was simplified - media loaded from Wger API.
+    /// Note: Dynamic block creation was simplified - media loaded from Firebase Storage.
     func loadBlocks(
         for goal: FitnessGoal,
         level: TrainingLevel,

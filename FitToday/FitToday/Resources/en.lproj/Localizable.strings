@@ -245,6 +245,10 @@
 "settings.pro.connect_sync" = "Connect to sync workouts";
 "settings.personal_trainer" = "Personal Trainer";
 "settings.personal_trainer_desc" = "Connect with your trainer";
+"settings.theme" = "Theme";
+"settings.theme.system" = "System";
+"settings.theme.dark" = "Dark";
+"settings.theme.light" = "Light";
 
 // MARK: - Privacy Settings
 "privacy.title" = "Privacy Settings";
@@ -889,11 +893,7 @@
 
 // MARK: - Trainer Chat
 "trainer.chat.placeholder" = "Type a message...";
-"trainer.chat.mock.msg1" = "Hey! I updated your workout plan for this week. Check out the new exercises!";
-"trainer.chat.mock.msg2" = "Great, thanks! I'll take a look now.";
-"trainer.chat.mock.msg3" = "Focus on keeping proper form during the squats. I added a video reference in the notes.";
-"trainer.chat.mock.msg4" = "Got it. Should I increase the weight this week?";
-"trainer.chat.mock.msg5" = "Yes, try adding 2.5kg to your bench press and squats. Let me know how it goes!";
+"trainer.chat.empty" = "No messages yet. Start the conversation!";
 
 // MARK: - Trainer History
 "trainer.history.this_week" = "This Week";

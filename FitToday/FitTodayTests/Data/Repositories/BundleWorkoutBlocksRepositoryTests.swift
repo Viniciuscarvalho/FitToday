@@ -15,7 +15,7 @@ final class BundleWorkoutBlocksRepositoryTests: XCTestCase {
     var sut: BundleWorkoutBlocksRepository!
 
     override func setUp() async throws {
-        // Cria repositório - enrichment agora é feito via Wger API separadamente
+        // Cria repositório - enrichment agora é feito via Firestore separadamente
         sut = BundleWorkoutBlocksRepository()
     }
 

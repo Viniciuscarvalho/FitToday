@@ -2,7 +2,7 @@
 //  ExercisePickerView.swift
 //  FitToday
 //
-//  Modal view for searching and selecting exercises from Wger API.
+//  Modal view for searching and selecting exercises from the catalog.
 //
 
 import SwiftUI
@@ -12,11 +12,11 @@ struct ExercisePickerView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var viewModel: ExercisePickerViewModel
 
-    let onSelect: (WgerExercise) -> Void
+    let onSelect: (CatalogExercise) -> Void
 
     init(
         exerciseService: ExerciseServiceProtocol? = nil,
-        onSelect: @escaping (WgerExercise) -> Void
+        onSelect: @escaping (CatalogExercise) -> Void
     ) {
         _viewModel = State(initialValue: ExercisePickerViewModel(exerciseService: exerciseService))
         self.onSelect = onSelect
@@ -173,7 +173,7 @@ struct FilterChip: View {
 // MARK: - Exercise List Row
 
 struct ExerciseListRow: View {
-    let exercise: WgerExercise
+    let exercise: CatalogExercise
 
     var body: some View {
         HStack(spacing: FitTodaySpacing.md) {
@@ -193,14 +193,14 @@ struct ExerciseListRow: View {
 
                 HStack(spacing: FitTodaySpacing.sm) {
                     if let categoryId = exercise.category,
-                       let category = WgerCategoryMapping.from(id: categoryId) {
+                       let category = ExerciseCategoryMapping.from(name: categoryId) {
                         Label(category.portugueseName, systemImage: "figure.stand")
                             .font(FitTodayFont.ui(size: 12, weight: .medium))
                             .foregroundStyle(FitTodayColor.textSecondary)
                     }
 
                     if let equipmentId = exercise.equipment.first,
-                       let equipment = WgerEquipmentMapping.from(id: equipmentId) {
+                       let equipment = ExerciseEquipmentMapping.from(id: equipmentId) {
                         Label(equipment.portugueseName, systemImage: "dumbbell")
                             .font(FitTodayFont.ui(size: 12, weight: .medium))
                             .foregroundStyle(FitTodayColor.textSecondary)
@@ -218,28 +218,11 @@ struct ExerciseListRow: View {
 
     private var iconForCategory: String {
         guard let categoryId = exercise.category,
-              let category = WgerCategoryMapping.from(id: categoryId) else {
+              let category = ExerciseCategoryMapping.from(name: categoryId) else {
             return "figure.strengthtraining.traditional"
         }
 
-        switch category {
-        case .arms:
-            return "figure.strengthtraining.traditional"
-        case .legs:
-            return "figure.run"
-        case .abs:
-            return "figure.core.training"
-        case .chest:
-            return "figure.strengthtraining.functional"
-        case .back:
-            return "figure.rowing"
-        case .shoulders:
-            return "figure.boxing"
-        case .calves:
-            return "figure.walk"
-        case .cardio:
-            return "figure.run.circle"
-        }
+        return category.icon
     }
 }
 

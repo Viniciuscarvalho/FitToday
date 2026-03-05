@@ -36,9 +36,8 @@ struct OnboardingPage: View {
             .background(
                 RoundedRectangle(cornerRadius: FitTodayRadius.md)
                     .fill(FitTodayColor.surface)
-                    .retroGridOverlay(spacing: 25)
             )
-            .techCornerBorders(length: 14, thickness: 1.5)
+            .fitCardBorder()
             .cornerRadius(FitTodayRadius.md)
             .fitCardShadow()
         }

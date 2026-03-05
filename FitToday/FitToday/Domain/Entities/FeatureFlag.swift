@@ -55,7 +55,7 @@ enum FeatureFlagKey: String, CaseIterable, Sendable {
     /// Enables user-created workout templates.
     case customWorkoutsEnabled = "custom_workouts_enabled"
 
-    /// Enables exercise library/explorer (Wger API).
+    /// Enables exercise library/explorer.
     case exerciseLibraryEnabled = "exercise_library_enabled"
 
     // MARK: - Personal Trainer

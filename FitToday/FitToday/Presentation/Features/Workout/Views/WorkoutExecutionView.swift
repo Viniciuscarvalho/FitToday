@@ -142,7 +142,8 @@ struct WorkoutExecutionView: View {
                 .foregroundStyle(FitTodayColor.textPrimary)
 
             // Exercise Image
-            ExerciseHeroImage(media: prescription.exercise.media)
+            ExerciseAnimatedView(exerciseId: prescription.exercise.id, cornerRadius: FitTodayRadius.md)
+                .frame(height: 220)
                 .fitCardShadow()
 
             // Exercise Info
@@ -470,9 +471,8 @@ struct WorkoutExecutionView: View {
             .background(
                 RoundedRectangle(cornerRadius: FitTodayRadius.lg)
                     .fill(FitTodayColor.surfaceElevated)
-                    .retroGridOverlay(spacing: 20)
             )
-            .techCornerBorders(length: 16, thickness: 2)
+            .fitCardBorder()
             .padding(FitTodaySpacing.xl)
         }
     }

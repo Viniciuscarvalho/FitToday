@@ -29,7 +29,7 @@ struct PaywallHeroSection: View {
                     .font(.system(size: 50))
                     .foregroundStyle(
                         LinearGradient(
-                            colors: [FitTodayColor.brandPrimary, FitTodayColor.neonCyan],
+                            colors: [FitTodayColor.brandPrimary, FitTodayColor.brandAccent],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         )

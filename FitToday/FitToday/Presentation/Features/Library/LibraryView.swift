@@ -167,16 +167,28 @@ private struct LibraryWorkoutCard: View {
     let workout: LibraryWorkout
     let onTap: () -> Void
 
-    /// Thumbnail do primeiro exercício (se existir).
-    private var firstExerciseMedia: ExerciseMedia? {
-        workout.exercises.first?.exercise.media
+    /// ID do primeiro exercício (se existir).
+    private var firstExerciseId: String? {
+        workout.exercises.first?.exercise.id
     }
 
     var body: some View {
         Button(action: onTap) {
             HStack(spacing: FitTodaySpacing.md) {
                 // Thumbnail do treino (primeiro exercício)
-                ExerciseThumbnail(media: firstExerciseMedia, size: 72)
+                if let exerciseId = firstExerciseId {
+                    ExerciseImageView(exerciseId: exerciseId, imageIndex: 0, cornerRadius: FitTodayRadius.sm)
+                        .frame(width: 72, height: 72)
+                } else {
+                    ZStack {
+                        RoundedRectangle(cornerRadius: FitTodayRadius.sm)
+                            .fill(FitTodayColor.surface)
+                        Image(systemName: "figure.strengthtraining.traditional")
+                            .font(.system(size: 30))
+                            .foregroundStyle(FitTodayColor.textTertiary)
+                    }
+                    .frame(width: 72, height: 72)
+                }
 
                 VStack(alignment: .leading, spacing: FitTodaySpacing.xs) {
                     Text(workout.title)
