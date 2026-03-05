@@ -3,40 +3,51 @@
 //  FitToday
 //
 //  Design System — Constancia & Equilibrio Mental
-//  Tema Dark Mode com paleta azul calma e tipografia humanista
+//  Paleta azul calma e tipografia humanista — Dark & Light modes
 //
 
 import SwiftUI
+import UIKit
 
-// MARK: - Color System (Dark Theme - Calm Blue / Wellness)
+// MARK: - Adaptive Color Helper
+
+private func adaptiveColor(light: String, dark: String) -> Color {
+    Color(UIColor { traits in
+        traits.userInterfaceStyle == .dark
+            ? UIColor(Color(hex: dark))
+            : UIColor(Color(hex: light))
+    })
+}
+
+// MARK: - Color System (Calm Blue / Wellness)
 
 enum FitTodayColor {
-    // Cores de marca - Azul calmo como cor principal
-    static let brandPrimary = Color(hex: "#3B82F6")  // Azul confianca
-    static let brandSecondary = Color(hex: "#60A5FA")  // Azul claro
-    static let brandAccent = Color(hex: "#FB7185")  // Coral — esforco/calorias
+    // Cores de marca
+    static let brandPrimary = adaptiveColor(light: "#2563EB", dark: "#3B82F6")
+    static let brandSecondary = adaptiveColor(light: "#3B82F6", dark: "#60A5FA")
+    static let brandAccent = adaptiveColor(light: "#E11D48", dark: "#FB7185")
 
-    // Backgrounds - Dark neutral theme
-    static let background = Color(hex: "#111111")  // Preto neutro
-    static let backgroundElevated = Color(hex: "#1A1A1A")  // Elevacao leve
-    static let surface = Color(hex: "#1E1E1E")  // Cards e superficies
-    static let surfaceElevated = Color(hex: "#252525")  // Cards elevados
+    // Backgrounds
+    static let background = adaptiveColor(light: "#F8FAFC", dark: "#111111")
+    static let backgroundElevated = adaptiveColor(light: "#FFFFFF", dark: "#1A1A1A")
+    static let surface = adaptiveColor(light: "#F1F5F9", dark: "#1E1E1E")
+    static let surfaceElevated = adaptiveColor(light: "#E2E8F0", dark: "#252525")
 
     // Texto
-    static let textPrimary = Color.white
-    static let textSecondary = Color(hex: "#94A3B8")  // Cinza lavanda
-    static let textTertiary = Color(hex: "#64748B")  // Cinza slate
-    static let textInverse = Color(hex: "#111111")  // Para botoes com fundo claro
+    static let textPrimary = adaptiveColor(light: "#0F172A", dark: "#FFFFFF")
+    static let textSecondary = adaptiveColor(light: "#475569", dark: "#94A3B8")
+    static let textTertiary = adaptiveColor(light: "#64748B", dark: "#64748B")
+    static let textInverse = adaptiveColor(light: "#FFFFFF", dark: "#111111")
 
     // Separadores e bordas
-    static let outline = Color(hex: "#2A2A2A")
-    static let outlineVariant = Color(hex: "#3A3A3A")
+    static let outline = adaptiveColor(light: "#E2E8F0", dark: "#2A2A2A")
+    static let outlineVariant = adaptiveColor(light: "#CBD5E1", dark: "#3A3A3A")
 
     // Status colors
-    static let success = Color(hex: "#22C55E")  // Verde moderno
-    static let warning = Color(hex: "#F59E0B")  // Amber
-    static let error = Color(hex: "#EF4444")  // Vermelho moderno
-    static let info = Color(hex: "#3B82F6")  // Azul moderno
+    static let success = adaptiveColor(light: "#16A34A", dark: "#22C55E")
+    static let warning = adaptiveColor(light: "#D97706", dark: "#F59E0B")
+    static let error = adaptiveColor(light: "#DC2626", dark: "#EF4444")
+    static let info = adaptiveColor(light: "#2563EB", dark: "#3B82F6")
 
     // Gradientes principais
     static let gradientPrimary = LinearGradient(
@@ -64,13 +75,13 @@ enum FitTodayColor {
     )
 
     static let gradientBackground = LinearGradient(
-        colors: [background, Color(hex: "#0D0D0D")],
+        colors: [background, adaptiveColor(light: "#EFF6FF", dark: "#0D0D0D")],
         startPoint: .top,
         endPoint: .bottom
     )
 
     static let gradientSurface = LinearGradient(
-        colors: [Color(hex: "#1A1A1A"), Color(hex: "#111111")],
+        colors: [adaptiveColor(light: "#F1F5F9", dark: "#1A1A1A"), adaptiveColor(light: "#E2E8F0", dark: "#111111")],
         startPoint: .top,
         endPoint: .bottom
     )
