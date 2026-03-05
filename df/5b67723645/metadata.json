@@ -3,11 +3,16 @@
   "checkpoint_id": "df5b67723645",
   "strategy": "manual-commit",
   "branch": "feat/exercise-image-cache-phase5",
-  "checkpoints_count": 0,
+  "checkpoints_count": 1,
   "files_touched": [
+    ".claude/settings.local.json",
     "FitToday/FitToday/Data/Mappers/TrainerChatMessageMapper.swift",
     "FitToday/FitToday/Data/Models/FBTrainerChatModels.swift",
+    "FitToday/FitToday/Data/Resources/LibraryWorkoutsSeed.json",
+    "FitToday/FitToday/Data/Resources/ProgramsSeed.json",
+    "FitToday/FitToday/Data/Resources/WorkoutBlocksSeed.json",
     "FitToday/FitToday/Data/Services/Firebase/FirebaseTrainerChatService.swift",
+    "FitToday/FitToday/Domain/Entities/ProgramModels.swift",
     "FitToday/FitToday/Domain/Entities/TrainerChatMessage.swift",
     "FitToday/FitToday/Domain/Protocols/TrainerChatServiceProtocol.swift",
     "FitToday/FitToday/Presentation/DI/AppContainer.swift",
@@ -18,7 +23,10 @@
     "FitToday/FitToday/Presentation/Features/PersonalTrainer/TrainerChatViewModel.swift",
     "FitToday/FitToday/Presentation/Features/PersonalTrainer/TrainerDashboardView.swift",
     "FitToday/FitToday/Resources/en.lproj/Localizable.strings",
-    "FitToday/FitToday/Resources/pt-BR.lproj/Localizable.strings"
+    "FitToday/FitToday/Resources/pt-BR.lproj/Localizable.strings",
+    "tasks/prd-new-programas-area/prd.md",
+    "tasks/prd-new-programas-area/tasks.md",
+    "tasks/prd-new-programas-area/techspec.md"
   ],
   "sessions": [
     {
@@ -27,13 +35,20 @@
       "context": "/df/5b67723645/0/context.md",
       "content_hash": "/df/5b67723645/0/content_hash.txt",
       "prompt": "/df/5b67723645/0/prompt.txt"
+    },
+    {
+      "metadata": "/df/5b67723645/1/metadata.json",
+      "transcript": "/df/5b67723645/1/full.jsonl",
+      "context": "/df/5b67723645/1/context.md",
+      "content_hash": "/df/5b67723645/1/content_hash.txt",
+      "prompt": "/df/5b67723645/1/prompt.txt"
     }
   ],
   "token_usage": {
-    "input_tokens": 4,
-    "cache_creation_tokens": 115043,
-    "cache_read_tokens": 113803,
-    "output_tokens": 539,
-    "api_call_count": 2
+    "input_tokens": 41,
+    "cache_creation_tokens": 216528,
+    "cache_read_tokens": 2609407,
+    "output_tokens": 21860,
+    "api_call_count": 35
   }
 }
