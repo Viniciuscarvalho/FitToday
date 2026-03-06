@@ -1,0 +1,53 @@
+{
+  "cli_version": "0.4.4",
+  "checkpoint_id": "447fe22bef75",
+  "strategy": "manual-commit",
+  "branch": "fix/issues-85-88-89",
+  "checkpoints_count": 1,
+  "files_touched": [
+    ".claude/settings.local.json",
+    "AGENTS.md",
+    "FitToday/FitToday.xcodeproj/project.pbxproj",
+    "FitToday/FitToday/Data/Services/ImageCache/ExerciseImageCache.swift",
+    "FitToday/FitToday/Data/Services/OpenAI/ExerciseSubstitutionService.swift",
+    "FitToday/FitToday/Data/Services/OpenAI/NewOpenAIClient.swift",
+    "FitToday/FitToday/FitTodayApp.swift",
+    "FitToday/FitToday/Presentation/DI/AppContainer.swift",
+    "FitToday/FitToday/Presentation/DesignSystem/ButtonStyles.swift",
+    "FitToday/FitToday/Presentation/DesignSystem/ExercisePlaceholderView.swift",
+    "FitToday/FitToday/Presentation/DesignSystem/RestTimerView.swift",
+    "FitToday/FitToday/Presentation/Features/AIChat/AIChatView.swift",
+    "FitToday/FitToday/Presentation/Features/AIChat/AIChatViewModel.swift",
+    "FitToday/FitToday/Presentation/Features/PersonalTrainer/PersonalTrainerViewModel.swift",
+    "FitToday/FitToday/Presentation/Features/Pro/ProfileProView.swift",
+    "FitToday/FitToday/Presentation/Features/Workout/WorkoutCompletionView.swift",
+    "FitToday/FitToday/Presentation/Infrastructure/ErrorMapper.swift",
+    "FitToday/FitTodayTests/Data/Services/ImageCache/ExerciseImageCacheTests.swift",
+    "FitToday/FitTodayTests/Data/Services/OpenAI/NewOpenAIClientTests.swift",
+    "FitToday/FitTodayTests/Data/Services/OpenAI/NewOpenAIWorkoutComposerTests.swift",
+    "FitToday/FitTodayTests/Presentation/ErrorPresentingTests.swift",
+    "FitToday/FitTodayTests/Presentation/PersonalTrainerViewModelTests.swift",
+    "firebase.json",
+    "functions/.gitignore",
+    "functions/package.json",
+    "functions/src/index.ts",
+    "functions/src/openaiProxy.ts",
+    "ops/sessions/20260306-221531.json"
+  ],
+  "sessions": [
+    {
+      "metadata": "/44/7fe22bef75/0/metadata.json",
+      "transcript": "/44/7fe22bef75/0/full.jsonl",
+      "context": "/44/7fe22bef75/0/context.md",
+      "content_hash": "/44/7fe22bef75/0/content_hash.txt",
+      "prompt": "/44/7fe22bef75/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 12807,
+    "cache_creation_tokens": 246613,
+    "cache_read_tokens": 12976739,
+    "output_tokens": 39427,
+    "api_call_count": 137
+  }
+}
