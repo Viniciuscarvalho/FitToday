@@ -33,16 +33,15 @@ final class AIChatViewModel: ErrorPresenting {
     private var typingTask: Task<Void, Never>?
     private var _cachedChatService: AIChatService?
 
-    /// Creates on-demand so API key saved after launch takes effect.
+    /// Creates on-demand. AI calls go through Firebase Functions proxy (no API key needed).
     private var chatService: AIChatService? {
         if let cached = _cachedChatService { return cached }
-        guard let client = NewOpenAIClient.fromUserKey(),
-              let profileRepo = resolver.resolve(UserProfileRepository.self),
+        guard let profileRepo = resolver.resolve(UserProfileRepository.self),
               let statsRepo = resolver.resolve(UserStatsRepository.self),
               let historyRepo = resolver.resolve(WorkoutHistoryRepository.self)
         else { return nil }
         let service = AIChatService(
-            client: client,
+            client: NewOpenAIClient(),
             profileRepository: profileRepo,
             statsRepository: statsRepo,
             historyRepository: historyRepo

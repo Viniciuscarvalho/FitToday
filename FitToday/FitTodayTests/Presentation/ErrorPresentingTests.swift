@@ -191,43 +191,43 @@ final class ErrorPresentingTests: XCTestCase {
     XCTAssertTrue(message.message.contains("assinatura"))
   }
   
-  // MARK: - ErrorMapper OpenAIClientError Tests
-  
-  func testOpenAIErrorConfigurationMissing() {
-    let error = OpenAIClientError.configurationMissing
+  // MARK: - ErrorMapper NewOpenAIClient.ClientError Tests
+
+  func testOpenAIErrorNotAuthenticated() {
+    let error = NewOpenAIClient.ClientError.notAuthenticated
     let message = ErrorMapper.userFriendlyMessage(for: error)
-    
+
     XCTAssertEqual(message.title, "IA não configurada")
     XCTAssertTrue(message.message.contains("treino local"))
   }
-  
+
   func testOpenAIErrorInvalidResponse() {
-    let error = OpenAIClientError.invalidResponse
+    let error = NewOpenAIClient.ClientError.invalidResponse
     let message = ErrorMapper.userFriendlyMessage(for: error)
-    
+
     XCTAssertEqual(message.title, "IA temporariamente indisponível")
     XCTAssertTrue(message.message.contains("treino local"))
   }
-  
+
   func testOpenAIErrorRateLimit() {
-    let error = OpenAIClientError.httpError(429, "Rate limit exceeded")
+    let error = NewOpenAIClient.ClientError.httpError(statusCode: 429, message: "Rate limit exceeded")
     let message = ErrorMapper.userFriendlyMessage(for: error)
-    
+
     XCTAssertEqual(message.title, "Limite atingido")
     XCTAssertTrue(message.message.contains("limite"))
   }
-  
+
   func testOpenAIErrorServerError() {
-    let error = OpenAIClientError.httpError(500, "Internal server error")
+    let error = NewOpenAIClient.ClientError.httpError(statusCode: 500, message: "Internal server error")
     let message = ErrorMapper.userFriendlyMessage(for: error)
-    
+
     XCTAssertEqual(message.title, "Servidor temporariamente indisponível")
   }
-  
+
   func testOpenAIErrorGenericHTTP() {
-    let error = OpenAIClientError.httpError(400, "Bad request")
+    let error = NewOpenAIClient.ClientError.httpError(statusCode: 400, message: "Bad request")
     let message = ErrorMapper.userFriendlyMessage(for: error)
-    
+
     XCTAssertEqual(message.title, "IA temporariamente indisponível")
   }
   
@@ -309,7 +309,7 @@ final class ErrorPresentingTests: XCTestCase {
     let errors: [Error] = [
       URLError(.notConnectedToInternet),
       DomainError.profileNotFound,
-      OpenAIClientError.invalidResponse
+      NewOpenAIClient.ClientError.invalidResponse
     ]
     
     for error in errors {
