@@ -37,16 +37,73 @@ final class PersonalTrainerViewModelTests: XCTestCase {
         }
     }
 
+    private final class MockGetCurrentTrainerUseCase: GetCurrentTrainerUseCaseProtocol, @unchecked Sendable {
+        var result: TrainerWithRelationship?
+
+        func execute() async throws -> TrainerWithRelationship? {
+            return result
+        }
+
+        func observeRelationship() -> AsyncStream<TrainerStudentRelationship?> {
+            AsyncStream { continuation in
+                continuation.finish()
+            }
+        }
+    }
+
+    // MARK: - Helpers
+
+    private func makeTrainer() -> PersonalTrainer {
+        PersonalTrainer(
+            id: "trainer-1",
+            displayName: "Test Trainer",
+            email: "test@trainer.com",
+            photoURL: nil,
+            specializations: ["strength"],
+            bio: nil,
+            isActive: true,
+            inviteCode: "TEST",
+            maxStudents: 10,
+            currentStudentCount: 0,
+            rating: nil,
+            reviewCount: nil
+        )
+    }
+
+    private func makeViewModelWithRelationship(
+        cancelUseCase: MockCancelUseCase
+    ) async -> PersonalTrainerViewModel {
+        let getCurrentUseCase = MockGetCurrentTrainerUseCase()
+        let trainer = makeTrainer()
+        let relationship = TrainerStudentRelationship(
+            id: "rel-123",
+            trainerId: trainer.id,
+            studentId: "student-1",
+            status: .pending,
+            createdAt: Date()
+        )
+        getCurrentUseCase.result = TrainerWithRelationship(
+            trainer: trainer,
+            relationship: relationship
+        )
+
+        let viewModel = PersonalTrainerViewModel(
+            cancelConnectionUseCase: cancelUseCase,
+            getCurrentTrainerUseCase: getCurrentUseCase
+        )
+
+        // Load the trainer so relationshipId is set
+        await viewModel.loadCurrentTrainer()
+        XCTAssertEqual(viewModel.relationshipId, "rel-123")
+
+        return viewModel
+    }
+
     // MARK: - Cancel Connection Tests (Issue #88)
 
     func testCancelConnectionResetsLoadingOnSuccess() async {
         let cancelUseCase = MockCancelUseCase()
-        let viewModel = PersonalTrainerViewModel(
-            cancelConnectionUseCase: cancelUseCase
-        )
-
-        // Simulate having an active relationship
-        viewModel.setRelationshipIdForTesting("rel-123")
+        let viewModel = await makeViewModelWithRelationship(cancelUseCase: cancelUseCase)
 
         let result = await viewModel.cancelConnection()
 
@@ -60,11 +117,7 @@ final class PersonalTrainerViewModelTests: XCTestCase {
     func testCancelConnectionResetsLoadingOnError() async {
         let cancelUseCase = MockCancelUseCase()
         cancelUseCase.shouldThrow = true
-        let viewModel = PersonalTrainerViewModel(
-            cancelConnectionUseCase: cancelUseCase
-        )
-
-        viewModel.setRelationshipIdForTesting("rel-123")
+        let viewModel = await makeViewModelWithRelationship(cancelUseCase: cancelUseCase)
 
         let result = await viewModel.cancelConnection()
 
@@ -88,43 +141,31 @@ final class PersonalTrainerViewModelTests: XCTestCase {
 
     // MARK: - Request Connection Tests
 
-    func testRequestConnectionResetsLoadingOnSuccess() async {
+    func testRequestConnectionResetsIsRequestingOnSuccess() async {
         let requestUseCase = MockRequestUseCase()
         let viewModel = PersonalTrainerViewModel(
             requestConnectionUseCase: requestUseCase
         )
 
-        let trainer = PersonalTrainer.stub()
+        let trainer = makeTrainer()
         let result = await viewModel.requestConnection(to: trainer)
 
         XCTAssertTrue(result)
         XCTAssertFalse(viewModel.isRequestingConnection, "isRequestingConnection must be false after success")
     }
 
-    func testRequestConnectionResetsLoadingOnError() async {
+    func testRequestConnectionResetsIsRequestingOnError() async {
         let requestUseCase = MockRequestUseCase()
         requestUseCase.shouldThrow = true
         let viewModel = PersonalTrainerViewModel(
             requestConnectionUseCase: requestUseCase
         )
 
-        let trainer = PersonalTrainer.stub()
+        let trainer = makeTrainer()
         let result = await viewModel.requestConnection(to: trainer)
 
         XCTAssertFalse(result)
         XCTAssertFalse(viewModel.isRequestingConnection, "isRequestingConnection must be false after error")
         XCTAssertNotNil(viewModel.error)
-    }
-}
-
-// MARK: - Test Helpers
-
-extension PersonalTrainerViewModel {
-    /// Test-only helper to set relationshipId for cancel tests
-    func setRelationshipIdForTesting(_ id: String) {
-        // Access internal state via the testing init path
-        // We need a way to set this. Since the property is private(set),
-        // we'll use a workaround through the observation flow.
-        self.relationshipId = id
     }
 }
