@@ -1,0 +1,44 @@
+{
+  "cli_version": "0.4.4",
+  "checkpoint_id": "aad8a06ed3c3",
+  "session_id": "2afa1a55-c96a-4172-8f6e-fc3512c27bab",
+  "strategy": "manual-commit",
+  "created_at": "2026-03-06T23:34:55.520018Z",
+  "branch": "fix/issues-85-88-89",
+  "checkpoints_count": 9,
+  "files_touched": [
+    "FitToday/FitToday/Data/Models/CMSWorkoutModels.swift",
+    "FitToday/FitToday/Presentation/Features/PersonalTrainer/PersonalTrainerViewModel.swift",
+    "firebase-debug.log",
+    "ops/sessions/20260306-223906.json",
+    "ops/sessions/20260306-225024.json",
+    "ops/sessions/20260306-230125.json",
+    "ops/sessions/20260306-230233.json",
+    "ops/sessions/20260306-231715.json",
+    "ops/sessions/20260306-231942.json",
+    "ops/sessions/20260306-232046.json",
+    "ops/sessions/20260306-233034.json",
+    "ops/sessions/20260306-233449.json"
+  ],
+  "agent": "Claude Code",
+  "transcript_identifier_at_start": "7591e2fe-96ac-42e1-b373-058053c01956",
+  "checkpoint_transcript_start": 963,
+  "transcript_lines_at_start": 963,
+  "token_usage": {
+    "input_tokens": 1073,
+    "cache_creation_tokens": 549555,
+    "cache_read_tokens": 4573502,
+    "output_tokens": 19278,
+    "api_call_count": 45
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-03-06T23:34:54.33684Z",
+    "agent_lines": 0,
+    "human_added": 644,
+    "human_modified": 9,
+    "human_removed": 0,
+    "total_committed": 644,
+    "agent_percentage": 0
+  },
+  "transcript_path": ".claude/projects/-Users-viniciuscarvalho-Documents-FitToday/2afa1a55-c96a-4172-8f6e-fc3512c27bab.jsonl"
+}
