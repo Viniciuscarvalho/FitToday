@@ -193,8 +193,8 @@ final class ErrorPresentingTests: XCTestCase {
   
   // MARK: - ErrorMapper NewOpenAIClient.ClientError Tests
 
-  func testOpenAIErrorConfigurationMissing() {
-    let error = NewOpenAIClient.ClientError.missingAPIKey
+  func testOpenAIErrorNotAuthenticated() {
+    let error = NewOpenAIClient.ClientError.notAuthenticated
     let message = ErrorMapper.userFriendlyMessage(for: error)
 
     XCTAssertEqual(message.title, "IA não configurada")

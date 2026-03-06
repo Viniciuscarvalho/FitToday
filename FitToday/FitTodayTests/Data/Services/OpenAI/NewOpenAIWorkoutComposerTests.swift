@@ -182,8 +182,7 @@ final class NewOpenAIWorkoutComposerTests: XCTestCase {
 
     func testComposerComponentsIntegration() {
         // Given
-        let apiKey = "sk-test-key"
-        let client = NewOpenAIClient(apiKey: apiKey)
+        let client = NewOpenAIClient()
         let promptBuilder = NewWorkoutPromptBuilder()
         let blueprintEngine = WorkoutBlueprintEngine()
         let historyRepo = mockHistoryRepository!

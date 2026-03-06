@@ -248,9 +248,16 @@ enum ErrorMapper {
 
   private static func handleOpenAIError(_ error: NewOpenAIClient.ClientError) -> ErrorMessage {
     switch error {
-    case .missingAPIKey:
+    case .notAuthenticated:
       return ErrorMessage(
         title: "error.openai.not_configured.title".localized,
+        message: "error.openai.fallback.message".localized,
+        action: .dismiss
+      )
+
+    case .functionsError:
+      return ErrorMessage(
+        title: "error.openai.temporarily_unavailable.title".localized,
         message: "error.openai.fallback.message".localized,
         action: .dismiss
       )
