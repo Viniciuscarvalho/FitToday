@@ -1,0 +1,40 @@
+{
+  "cli_version": "0.4.4",
+  "checkpoint_id": "5a3bf5984554",
+  "session_id": "2afa1a55-c96a-4172-8f6e-fc3512c27bab",
+  "strategy": "manual-commit",
+  "created_at": "2026-03-06T17:40:58.867165Z",
+  "branch": "feat/fitness-preferences",
+  "checkpoints_count": 1,
+  "files_touched": [
+    ".claude/settings.local.json",
+    "AGENTS.md",
+    "Config/AppInfo.plist",
+    "FitToday/FitToday/Presentation/Features/AIChat/AIChatView.swift",
+    "FitToday/FitTodayTests/Domain/UseCases/CMSWorkoutUseCasesTests.swift",
+    "FitToday/FitTodayTests/Integration/WorkoutCompositionFlowTests.swift",
+    "FitToday/FitTodayTests/Presentation/ErrorPresentingTests.swift",
+    "ops/sessions/20260306-001115.json",
+    "ops/sessions/20260306-003039.json",
+    "ops/sessions/20260306-004813.json",
+    "ops/sessions/20260306-174054.json"
+  ],
+  "agent": "Claude Code",
+  "token_usage": {
+    "input_tokens": 5666,
+    "cache_creation_tokens": 70941,
+    "cache_read_tokens": 1552497,
+    "output_tokens": 8835,
+    "api_call_count": 30
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-03-06T17:40:58.697092Z",
+    "agent_lines": 0,
+    "human_added": 0,
+    "human_modified": 44,
+    "human_removed": 79,
+    "total_committed": 44,
+    "agent_percentage": 0
+  },
+  "transcript_path": ".claude/projects/-Users-viniciuscarvalho-Documents-FitToday/2afa1a55-c96a-4172-8f6e-fc3512c27bab.jsonl"
+}
