@@ -539,13 +539,6 @@ struct ProfileProView: View {
                     openSupportURL()
                 }
 
-                #if DEBUG
-                Divider().padding(.leading, 56)
-
-                SettingsRow(icon: "key", title: "settings.api_key".localized) {
-                    router.push(.apiKeySettings, on: .profile)
-                }
-                #endif
             }
             .background(FitTodayColor.surface)
             .clipShape(RoundedRectangle(cornerRadius: 16))
