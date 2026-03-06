@@ -1,0 +1,13 @@
+Uma issue que é extremamente critica para fazer antes do lançamento do app e que preciso ter todos os critérios de aceites extremamente validados, https://github.com/Viniciuscarvalho/FitToday/issues/84, por questão de segurança, após isso, faça o /commit e crie o PR e quando esse PR for mergeado, pode fechar essa issue.
+
+---
+
+Tool loaded.
+
+---
+
+Tool loaded.
+
+---
+
+Em configurações ainda está expondo a minha configuração de chave de API da openAI, isso não deve ficar para todos os usuários jamais, pode remover e isso é crucial.
