@@ -94,3 +94,19 @@ struct ExerciseDTO: Codable { ... }
 - [ ] Busca global pelo nome do token antigo — todas as referências migradas
 - [ ] Fontes no `Info.plist` batem com as realmente usadas no app
 - [ ] Build sem warnings de uso de símbolo deprecated
+
+---
+
+### [C004] API keys nunca devem ser embarcadas em builds de produção
+
+**Contexto:** Issue #84 — chave OpenAI do developer estava acessível via `APIKeySettingsView` e potencialmente extraível do bundle via `Secrets.plist`.
+
+**Regra:**
+> Chaves de API **nunca** devem ser embarcadas no bundle do app (IPA). O `KeychainBootstrap` e a `APIKeySettingsView` devem existir **apenas** em builds `DEBUG` (`#if DEBUG`). Em produção, chaves devem vir de Firebase Remote Config ou serem intermediadas por Firebase Functions (proxy server-side).
+
+**Checklist de segurança para API keys:**
+- [ ] `Secrets.plist` está no `.gitignore` e **nunca** é commitado
+- [ ] `KeychainBootstrap` está inteiramente dentro de `#if DEBUG`
+- [ ] Toda navegação para `APIKeySettingsView` está dentro de `#if DEBUG`
+- [ ] Nenhuma chave de API aparece hardcoded no código-fonte
+- [ ] Em Release, chaves são obtidas via Firebase Remote Config ou proxy server-side
