@@ -38,9 +38,9 @@ final class PersonalTrainerViewModelTests: XCTestCase {
     }
 
     private final class MockGetCurrentTrainerUseCase: GetCurrentTrainerUseCaseProtocol, @unchecked Sendable {
-        var result: TrainerWithRelationship?
+        var result: (trainer: PersonalTrainer, relationship: TrainerStudentRelationship)?
 
-        func execute() async throws -> TrainerWithRelationship? {
+        func execute() async throws -> (trainer: PersonalTrainer, relationship: TrainerStudentRelationship)? {
             return result
         }
 
@@ -80,12 +80,13 @@ final class PersonalTrainerViewModelTests: XCTestCase {
             trainerId: trainer.id,
             studentId: "student-1",
             status: .pending,
-            createdAt: Date()
+            requestedBy: .student,
+            requestedAt: Date(),
+            acceptedAt: nil,
+            subscriptionStatus: .trial,
+            subscriptionExpiresAt: nil
         )
-        getCurrentUseCase.result = TrainerWithRelationship(
-            trainer: trainer,
-            relationship: relationship
-        )
+        getCurrentUseCase.result = (trainer: trainer, relationship: relationship)
 
         let viewModel = PersonalTrainerViewModel(
             cancelConnectionUseCase: cancelUseCase,
@@ -108,7 +109,7 @@ final class PersonalTrainerViewModelTests: XCTestCase {
         let result = await viewModel.cancelConnection()
 
         XCTAssertTrue(result)
-        XCTAssertFalse(viewModel.isLoading, "isLoading must be false after successful cancel")
+        XCTAssertFalse(viewModel.isLoading, "isLoading must be false after successful cancel — stuck loop bug")
         XCTAssertNil(viewModel.currentTrainer)
         XCTAssertNil(viewModel.connectionStatus)
         XCTAssertNil(viewModel.relationshipId)
@@ -122,7 +123,7 @@ final class PersonalTrainerViewModelTests: XCTestCase {
         let result = await viewModel.cancelConnection()
 
         XCTAssertFalse(result)
-        XCTAssertFalse(viewModel.isLoading, "isLoading must be false even after cancel error")
+        XCTAssertFalse(viewModel.isLoading, "isLoading must be false even after cancel error — stuck loop bug")
         XCTAssertNotNil(viewModel.error)
     }
 
@@ -132,7 +133,6 @@ final class PersonalTrainerViewModelTests: XCTestCase {
             cancelConnectionUseCase: cancelUseCase
         )
 
-        // No relationshipId set
         let result = await viewModel.cancelConnection()
 
         XCTAssertFalse(result)
