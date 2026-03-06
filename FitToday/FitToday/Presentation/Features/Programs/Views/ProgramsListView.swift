@@ -54,6 +54,14 @@ struct ProgramsListView: View {
                 // Search bar
                 searchBar(viewModel: viewModel)
 
+                // Incomplete profile banner
+                if viewModel.isProfileIncomplete {
+                    IncompleteProfileBanner {
+                        router.push(.editProfile, on: .workout)
+                    }
+                    .padding(.horizontal, FitTodaySpacing.md)
+                }
+
                 // Featured program
                 if let featured = viewModel.featuredProgram {
                     featuredSection(featured)
@@ -219,7 +227,10 @@ struct ProgramsListView: View {
                 ScrollView(.horizontal, showsIndicators: false) {
                     LazyHStack(spacing: FitTodaySpacing.md) {
                         ForEach(viewModel.filteredPrograms) { program in
-                            ProgramCard(program: program) {
+                            ProgramCard(
+                                program: program,
+                                isRecommended: viewModel.recommendedProgramIds.contains(program.id)
+                            ) {
                                 router.push(.programDetail(program.id), on: .workout)
                             }
                         }
@@ -235,8 +246,8 @@ struct ProgramsListView: View {
         switch goalTag {
         case .strength: return [.blue, .purple]
         case .conditioning: return [.orange, .red]
-        case .aerobic: return [.green, .teal]
-        case .core: return [.cyan, .mint]
+        case .hypertrophy: return [.green, .teal]
+        case .wellness: return [.cyan, .mint]
         case .endurance: return [.indigo, .blue]
         }
     }
@@ -246,6 +257,7 @@ struct ProgramsListView: View {
 
 private struct ProgramCard: View {
     let program: Program
+    var isRecommended: Bool = false
     let onTap: () -> Void
 
     var body: some View {
@@ -270,6 +282,16 @@ private struct ProgramCard: View {
                 }
 
                 VStack(alignment: .leading, spacing: FitTodaySpacing.xs) {
+                    if isRecommended {
+                        Text("Para você")
+                            .font(.system(.caption2, weight: .semibold))
+                            .foregroundStyle(FitTodayColor.brandPrimary)
+                            .padding(.horizontal, FitTodaySpacing.xs)
+                            .padding(.vertical, 2)
+                            .background(FitTodayColor.brandPrimary.opacity(0.15))
+                            .clipShape(Capsule())
+                    }
+
                     Text(program.shortName)
                         .font(.system(.subheadline, weight: .semibold))
                         .foregroundStyle(FitTodayColor.textPrimary)
@@ -298,8 +320,8 @@ private struct ProgramCard: View {
         switch goalTag {
         case .strength: return [.blue, .purple]
         case .conditioning: return [.orange, .red]
-        case .aerobic: return [.green, .teal]
-        case .core: return [.cyan, .mint]
+        case .hypertrophy: return [.green, .teal]
+        case .wellness: return [.cyan, .mint]
         case .endurance: return [.indigo, .blue]
         }
     }
@@ -335,6 +357,14 @@ private struct ProgramCard: View {
 
     var featuredProgram: Program? {
         recommendedPrograms.first
+    }
+
+    var isProfileIncomplete: Bool {
+        userProfile?.isProfileComplete == false
+    }
+
+    var recommendedProgramIds: Set<String> {
+        Set(recommendedPrograms.map { $0.id })
     }
 
     var filteredPrograms: [Program] {
@@ -381,6 +411,41 @@ private struct ProgramCard: View {
             print("[ProgramsListViewModel] Error: \(error)")
             #endif
         }
+    }
+}
+
+// MARK: - Incomplete Profile Banner
+
+struct IncompleteProfileBanner: View {
+    let onTap: () -> Void
+
+    var body: some View {
+        Button(action: onTap) {
+            HStack(spacing: FitTodaySpacing.sm) {
+                Image(systemName: "person.crop.circle.badge.exclamationmark")
+                    .foregroundStyle(FitTodayColor.brandAccent)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Complete seu perfil")
+                        .font(.system(.subheadline, weight: .semibold))
+                        .foregroundStyle(FitTodayColor.textPrimary)
+                    Text("Melhore suas recomendações respondendo mais perguntas")
+                        .font(.system(.caption))
+                        .foregroundStyle(FitTodayColor.textSecondary)
+                }
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .foregroundStyle(FitTodayColor.textTertiary)
+                    .font(.system(size: 12))
+            }
+            .padding(FitTodaySpacing.md)
+            .background(FitTodayColor.surface)
+            .clipShape(RoundedRectangle(cornerRadius: FitTodayRadius.md))
+            .overlay(
+                RoundedRectangle(cornerRadius: FitTodayRadius.md)
+                    .strokeBorder(FitTodayColor.brandAccent.opacity(0.3), lineWidth: 1)
+            )
+        }
+        .buttonStyle(.plain)
     }
 }
 

@@ -91,6 +91,16 @@ enum OnboardingMode {
         }
     }
 
+    /// Pre-fills the ViewModel from an existing UserProfile (used for editing in Settings).
+    func loadFromProfile(_ profile: UserProfile) {
+        selectedGoal = profile.mainGoal
+        selectedStructure = profile.availableStructure
+        selectedMethod = profile.preferredMethod
+        selectedLevel = profile.level
+        selectedConditions = Set(profile.healthConditions)
+        weeklyFrequency = profile.weeklyFrequency
+    }
+
     /// Submete perfil no modo progressivo (aplica defaults e marca como incompleto)
     func submitProgressiveProfile() async -> Bool {
         guard canSubmitProgressive,

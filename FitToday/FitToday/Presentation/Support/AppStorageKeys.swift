@@ -14,6 +14,7 @@ enum AppStorageKeys {
 
     // Onboarding
     static let hasSeenWelcome = "hasSeenWelcome"
+    static let hasCompletedOnboarding = "hasCompletedOnboarding"
 
     // Theme
     static let themePreference = "themePreference"
