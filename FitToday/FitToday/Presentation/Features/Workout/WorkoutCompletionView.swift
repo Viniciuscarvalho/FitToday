@@ -39,6 +39,11 @@ struct WorkoutCompletionView: View {
 
     // Success feedback
     @State private var didPlayHaptic = false
+    @State private var showCompletionCelebration = false
+
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var iconScale: CGFloat = 0.3
+    @State private var iconOpacity: Double = 0
 
     var body: some View {
         VStack(spacing: FitTodaySpacing.lg) {
@@ -47,6 +52,8 @@ struct WorkoutCompletionView: View {
                 .scaledToFit()
                 .frame(width: 96, height: 96)
                 .foregroundStyle(statusColor)
+                .scaleEffect(iconScale)
+                .opacity(iconOpacity)
 
             VStack(spacing: FitTodaySpacing.sm) {
                 Text(titleText)
@@ -184,6 +191,14 @@ struct WorkoutCompletionView: View {
             }
         }
         .overlay {
+            if showCompletionCelebration {
+                CelebrationOverlay(type: .checkInComplete)
+                    .allowsHitTesting(false)
+                    .task {
+                        try? await Task.sleep(for: .seconds(3))
+                        showCompletionCelebration = false
+                    }
+            }
             if showCelebration {
                 CelebrationOverlay(type: .checkInComplete)
                     .onTapGesture {
@@ -533,12 +548,23 @@ struct WorkoutCompletionView: View {
     // MARK: - Success Feedback
 
     private func playSuccessHapticIfNeeded() {
-        guard status == .completed, !didPlayHaptic else { return }
+        guard !didPlayHaptic else { return }
         didPlayHaptic = true
+
+        // Animate icon entrance
+        withAnimation(reduceMotion ? .none : .spring(response: 0.5, dampingFraction: 0.5)) {
+            iconScale = 1
+            iconOpacity = 1
+        }
+
+        guard status == .completed else { return }
 
         // Play success haptic feedback
         let generator = UINotificationFeedbackGenerator()
         generator.notificationOccurred(.success)
+
+        // Show completion celebration
+        showCompletionCelebration = true
     }
 
     // MARK: - App Store Review
