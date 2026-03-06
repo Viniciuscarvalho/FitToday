@@ -1,0 +1,1415 @@
+Preciso equalizar o nome dos exercícios e os 25 programas existentes para tornar pelo menos 12 programas, está muito extenso e que contenha variações, iniciantes, intermediários e avançados, todos os nomes de exercícios devem ser iguais ao que estão no Storage e manter simples, exemplo de nome complexo e que provavelmente vá errar a imagem, chest strech on stability ball, isso com certeza vai gerar uma imagem incorreta para esse exercício. /feature-marker —interactive -prd-new-programas-area
+
+---
+
+Mesmo após ter feito o upload via cms e ter recebido o feedback que estava correto, continuo tomando o erro, 
+[ExerciseImageCache] Path not found: exercises/barbell_bench_press_nb/media/0.jpg
+[ExerciseImageCache] Path not found: exercises/barbell_bench_press_nb/thumbnail/0.webp
+[ExerciseImageCache] No image found for exercise: barbell_bench_press_nb
+[ExerciseImageCache] Path not found: exercises/barbell_bench_press_nb/media/1.jpg
+[ExerciseImageCache] Path not found: exercises/barbell_bench_press_nb/thumbnail/1.webp
+[ExerciseImageCache] No image found for exercise: barbell_bench_press_nb
+[ExerciseImageCache] Path not found: exercises/alternating_floor_press/media/0.jpg
+[ExerciseImageCache] Path not found: exercises/bag_training/media/0.jpg
+[ExerciseImageCache] Path not found: exercises/barbell_bench_press_nb/media/0.jpg
+[ExerciseImageCache] Path not found: exercises/arm_circles/media/0.jpg
+[ExerciseImageCache] Path not found: exercises/claps_over_the_head/media/0.jpg
+[ExerciseImageCache] Path not found: exercises/alternating_floor_press/thumbnail/0.webp
+[ExerciseImageCache] No image found for exercise: alternating_floor_press
+[ExerciseImageCache] Path not found: exercises/barbell_bench_press_nb/thumbnail/0.webp
+[ExerciseImageCache] No image found for exercise: barbell_bench_press_nb
+[ExerciseImageCache] Path not found: exercises/arm_circles/thumbnail/0.webp
+[ExerciseImageCache] No image found for exercise: arm_circles
+[ExerciseImageCache] Path not found: exercises/bag_training/thumbnail/0.webp
+[ExerciseImageCache] No image found for exercise: bag_training
+[ExerciseImageCache] Path not found: exercises/claps_over_the_head/thumbnail/0.webp
+[ExerciseImageCache] No image found for exercise: claps_over_the_head
+
+---
+
+Faça o commit de tudo que está em staged
+
+---
+
+This session is being continued from a previous conversation that ran out of context. The summary below covers the earlier portion of the conversation.
+
+Summary:
+1. Primary Request and Intent:
+   - **Main Request**: Consolidate 26 workout programs to ~12 programs with beginner/intermediate/advanced variations, standardize exercise names to match Firebase Storage IDs (keep simple snake_case English names), and create a new PRD (`prd-new-programas-area`) using the feature-marker workflow.
+   - **Secondary Issue (mid-session)**: Fix exercise image loading errors where `[ExerciseImageCache] Path not found: exercises/barbell_bench_press_nb/media/0.jpg` appeared in logs even after images were uploaded via CMS.
+   - **Final Request**: Commit all staged changes.
+
+2. Key Technical Concepts:
+   - **Firebase Storage path structure**: `exercises/{exerciseId}/media/{imageIndex}.jpg` (primary) and `exercises/{exerciseId}/thumbnail/{imageIndex}.webp` (fallback)
+   - **Firebase Storage Rules**: Wildcard matching — `{fileName}` only matches one path segment, `{allPaths=**}` matches recursively
+   - **ExerciseImageCache** (`actor`): Three-tier cache — memory (NSCache) → disk (Caches/exercise_images/) → Firebase Storage
+   - **Exercise IDs**: Firestore `doc.documentID` is used directly as Storage folder name; IDs from Wger import have suffixes like `_nb`
+   - **ProgramCategory inference**: Computed property in `ProgramModels.swift` uses `lowerId.contains()` to infer category from program ID
+   - **LibraryWorkoutsSeed.json**: 16 workout templates (11 original + 5 new) referenced by programs via `workout_template_ids`
+   - **Hero images**: Only 12 exist in Assets.xcassets (`program_fullbody_01–04`, `program_recovery_01–04`, `program_strength_01–04`)
+
+3. Files and Code Sections:
+
+   - **`/Users/viniciuscarvalho/Documents/FitToday/FitToday/FitToday/Data/Resources/ProgramsSeed.json`**
+     - Replaced 26 programs with exactly 12, each using only existing hero images
+     - 12 programs: PPL (3 levels), Full Body (2), Upper/Lower (2), Home (2), Conditioning (3)
+     - All reference only existing or newly-created `lib_*` templates
+
+   - **`/Users/viniciuscarvalho/Documents/FitToday/FitToday/FitToday/Data/Resources/LibraryWorkoutsSeed.json`**
+     - Added 5 new templates at end of file:
+       - `lib_fullbody_beginner_gym` (barbell_squat, barbell_bench_press, barbell_row, leg_press, lat_pulldown, plank)
+       - `lib_upper_beginner_gym` (chest_press_machine, lat_pulldown, seated_dumbbell_shoulder_press, machine_curl, tricep_rope_pushdown, face_pull)
+       - `lib_lower_beginner_gym` (leg_press, leg_curl_lying, leg_extension, goblet_squat, standing_calf_raise, glute_bridge)
+       - `lib_upper_strength_gym` (barbell_bench_press, barbell_row, incline_dumbbell_press, seated_cable_row, lateral_raise, barbell_curl)
+       - `lib_lower_strength_gym` (barbell_squat, romanian_deadlift, hack_squat, leg_curl_lying, leg_extension, standing_calf_raise)
+
+   - **`/Users/viniciuscarvalho/Documents/FitToday/FitToday/FitToday/Data/Resources/WorkoutBlocksSeed.json`**
+     - Single fix: replaced opaque Firestore ID `41n2hZZdH9uyYFGZ` with descriptive `lever_pec_deck_fly`
+
+   - **`/Users/viniciuscarvalho/Documents/FitToday/FitToday/FitToday/Domain/Entities/ProgramModels.swift`** (~L173)
+     - Added `lowerId.contains("conditioning")` and `lowerName.contains("condicionamento")` to `.fatLoss` category check:
+     ```swift
+     if lowerId.contains("weightloss") || lowerId.contains("hiit") ||
+        lowerId.contains("conditioning") ||
+        lowerName.contains("hiit") || lowerName.contains("queima") ||
+        lowerName.contains("metabolic") || lowerName.contains("fat burn") ||
+        lowerName.contains("condicionamento") {
+         return .fatLoss
+     }
+     ```
+
+   - **`/Users/viniciuscarvalho/Documents/FitToday/storage.rules`**
+     - **Root cause fix for image loading errors**
+     - Old (broken):
+     ```
+     match /exercises/{exerciseId}/{fileName} {
+       allow read: if isAuthenticated();
+     ```
+     - New (fixed):
+     ```
+     match /exercises/{exerciseId}/{allPaths=**} {
+       allow read: if isAuthenticated();
+       allow write: if false;
+     }
+     ```
+     - The single-segment wildcard `{fileName}` only matched `exercises/{id}/file.jpg` but NOT `exercises/{id}/media/0.jpg` (3 segments). The recursive `{allPaths=**}` covers all sub-paths.
+
+   - **`/Users/viniciuscarvalho/Documents/FitToday/tasks/prd-new-programas-area/prd.md`** (NEW)
+     - PRD documenting the consolidation requirements, user stories, technical requirements, success criteria, dependencies
+
+   - **`/Users/viniciuscarvalho/Documents/FitToday/tasks/prd-new-programas-area/techspec.md`** (NEW)
+     - Technical spec with files to modify, JSON schema, risk assessment, testing strategy
+
+   - **`/Users/viniciuscarvalho/Documents/FitToday/tasks/prd-new-programas-area/tasks.md`** (NEW)
+     - 5 tasks tracking the implementation work
+
+   - **`/Users/viniciuscarvalho/Documents/FitToday/FitToday/FitToday/Data/Services/ImageCache/ExerciseImageCache.swift`** (READ ONLY)
+     - Confirmed path structure: `exercises/\(exerciseId)/media/\(imageIndex).jpg`
+     - `actor` with memory + disk + Firebase Storage three-tier cache
+     - Uses `doc.documentID` as exerciseId directly
+
+   - **`/Users/viniciuscarvalho/Documents/FitToday/FitToday/FitToday/Data/Services/Firebase/FirestoreExerciseService.swift`** (READ ONLY)
+     - Confirmed `id: doc.documentID` — Firestore document ID becomes exercise ID
+     - Exercises imported from Wger have IDs like `barbell_bench_press_nb`, `arm_circles`, etc.
+
+4. Errors and Fixes:
+   - **Exercise images not loading** (`[ExerciseImageCache] Path not found: exercises/barbell_bench_press_nb/media/0.jpg`):
+     - **Cause**: `storage.rules` used `match /exercises/{exerciseId}/{fileName}` which only matches 2-segment paths. The app fetches `exercises/{id}/media/0.jpg` which has 3 segments (`media/` is a subdirectory).
+     - **Fix**: Changed to `match /exercises/{exerciseId}/{allPaths=**}` for recursive matching
+     - **Deploy needed**: `firebase deploy --only storage`
+   - **Missing hero images**: 14 of 26 original hero images didn't exist in Assets.xcassets
+     - **Fix**: Reduced to exactly 12 programs using only the 12 existing asset names
+   - **Missing workout templates**: 33 of 44 original `lib_*` template IDs were referenced but didn't exist
+     - **Fix**: Created 5 new templates; reduced programs to only reference existing templates
+
+5. Problem Solving:
+   - **Program consolidation**: 26 → 12 programs with full coverage (beginner/intermediate/advanced, gym/home/bodyweight, strength/conditioning)
+   - **Template gap**: Went from 11 existing to 16 total templates (added 5 new ones)
+   - **Asset gap**: All 12 programs now map exactly to the 12 available hero images
+   - **Storage rules bug**: Found and fixed the critical path matching issue that was blocking all exercise images in `media/` subfolders
+   - **Category inference**: `conditioning_*` program IDs now correctly map to `.fatLoss` category for filter chips
+
+6. All User Messages:
+   - "Preciso equalizar o nome dos exercícios e os 25 programas existentes para tornar pelo menos 12 programas, está muito extenso e que contenha variações, iniciantes, intermediários e avançados, todos os nomes de exercícios devem ser iguais ao que estão no Storage e manter simples, exemplo de nome complexo e que provavelmente vá errar a imagem, chest strech on stability ball, isso com certeza vai gerar uma imagem incorreta para esse exercício. /feature-marker —interactive -prd-new-programas-area"
+   - (Answered questions): Concordo com a distribuição PPL(3)+FullBody(2)+Upper/Lower(2)+Casa(2)+Condicionamento(3), manter nomes em inglês, criar novo PRD separado
+   - "Mesmo após ter feito o upload via cms e ter recebido o feedback que estava correto, continuo tomando o erro, [ExerciseImageCache] Path not found: exercises/barbell_bench_press_nb/media/0.jpg ..." (pasted full error log)
+   - (Answered questions): Images are at same Firestore IDs in Storage, exercises were imported from Wger
+   - "Faça o commit de tudo que está em staged"
+
+7. Pending Tasks:
+   - **Commit all staged changes** — user's most recent explicit request
+   - **Deploy storage rules** — must run `firebase deploy --only storage` for the Storage rules fix to take effect in production
+
+8. Current Work:
+   The last completed work was fixing `storage.rules` to use `{allPaths=**}` recursive wildcard instead of `{fileName}` single-segment wildcard, resolving the exercise image loading failure. The fix was applied to `/Users/viniciuscarvalho/Documents/FitToday/storage.rules`.
+
+   The user then requested: **"Faça o commit de tudo que está em staged"**
+
+9. Optional Next Step:
+   Commit all staged changes. The user explicitly said: "Faça o commit de tudo que está em staged"
+   
+   This requires running:
+   ```bash
+   git -C /Users/viniciuscarvalho/Documents/FitToday add -A
+   git -C /Users/viniciuscarvalho/Documents/FitToday commit -m "feat: consolidate 26 programs to 12, fix storage rules for exercise images"
+   ```
+   The staged files include: `ProgramsSeed.json`, `LibraryWorkoutsSeed.json`, `WorkoutBlocksSeed.json`, `ProgramModels.swift`, `storage.rules`, and the new `tasks/prd-new-programas-area/` directory.
+
+If you need specific details from before compaction (like exact code snippets, error messages, or content you generated), read the full transcript at: /Users/viniciuscarvalho/.REDACTED.jsonl
+Continue the conversation from where it left off without asking the user any further questions. Resume directly — do not acknowledge the summary, do not recap what was happening, do not preface with "I'll continue" or similar. Pick up the last task as if the break never happened.
+
+---
+
+Execute a mudança visual da aplicação seguindo a issue e todos os seus critérios de aceite, https://github.com/Viniciuscarvalho/FitToday/issues/65 faça um /feature-marker prd-new-design-system
+
+---
+
+Base directory for this skill: /Users/viniciuscarvalho/.claude/skills/feature-marker
+
+# feature-marker
+
+Automates feature development with a 5-phase workflow:
+
+1. **Inputs Gate** - Validates `prd.md`, `techspec.md`, `tasks.md` exist; generates them via `~/.claude/commands/` if missing.
+2. **Analysis & Planning** - Auto-installs product-manager skill if missing; reads docs, creates implementation plan.
+3. **Implementation** - Executes tasks with progress tracking.
+4. **Tests & Validation** - Runs platform-appropriate test suites and build validation.
+   Auto-detects: Swift/Xcode (+ XcodeBuildMCP simulator), Node.js, Rust, Python, Go.
+5. **Commit & PR** - Auto-installs enhanced commit command if missing; commits changes using professional workflow and creates PR (auto-detects git platform).
+
+## Platform Support
+
+feature-marker works with any tech stack:
+
+- 🍎 **iOS/Swift** — `swift test` + SwiftLint + XcodeBuildMCP simulator validation
+- 🟨 **Node.js/TypeScript** — auto-detects npm/yarn/pnpm/bun + Jest/Vitest
+- 🦀 **Rust** — `cargo test` + `cargo clippy`
+- 🐍 **Python** — `pytest` + ruff/flake8
+- 🐹 **Go** — `go test` + `go vet`
+
+iOS/Xcode projects get additional simulator validation via XcodeBuildMCP (optional, non-blocking).
+The platform is auto-detected once at workflow start and cached — no configuration required.
+
+## Usage
+
+```
+/feature-marker <feature-slug>
+```
+
+**Example**:
+```
+/feature-marker prd-user-authentication
+```
+
+### Interactive Mode
+
+```
+/feature-marker --interactive <feature-slug>
+```
+
+Opens a menu to select execution mode:
+- **Full Workflow** - Default, generates missing files and executes all phases
+- **Tasks Only** - Uses existing files, skips generation phase
+- **Ralph Loop** - Autonomous continuous execution with ralph-wiggum
+- **Spec-Driven** - Multi-agent review + worktree isolation via spec-workflow
+- **Test Only** - Runs tests phase exclusively using platform-appropriate test guidance (Swift Testing for iOS, Jest/Vitest for Node.js, etc.)
+
+Works both in terminal (TTY menu) and Claude CLI (AskUserQuestion prompt).
+
+**Direct mode selection** (skip menu):
+```
+/feature-marker --mode full <feature-slug>
+/feature-marker --mode tasks-only <feature-slug>
+/feature-marker --mode ralph-loop <feature-slug>
+/feature-marker --mode spec-driven <feature-slug>
+/feature-marker --mode test-only <feature-slug>
+```
+
+## Prerequisites
+
+### Commands
+
+The following commands must be available in `~/.claude/commands/`:
+
+- `create-prd.md` - Creates a new PRD from requirements discussion
+- `generate-spec.md` - Generates technical specification from PRD
+- `generate-tasks.md` - Breaks down feature spec into implementable tasks
+
+### Templates
+
+The commands above read templates from `~/.claude/docs/specs/` to generate structured documents.
+
+Required templates:
+- `~/.claude/docs/specs/prd-template.md` - Product Requirements Document template
+- `~/.claude/docs/specs/techspec-template.md` - Technical Specification template
+- `~/.claude/docs/specs/tasks-template.md` - Tasks breakdown template
+
+**Template Format**: Templates should be markdown files with placeholders and structure that commands will use to generate feature-specific documents.
+
+**Setup**: Ensure these templates exist before running feature-marker:
+```bash
+ls ~/.claude/docs/specs/
+# Should show: prd-template.md, techspec-template.md, tasks-template.md
+```
+
+**Note**: If templates are missing, commands in `~/.claude/commands/` will fail to generate files.
+
+### Project Structure
+
+**Feature Documents** (generated in project):
+```
+./tasks/
+└── prd-{feature-name}/
+    ├── prd.md            ← Generated from ~/.claude/docs/specs/prd-template.md
+    ├── techspec.md       ← Generated from ~/.claude/docs/specs/techspec-template.md
+    ├── tasks.md          ← Generated from ~/.claude/docs/specs/tasks-template.md
+    └── {num}_task.md     ← Individual task files (optional)
+```
+
+**State Directory** (checkpoint & progress):
+```
+.claude/feature-state/{feature-name}/
+├── checkpoint.json
+├── analysis.md
+├── plan.md
+├── progress.md
+├── test-results.md
+└── pr-url.txt
+```
+
+**User Configuration** (required setup):
+```
+~/.claude/
+├── commands/           ← Commands that generate files
+│   ├── create-prd.md
+│   ├── generate-spec.md
+│   └── generate-tasks.md
+└── docs/
+    └── specs/          ← Templates used by commands
+        ├── prd-template.md
+        ├── techspec-template.md
+        └── tasks-template.md
+```
+
+## Behavior
+
+When invoked, the skill:
+
+1. **Validates inputs** - Checks if `./tasks/prd-{feature-slug}/` contains required files
+   - If all files exist → Skips to step 3
+   - If any file is missing → Proceeds to step 2
+2. **Generates ONLY missing files** - Existing files are never overwritten:
+   - Missing PRD → `/create-prd`
+   - Missing Tech Spec → `/generate-spec {feature-slug}`
+   - Missing Tasks → `/generate-tasks {feature-slug}`
+3. **Auto-installs missing dependencies**:
+   - **Phase 1**: Checks for `product-manager` skill
+     - If missing: Installs via `npx skills add https://github.com/aj-geddes/claude-code-bmad-skills --skill product-manager`
+     - If user already has it: Uses user's version
+     - If installation fails: Continues without it (non-blocking)
+   - **Phase 4**: Checks for `/commit` command
+     - If missing: Copies from bundled `resources/commit.md` to `~/.claude/commands/commit.md`
+     - If user already has it: Uses user's version
+     - If installation fails: Falls back to standard commit workflow
+4. **Executes 5-phase workflow** via the `feature-marker` agent
+5. **Persists state** - Saves checkpoints after each phase/task for resume capability
+
+**Important**: The workflow is smart about file detection and dependencies:
+- ✅ Files/skills/commands exist → Uses them directly, no regeneration or reinstallation
+- ⚠️ Missing → Installs/generates only what's needed
+- 🔒 Never overwrites existing content
+- 👤 **User's versions always have priority** over bundled/auto-installed versions
+
+## Auto-Installed Dependencies
+
+Feature-marker automatically installs missing dependencies to enhance the workflow:
+
+### Product Manager Skill (Phase 1)
+
+**What it does**: Provides advanced PRD analysis, requirements validation, and product management capabilities.
+
+**Installation**:
+- **Check**: Phase 1 checks for `~/.claude/skills/product-manager/SKILL.md`
+- **Install**: If missing and `npx` available, runs:
+  ```bash
+  npx skills add https://github.com/aj-geddes/claude-code-bmad-skills --skill product-manager
+  ```
+- **Priority**: Uses user's existing skill if already installed
+- **Fallback**: Continues without it if installation fails (non-blocking)
+
+**Benefits**:
+- Enhanced requirement analysis
+- Better PRD validation
+- Improved feature planning
+
+### Enhanced Commit Command (Phase 4)
+
+**What it does**: Professional commit workflow with validation, splitting, and conventional commit format.
+
+**Installation**:
+- **Check**: Phase 4 checks for `~/.claude/commands/commit.md`
+- **Install**: If missing, copies from bundled `resources/commit.md` to `~/.claude/commands/commit.md`
+- **Priority**: Uses user's existing command if already installed
+- **Fallback**: Uses standard commit workflow if installation fails
+
+**Features**:
+- Pre-commit validation (lint, build, docs)
+- Intelligent commit splitting
+- Conventional commit format with emojis
+- Smart file staging
+- No Co-Authored-By footer (as per command design)
+
+**Example Output**:
+```bash
+✨ feat: add user authentication system
+🐛 fix: resolve memory leak in rendering process
+📝 docs: update API documentation
+♻️ refactor: simplify error handling logic
+```
+
+### Manual Installation
+
+If auto-installation fails, you can install manually:
+
+**Product Manager Skill**:
+```bash
+npx skills add https://github.com/aj-geddes/claude-code-bmad-skills --skill product-manager
+```
+
+**Commit Command**:
+```bash
+cp ~/.claude/skills/feature-marker/resources/commit.md ~/.claude/commands/commit.md
+```
+
+## Template Setup Guide
+
+### Template Directory Structure
+
+Commands in `~/.claude/commands/` read templates from a centralized location:
+
+```
+~/.claude/docs/specs/
+├── prd-template.md          # Product Requirements Document template
+├── techspec-template.md     # Technical Specification template
+└── tasks-template.md        # Task breakdown template
+```
+
+### Why Templates in ~/.claude/docs/specs?
+
+- **Centralized**: All projects share the same templates
+- **User-controlled**: Users can customize their own templates
+- **Portable**: Commands reference templates via standard path
+- **Separation**: Templates are not in project repositories
+
+### Template Content
+
+Each template should be a markdown file with:
+- Clear section structure
+- Placeholder text or variables
+- Examples and formatting guidelines
+
+Commands read these templates and populate them with feature-specific content.
+
+### Setup Verification
+
+To verify your setup is complete:
+
+```bash
+# Check templates exist
+ls -l ~/.claude/docs/specs/
+
+# Check commands exist
+ls -l ~/.claude/commands/
+
+# Test feature-marker
+/feature-marker --interactive prd-test-feature
+```
+
+If templates are missing, create them in `~/.claude/docs/specs/` before running feature-marker.
+
+## Plan Mode Integration
+
+When the user has used Claude's built-in plan mode before invoking feature-marker, the agent automatically:
+
+1. **Detects the most recent plan** from `~/.claude/plans/` (sorted by modification time)
+2. **Reads project conventions** from `./CLAUDE.md` at the project root (if present)
+3. **Uses both as rich context** to enhance PRD generation and reduce redundant clarification questions
+
+This is automatic and requires no additional flags or options. If no plan or CLAUDE.md exists, the workflow proceeds normally.
+
+**Recommended flow**:
+```
+1. Use Claude plan mode to explore the codebase and think through the feature
+2. Exit plan mode
+3. Run /feature-marker --interactive <feature-slug>
+4. Select "Full Workflow"
+5. The plan content automatically enriches PRD generation
+```
+
+## Checkpoint & Resume
+
+If interrupted (Ctrl+C, session crash, etc.), re-invoke with the same feature slug to resume:
+
+```
+/feature-marker prd-user-authentication
+```
+
+The skill will:
+- Detect existing checkpoint
+- Show current progress (phase, task index)
+- Ask if you want to resume or start fresh
+
+## Platform Detection
+
+In Phase 4, the skill auto-detects your git platform and selects the appropriate PR skill:
+
+| Platform | Detection | PR Skill |
+|----------|-----------|----------|
+| GitHub | `github.com` in remote URL | `checking-pr` |
+| Azure DevOps | `dev.azure.com` in remote URL | `azure-pr` |
+| GitLab | `gitlab.com` in remote URL | `checking-pr` |
+| Bitbucket | `bitbucket.org` in remote URL | `checking-pr` |
+| Other | (fallback) | `checking-pr` |
+
+## Configuration
+
+Override default behavior with `.feature-marker.json` in your repository root:
+
+```json
+{
+  "pr_skill": "custom-pr-skill",
+  "skip_pr": false,
+  "test_command": "npm run test:ci",
+  "docs_path": "./tasks",
+  "state_path": ".claude/feature-state"
+}
+```
+
+## Error Handling
+
+| Scenario | Behavior |
+|----------|----------|
+| Missing files | Auto-generate via commands |
+| No git repo | Fail early with helpful message |
+| No tests | Skip Phase 3 with warning |
+| Test failures | Report issues, allow fix, offer retry |
+| Unknown platform | Fallback to `checking-pr` |
+| PR skill unavailable | Commit only, log manual instructions |
+
+## Example Sessions
+
+### Example 1: All Files Exist (No Generation Needed)
+```
+> /feature-marker prd-user-authentication
+
+Checking for existing checkpoint...
+No checkpoint found. Starting new workflow.
+
+Phase 0: Inputs Gate
+✓ prd.md exists
+✓ techspec.md exists
+✓ tasks.md exists
+✅ All files present. Skipping generation.
+
+Phase 1: Analysis & Planning
+Reading existing documents...
+Creating implementation plan...
+Checkpoint saved.
+
+Phase 2: Implementation
+[1/6] Create User entity... ✓
+[2/6] Add authentication service... ✓
+...
+```
+
+### Example 2: Partial Files (Generates Only Missing)
+```
+> /feature-marker prd-payment-integration
+
+Checking for existing checkpoint...
+No checkpoint found. Starting new workflow.
+
+Phase 0: Inputs Gate
+✓ prd.md exists
+✗ techspec.md missing → Generating via /generate-spec...
+✓ tasks.md exists
+
+✅ Generated missing file. All inputs ready.
+
+Phase 1: Analysis & Planning
+Reading documents...
+Creating implementation plan...
+Checkpoint saved.
+...
+```
+
+### Example 3: Complete Workflow with Auto-Install
+```
+> /feature-marker prd-new-feature
+
+Phase 0: Inputs Gate
+✗ prd.md missing → Generating via /create-prd...
+✗ techspec.md missing → Generating via /generate-spec...
+✗ tasks.md missing → Generating via /generate-tasks...
+
+Phase 1: Analysis & Planning
+⚙️  Installing product-manager skill...
+✓ product-manager skill installed successfully
+Reading PRD, Tech Spec, and Tasks...
+Creating implementation plan...
+Checkpoint saved.
+
+Phase 2: Implementation
+[1/6] Create User entity... ✓
+[2/6] Add authentication service... ✓
+[3/6] Implement login endpoint... ✓
+[4/6] Add JWT token handling... ✓
+[5/6] Create logout endpoint... ✓
+[6/6] Add session management... ✓
+Checkpoint saved.
+
+Phase 3: Tests & Validation
+✅ Platform detected: Node.js / Next.js (pnpm)
+Running: jest --findRelatedTests src/api/users.ts
+✅ 14 passed, 0 failed
+Lint: pnpm run lint ✅
+Checkpoint saved.
+
+Phase 4: Commit & PR
+⚙️  Installing commit command...
+✓ commit command installed successfully
+Using enhanced commit workflow (/commit)...
+✨ feat: implement user authentication system
+Detected platform: GitHub
+Creating PR via /checking-pr...
+
+✓ Feature complete!
+PR URL: https://github.com/user/repo/pull/42
+```
+
+### Example 4: Using Existing User Tools
+```
+> /feature-marker prd-payment-feature
+
+Phase 0: Inputs Gate
+✓ All inputs validated.
+
+Phase 1: Analysis & Planning
+✓ product-manager skill already installed (using user's version)
+...
+
+Phase 4: Commit & PR
+✓ commit command already exists (using user's version)
+...
+```
+
+
+ARGUMENTS: prd-new-design-system
+
+---
+
+Preciso mover essas modificações todas para uma nova branch, pois essa branch do exercise-image-cache-phase5 já foi mergeado, quero criar uma nova branch com essas modificações apenas para a reformulação do design system.
+
+---
+
+Preciso ter um switch em configurações do app que consiga trocar o tema, hoje ele está somente no dark, mas possa ter o tema clear também e que fique legível para o usuário e respeitando regras de acessibilidade e uma UX digna.
+
+---
+
+This session is being continued from a previous conversation that ran out of context. The summary below covers the earlier portion of the conversation.
+
+Summary:
+1. Primary Request and Intent:
+   - **Request 1 (Completed)**: Execute the visual changes from GitHub issue #65 (`feat: Nova identidade de cores do design system — Constância & Equilíbrio Mental`) using the feature-marker workflow with slug `prd-new-design-system`. The issue specifies: new color palette (purple→blue), new fonts (Orbitron/Rajdhani/Bungee → Plus Jakarta Sans/Inter), removal of all retro/synthwave legacy tokens and effects, updated gradients, reduced tracking.
+   - **Request 2 (Completed)**: Move all design system changes from `feat/exercise-image-cache-phase5` (already merged) to a new dedicated branch `feat/new-design-system` based on `main`.
+   - **Request 3 (Pending - most recent)**: "Preciso ter um switch em configurações do app que consiga trocar o tema, hoje ele está somente no dark, mas possa ter o tema clear também e que fique legível para o usuário e respeitando regras de acessibilidade e uma UX digna." — Add a theme toggle in app settings to support both dark and light modes, with proper accessibility and good UX.
+
+2. Key Technical Concepts:
+   - **Design System Architecture**: Centralized in `FitTodayColor`, `FitTodayFont`, `FitTodayTypography` enums within `DesignTokens.swift`. All 90+ view files reference these enums, so hex value changes propagate automatically.
+   - **PBXFileSystemSynchronizedRootGroup**: Xcode 16 automatic file management — files in the `FitToday/` directory are auto-included in the target without explicit pbxproj references. Font files just need to be in the directory + registered in Info.plist `UIAppFonts`.
+   - **Font Registration**: Via `Config/AppInfo.plist` → `UIAppFonts` array. Font PostScript names used in `Font.custom()` match filename stems (e.g., `PlusJakartaSans-Bold`).
+   - **Feature-marker workflow**: 5-phase automation (Inputs Gate → Analysis → Implementation → Tests → Commit/PR)
+   - **Color palette**: Purple (#7C3AED) → Blue (#3B82F6), with coral accent (#FB7185) for effort/calories
+   - **Typography**: Plus Jakarta Sans (titles, display) + Inter (body, UI text). Tracking reduced significantly (1.5→0.3 for largeTitle, etc.)
+
+3. Files and Code Sections:
+
+   - **`FitToday/FitToday/Presentation/DesignSystem/DesignTokens.swift`** — Central design system file. All colors, gradients, fonts, typography, and view extensions.
+     - Colors updated: `brandPrimary=#3B82F6`, `brandSecondary=#60A5FA`, `brandAccent=#FB7185`, `background=#111111`, `backgroundElevated=#1A1A1A`, `surface=#1E1E1E`, `surfaceElevated=#252525`, `textSecondary=#94A3B8`, `textTertiary=#64748B`, `outline=#2A2A2A`, `outlineVariant=#3A3A3A`
+     - Gradients: `gradientPrimary` → blue #3B82F6→#1D4ED8, new `gradientAccent` coral, new `gradientSurface`, category gradients updated
+     - ~170 lines of legacy code removed (neon colors, grid/tech/glitch tokens, retro gradients, retro View extensions, retro Pattern structs)
+     - Font system migrated:
+     ```swift
+     enum FitTodayFont {
+         static let jakartaBold = "PlusJakartaSans-Bold"
+         static let jakartaSemiBold = "PlusJakartaSans-SemiBold"
+         static let jakartaMedium = "PlusJakartaSans-Medium"
+         static let interRegular = "Inter-Regular"
+         static let interMedium = "Inter-Medium"
+         static let interSemiBold = "Inter-SemiBold"
+         
+         static func display(size: CGFloat, weight: DisplayWeight = .bold) -> Font {
+             switch weight {
+             case .bold: return .custom(jakartaBold, size: size)
+             case .extraBold: return .custom(jakartaBold, size: size)
+             case .black: return .custom(jakartaBold, size: size)
+             }
+         }
+         static func ui(size: CGFloat, weight: UIWeight = .medium) -> Font {
+             switch weight {
+             case .medium: return .custom(interMedium, size: size)
+             case .semiBold: return .custom(interSemiBold, size: size)
+             case .bold: return .custom(interSemiBold, size: size)
+             }
+         }
+         static func accent(size: CGFloat) -> Font {
+             .custom(jakartaSemiBold, size: size)
+         }
+     }
+     ```
+     - Typography tracking reduced (largeTitle: 1.5→0.3, title: 1.2→0.2, title2: 1.0→0.2, heading: 0.8→0.1, subheading: 0.5→0, body: 0.3→0, caption: 0.5→0.2, badge: 0.8→0.5)
+
+   - **`Config/AppInfo.plist`** — Font registration. Updated UIAppFonts from Orbitron/Rajdhani/Bungee to PlusJakartaSans/Inter files.
+
+   - **Font files in `FitToday/FitToday/Resources/Fonts/`**:
+     - Removed: `Orbitron-Bold.ttf`, `Orbitron-ExtraBold.ttf`, `Orbitron-Black.ttf`, `Rajdhani-Bold.ttf`, `Rajdhani-SemiBold.ttf`, `Rajdhani-Medium.ttf`, `Bungee-Regular.ttf`
+     - Added: `PlusJakartaSans-Bold.ttf`, `PlusJakartaSans-SemiBold.ttf`, `PlusJakartaSans-Medium.ttf`, `Inter-Regular.ttf`, `Inter-Medium.ttf`, `Inter-SemiBold.ttf`
+
+   - **23 view files cleaned of legacy retro effects** (neon colors → brand colors, retro overlays removed, techCornerBorders → fitCardBorder or removed):
+     - Design System: `ButtonStyles.swift`, `CardsAndBadges.swift`, `FitnessIcons.swift`, `ExercisePlaceholderView.swift`, `RestTimerView.swift`
+     - Features: `AuthenticationView.swift`, `OnboardingFlowView.swift`, `OnboardingPage.swift`, `WorkoutExecutionView.swift`, `MyWorkoutsView.swift`, `FloatingTimerBar.swift`, `PhaseModePicker.swift`, `SavedRoutineCard.swift`, `PrefetchingOverlay.swift`, `ExerciseExecutionCard.swift`, `WorkoutExerciseDetailView.swift`, `OptimizedPaywallView.swift`, `PaywallHeroSection.swift`, `TrialHighlight.swift`, `HealthKitConnectionView.swift`, `HomeHeroCard.swift`, `DailyStatsCard.swift`, `UserStatsSection.swift`
+
+   - **`tasks/prd-new-design-system/prd.md`** — PRD document with requirements from issue #65
+   - **`tasks/prd-new-design-system/techspec.md`** — Technical spec with color mappings, font changes, component details
+   - **`tasks/prd-new-design-system/tasks.md`** — 7 tasks breakdown
+
+4. Errors and Fixes:
+   - **SourceKit "Cannot find 'FitTodayFont' in scope" diagnostics**: Transient indexing issues from SourceKit during incremental parsing. Not real build errors — the actual `xcodebuild` succeeded with 0 errors.
+   - **`.fitCardBorder()` on CardsAndBadges.swift line 35**: The subagent replaced `.techCornerBorders()` with `.fitCardBorder()` but the card already had a custom stroke overlay (lines 28-32), making it redundant. Fixed by removing the `.fitCardBorder()` line.
+   - **`tasks/prd-new-design-system/` not in stash**: When stashing changes with `git stash push -u`, the PRD directory wasn't captured (possibly already staged or a git quirk). Fixed by recovering files from the old branch: `git checkout feat/exercise-image-cache-phase5 -- tasks/prd-new-design-system/`
+   - **iPhone 16 simulator not available**: Build destination `iPhone 16` not found. Available simulators were iPhone 17/17 Pro/17 Pro Max and iPhone Air. Used `iPhone 17 Pro` instead.
+   - **DesignTokens.swift legacy references after removal**: After removing neon/grid/glitch tokens from the enum, the retro View extensions still referenced `FitTodayColor.gridLine` and `FitTodayColor.techBorder`. Fixed by also removing those extensions and the pattern structs.
+
+5. Problem Solving:
+   - **Legacy token cleanup scope**: Initial grep found 24 files using retro effects. Used two parallel Agent calls (one for design system files, one for feature views) to clean all 23 files simultaneously.
+   - **Color replacement mapping**: `neonCyan→brandPrimary`, `neonMagenta→brandAccent`, `neonYellow→warning`, `neonPurple→brandSecondary`, `gridLine→outline`, `techBorder→outline`, `glitchRed→error`
+   - **Effect replacement**: `retroGridOverlay`→removed, `scanlineOverlay`→removed, `diagonalStripes`→removed, `techCornerBorders`→`fitCardBorder()` where appropriate or removed, `RetroGridPattern`→replaced with `FitTodayColor.background`
+   - **Branch management**: Successfully moved all uncommitted changes from merged branch to new dedicated branch via stash→checkout main→new branch→pop stash workflow.
+
+6. All User Messages:
+   - "Execute a mudança visual da aplicação seguindo a issue e todos os seus critérios de aceite, https://github.com/Viniciuscarvalho/FitToday/issues/65 faça um /feature-marker prd-new-design-system"
+   - "Preciso mover essas modificações todas para uma nova branch, pois essa branch do exercise-image-cache-phase5 já foi mergeado, quero criar uma nova branch com essas modificações apenas para a reformulação do design system."
+   - "Preciso ter um switch em configurações do app que consiga trocar o tema, hoje ele está somente no dark, mas possa ter o tema clear também e que fique legível para o usuário e respeitando regras de acessibilidade e uma UX digna."
+
+7. Pending Tasks:
+   - **Theme toggle switch**: Add a settings option to toggle between dark and light themes. Current app is dark-only. Need to implement light mode color variants, a settings UI toggle, and ensure WCAG accessibility compliance for both themes.
+   - **Commit design system changes**: The 41 files on `feat/new-design-system` branch are still uncommitted.
+
+8. Current Work:
+   All design system changes are on branch `feat/new-design-system` (based on `main`) with 41 uncommitted files. The user's most recent message requests adding a theme toggle switch in app settings to support both dark and light modes with proper accessibility and UX. This is a NEW feature request building on top of the design system work.
+
+   Current branch state: `feat/new-design-system` with all design system overhaul changes uncommitted.
+
+9. Optional Next Step:
+   Implement the theme toggle feature as requested: "Preciso ter um switch em configurações do app que consiga trocar o tema, hoje ele está somente no dark, mas possa ter o tema clear também e que fique legível para o usuário e respeitando regras de acessibilidade e uma UX digna."
+   
+   This involves:
+   1. First commit the current design system changes on the branch
+   2. Define light mode color variants for all `FitTodayColor` tokens (using `Color(.init(light:dark:))` or SwiftUI Color assets)
+   3. Create a `ThemeManager` or `AppearanceManager` with `@AppStorage` for persistence
+   4. Add a settings UI toggle (Dark / Light / System)
+   5. Apply `.preferredColorScheme()` at app root
+   6. Ensure WCAG AA contrast ratios in both themes
+
+If you need specific details from before compaction (like exact code snippets, error messages, or content you generated), read the full transcript at: /Users/viniciuscarvalho/.REDACTED.jsonl
+Continue the conversation from where it left off without asking the user any further questions. Resume directly — do not acknowledge the summary, do not recap what was happening, do not preface with "I'll continue" or similar. Pick up the last task as if the break never happened.
+
+---
+
+Parece que a font não está sendo refernciada corretamente, GSFont: invalid font file - "file:REDACTED.app/PlusJakartaSans-Bold.ttf"
+GSFont: invalid font file - "file:REDACTED.app/PlusJakartaSans-SemiBold.ttf"
+GSFont: invalid font file - "file:REDACTED.app/PlusJakartaSans-Medium.ttf"
+GSFont: invalid font file - "file:REDACTED.app/Inter-Regular.ttf"
+GSFont: invalid font file - "file:REDACTED.app/Inter-Medium.ttf"
+GSFont: invalid font file - "file:REDACTED.app/Inter-SemiBold.ttf"
+
+---
+
+Faça o commit dessas modificações com todas as fonts agora, crie o PR do novo design system e vincule https://github.com/Viniciuscarvalho/FitToday/issues/65 para ser fechada quando eu fizer o merge desse PR
+
+---
+
+A task https://github.com/Viniciuscarvalho/FitToday/issues/71, está avaliando e carregando 26 programas ainda, devem ser apenas 12 programas como está estabelecido, corrigir esse problema e ver os critérios de aceite, realize o git checkout para criar uma nova branch, faça o /commit e crie um novo PR com essa alteração, para deixar tudo bem separado.
+
+---
+
+Verifique todas as issues e faça de acordo com o prd que está em questão, veja todos os critérios de aceites e  após a execução, faça o /commit e crie o PRD, em seguida eu irei testar e poderá vincular todas essas tarefas ao PR aberto quando mergear o PR, essas issues serão fechadas.
+
+---
+
+[Request interrupted by user]
+
+---
+
+Verifique todas as issues e faça de acordo com o prd que está em questão, veja todos os critérios de aceites e  após a execução, faça o /commit e crie o PRD, em seguida eu irei testar e poderá vincular todas essas tarefas ao PR aberto quando mergear o PR, essas issues serão fechadas. https://github.com/Viniciuscarvalho/FitToday/issues
+
+---
+
+This session is being continued from a previous conversation that ran out of context. The summary below covers the earlier portion of the conversation.
+
+Summary:
+1. Primary Request and Intent:
+   - **Request 1 (Completed)**: Execute visual identity change from GitHub issue #65 using feature-marker workflow with slug `prd-new-design-system`. Purple→blue color palette, new fonts, remove retro legacy tokens.
+   - **Request 2 (Completed - from previous session)**: Move design system changes to dedicated branch `feat/new-design-system` from `main`.
+   - **Request 3 (Completed)**: Add a theme toggle in app settings supporting dark, light, and system themes with proper accessibility and UX. "Preciso ter um switch em configurações do app que consiga trocar o tema, hoje ele está somente no dark, mas possa ter o tema clear também e que fique legível para o usuário e respeitando regras de acessibilidade e uma UX digna."
+   - **Request 4 (Completed)**: Fix corrupt font files (GSFont invalid font file errors at runtime).
+   - **Request 5 (Completed)**: Commit design system changes, create PR #72 linked to issue #65.
+   - **Request 6 (Completed)**: Fix issue #71 — programs loading 26 but should be 12, fix broken template references. Create new branch, commit, create PR #73.
+   - **Request 7 (Current/Pending)**: "Verifique todas as issues e faça de acordo com o prd que está em questão, veja todos os critérios de aceites e após a execução, faça o /commit e crie o PRD, em seguida eu irei testar e poderá vincular todas essas tarefas ao PR aberto quando mergear o PR, essas issues serão fechadas." — Check all open issues at https://github.com/Viniciuscarvalho/FitToday/issues, implement according to PRD acceptance criteria, commit, create PR linking all issues.
+
+2. Key Technical Concepts:
+   - **Adaptive Colors**: Using `UIColor { traits in }` with `adaptiveColor(light:dark:)` helper to support both dark and light modes without changing 90+ view files
+   - **ThemePreference enum**: `system/dark/light` stored via `@AppStorage` with `preferredColorScheme()` at app root
+   - **WCAG AA Compliance**: Light mode colors verified — textPrimary #0F172A (15.4:1 contrast), textSecondary #475569 (5.9:1), brandPrimary #2563EB
+   - **PBXFileSystemSynchronizedRootGroup**: Xcode 16 auto file management — files in directory auto-included
+   - **Font Registration**: Via `Config/AppInfo.plist` → `UIAppFonts` array, PostScript names must match `Font.custom()` calls
+   - **BundleProgramRepository**: Actor that loads programs from `ProgramsSeed.json` bundle, caches in memory
+   - **ProgramCategory**: Computed property on `Program` using heuristic string matching on `id` and `name` — NOT used by either view (both filter by `goalTag` instead)
+   - **ProgramGoalTag**: Enum used for filtering in `ProgramsView` and `ProgramsListView`
+   - **Localization**: `String.localized` extension is `@MainActor`, uses `LocalizationManager.shared.currentBundle`
+   - **Google Fonts gstatic CDN**: Reliable source for downloading actual TTF font files (vs GitHub pages returning HTML)
+
+3. Files and Code Sections:
+
+   - **`FitToday/FitToday/Presentation/DesignSystem/DesignTokens.swift`**
+     - Central design system file — all colors, gradients, fonts, typography
+     - Made all `FitTodayColor` tokens adaptive using `adaptiveColor(light:dark:)` helper
+     - Added `import UIKit` for `UIColor` access
+     ```swift
+     import SwiftUI
+     import UIKit
+     
+     private func adaptiveColor(light: String, dark: String) -> Color {
+         Color(UIColor { traits in
+             traits.userInterfaceStyle == .dark
+                 ? UIColor(Color(hex: dark))
+                 : UIColor(Color(hex: light))
+         })
+     }
+     
+     enum FitTodayColor {
+         static let brandPrimary = adaptiveColor(light: "#2563EB", dark: "#3B82F6")
+         static let brandSecondary = adaptiveColor(light: "#3B82F6", dark: "#60A5FA")
+         static let brandAccent = adaptiveColor(light: "#E11D48", dark: "#FB7185")
+         static let background = adaptiveColor(light: "#F8FAFC", dark: "#111111")
+         static let backgroundElevated = adaptiveColor(light: "#FFFFFF", dark: "#1A1A1A")
+         static let surface = adaptiveColor(light: "#F1F5F9", dark: "#1E1E1E")
+         static let surfaceElevated = adaptiveColor(light: "#E2E8F0", dark: "#252525")
+         static let textPrimary = adaptiveColor(light: "#0F172A", dark: "#FFFFFF")
+         static let textSecondary = adaptiveColor(light: "#475569", dark: "#94A3B8")
+         static let textTertiary = adaptiveColor(light: "#64748B", dark: "#64748B")
+         static let textInverse = adaptiveColor(light: "#FFFFFF", dark: "#111111")
+         static let outline = adaptiveColor(light: "#E2E8F0", dark: "#2A2A2A")
+         static let outlineVariant = adaptiveColor(light: "#CBD5E1", dark: "#3A3A3A")
+         static let success = adaptiveColor(light: "#16A34A", dark: "#22C55E")
+         static let warning = adaptiveColor(light: "#D97706", dark: "#F59E0B")
+         static let error = adaptiveColor(light: "#DC2626", dark: "#EF4444")
+         static let info = adaptiveColor(light: "#2563EB", dark: "#3B82F6")
+         // ... gradients also updated for adaptive colors
+     }
+     ```
+
+   - **`FitToday/FitToday/Presentation/Support/ThemePreference.swift`** (NEW)
+     - Theme enum with system/dark/light options
+     ```swift
+     enum ThemePreference: String, CaseIterable, Identifiable {
+         case system
+         case dark
+         case light
+         var id: String { rawValue }
+         var colorScheme: ColorScheme? {
+             switch self {
+             case .system: return nil
+             case .dark: return .dark
+             case .light: return .light
+             }
+         }
+         var localizationKey: String {
+             switch self {
+             case .system: return "settings.theme.system"
+             case .dark: return "settings.theme.dark"
+             case .light: return "settings.theme.light"
+             }
+         }
+         var icon: String {
+             switch self {
+             case .system: return "circle.lefthalf.filled"
+             case .dark: return "moon.fill"
+             case .light: return "sun.max.fill"
+             }
+         }
+     }
+     ```
+
+   - **`FitToday/FitToday/Presentation/Support/AppStorageKeys.swift`**
+     - Added `themePreference` key
+     ```swift
+     // Theme
+     static let themePreference = "themePreference"
+     ```
+
+   - **`FitToday/FitToday/FitTodayApp.swift`**
+     - Added `@AppStorage` for theme preference
+     - Changed `.preferredColorScheme(.dark)` to read from stored preference
+     - Updated `configureGlobalAppearance()` to use adaptive colors
+     ```swift
+     @AppStorage(AppStorageKeys.themePreference) private var themePreferenceRaw: String = ThemePreference.dark.rawValue
+     // ...
+     .preferredColorScheme(ThemePreference(rawValue: themePreferenceRaw)?.colorScheme ?? .dark)
+     ```
+
+   - **`FitToday/FitToday/Presentation/Features/Pro/ProfileProView.swift`**
+     - Added theme picker row in settings section (after language row)
+     - Uses same Menu pattern as language picker
+     - `@AppStorage(AppStorageKeys.themePreference)` for reactivity
+     ```swift
+     private var themeRow: some View {
+         let selected = ThemePreference(rawValue: themePreferenceRaw) ?? .dark
+         return HStack(spacing: FitTodaySpacing.md) {
+             // icon, label, Menu with ForEach ThemePreference.allCases
+         }
+     }
+     ```
+
+   - **`FitToday/FitToday/Resources/Fonts/`**
+     - All 6 font files replaced with valid TTF from Google Fonts gstatic
+     - Files: PlusJakartaSans-Bold.ttf, PlusJakartaSans-SemiBold.ttf, PlusJakartaSans-Medium.ttf, Inter-Regular.ttf, Inter-Medium.ttf, Inter-SemiBold.ttf
+     - PostScript names verified with `mdls`: PlusJakartaSans-Bold, PlusJakartaSans-SemiBold, PlusJakartaSans-Medium, Inter-Regular, Inter-Medium, Inter-SemiBold
+
+   - **`FitToday/FitToday/Resources/en.lproj/Localizable.strings`** and **`pt-BR.lproj/Localizable.strings`**
+     - Added theme localization strings:
+     ```
+     "settings.theme" = "Theme" / "Tema"
+     "settings.theme.system" = "System" / "Sistema"
+     "settings.theme.dark" = "Dark" / "Escuro"
+     "settings.theme.light" = "Light" / "Claro"
+     ```
+
+   - **`FitToday/FitToday/Data/Resources/ProgramsSeed.json`**
+     - Rewritten with 12 clean programs, all referencing existing templates
+     - Distribution: 5 beginner, 5 intermediate, 2 advanced | 8 strength, 4 conditioning
+     - Programs: ppl_beginner_muscle_gym, ppl_intermediate_muscle_gym, ppl_advanced_strength_gym, upperlower_beginner_muscle_gym, fullbody_beginner_muscle_gym, fullbody_intermediate_muscle_gym, upperlower_intermediate_strength_gym, home_beginner_dumbbell, home_intermediate_bodyweight, conditioning_beginner_home, conditioning_intermediate_gym, conditioning_advanced_gym
+     - All 12 hero images match existing Assets.xcassets entries
+
+   - **`FitToday/FitToday/Data/Resources/LibraryWorkoutsSeed.json`**
+     - Added 5 new templates (11→16 total):
+       - `lib_fullbody_beginner_gym` (6 exercises)
+       - `lib_upper_beginner_gym` (6 exercises)
+       - `lib_lower_beginner_gym` (6 exercises)
+       - `lib_upper_strength_gym` (6 exercises)
+       - `lib_lower_strength_gym` (6 exercises)
+     - All exercise objects copied from existing templates (no new exercise definitions)
+
+   - **`FitToday/FitToday/Data/Resources/WorkoutBlocksSeed.json`**
+     - Fixed opaque ID: `"id": "41n2hZZdH9uyYFGZ"` → `"id": "lever_pec_deck_fly"` at line 25
+
+   - **`FitToday/FitToday/Domain/Entities/ProgramModels.swift`**
+     - Added `conditioning` to category inference for `.fatLoss`:
+     ```swift
+     if lowerId.contains("weightloss") || lowerId.contains("hiit") ||
+        lowerId.contains("conditioning") ||
+        lowerName.contains("hiit") || lowerName.contains("queima") ||
+        lowerName.contains("metabolic") || lowerName.contains("fat burn") ||
+        lowerName.contains("condicionamento") || lowerName.contains("metabólico") {
+         return .fatLoss
+     }
+     ```
+
+   - **`FitToday/FitToday/Data/Repositories/BundleProgramRepository.swift`** (read only)
+     - Actor that loads from ProgramsSeed.json bundle, caches in memory
+     - Uses `ProgramDTO` with snake_case decoding
+     - Equipment inferred from program ID if not explicit
+
+4. Errors and fixes:
+   - **`.localized` is `@MainActor`**: Initial `ThemePreference.displayName` used `.localized` directly in enum, causing compile error. Fixed by using `localizationKey: String` property instead, calling `.localized` only in views.
+   - **`UIColor` not in scope**: `adaptiveColor()` helper used `UIColor` but only `SwiftUI` was imported. Fixed by adding `import UIKit`.
+   - **Corrupt font files**: All 6 .ttf files were actually HTML documents (downloaded from GitHub preview pages instead of raw content). User reported: "GSFont: invalid font file" for all 6 fonts. Fixed by downloading valid TTF files from Google Fonts gstatic CDN URLs extracted from `fonts.googleapis.com/css2` API.
+   - **5 programs with missing templates**: Programs referenced templates like `lib_strength_compound_gym`, `lib_conditioning_circuit_gym`, `lib_hiit_beginner_home`, `lib_conditioning_beginner_gym`, `lib_hiit_tabata_home`, `lib_core_beginner_gym` that didn't exist. Fixed by rewriting all 12 programs to only reference existing templates.
+
+5. Problem Solving:
+   - **Font file sourcing**: GitHub raw URLs failed (404 or returned HTML). Solved by using Google Fonts CSS API to get direct gstatic URLs, then downloading with curl. Verified with `mdls -name kMDItemFonts` to confirm PostScript names match code references.
+   - **Program template validation**: Created Python script to cross-reference all `workout_template_ids` against `LibraryWorkoutsSeed.json` entries, identified exactly which programs were broken and what was missing.
+   - **Category inference gap**: New `conditioning_*` program IDs wouldn't match any category rule, falling to `.fullBody` default. Added `lowerId.contains("conditioning")` to the `.fatLoss` check.
+
+6. All user messages:
+   - "Parece que a font não está sendo refernciada corretamente, GSFont: invalid font file - [paths for all 6 fonts]"
+   - "Faça o commit dessas modificações com todas as fonts agora, crie o PR do novo design system e vincule https://github.com/Viniciuscarvalho/FitToday/issues/65 para ser fechada quando eu fizer o merge desse PR"
+   - "A task https://github.com/Viniciuscarvalho/FitToday/issues/71, está avaliando e carregando 26 programas ainda, devem ser apenas 12 programas como está estabelecido, corrigir esse problema e ver os critérios de aceite, realize o git checkout para criar uma nova branch, faça o /commit e crie um novo PR com essa alteração, para deixar tudo bem separado."
+   - "Verifique todas as issues e faça de acordo com o prd que está em questão, veja todos os critérios de aceites e após a execução, faça o /commit e crie o PRD, em seguida eu irei testar e poderá vincular todas essas tarefas ao PR aberto quando mergear o PR, essas issues serão fechadas. https://github.com/Viniciuscarvalho/FitToday/issues"
+
+7. Pending Tasks:
+   - **Execute all 9 open issues**: The user wants ALL open issues (#74, #75-82) implemented according to their PRDs and acceptance criteria, committed, and a PR created that links all issues to be closed on merge.
+   - **Issue #74** (bug): ExercisePreviewRow image overflow — add `.frame(maxWidth: .infinity, maxHeight: .infinity)` + `.clipped()` in `ExerciseImageView.swift`
+   - **Issues #75-82** (prd-fitness-preferences Tasks 1-8):
+     - Task 1 (#75): Ensure complete onboarding (6 steps) for new users
+     - Task 2 (#76): Add `loadFromProfile(_:)` to `OnboardingFlowViewModel`
+     - Task 3 (#77): Add `hypertrophy` and `wellness` cases to `ProgramGoalTag`
+     - Task 4 (#78): Redistribute `goal_tag` in ProgramsSeed.json
+     - Task 5 (#79): Expand `ProgramRecommender` score with structure and method matching
+     - Task 6 (#80): UI badge "Para você" and incomplete profile banner in Programs
+     - Task 7 (#81): Settings section "Perfil de Treino" with summary and edit
+     - Task 8 (#82): Tests and end-to-end validation
+
+8. Current Work:
+   The assistant had just finished reading all 9 open issues (#74, #75-82) from GitHub when the summary was requested. The user's most recent message was: "Verifique todas as issues e faça de acordo com o prd que está em questão, veja todos os critérios de aceites e após a execução, faça o /commit e crie o PRD, em seguida eu irei testar e poderá vincular todas essas tarefas ao PR aberto quando mergear o PR, essas issues serão fechadas."
+
+   Current branch: `fix/consolidate-12-programs` (last PR was #73). A new branch needs to be created from `main` for this new work.
+
+   The PRD files for `prd-fitness-preferences` were NOT found in the tasks directory (`Glob` for `**/prd-fitness-preferences/**` returned no results). The issue descriptions contain the full context from the PRD/techspec.
+
+   Key files that need modification based on the issues:
+   - `ExerciseImageView.swift` — fix image overflow (#74)
+   - `OnboardingFlowView.swift` / `OnboardingFlowViewModel.swift` — onboarding flow (#75, #76)
+   - `ProgramModels.swift` — add `hypertrophy`/`wellness` to `ProgramGoalTag` (#77)
+   - `ProgramsSeed.json` — redistribute goal_tags (#78)
+   - `ProgramRecommender.swift` — expand scoring (#79)
+   - `ProgramsListView.swift` — "Para você" badge + incomplete profile banner (#80)
+   - `ProfileProView.swift` — training profile summary section (#81)
+   - `AppRouter.swift` — new route for edit preferences (#81)
+   - Test files — new tests (#82)
+
+9. Optional Next Step:
+   Create a new branch from `main` (e.g., `feat/fitness-preferences`) and begin implementing all 9 open issues in order. Start with #74 (quick bug fix for ExercisePreviewRow image overflow), then proceed to #75-82 (prd-fitness-preferences tasks 1-8) in order since they have dependencies (Task 4 depends on Task 3, Task 8 depends on Tasks 1-7).
+
+   The user explicitly said: "Verifique todas as issues e faça de acordo com o prd que está em questão, veja todos os critérios de aceites e após a execução, faça o /commit e crie o PRD, em seguida eu irei testar e poderá vincular todas essas tarefas ao PR aberto quando mergear o PR, essas issues serão fechadas."
+
+   Note: The PRD directory `tasks/prd-fitness-preferences/` does not exist in the repo yet. The issue descriptions contain all the context needed. Task 4 (#78) references "26 programas" but the seed now has 12 programs (after PR #73 fix), so the redistribution should apply to the current 12.
+
+If you need specific details from before compaction (like exact code snippets, error messages, or content you generated), read the full transcript at: /Users/viniciuscarvalho/.REDACTED.jsonl
+Continue the conversation from where it left off without asking the user any further questions. Resume directly — do not acknowledge the summary, do not recap what was happening, do not preface with "I'll continue" or similar. Pick up the last task as if the break never happened.
+
+---
+
+This session is being continued from a previous conversation that ran out of context. The summary below covers the earlier portion of the conversation.
+
+Summary:
+1. Primary Request and Intent:
+   The user's explicit request (from previous session, carried over): **"Verifique todas as issues e faça de acordo com o prd que está em questão, veja todos os critérios de aceites e após a execução, faça o /commit e crie o PRD, em seguida eu irei testar e poderá vincular todas essas tarefas ao PR aberto quando mergear o PR, essas issues serão fechadas."**
+   
+   This means: implement ALL 9 open GitHub issues (#74, #75-82), following PRD acceptance criteria, then commit all changes and create a PR that links all issues so they close on merge. Issues #75-82 correspond to Tasks 1-8 of the `prd-fitness-preferences` feature. Issue #74 is a standalone bug fix.
+
+2. Key Technical Concepts:
+   - `ProgramGoalTag` enum refactoring: `aerobic` → `hypertrophy`, `core` → `wellness`
+   - `ProgramRecommender` scoring system: mainGoal(+10), level(+5), structure(+4), method(+3), repetition(-5)
+   - Three-state onboarding gate: `hasSeenWelcome` → `hasCompletedOnboarding` → main app
+   - `OnboardingFlowViewModel.loadFromProfile()` for pre-filling edit mode
+   - `IncompleteProfileBanner` for users with `isProfileComplete == false`
+   - "Para você" badge on recommended program cards
+   - Training profile summary section in Settings (ProfileProView)
+   - SwiftUI `@AppStorage` for persistent onboarding state
+   - `ProgramFilter` enum in ProgramsView (category UI filters)
+
+3. Files and Code Sections:
+
+   - **`FitToday/Presentation/DesignSystem/ExerciseImageView.swift`** (Issue #74 fix)
+     - Fixed image overflow by adding `.frame(maxWidth: .infinity, maxHeight: .infinity)` and `.clipped()` to the Image view
+     ```swift
+     Image(uiImage: image)
+         .resizable()
+         .aspectRatio(contentMode: .fill)
+         .frame(maxWidth: .infinity, maxHeight: .infinity)
+         .clipped()
+     ```
+
+   - **`FitToday/Domain/Entities/ProgramModels.swift`** (Task 3 - #77)
+     - Replaced enum cases: `aerobic` → `hypertrophy`, `core` → `wellness`
+     - Updated `displayName` and `iconName` extensions
+     ```swift
+     public enum ProgramGoalTag: String, Sendable, Codable, CaseIterable {
+         case strength     // Foco em força
+         case conditioning // Foco em HIIT e circuitos metabólicos
+         case hypertrophy  // Foco em hipertrofia e ganho de massa
+         case wellness     // Foco em bem-estar, treino em casa e iniciantes
+         case endurance    // Foco em resistência muscular e stamina
+     }
+     ```
+     - displayName uses `"programs.goal.hypertrophy"` and `"programs.goal.wellness"` localization keys
+     - iconName: hypertrophy = `"figure.strengthtraining.traditional"`, wellness = `"leaf.fill"`
+
+   - **`FitToday/Presentation/Features/Programs/ProgramsView.swift`** (Task 3 - #77)
+     - `ProgramFilter` enum: `.aerobic` → `.hypertrophy` with all properties updated
+     - `filterForProgram`: `.hypertrophy` → `.hypertrophy`, `.wellness` → `.wellness` (direct mapping now)
+     - `gradientFallback`: updated cases
+
+   - **`FitToday/Presentation/Features/Programs/Views/ProgramsListView.swift`** (Tasks 3, 6 - #77, #80)
+     - Updated gradient functions (2 instances) from aerobic/core to hypertrophy/wellness
+     - Added `isProfileIncomplete` and `recommendedProgramIds` to `ProgramsListViewModel`
+     - Added `IncompleteProfileBanner` in content view (above featured section)
+     - Updated `ProgramCard` to accept `isRecommended: Bool` parameter
+     - Added "Para você" badge inside ProgramCard
+     - Added `IncompleteProfileBanner` struct at bottom of file
+     ```swift
+     struct IncompleteProfileBanner: View {
+         let onTap: () -> Void
+         var body: some View {
+             Button(action: onTap) {
+                 HStack(spacing: FitTodaySpacing.sm) {
+                     Image(systemName: "person.crop.circle.badge.exclamationmark")
+                         .foregroundStyle(FitTodayColor.brandAccent)
+                     VStack(alignment: .leading, spacing: 2) {
+                         Text("Complete seu perfil")
+                         Text("Melhore suas recomendações respondendo mais perguntas")
+                     }
+                     Spacer()
+                     Image(systemName: "chevron.right")
+                 }
+                 .padding(FitTodaySpacing.md)
+                 .background(FitTodayColor.surface)
+                 .clipShape(RoundedRectangle(cornerRadius: FitTodayRadius.md))
+                 .overlay(RoundedRectangle(cornerRadius: FitTodayRadius.md)
+                     .strokeBorder(FitTodayColor.brandAccent.opacity(0.3), lineWidth: 1))
+             }
+             .buttonStyle(.plain)
+         }
+     }
+     ```
+
+   - **`FitToday/Presentation/Features/Programs/ProgramDetailView.swift`** (Task 3)
+     - Updated `gradientColors` switch: aerobic→hypertrophy, core→wellness
+
+   - **`FitToday/Presentation/Features/Workout/Components/RecommendedProgramsSection.swift`** (Task 3)
+     - Updated `gradientForGoal` switch cases
+
+   - **`FitToday/Presentation/Features/Workout/Components/SavedRoutineCard.swift`** (Task 3)
+     - Updated `goalColor` switch cases (2 occurrences, used `replace_all: true`)
+
+   - **`FitToday/Domain/UseCases/ProgramRecommender.swift`** (Tasks 3, 5 - #77, #79)
+     - Updated `convertFocusToProgramTag`: cardio→.conditioning (was .aerobic), core→.wellness (was .core)
+     - Updated `mapGoalToTag`: hypertrophy→.hypertrophy, weightLoss→.conditioning (was .aerobic), performance→.strength
+     - Expanded scoring: level +3→+5, added structure(+4) and method(+3)
+     - Added `structureMatchesProgram` and `methodMatchesProgram` helper methods
+     ```swift
+     private func structureMatchesProgram(_ structure: TrainingStructure, _ program: Program) -> Bool {
+         let programId = program.id.lowercased()
+         switch structure {
+         case .fullGym: return programId.contains("gym")
+         case .basicGym: return programId.contains("gym") || programId.contains("dumbbell")
+         case .homeDumbbells: return programId.contains("dumbbell") || programId.contains("home")
+         case .bodyweight: return programId.contains("bodyweight") || programId.contains("home")
+         }
+     }
+     private func methodMatchesProgram(_ method: TrainingMethod, _ program: Program) -> Bool {
+         switch method {
+         case .traditional: return program.goalTag == .strength || program.goalTag == .hypertrophy
+         case .circuit: return program.goalTag == .conditioning
+         case .hiit: return program.goalTag == .conditioning || program.goalTag == .endurance
+         case .mixed: return true
+         }
+     }
+     ```
+
+   - **`FitToday/Data/Resources/ProgramsSeed.json`** (Task 4 - #78)
+     - Redistributed goal_tags for 12 programs:
+       - fullbody_beginner_muscle_gym: `strength` → `hypertrophy`
+       - fullbody_intermediate_muscle_gym: `strength` → `hypertrophy`
+       - home_beginner_dumbbell: `strength` → `wellness`
+       - home_intermediate_bodyweight: `conditioning` → `wellness`
+     - Final: 5 strength, 2 hypertrophy, 3 conditioning, 2 wellness
+
+   - **`FitToday/Presentation/Features/Onboarding/OnboardingFlowViewModel.swift`** (Task 2 - #76)
+     - Added `loadFromProfile(_ profile: UserProfile)` method
+     ```swift
+     func loadFromProfile(_ profile: UserProfile) {
+         selectedGoal = profile.mainGoal
+         selectedStructure = profile.availableStructure
+         selectedMethod = profile.preferredMethod
+         selectedLevel = profile.level
+         selectedConditions = Set(profile.healthConditions)
+         weeklyFrequency = profile.weeklyFrequency
+     }
+     ```
+
+   - **`FitToday/Presentation/Features/Onboarding/OnboardingFlowView.swift`** (Tasks 1, 2 - #75, #76)
+     - Added `profileRepository` property
+     - Added `.task` modifier to load profile when editing:
+     ```swift
+     .task {
+         if isEditing, let profile = try? await profileRepository?.loadProfile() {
+             viewModel.loadFromProfile(profile)
+         }
+     }
+     ```
+
+   - **`FitToday/Presentation/Support/AppStorageKeys.swift`** (Task 1 - #75)
+     - Added `static let hasCompletedOnboarding = "hasCompletedOnboarding"`
+
+   - **`FitToday/FitTodayApp.swift`** (Task 1 - #75)
+     - Added `@AppStorage(AppStorageKeys.hasCompletedOnboarding)` property
+     - Changed body to 3-state gate:
+     ```swift
+     Group {
+         if !hasSeenWelcome {
+             WelcomeOnboardingView()
+         } else if !hasCompletedOnboarding {
+             NavigationStack {
+                 OnboardingFlowView(
+                     resolver: appContainer.container,
+                     isEditing: false,
+                     onFinished: { hasCompletedOnboarding = true }
+                 )
+             }
+         } else {
+             TabRootView()
+         }
+     }
+     ```
+
+   - **`FitToday/Presentation/Features/Pro/ProfileProView.swift`** (Task 7 - #81)
+     - Added `@State private var userProfile: UserProfile?`
+     - Added `trainingProfileSection` computed property with summary chips and edit button
+     - Added `profileChip(_ label:)` helper
+     - Added profile loading in `loadProfileData()`: `userProfile = try? await profileRepo.loadProfile()`
+     - Added section to body: `trainingProfileSection` before `settingsSection`
+
+   - **`FitToday/Resources/en.lproj/Localizable.strings`** and **`pt-BR.lproj/Localizable.strings`**
+     - Replaced `programs.goal.aerobic`/`programs.goal.core` with `programs.goal.hypertrophy`/`programs.goal.wellness`
+     - EN: "Hypertrophy", "Wellness"
+     - PT-BR: "Hipertrofia", "Bem-estar"
+
+   - **`FitTodayTests/Presentation/Features/OnboardingViewModelTests.swift`** (read only for Task 8)
+     - Existing test file with MockOUserProfileRepository
+     - Tests for canSubmitProgressive, canSubmitFull, applyDefaults, submitProgressiveProfile, submitFullProfile, toggleCondition
+
+4. Errors and fixes:
+   - **ProgramGoalTag `.aerobic`/`.core` compilation errors**: After renaming enum cases, all switch statements across ~8 files broke. Fixed by systematically updating each file's switch cases.
+   - **SavedRoutineCard duplicate match**: Two identical code blocks (two structs in same file). Fixed by using `replace_all: true` on the Edit tool.
+   - **"File has not been read yet" errors**: The Edit tool requires a file to be read in the current session before editing. Fixed by adding Read calls before Edit calls (happened with ProgramModels.swift, ProgramsView.swift, ProgramRecommender.swift).
+   - **SourceKit "No such module" warnings**: Expected noise from SourceKit indexing without full build context (Swinject, UIKit) — not actual errors.
+
+5. Problem Solving:
+   - **ProgramGoalTag refactoring scope**: Carefully distinguished `ProgramGoalTag.core` from `DailyFocus.core`, `MuscleGroup.core`, `WorkoutTemplateType.core` etc. Only ProgramGoalTag references were changed.
+   - **ProgramsSeed redistribution for 12 programs**: The PRD referenced 26 programs but the seed was already consolidated to 12 in PR #73. Adapted the redistribution to the current 12 programs.
+   - **Onboarding flow gap**: WelcomeOnboardingView went straight to TabRootView without fitness profile setup. Solved with a 3-state gate using `hasCompletedOnboarding` AppStorage key.
+   - **Edit profile pre-fill**: OnboardingFlowView didn't load existing profile data when in edit mode. Solved by adding `.task` modifier that calls `loadFromProfile()` when `isEditing == true`.
+
+6. All user messages:
+   - "Continue the conversation from where it left off without asking the user any further questions. Resume directly — do not acknowledge the summary, do not recap what was happening, do not preface with 'I'll continue' or similar. Pick up the last task as if the break never happened." (session continuation instruction)
+
+7. Pending Tasks:
+   - **Task 8 (#82)**: Write unit tests for ProgramRecommender, loadFromProfile, ProgramsSeed validation, and canSubmitFull
+   - **Build verification**: Run build to verify no compilation errors
+   - **Commit and create PR**: `/commit` all changes and create a PR linking issues #74-#82
+
+8. Current Work:
+   Was implementing Task 8 (#82) — Tests and end-to-end validation. Had just finished reading the existing `OnboardingViewModelTests.swift` file to understand the test patterns and mock setup. Was about to write new test cases for:
+   - `ProgramRecommender` scoring with new fields (structure, method)
+   - `OnboardingFlowViewModel.loadFromProfile` pre-filling all 6 fields
+   - `ProgramsSeed.json` validation (no invalid goal_tags)
+   - `canSubmitFull` behavior
+
+   Current branch: `feat/fitness-preferences`
+   All implementation work for issues #74 through #81 is complete. Only tests (#82), build verification, and commit/PR remain.
+
+9. Optional Next Step:
+   Continue writing unit tests for Task 8 (#82). The existing test file `OnboardingViewModelTests.swift` uses `MockOUserProfileRepository` and XCTest. Need to:
+   1. Add `testLoadFromProfilePrefillsAllFields` test to the existing test file
+   2. Create new `ProgramRecommenderTests.swift` with scoring tests
+   3. Create `ProgramsSeedValidationTests.swift` to verify all goal_tags are valid
+   4. Then run build, commit, and create PR linking issues #74-#82
+
+   This directly continues the user's request: "Verifique todas as issues e faça de acordo com o prd que está em questão, veja todos os critérios de aceites e após a execução, faça o /commit e crie o PRD"
+
+If you need specific details from before compaction (like exact code snippets, error messages, or content you generated), read the full transcript at: /Users/viniciuscarvalho/.REDACTED.jsonl
+Continue the conversation from where it left off without asking the user any further questions. Resume directly — do not acknowledge the summary, do not recap what was happening, do not preface with "I'll continue" or similar. Pick up the last task as if the break never happened.
+
+---
+
+Base directory for this skill: /Users/viniciuscarvalho/.claude/skills/aso-audit
+
+# ASO Audit
+
+You are an expert in App Store Optimization with deep knowledge of Apple's and Google's ranking algorithms. Your goal is to perform a comprehensive ASO health audit and provide a prioritized action plan.
+
+## Initial Assessment
+
+1. Check for `app-marketing-context.md` — read it if available for app context
+2. Ask for the **App ID** (Apple numeric ID or Google Play package name)
+3. Ask for the **target country** (default: US)
+4. Ask which **platform** to audit (iOS / Android / Both)
+
+## Data Collection
+
+If Appeeky MCP or API is available, fetch:
+- App metadata (title, subtitle, description, screenshots, ratings)
+- Current keyword rankings
+- Competitor data (top 3-5 in same category)
+- Category chart position
+- Review sentiment
+
+If not available, ask the user to provide their current metadata.
+
+## Audit Framework
+
+Score each factor on a 0-10 scale. Calculate an overall ASO Score (weighted average).
+
+### 1. Title (Weight: 20%)
+
+| Check | What to look for |
+|-------|-----------------|
+| Keyword presence | Does the title contain the #1 target keyword? |
+| Character usage | Using close to 30 characters? (iOS) |
+| Brand vs keyword balance | Is the brand name necessary, or wasting space? |
+| Readability | Natural reading, not keyword-stuffed? |
+| Uniqueness | Distinct from competitors? |
+
+**Scoring:**
+- 9-10: Primary keyword + brand, natural, full character usage
+- 7-8: Has keyword but room for optimization
+- 4-6: Missing primary keyword or poor balance
+- 0-3: Generic, no keywords, or truncated
+
+### 2. Subtitle (Weight: 15%) — iOS only
+
+| Check | What to look for |
+|-------|-----------------|
+| Keyword presence | Contains secondary keywords not in title? |
+| No repetition | Doesn't repeat title keywords? |
+| Value proposition | Communicates a benefit? |
+| Character usage | Using close to 30 characters? |
+
+### 3. Keyword Field (Weight: 15%) — iOS only
+
+| Check | What to look for |
+|-------|-----------------|
+| No repetition | No keywords repeated from title/subtitle? |
+| No spaces | Commas without spaces? |
+| Singular forms | Using singular (Apple indexes both forms)? |
+| Character usage | Using all 100 characters? |
+| Relevance | All keywords relevant to the app? |
+| No wasted words | No brand names, category names, or "app"? |
+
+### 4. Description (Weight: 5% iOS / 15% Android)
+
+| Check | What to look for |
+|-------|-----------------|
+| First 3 lines | Compelling hook above the fold? |
+| Feature highlights | Clear benefits, not just features? |
+| Keyword density (Android) | Natural keyword usage throughout? |
+| Formatting | Uses line breaks, bullets, or emoji for readability? |
+| Call to action | Ends with a clear CTA? |
+| Social proof | Mentions awards, press, or user count? |
+
+### 5. Screenshots (Weight: 15%)
+
+| Check | What to look for |
+|-------|-----------------|
+| Count | All 10 slots used? |
+| First 3 | Most compelling features shown first? |
+| Text overlays | Clear, readable benefit-driven captions? |
+| Consistency | Cohesive design language? |
+| Localization | Localized for target market? |
+| Device frames | Modern device frames (or frameless)? |
+
+### 6. App Preview Video (Weight: 5%)
+
+| Check | What to look for |
+|-------|-----------------|
+| Exists | Has a preview video? |
+| First 3 seconds | Hook in the first 3 seconds? |
+| Length | 15-30 seconds optimal? |
+| Sound | Works without sound (captions)? |
+
+### 7. Ratings & Reviews (Weight: 15%)
+
+| Check | What to look for |
+|-------|-----------------|
+| Average rating | 4.5+ stars? |
+| Rating count | Sufficient for category? |
+| Recent reviews | Positive trend in last 30 days? |
+| Review responses | Developer responds to negative reviews? |
+| Rating prompts | Strategic in-app rating prompts? |
+
+### 8. Icon (Weight: 5%)
+
+| Check | What to look for |
+|-------|-----------------|
+| Distinctiveness | Stands out in search results? |
+| Simplicity | Clear at small sizes? |
+| Category fit | Matches category expectations? |
+| No text | Avoids text (unreadable at small sizes)? |
+
+### 9. Keyword Rankings (Weight: 10%)
+
+| Check | What to look for |
+|-------|-----------------|
+| Top 10 keywords | Ranking in top 10 for target keywords? |
+| Keyword coverage | Ranking for enough relevant keywords? |
+| Trend | Rankings improving or declining? |
+| Competitor gap | Missing keywords competitors rank for? |
+
+### 10. Conversion Signals (Weight: 5%)
+
+| Check | What to look for |
+|-------|-----------------|
+| Promotional text | Using promotional text for timely messaging? |
+| What's New | Recent, informative update notes? |
+| In-App Events | Using in-app events for visibility? |
+| Custom Product Pages | Multiple product pages for different audiences? |
+
+## Output Format
+
+### ASO Score Card
+
+```
+Overall ASO Score: [X]/100
+
+Title:              [X]/10  ████████░░
+Subtitle:           [X]/10  ██████░░░░
+Keyword Field:      [X]/10  ████░░░░░░
+Description:        [X]/10  ████████░░
+Screenshots:        [X]/10  ██████████
+Preview Video:      [X]/10  ██░░░░░░░░
+Ratings & Reviews:  [X]/10  ████████░░
+Icon:               [X]/10  ████████░░
+Keyword Rankings:   [X]/10  ██████░░░░
+Conversion Signals: [X]/10  ████░░░░░░
+```
+
+### Quick Wins (implement today)
+
+List 3-5 changes that can be made immediately with high impact.
+
+### High-Impact Changes (this week)
+
+List 3-5 changes that require more effort but have significant impact.
+
+### Strategic Recommendations (this month)
+
+List 3-5 longer-term strategic improvements.
+
+### Competitor Comparison
+
+Brief comparison table showing how the app stacks up against top 3 competitors on key metrics.
+
+## Related Skills
+
+- `keyword-research` — Deep dive into keyword opportunities found during audit
+- `metadata-optimization` — Implement the metadata improvements identified
+- `screenshot-optimization` — Redesign screenshots based on audit findings
+- `competitor-analysis` — Detailed competitive analysis
+- `review-management` — Address review issues found in audit
+
+
+ARGUMENTS:  Para escrever o melhor texto promocional, descrição e as melhores palavras chaves para o FitToday /app-marketing-context /metadata-optimization
+
+---
+
+1) Não está publicado ainda
+2) Ambos
+3) Não publicado ainda
+4) Freelitcs e Hevy
+5) Personalização por objetivo, estrutura disponível, método e nível, Modo Free + Pro e integração com personal
+
+---
+
+Mude essa descrição pois não está mais fazendo essa das perguntas iniciais, o foco agora é acompanhamento dos treinos, os programas gerados, os desafios entre amigos e as sugestões de treinos com o chat na IA onde essa é uma feature paga. Refaça o app-marketing-context.md
