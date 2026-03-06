@@ -15,3 +15,6 @@ export {
   createWeeklyStreakWeek,
   sendAtRiskNotifications,
 } from "./groupStreak";
+
+// Export OpenAI proxy functions
+export {generateWorkout, sendChat} from "./openaiProxy";
