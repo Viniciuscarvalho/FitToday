@@ -3,120 +3,145 @@
 ## App Identity
 
 **App Name:** FitToday
-**Tagline (PT-BR):** Seu treino ideal, todo dia. Em segundos.
-**Tagline (EN):** Your perfect workout, every day. In seconds.
+**Tagline (PT-BR):** Treine mais. Pense menos. Evolua sempre.
+**Tagline (EN):** Train smarter. Track everything. Challenge friends.
 **Category:** Health & Fitness
 **Platform:** iOS
-**Monetization:** Free + Pro (lifetime purchase, non-consumable)
-**Status:** Pre-launch
-**Primary Markets:** Brazil (pt-BR), United States (en-US)
+**Monetization:** Free + Pro (compra única vitalícia — sem assinatura)
+**Status:** Pré-lançamento
+**Primary Markets:** Brasil (pt-BR), Estados Unidos (en-US)
 
 ---
 
-## Core Problem Solved
+## O que o FitToday realmente é
 
-Most fitness apps require users to plan their own workouts, or force them into rigid programs that don't adapt to their daily reality. FitToday solves this with a daily 2-question check-in that generates a fully personalized workout in under 10 seconds — adapted to what they want to train, how sore they feel, their available equipment, and their fitness goal.
+FitToday é um app de acompanhamento e geração de treinos que combina programas estruturados, geração de treino por IA, histórico completo de evolução, desafios sociais entre amigos e acesso a personal trainer — tudo em um único lugar.
 
----
-
-## Primary Value Proposition
-
-**"Two questions. One perfect workout. Every day."**
-
-FitToday removes every excuse not to train. You answer 2 questions, the app generates a safe, smart workout adapted to your body today — not yesterday's body or a generic template.
+O usuário não precisa saber montar um treino. O FitToday faz isso com base no perfil, no histórico e, para usuários Pro, com um chat de IA (FitOrb) que sugere treinos personalizados sob demanda.
 
 ---
 
-## Key Features
+## Features Principais
 
-### Free Tier
-- Access to 12+ structured workout programs (PPL, Full Body, Upper/Lower, Conditioning, Home)
-- Library of pre-built workouts organized by goal and equipment
-- Basic workout history
-- Exercise images and execution tips for 1,000+ exercises
+### Gratuito (Free)
+- **12+ programas estruturados** — Push Pull Legs, Full Body, Upper Lower, HIIT, Treino em Casa, Condicionamento e mais, com progressão por semanas
+- **Acompanhamento de treinos** — execute, marque séries, cronômetro de descanso integrado, GIFs de execução para cada exercício
+- **Histórico básico** — últimos 7 dias de treinos registrados
+- **Desafios entre amigos** — até 5 desafios simultâneos
+- **Streak semanal** — visualização dos dias treinados na semana
+- **Estatísticas diárias** — treinos na semana, séries totais, calorias, duração média
 
-### Pro Tier (Lifetime Purchase)
-- **Daily adaptive workout** based on 2-question check-in
-- **AI engine** (hybrid: curated blocks + OpenAI) that selects, orders, and adapts volume
-- **Muscle soreness adaptation** — lighter load when you're sore, harder when you're fresh
-- **Full personalization** by goal, available equipment, preferred method, and level
-- **Advanced workout history** with HealthKit / Apple Health sync
-- **Program mode** — structured multi-week programs with progression
-- **Personal trainer companion** — coaches can use FitToday to manage and guide their clients
-
----
-
-## Personalization Dimensions
-
-FitToday personalizes workouts across 5 dimensions at onboarding + daily:
-
-1. **Goal** — Hypertrophy, Conditioning, Endurance, Weight Loss, Performance
-2. **Available Equipment** — Full gym, Basic gym, Dumbbells at home, Bodyweight
-3. **Training Method** — Traditional (sets/reps), Circuit, HIIT, Mixed
-4. **Level** — Beginner, Intermediate, Advanced
-5. **Health Conditions** — Lower back pain, Knee, Shoulder (adapts exercise selection)
+### Pro (compra única vitalícia)
+- **FitOrb AI Chat** — chat com IA de fitness para sugestões de treino, dúvidas e ajustes sob demanda (feature Pro principal)
+- **Treinos IA personalizados** — até 2 por dia, gerados com base em perfil, objetivo, equipamento e histórico
+- **Ajuste por dor muscular** — adapta o treino ao nível de fadiga atual
+- **Substituição inteligente de exercícios** — troca exercícios conforme lesão ou equipamento indisponível
+- **Histórico ilimitado** — todo o histórico com métricas de evolução
+- **Integração com Apple Health (HealthKit)** — sincronização automática
+- **Desafios ilimitados** — sem limite de desafios simultâneos
+- **Conexão com Personal Trainer** — receba treinos do seu personal diretamente no app, com acompanhamento de evolução
+- **Live Activity** — cronômetro e progresso do treino na tela de bloqueio e Dynamic Island
 
 ---
 
-## Target Audience
+## Social & Desafios
 
-### Primary (Brazil)
-- Age 20–38, urban, gym-goer or home-trainer
-- Wants results but lacks time to plan workouts
-- Frustrated with rigid programs that don't adapt when they're tired or traveling
-- Values simplicity + Brazilian Portuguese UX
-
-### Primary (USA)
-- Age 22–40, health-conscious, uses Apple ecosystem
-- Looking for an alternative to subscription-based apps
-- Wants personalization without complexity
-- Appreciates one-time payment model (no subscription fatigue)
-
-### Secondary (Both)
-- Personal trainers looking for a client management companion app
+- **Grupos de amigos** — crie ou entre em grupos para treinar junto
+- **Feed de check-in** — compartilhe fotos e registros dos treinos com o grupo
+- **Leaderboard (Ranking)** — placar dos membros por treinos completados
+- **Group Streak** — sequência coletiva de treinos do grupo
+- **Desafios com metas** — progresso, participantes e prazo definidos
+- **Notificações de conquistas** — milestones e celebrações ao completar metas
 
 ---
 
-## Competitive Landscape
+## Personal Trainer (Feature Diferenciada Pro)
 
-| App | Strength | Our Edge |
-|-----|----------|----------|
-| **Freeletics** | Bodyweight programs, strong brand | We cover gym + home, adapt daily to soreness, lifetime purchase |
-| **Hevy** | Workout logging, clean UI | We generate workouts (they just log), full AI personalization |
-| **Strong** | Powerlifting focus, tracking | We generate + adapt; not just tracking |
-| **FitBod** | AI workout generation | We're simpler (2 questions), lifetime purchase, PT integration |
-| **Nike Training Club** | Brand, video content | We personalize to your equipment + soreness; works offline |
+- Personal trainer conecta com o aluno pelo app
+- Envia treinos personalizados diretamente para o aluno via CMS
+- Aluno executa e registra o treino recebido
+- Trainer acompanha histórico e evolução do aluno em tempo real
+- Chat entre trainer e aluno integrado no app
 
 ---
 
-## Unique Differentiators
+## Personalização de Perfil
 
-1. **2-question daily check-in** — Lowest friction in category (< 10 seconds to start)
-2. **Soreness-aware adaptation** — No other app adapts to how sore you are today
-3. **Lifetime purchase** — No subscriptions in a sea of subscription apps
-4. **Equipment-aware** — Works for full gym, basic gym, home dumbbells, or bodyweight
-5. **Personal trainer companion** — Trainers can use FitToday to guide clients
-6. **HealthKit integration** — Syncs with Apple Health automatically
-7. **Programs + Daily** — Combines long-term program structure with daily flexibility
-
----
-
-## Key Messages
-
-**For casual users:**
-"You don't need to be a fitness expert. Just tell us what you feel like training and how sore you are — we'll handle the rest."
-
-**For gym-goers:**
-"Stop thinking about what to do at the gym. FitToday generates a smart, goal-aligned workout before you even walk through the door."
-
-**For personal trainers:**
-"Give your clients a tool that adapts their training between sessions — so they train smarter, not just harder."
-
-**Lifetime purchase angle:**
-"Pay once. Train forever. No subscriptions."
+Onboarding captura 5 dimensões:
+1. **Objetivo** — Hipertrofia, Condicionamento, Resistência, Emagrecimento, Performance
+2. **Equipamento disponível** — Academia completa, Academia básica, Halteres em casa, Peso corporal
+3. **Método preferido** — Tradicional (séries/reps), Circuito, HIIT, Misto
+4. **Nível** — Iniciante, Intermediário, Avançado
+5. **Condições de saúde** — Lombar, Joelho, Ombro (adapta seleção de exercícios)
 
 ---
 
-## Pricing Signal
-- **Free:** Full program library, exercise database
-- **Pro:** One-time payment (lifetime access to all AI features)
+## Diferencial Competitivo
+
+| App | Ponto Fraco | Vantagem FitToday |
+|-----|-------------|-------------------|
+| **Freeletics** | Apenas peso corporal, assinatura cara | Academia + casa, compra única, PT integration |
+| **Hevy** | Apenas registro (log), sem geração nem IA | Gera treino + registra + social + IA chat |
+| **Strong** | Registro manual, sem IA, sem social | Geração automática, chat IA, desafios, grupos |
+| **FitBod** | Sem social, assinatura mensal | Desafios, grupos, compra única vitalícia |
+| **Nike Training Club** | Sem personalização avançada, sem PT real | Perfil 5 dimensões, PT conectado, grupos ativos |
+
+---
+
+## Proposta de Valor por Público
+
+### Praticante de academia (30–45% da base)
+"Programas sérios de hipertrofia e força, mais a flexibilidade de pedir um treino personalizado pelo chat IA quando quiser mudar."
+
+### Iniciante sem personal (25–35%)
+"Não sabe por onde começar? Escolhe um programa, o app guia cada exercício com GIF, registra o progresso e celebra cada treino."
+
+### Usuário com personal trainer (15–20%)
+"Seu personal envia os treinos direto pelo FitToday. Você executa, registra e ele acompanha — sem WhatsApp, sem planilha."
+
+### Grupo de amigos que treina junto (10–20%)
+"Criem um grupo, montem desafios e vejam quem treina mais. Feed, ranking e streak coletivo mantém todo mundo motivado."
+
+---
+
+## Mensagens-chave
+
+**Posicionamento principal:**
+"FitToday é o único app que conecta programas estruturados, chat IA de fitness, desafios com amigos e personal trainer — em uma compra única para sempre."
+
+**Contra assinaturas:**
+"Pague uma vez. Sem mensalidade, sem renovação, sem surpresa no cartão."
+
+**Para quem tem personal:**
+"Seu personal está no app. Os treinos chegam direto aqui. Sem WhatsApp."
+
+**Para quem treina com amigos:**
+"Desafiem uns aos outros. Façam check-in. Vejam quem não faltou."
+
+**Para o chat IA (FitOrb):**
+"É como ter um personal trainer no bolso. Pergunte qualquer coisa sobre treino e receba sugestões adaptadas ao seu perfil."
+
+---
+
+## Free vs Pro — Resumo
+
+| Feature | Free | Pro |
+|---------|------|-----|
+| Programas estruturados | ✅ Todos | ✅ Todos |
+| Acompanhamento de treino (GIFs, timer) | ✅ | ✅ |
+| Histórico | 7 dias | Ilimitado |
+| Treinos IA gerados | 1/semana | 2/dia |
+| FitOrb AI Chat | ❌ | ✅ |
+| Ajuste por fadiga/dor muscular | ❌ | ✅ |
+| Substituição inteligente de exercícios | ❌ | ✅ |
+| Desafios simultâneos | 5 | Ilimitado |
+| Personal Trainer | ❌ | ✅ |
+| HealthKit / Apple Health | ❌ | ✅ |
+| Live Activity (Dynamic Island) | ❌ | ✅ |
+
+---
+
+## Modelo de Monetização
+- **Free:** acesso permanente a programas, acompanhamento, desafios limitados (sem IA chat, sem PT)
+- **Pro:** compra única vitalícia (non-consumable IAP via StoreKit 2)
+- **Sem assinatura** em nenhuma camada
