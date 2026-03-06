@@ -187,9 +187,9 @@ struct CMSStudentRegistrationRequest: Codable, Sendable {
 /// Response from student registration.
 struct CMSStudentRegistrationResponse: Codable, Sendable {
     let id: String
-    let firebaseUid: String
-    let trainerId: String
-    let displayName: String
+    let firebaseUid: String?
+    let trainerId: String?
+    let displayName: String?
     let email: String?
     let createdAt: Date?
 }

@@ -401,15 +401,16 @@ final class PersonalTrainerViewModel {
             for await relationship in useCase.observeRelationship() {
                 guard !Task.isCancelled else { break }
 
-                if let rel = relationship {
+                if let rel = relationship, rel.status != .cancelled {
                     connectionStatus = rel.status
                     relationshipId = rel.id
 
-                    // Reload trainer if status changed
+                    // Reload trainer if status changed to active
                     if rel.status == .active && currentTrainer == nil {
                         await loadCurrentTrainer()
                     }
                 } else {
+                    // nil or cancelled — treat as no trainer
                     currentTrainer = nil
                     connectionStatus = nil
                     relationshipId = nil
