@@ -18,7 +18,7 @@ import SwiftData
 final class WorkoutCompositionFlowTests: XCTestCase {
   
   private var blueprintEngine: WorkoutBlueprintEngine!
-  private var promptAssembler: WorkoutPromptAssembler!
+  private var promptAssembler: NewWorkoutPromptBuilder!
   private var qualityGate: WorkoutPlanQualityGate!
   private var cacheRepository: SwiftDataWorkoutCompositionCacheRepository!
   private var modelContainer: ModelContainer!
@@ -26,7 +26,7 @@ final class WorkoutCompositionFlowTests: XCTestCase {
   override func setUp() {
     super.setUp()
     blueprintEngine = WorkoutBlueprintEngine()
-    promptAssembler = WorkoutPromptAssembler()
+    promptAssembler = NewWorkoutPromptBuilder()
     qualityGate = WorkoutPlanQualityGate()
     
     // Cache em memória
@@ -61,20 +61,19 @@ final class WorkoutCompositionFlowTests: XCTestCase {
     XCTAssertFalse(blueprint.isRecoveryMode)
     
     // 2. Prompt Assembly
-    let prompt = promptAssembler.assemblePrompt(
+    let prompt = promptAssembler.buildPrompt(
       blueprint: blueprint,
       blocks: WorkoutTestFixtures.Blocks.all,
       profile: profile,
-      checkIn: checkIn
+      checkIn: checkIn,
+      previousWorkouts: []
     )
-    
-    XCTAssertFalse(prompt.systemMessage.isEmpty)
-    XCTAssertFalse(prompt.userMessage.isEmpty)
-    XCTAssertEqual(prompt.metadata.goal, .hypertrophy)
-    
+
+    XCTAssertFalse(prompt.isEmpty)
+
     // 3. Criar plano simples diretamente do blueprint (simula OpenAI)
     let plan = makeSimplePlan(from: blueprint)
-    
+
     // 4. Cache
     let input = BlueprintInput.from(profile: profile, checkIn: checkIn)
     let entry = CachedWorkoutEntry(
@@ -109,18 +108,19 @@ final class WorkoutCompositionFlowTests: XCTestCase {
     XCTAssertEqual(blueprint.equipmentConstraints.allowedEquipment, [.bodyweight])
     
     // 2. Prompt Assembly
-    let prompt = promptAssembler.assemblePrompt(
+    let prompt = promptAssembler.buildPrompt(
       blueprint: blueprint,
       blocks: WorkoutTestFixtures.Blocks.all,
       profile: profile,
-      checkIn: checkIn
+      checkIn: checkIn,
+      previousWorkouts: []
     )
-    
-    XCTAssertTrue(prompt.systemMessage.contains("emagrecimento") || prompt.systemMessage.contains("Emagrecimento"))
-    
+
+    XCTAssertTrue(prompt.lowercased().contains("weight loss") || prompt.lowercased().contains("emagrecimento"))
+
     // 3. Criar plano simples diretamente do blueprint (simula OpenAI)
     let plan = makeSimplePlan(from: blueprint)
-    
+
     // 4. Cache
     let input = BlueprintInput.from(profile: profile, checkIn: checkIn)
     let entry = CachedWorkoutEntry(
@@ -134,9 +134,9 @@ final class WorkoutCompositionFlowTests: XCTestCase {
       blueprintVersion: blueprint.version.rawValue,
       variationSeed: blueprint.variationSeed
     )
-    
+
     try await cacheRepository.saveCachedWorkout(entry)
-    
+
     // 5. Verify cache hit
     let cached = try await cacheRepository.getCachedWorkout(for: input.cacheKey)
     XCTAssertNotNil(cached)
@@ -153,14 +153,15 @@ final class WorkoutCompositionFlowTests: XCTestCase {
     XCTAssertEqual(blueprint.intensity, .low)
     
     // 2. Prompt Assembly
-    let prompt = promptAssembler.assemblePrompt(
+    let prompt = promptAssembler.buildPrompt(
       blueprint: blueprint,
       blocks: WorkoutTestFixtures.Blocks.all,
       profile: profile,
-      checkIn: checkIn
+      checkIn: checkIn,
+      previousWorkouts: []
     )
-    
-    XCTAssertTrue(prompt.systemMessage.contains("recovery") || prompt.systemMessage.contains("recuperação"))
+
+    XCTAssertTrue(prompt.lowercased().contains("recovery") || prompt.lowercased().contains("recuperação"))
     
     // 3. Verify recovery blueprint characteristics
     XCTAssertGreaterThan(
@@ -197,21 +198,23 @@ final class WorkoutCompositionFlowTests: XCTestCase {
       let blueprint = blueprintEngine.generateBlueprint(profile: profile, checkIn: checkIn)
 
       // Mesmo blueprint deve gerar mesmo prompt
-      let prompt1 = promptAssembler.assemblePrompt(
+      let prompt1 = promptAssembler.buildPrompt(
         blueprint: blueprint,
         blocks: WorkoutTestFixtures.Blocks.all,
         profile: profile,
-        checkIn: checkIn
+        checkIn: checkIn,
+        previousWorkouts: []
       )
 
-      let prompt2 = promptAssembler.assemblePrompt(
+      let prompt2 = promptAssembler.buildPrompt(
         blueprint: blueprint,
         blocks: WorkoutTestFixtures.Blocks.all,
         profile: profile,
-        checkIn: checkIn
+        checkIn: checkIn,
+        previousWorkouts: []
       )
 
-      XCTAssertEqual(prompt1.cacheKey, prompt2.cacheKey, "Same blueprint should produce same cache key for \(goal)")
+      XCTAssertEqual(prompt1, prompt2, "Same blueprint should produce same prompt for \(goal)")
     }
   }
   

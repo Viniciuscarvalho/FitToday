@@ -52,12 +52,14 @@ struct AIChatView: View {
                                 .foregroundStyle(FitTodayColor.textSecondary)
                         }
                     }
+                    #if DEBUG
                     Button {
                         router.push(.apiKeySettings)
                     } label: {
                         Image(systemName: "gearshape")
                             .foregroundStyle(FitTodayColor.textSecondary)
                     }
+                    #endif
                 }
             }
         }
