@@ -18,6 +18,7 @@ struct ProfileProView: View {
     @State private var showingRestoreAlert = false
     @State private var restoreMessage = ""
     @State private var userName: String = "Athlete"
+    @State private var userProfile: UserProfile?
     @State private var streakDays: Int = 0
     @State private var totalMinutes: Int = 0
     @State private var completedWorkouts: Int = 0
@@ -56,6 +57,9 @@ struct ProfileProView: View {
 
                 // Personal Trainer
                 personalTrainerCard
+
+                // Training Profile
+                trainingProfileSection
 
                 // Profile Settings
                 settingsSection
@@ -331,6 +335,59 @@ struct ProfileProView: View {
         .buttonStyle(.plain)
     }
 
+    // MARK: - Training Profile Section
+
+    private var trainingProfileSection: some View {
+        VStack(alignment: .leading, spacing: FitTodaySpacing.sm) {
+            Text("Perfil de Treino")
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundStyle(FitTodayColor.textSecondary)
+                .padding(.leading, 4)
+
+            Button {
+                router.push(.editProfile, on: .profile)
+            } label: {
+                VStack(alignment: .leading, spacing: FitTodaySpacing.sm) {
+                    HStack {
+                        Text("Preferências de Treino")
+                            .font(.system(.body, weight: .semibold))
+                            .foregroundStyle(FitTodayColor.textPrimary)
+                        Spacer()
+                        Text("Editar")
+                            .font(.system(size: 14, weight: .medium))
+                            .foregroundStyle(FitTodayColor.brandPrimary)
+                    }
+
+                    if let profile = userProfile {
+                        HStack(spacing: FitTodaySpacing.sm) {
+                            profileChip(profile.mainGoal.title)
+                            profileChip(profile.level.title)
+                            profileChip("\(profile.weeklyFrequency)x/sem")
+                        }
+                    } else {
+                        Text("Perfil incompleto")
+                            .font(.system(size: 13))
+                            .foregroundStyle(FitTodayColor.brandAccent)
+                    }
+                }
+                .padding(FitTodaySpacing.md)
+                .background(FitTodayColor.surface)
+                .clipShape(RoundedRectangle(cornerRadius: 16))
+            }
+            .buttonStyle(.plain)
+        }
+    }
+
+    private func profileChip(_ label: String) -> some View {
+        Text(label)
+            .font(.system(size: 12, weight: .medium))
+            .foregroundStyle(FitTodayColor.textSecondary)
+            .padding(.horizontal, FitTodaySpacing.sm)
+            .padding(.vertical, 4)
+            .background(FitTodayColor.backgroundElevated)
+            .clipShape(Capsule())
+    }
+
     // MARK: - Settings Section
 
     private var settingsSection: some View {
@@ -552,6 +609,10 @@ struct ProfileProView: View {
                 print("[Profile] Error loading history: \(error)")
                 #endif
             }
+        }
+
+        if let profileRepo = resolver.resolve(UserProfileRepository.self) {
+            userProfile = try? await profileRepo.loadProfile()
         }
     }
 

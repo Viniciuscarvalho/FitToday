@@ -147,8 +147,8 @@
 // Program Goals (ProgramGoalTag)
 "programs.goal.strength" = "Strength";
 "programs.goal.conditioning" = "Conditioning";
-"programs.goal.aerobic" = "Aerobic";
-"programs.goal.core" = "Core";
+"programs.goal.hypertrophy" = "Hypertrophy";
+"programs.goal.wellness" = "Wellness";
 "programs.goal.endurance" = "Endurance";
 
 "programs.card.start" = "Start Program";

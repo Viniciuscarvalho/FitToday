@@ -120,9 +120,9 @@ struct SavedRoutineCard: View {
             return FitTodayColor.brandPrimary
         case .conditioning:
             return FitTodayColor.error
-        case .aerobic:
+        case .hypertrophy:
             return FitTodayColor.success
-        case .core:
+        case .wellness:
             return FitTodayColor.warning
         case .endurance:
             return FitTodayColor.brandSecondary
@@ -284,9 +284,9 @@ struct SavedRoutineCardRow: View {
             return FitTodayColor.brandPrimary
         case .conditioning:
             return FitTodayColor.error
-        case .aerobic:
+        case .hypertrophy:
             return FitTodayColor.success
-        case .core:
+        case .wellness:
             return FitTodayColor.warning
         case .endurance:
             return FitTodayColor.brandSecondary

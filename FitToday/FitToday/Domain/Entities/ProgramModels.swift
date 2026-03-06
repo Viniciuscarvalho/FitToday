@@ -10,10 +10,10 @@ import Foundation
 
 /// Tag de objetivo do programa para classificação e recomendação.
 public enum ProgramGoalTag: String, Sendable, Codable, CaseIterable {
-    case strength     // Foco em força e hipertrofia
+    case strength     // Foco em força
     case conditioning // Foco em HIIT e circuitos metabólicos
-    case aerobic      // Foco em cardio e queima calórica
-    case core         // Foco em abdominal e estabilidade
+    case hypertrophy  // Foco em hipertrofia e ganho de massa
+    case wellness     // Foco em bem-estar, treino em casa e iniciantes
     case endurance    // Foco em resistência muscular e stamina
 }
 
@@ -227,8 +227,8 @@ extension ProgramGoalTag {
         switch self {
         case .strength: return NSLocalizedString("programs.goal.strength", comment: "Strength goal")
         case .conditioning: return NSLocalizedString("programs.goal.conditioning", comment: "Conditioning goal")
-        case .aerobic: return NSLocalizedString("programs.goal.aerobic", comment: "Aerobic goal")
-        case .core: return NSLocalizedString("programs.goal.core", comment: "Core/wellness goal")
+        case .hypertrophy: return NSLocalizedString("programs.goal.hypertrophy", comment: "Hypertrophy goal")
+        case .wellness: return NSLocalizedString("programs.goal.wellness", comment: "Wellness goal")
         case .endurance: return NSLocalizedString("programs.goal.endurance", comment: "Endurance goal")
         }
     }
@@ -237,8 +237,8 @@ extension ProgramGoalTag {
         switch self {
         case .strength: return "dumbbell.fill"
         case .conditioning: return "flame.fill"
-        case .aerobic: return "figure.run"
-        case .core: return "figure.core.training"
+        case .hypertrophy: return "figure.strengthtraining.traditional"
+        case .wellness: return "leaf.fill"
         case .endurance: return "heart.fill"
         }
     }
