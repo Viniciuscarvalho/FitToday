@@ -28,6 +28,10 @@ actor ExerciseImageCache {
 
     private var downloadTasks: [String: Task<UIImage?, Error>] = [:]
 
+    // MARK: - Negative Cache (prevents infinite retries for missing images)
+
+    private var failedKeys: Set<String> = []
+
     // MARK: - Configuration
 
     private let maxDownloadSize: Int64 = 5 * 1024 * 1024 // 5MB
@@ -69,7 +73,12 @@ actor ExerciseImageCache {
             return diskImage
         }
 
-        // 3. Firebase Storage download (deduplicated)
+        // 3. Check negative cache (avoid retrying known-missing images)
+        if failedKeys.contains(key) {
+            return nil
+        }
+
+        // 4. Firebase Storage download (deduplicated)
         return await downloadFromStorage(exerciseId: exerciseId, imageIndex: imageIndex, key: key)
     }
 
@@ -115,6 +124,7 @@ actor ExerciseImageCache {
     /// Removes all cached exercise images from memory and disk.
     func clearCache() {
         memoryCache.removeAllObjects()
+        failedKeys.removeAll()
 
         guard let files = try? fileManager.contentsOfDirectory(at: diskDirectory, includingPropertiesForKeys: nil) else {
             return
@@ -201,6 +211,12 @@ actor ExerciseImageCache {
         downloadTasks[key] = task
         let result = try? await task.value
         downloadTasks[key] = nil
+
+        // Remember failures to avoid infinite retries
+        if result == nil {
+            failedKeys.insert(key)
+        }
+
         return result
     }
 }

@@ -272,6 +272,7 @@ final class PersonalTrainerViewModel {
             searchResults = []
             searchQuery = ""
             inviteCode = ""
+            isRequestingConnection = false
 
             // Register student in CMS so the trainer can assign workouts
             await registerStudentInCMS(trainerId: trainer.id)
@@ -279,6 +280,7 @@ final class PersonalTrainerViewModel {
             return true
         } catch {
             self.error = error
+            isRequestingConnection = false
             #if DEBUG
             print("[PersonalTrainerViewModel] Error requesting connection: \(error)")
             #endif
@@ -344,9 +346,11 @@ final class PersonalTrainerViewModel {
             connectionStatus = nil
             relationshipId = nil
             assignedWorkouts = []
+            isLoading = false
             return true
         } catch {
             self.error = error
+            isLoading = false
             #if DEBUG
             print("[PersonalTrainerViewModel] Error canceling connection: \(error)")
             #endif
