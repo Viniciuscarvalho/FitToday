@@ -1,0 +1,33 @@
+{
+  "cli_version": "0.4.4",
+  "checkpoint_id": "5a3bf5984554",
+  "strategy": "manual-commit",
+  "branch": "fix/security-apikey-exposure-issue-84",
+  "checkpoints_count": 2,
+  "files_touched": [
+    ".claude/settings.local.json",
+    "Config/AppInfo.plist",
+    "FitToday/FitTodayTests/Domain/UseCases/CMSWorkoutUseCasesTests.swift",
+    "FitToday/FitTodayTests/Integration/WorkoutCompositionFlowTests.swift",
+    "FitToday/FitTodayTests/Presentation/ErrorPresentingTests.swift",
+    "ops/sessions/20260306-001115.json",
+    "ops/sessions/20260306-003039.json",
+    "ops/sessions/20260306-004813.json"
+  ],
+  "sessions": [
+    {
+      "metadata": "/5a/3bf5984554/0/metadata.json",
+      "transcript": "/5a/3bf5984554/0/full.jsonl",
+      "context": "/5a/3bf5984554/0/context.md",
+      "content_hash": "/5a/3bf5984554/0/content_hash.txt",
+      "prompt": "/5a/3bf5984554/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 18745,
+    "cache_creation_tokens": 123132,
+    "cache_read_tokens": 4959898,
+    "output_tokens": 17868,
+    "api_call_count": 50
+  }
+}
