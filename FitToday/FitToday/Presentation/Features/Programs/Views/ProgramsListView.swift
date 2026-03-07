@@ -116,6 +116,7 @@ struct ProgramsListView: View {
                         Image(program.heroImageName)
                             .resizable()
                             .aspectRatio(contentMode: .fill)
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
                     } else {
                         LinearGradient(
                             colors: gradientColors(for: program.goalTag),
@@ -125,10 +126,11 @@ struct ProgramsListView: View {
                     }
 
                     LinearGradient(
-                        colors: [.clear, .black.opacity(0.5)],
+                        colors: [.clear, .black.opacity(0.65)],
                         startPoint: .top,
                         endPoint: .bottom
                     )
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
 
                     VStack(alignment: .leading, spacing: FitTodaySpacing.xs) {
                         Spacer()
