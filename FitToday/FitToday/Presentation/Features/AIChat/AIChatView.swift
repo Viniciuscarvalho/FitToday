@@ -43,23 +43,13 @@ struct AIChatView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                HStack(spacing: FitTodaySpacing.sm) {
-                    if !viewModel.messages.isEmpty {
-                        Button {
-                            showClearConfirmation = true
-                        } label: {
-                            Image(systemName: "trash")
-                                .foregroundStyle(FitTodayColor.textSecondary)
-                        }
-                    }
-                    #if DEBUG
+                if !viewModel.messages.isEmpty {
                     Button {
-                        router.push(.apiKeySettings)
+                        showClearConfirmation = true
                     } label: {
-                        Image(systemName: "gearshape")
+                        Image(systemName: "trash")
                             .foregroundStyle(FitTodayColor.textSecondary)
                     }
-                    #endif
                 }
             }
         }
