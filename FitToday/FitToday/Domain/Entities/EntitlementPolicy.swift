@@ -124,26 +124,32 @@ struct EntitlementPolicy {
         usageCount: Int = 0
     ) -> FeatureAccessResult {
 
-        // Pro tem acesso a tudo (com limites diários em IA)
-        if entitlement.isPro {
-            if let expiration = entitlement.expirationDate, expiration < Date() {
-                return .trialExpired
-            }
+        // Subscription expired
+        if entitlement.isPro,
+           let expiration = entitlement.expirationDate,
+           expiration < Date() {
+            return .trialExpired
+        }
 
+        // Elite — acesso irrestrito a tudo
+        if entitlement.isElite {
+            return .allowed
+        }
+
+        // Pro — acesso com limites diários em IA
+        if entitlement.isPro {
             switch feature {
             case .aiWorkoutGeneration:
                 if usageCount >= proAIWorkoutsPerDay {
                     return .limitReached(remaining: 0, limit: proAIWorkoutsPerDay)
                 }
                 return .allowed
-            case .aiChat:
-                return .allowed
             default:
                 return .allowed
             }
         }
 
-        // Verificar features específicas para Free
+        // Free — verificar features específicas
         switch feature {
         case .aiWorkoutGeneration:
             if usageCount >= freeAIWorkoutsPerWeek {
