@@ -1,0 +1,28 @@
+{
+  "cli_version": "0.4.4",
+  "checkpoint_id": "ef780e7d12b6",
+  "strategy": "manual-commit",
+  "branch": "fix/issues-91-92-93-94",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "FitToday/FitToday/Presentation/Features/Programs/Views/ProgramsListView.swift",
+    "firebase-debug.log",
+    "ops/sessions/20260307-012653.json"
+  ],
+  "sessions": [
+    {
+      "metadata": "/ef/780e7d12b6/0/metadata.json",
+      "transcript": "/ef/780e7d12b6/0/full.jsonl",
+      "context": "/ef/780e7d12b6/0/context.md",
+      "content_hash": "/ef/780e7d12b6/0/content_hash.txt",
+      "prompt": "/ef/780e7d12b6/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 6,
+    "cache_creation_tokens": 97433,
+    "cache_read_tokens": 287842,
+    "output_tokens": 1745,
+    "api_call_count": 4
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "cli_version": "0.4.4",
+  "checkpoint_id": "ef780e7d12b6",
+  "session_id": "2afa1a55-c96a-4172-8f6e-fc3512c27bab",
+  "strategy": "manual-commit",
+  "created_at": "2026-03-07T01:27:01.463612Z",
+  "branch": "fix/issues-91-92-93-94",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "FitToday/FitToday/Presentation/Features/Programs/Views/ProgramsListView.swift",
+    "firebase-debug.log",
+    "ops/sessions/20260307-012653.json"
+  ],
+  "agent": "Claude Code",
+  "transcript_identifier_at_start": "fdb7c9fe-1bb5-4f0a-be7e-b23e08c169ce",
+  "checkpoint_transcript_start": 2094,
+  "transcript_lines_at_start": 2094,
+  "token_usage": {
+    "input_tokens": 6,
+    "cache_creation_tokens": 97433,
+    "cache_read_tokens": 287842,
+    "output_tokens": 1745,
+    "api_call_count": 4
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-03-07T01:26:59.582341Z",
+    "agent_lines": 0,
+    "human_added": 447,
+    "human_modified": 4,
+    "human_removed": 0,
+    "total_committed": 449,
+    "agent_percentage": 0
+  },
+  "transcript_path": ".claude/projects/-Users-viniciuscarvalho-Documents-FitToday/2afa1a55-c96a-4172-8f6e-fc3512c27bab.jsonl"
+}
