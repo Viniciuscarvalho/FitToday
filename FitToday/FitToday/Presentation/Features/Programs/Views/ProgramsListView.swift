@@ -15,6 +15,7 @@ struct ProgramsListView: View {
     @State private var viewModel: ProgramsListViewModel?
     @State private var dependencyError: String?
     @State private var hasInitialized = false
+    @State private var gridAppeared = false
 
     var body: some View {
         Group {
@@ -221,23 +222,43 @@ struct ProgramsListView: View {
                     .foregroundStyle(FitTodayColor.textSecondary)
                     .frame(maxWidth: .infinity, minHeight: 100)
             } else if viewModel.isLoading {
-                ProgressView()
-                    .frame(maxWidth: .infinity, minHeight: 100)
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: FitTodaySpacing.md) {
+                        ForEach(0..<4, id: \.self) { _ in
+                            RoundedRectangle(cornerRadius: FitTodayRadius.md)
+                                .fill(FitTodayColor.surface)
+                                .frame(width: 170, height: 180)
+                                .shimmer()
+                        }
+                    }
+                    .padding(.horizontal, FitTodaySpacing.md)
+                }
+                .frame(height: 200)
             } else {
                 ScrollView(.horizontal, showsIndicators: false) {
                     LazyHStack(spacing: FitTodaySpacing.md) {
-                        ForEach(viewModel.filteredPrograms) { program in
+                        ForEach(Array(viewModel.filteredPrograms.enumerated()), id: \.element.id) { index, program in
                             ProgramCard(
                                 program: program,
                                 isRecommended: viewModel.recommendedProgramIds.contains(program.id)
                             ) {
                                 router.push(.programDetail(program.id), on: .workout)
                             }
+                            .opacity(gridAppeared ? 1 : 0)
+                            .offset(x: gridAppeared ? 0 : 30)
+                            .animation(
+                                .easeOut(duration: 0.35).delay(Double(index) * 0.06),
+                                value: gridAppeared
+                            )
                         }
                     }
                     .padding(.horizontal, FitTodaySpacing.md)
                 }
                 .frame(height: 200)
+                .onAppear {
+                    gridAppeared = false
+                    withAnimation { gridAppeared = true }
+                }
             }
         }
     }
