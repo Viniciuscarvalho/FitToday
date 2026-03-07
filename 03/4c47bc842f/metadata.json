@@ -1,0 +1,47 @@
+{
+  "cli_version": "0.4.4",
+  "checkpoint_id": "034c47bc842f",
+  "strategy": "manual-commit",
+  "branch": "fix/issues-91-92-93-94",
+  "checkpoints_count": 1,
+  "files_touched": [
+    ".claude/settings.local.json",
+    "FitToday/FitToday/Presentation/Features/AIChat/AIChatView.swift",
+    "FitToday/FitToday/Presentation/Features/AIChat/AIChatViewModel.swift",
+    "FitToday/FitToday/Presentation/Features/Programs/Views/ProgramsListView.swift",
+    "FitToday/FitToday/Presentation/Features/Workout/Views/MyWorkoutsView.swift",
+    "FitToday/FitToday/Resources/en.lproj/Localizable.strings",
+    "FitToday/FitToday/Resources/pt-BR.lproj/Localizable.strings",
+    "firebase-debug.log",
+    "ops/sessions/20260306-221531.json",
+    "ops/sessions/20260306-223906.json",
+    "ops/sessions/20260306-225024.json",
+    "ops/sessions/20260306-230125.json",
+    "ops/sessions/20260306-230233.json",
+    "ops/sessions/20260306-231715.json",
+    "ops/sessions/20260306-231942.json",
+    "ops/sessions/20260306-232046.json",
+    "ops/sessions/20260306-233034.json",
+    "ops/sessions/20260306-233449.json",
+    "ops/sessions/20260306-234127.json",
+    "ops/sessions/20260307-000855.json",
+    "ops/sessions/20260307-002246.json",
+    "ops/sessions/20260307-003649.json"
+  ],
+  "sessions": [
+    {
+      "metadata": "/03/4c47bc842f/0/metadata.json",
+      "transcript": "/03/4c47bc842f/0/full.jsonl",
+      "context": "/03/4c47bc842f/0/context.md",
+      "content_hash": "/03/4c47bc842f/0/content_hash.txt",
+      "prompt": "/03/4c47bc842f/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 1089,
+    "cache_creation_tokens": 106868,
+    "cache_read_tokens": 5011500,
+    "output_tokens": 21578,
+    "api_call_count": 62
+  }
+}
