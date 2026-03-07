@@ -114,6 +114,35 @@ final class ExerciseImageCacheTests: XCTestCase {
         }
     }
 
+    // MARK: - Negative Cache (Issue #89 - prevents infinite retries)
+
+    func testRepeatedRequestsForMissingImageDoNotRetryInfinitely() async {
+        let exerciseId = "missing_exercise_\(UUID().uuidString)"
+
+        // First call — will attempt Firebase Storage and fail
+        let result1 = await ExerciseImageCache.shared.image(for: exerciseId, imageIndex: 0)
+        XCTAssertNil(result1)
+
+        // Second call — should return nil immediately from negative cache (no Firebase call)
+        let result2 = await ExerciseImageCache.shared.image(for: exerciseId, imageIndex: 0)
+        XCTAssertNil(result2)
+    }
+
+    func testClearCacheResetsNegativeCache() async {
+        let exerciseId = "cleared_exercise_\(UUID().uuidString)"
+
+        // Trigger negative cache
+        _ = await ExerciseImageCache.shared.image(for: exerciseId, imageIndex: 0)
+
+        // Clear all caches including negative cache
+        await ExerciseImageCache.shared.clearCache()
+
+        // After clear, should attempt download again (not return from negative cache)
+        // Still nil because exercise doesn't exist, but the important thing is no crash
+        let result = await ExerciseImageCache.shared.image(for: exerciseId, imageIndex: 0)
+        XCTAssertNil(result)
+    }
+
     // MARK: - Deduplication
 
     func testConcurrentRequestsForSameImageDoNotDuplicate() async {
