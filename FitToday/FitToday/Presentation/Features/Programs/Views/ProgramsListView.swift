@@ -111,52 +111,58 @@ struct ProgramsListView: View {
             Button {
                 router.push(.programDetail(program.id), on: .workout)
             } label: {
-                ZStack(alignment: .bottomLeading) {
-                    if UIImage(named: program.heroImageName) != nil {
-                        Image(program.heroImageName)
-                            .resizable()
-                            .aspectRatio(contentMode: .fill)
-                            .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    } else {
-                        LinearGradient(
-                            colors: gradientColors(for: program.goalTag),
-                            startPoint: .topTrailing,
-                            endPoint: .bottomLeading
-                        )
-                    }
-
-                    LinearGradient(
-                        colors: [.clear, .black.opacity(0.65)],
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-
-                    VStack(alignment: .leading, spacing: FitTodaySpacing.xs) {
-                        Text(program.durationDescription)
-                            .font(.system(.caption, weight: .bold))
-                            .padding(.horizontal, FitTodaySpacing.sm)
-                            .padding(.vertical, 4)
-                            .background(.white.opacity(0.25))
-                            .clipShape(Capsule())
-
-                        Text(program.name)
-                            .font(.system(.title2, weight: .bold))
-
-                        HStack(spacing: FitTodaySpacing.sm) {
-                            Label(program.durationDescription, systemImage: "calendar")
-                            Label(program.level.displayName, systemImage: "chart.bar")
-                            Label(program.equipment.displayName, systemImage: program.equipment.iconName)
+                GeometryReader { geo in
+                    ZStack(alignment: .bottomLeading) {
+                        // Background: image or gradient
+                        if UIImage(named: program.heroImageName) != nil {
+                            Image(program.heroImageName)
+                                .resizable()
+                                .scaledToFill()
+                                .frame(width: geo.size.width, height: 200)
+                                .clipped()
+                        } else {
+                            LinearGradient(
+                                colors: gradientColors(for: program.goalTag),
+                                startPoint: .topTrailing,
+                                endPoint: .bottomLeading
+                            )
+                            .frame(width: geo.size.width, height: 200)
                         }
-                        .font(.system(.caption))
-                        .opacity(0.85)
+
+                        // Dark gradient so text is always readable
+                        LinearGradient(
+                            colors: [.clear, .black.opacity(0.75)],
+                            startPoint: .center,
+                            endPoint: .bottom
+                        )
+                        .frame(width: geo.size.width, height: 200)
+
+                        // Text content pinned to bottom-left
+                        VStack(alignment: .leading, spacing: FitTodaySpacing.xs) {
+                            Text(program.durationDescription)
+                                .font(.system(.caption, weight: .bold))
+                                .padding(.horizontal, FitTodaySpacing.sm)
+                                .padding(.vertical, 4)
+                                .background(.white.opacity(0.25))
+                                .clipShape(Capsule())
+
+                            Text(program.name)
+                                .font(.system(.title2, weight: .bold))
+
+                            HStack(spacing: FitTodaySpacing.sm) {
+                                Label(program.level.displayName, systemImage: "chart.bar")
+                                Label(program.equipment.displayName, systemImage: program.equipment.iconName)
+                            }
+                            .font(.system(.caption))
+                            .opacity(0.85)
+                        }
+                        .foregroundStyle(.white)
+                        .padding(FitTodaySpacing.md)
                     }
-                    .foregroundStyle(.white)
-                    .padding(FitTodaySpacing.md)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .frame(width: geo.size.width, height: 200)
+                    .clipShape(RoundedRectangle(cornerRadius: FitTodayRadius.lg))
                 }
                 .frame(height: 200)
-                .clipShape(RoundedRectangle(cornerRadius: FitTodayRadius.lg))
             }
             .buttonStyle(.plain)
             .padding(.horizontal, FitTodaySpacing.md)
