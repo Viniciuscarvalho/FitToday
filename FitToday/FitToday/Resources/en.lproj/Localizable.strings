@@ -974,3 +974,14 @@
 "fitorb.error_service_unavailable" = "The AI assistant is not available at the moment.";
 "fitorb.limit_reached.title" = "Message Limit Reached";
 "fitorb.limit_reached.message" = "You have reached the daily message limit. Unlock Pro for unlimited messages.";
+"programs.search_placeholder" = "Search programs...";
+"programs.featured.title" = "Featured";
+"programs.categories.title" = "Categories";
+"programs.for_you" = "For You";
+"workout.search_placeholder" = "Search workouts...";
+"workout.card.exercises" = "exercises";
+"workout.card.minutes" = "min";
+"workout.card.sets" = "sets";
+"workout.card.last_used" = "Last used:";
+"programs.incomplete_profile.title" = "Complete your profile";
+"programs.incomplete_profile.subtitle" = "Improve your recommendations by answering more questions";

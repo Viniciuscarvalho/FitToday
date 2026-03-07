@@ -43,23 +43,13 @@ struct AIChatView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                HStack(spacing: FitTodaySpacing.sm) {
-                    if !viewModel.messages.isEmpty {
-                        Button {
-                            showClearConfirmation = true
-                        } label: {
-                            Image(systemName: "trash")
-                                .foregroundStyle(FitTodayColor.textSecondary)
-                        }
-                    }
-                    #if DEBUG
+                if !viewModel.messages.isEmpty {
                     Button {
-                        router.push(.apiKeySettings)
+                        showClearConfirmation = true
                     } label: {
-                        Image(systemName: "gearshape")
+                        Image(systemName: "trash")
                             .foregroundStyle(FitTodayColor.textSecondary)
                     }
-                    #endif
                 }
             }
         }
@@ -109,21 +99,6 @@ struct AIChatView: View {
                 Spacer(minLength: FitTodaySpacing.xl)
 
                 FitOrbView()
-
-                // API key missing banner
-                if !viewModel.isChatAvailable {
-                    HStack(spacing: FitTodaySpacing.sm) {
-                        Image(systemName: "key.fill")
-                            .foregroundStyle(FitTodayColor.brandPrimary)
-                        Text("fitorb.error_no_api_key".localized)
-                            .font(FitTodayFont.ui(size: 13, weight: .medium))
-                            .foregroundStyle(FitTodayColor.textSecondary)
-                    }
-                    .padding(FitTodaySpacing.md)
-                    .background(FitTodayColor.surfaceElevated)
-                    .clipShape(RoundedRectangle(cornerRadius: FitTodayRadius.md))
-                    .padding(.horizontal, FitTodaySpacing.md)
-                }
 
                 // Quick action chips
                 VStack(spacing: FitTodaySpacing.sm) {
