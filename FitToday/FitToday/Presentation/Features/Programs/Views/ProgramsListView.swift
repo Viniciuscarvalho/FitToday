@@ -133,8 +133,6 @@ struct ProgramsListView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
 
                     VStack(alignment: .leading, spacing: FitTodaySpacing.xs) {
-                        Spacer()
-
                         Text(program.durationDescription)
                             .font(.system(.caption, weight: .bold))
                             .padding(.horizontal, FitTodaySpacing.sm)
@@ -155,6 +153,7 @@ struct ProgramsListView: View {
                     }
                     .foregroundStyle(.white)
                     .padding(FitTodaySpacing.md)
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 }
                 .frame(height: 200)
                 .clipShape(RoundedRectangle(cornerRadius: FitTodayRadius.lg))
