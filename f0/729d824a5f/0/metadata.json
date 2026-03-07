@@ -1,0 +1,35 @@
+{
+  "cli_version": "0.4.4",
+  "checkpoint_id": "f0729d824a5f",
+  "session_id": "2afa1a55-c96a-4172-8f6e-fc3512c27bab",
+  "strategy": "manual-commit",
+  "created_at": "2026-03-07T00:46:29.999452Z",
+  "branch": "fix/issues-91-92-93-94",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "FitToday/FitToday/Presentation/Features/AIChat/AIChatView.swift",
+    "firebase-debug.log",
+    "ops/sessions/20260307-004619.json"
+  ],
+  "agent": "Claude Code",
+  "transcript_identifier_at_start": "078927a9-3eca-4a6c-ae8a-31a0f23aa48f",
+  "checkpoint_transcript_start": 1998,
+  "transcript_lines_at_start": 1998,
+  "token_usage": {
+    "input_tokens": 7,
+    "cache_creation_tokens": 89315,
+    "cache_read_tokens": 354465,
+    "output_tokens": 886,
+    "api_call_count": 5
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-03-07T00:46:26.734978Z",
+    "agent_lines": 0,
+    "human_added": 436,
+    "human_modified": 14,
+    "human_removed": 0,
+    "total_committed": 437,
+    "agent_percentage": 0
+  },
+  "transcript_path": ".claude/projects/-Users-viniciuscarvalho-Documents-FitToday/2afa1a55-c96a-4172-8f6e-fc3512c27bab.jsonl"
+}

@@ -1,0 +1,28 @@
+{
+  "cli_version": "0.4.4",
+  "checkpoint_id": "f0729d824a5f",
+  "strategy": "manual-commit",
+  "branch": "fix/issues-91-92-93-94",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "FitToday/FitToday/Presentation/Features/AIChat/AIChatView.swift",
+    "firebase-debug.log",
+    "ops/sessions/20260307-004619.json"
+  ],
+  "sessions": [
+    {
+      "metadata": "/f0/729d824a5f/0/metadata.json",
+      "transcript": "/f0/729d824a5f/0/full.jsonl",
+      "context": "/f0/729d824a5f/0/context.md",
+      "content_hash": "/f0/729d824a5f/0/content_hash.txt",
+      "prompt": "/f0/729d824a5f/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 7,
+    "cache_creation_tokens": 89315,
+    "cache_read_tokens": 354465,
+    "output_tokens": 886,
+    "api_call_count": 5
+  }
+}
