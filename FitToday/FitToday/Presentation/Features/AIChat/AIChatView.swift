@@ -110,21 +110,6 @@ struct AIChatView: View {
 
                 FitOrbView()
 
-                // API key missing banner
-                if !viewModel.isChatAvailable {
-                    HStack(spacing: FitTodaySpacing.sm) {
-                        Image(systemName: "key.fill")
-                            .foregroundStyle(FitTodayColor.brandPrimary)
-                        Text("fitorb.error_no_api_key".localized)
-                            .font(FitTodayFont.ui(size: 13, weight: .medium))
-                            .foregroundStyle(FitTodayColor.textSecondary)
-                    }
-                    .padding(FitTodaySpacing.md)
-                    .background(FitTodayColor.surfaceElevated)
-                    .clipShape(RoundedRectangle(cornerRadius: FitTodayRadius.md))
-                    .padding(.horizontal, FitTodaySpacing.md)
-                }
-
                 // Quick action chips
                 VStack(spacing: FitTodaySpacing.sm) {
                     Text("fitorb.try_asking".localized)

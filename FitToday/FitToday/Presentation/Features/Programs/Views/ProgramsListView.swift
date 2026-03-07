@@ -89,7 +89,7 @@ struct ProgramsListView: View {
         return HStack(spacing: FitTodaySpacing.sm) {
             Image(systemName: "magnifyingglass")
                 .foregroundStyle(FitTodayColor.textTertiary)
-            TextField("Buscar programa...", text: $vm.searchText)
+            TextField("programs.search_placeholder".localized, text: $vm.searchText)
                 .font(.system(.body))
                 .foregroundStyle(FitTodayColor.textPrimary)
         }
@@ -103,7 +103,7 @@ struct ProgramsListView: View {
 
     private func featuredSection(_ program: Program) -> some View {
         VStack(alignment: .leading, spacing: FitTodaySpacing.sm) {
-            Text("Em Destaque")
+            Text("programs.featured.title".localized)
                 .font(.system(.headline, weight: .semibold))
                 .foregroundStyle(FitTodayColor.textPrimary)
                 .padding(.horizontal, FitTodaySpacing.md)
@@ -112,11 +112,17 @@ struct ProgramsListView: View {
                 router.push(.programDetail(program.id), on: .workout)
             } label: {
                 ZStack(alignment: .bottomLeading) {
-                    LinearGradient(
-                        colors: gradientColors(for: program.goalTag),
-                        startPoint: .topTrailing,
-                        endPoint: .bottomLeading
-                    )
+                    if UIImage(named: program.heroImageName) != nil {
+                        Image(program.heroImageName)
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                    } else {
+                        LinearGradient(
+                            colors: gradientColors(for: program.goalTag),
+                            startPoint: .topTrailing,
+                            endPoint: .bottomLeading
+                        )
+                    }
 
                     LinearGradient(
                         colors: [.clear, .black.opacity(0.5)],
@@ -160,7 +166,7 @@ struct ProgramsListView: View {
 
     private func categoryChips(viewModel: ProgramsListViewModel) -> some View {
         VStack(alignment: .leading, spacing: FitTodaySpacing.sm) {
-            Text("Categorias")
+            Text("programs.categories.title".localized)
                 .font(.system(.headline, weight: .semibold))
                 .foregroundStyle(FitTodayColor.textPrimary)
                 .padding(.horizontal, FitTodaySpacing.md)
@@ -168,7 +174,7 @@ struct ProgramsListView: View {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: FitTodaySpacing.sm) {
                     chipButton(
-                        title: "Todos",
+                        title: "programs.category.all".localized,
                         icon: "square.grid.2x2",
                         isSelected: viewModel.selectedGoalTag == nil
                     ) {
@@ -211,13 +217,13 @@ struct ProgramsListView: View {
 
     private func programsGrid(viewModel: ProgramsListViewModel) -> some View {
         VStack(alignment: .leading, spacing: FitTodaySpacing.sm) {
-            Text("Programas Recomendados")
+            Text("programs.recommended.title".localized)
                 .font(.system(.headline, weight: .semibold))
                 .foregroundStyle(FitTodayColor.textPrimary)
                 .padding(.horizontal, FitTodaySpacing.md)
 
             if viewModel.filteredPrograms.isEmpty && !viewModel.isLoading {
-                Text("Nenhum programa encontrado")
+                Text("programs.empty.title".localized)
                     .font(.system(.subheadline))
                     .foregroundStyle(FitTodayColor.textSecondary)
                     .frame(maxWidth: .infinity, minHeight: 100)
@@ -285,12 +291,20 @@ private struct ProgramCard: View {
         Button(action: onTap) {
             VStack(alignment: .leading, spacing: FitTodaySpacing.sm) {
                 ZStack(alignment: .topTrailing) {
-                    LinearGradient(
-                        colors: gradientColors(for: program.goalTag),
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                    .frame(height: 100)
+                    if UIImage(named: program.heroImageName) != nil {
+                        Image(program.heroImageName)
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                            .frame(height: 100)
+                            .clipped()
+                    } else {
+                        LinearGradient(
+                            colors: gradientColors(for: program.goalTag),
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                        .frame(height: 100)
+                    }
 
                     Text(program.durationDescription)
                         .font(.system(.caption2, weight: .bold))
@@ -304,7 +318,7 @@ private struct ProgramCard: View {
 
                 VStack(alignment: .leading, spacing: FitTodaySpacing.xs) {
                     if isRecommended {
-                        Text("Para você")
+                        Text("programs.for_you".localized)
                             .font(.system(.caption2, weight: .semibold))
                             .foregroundStyle(FitTodayColor.brandPrimary)
                             .padding(.horizontal, FitTodaySpacing.xs)
@@ -446,10 +460,10 @@ struct IncompleteProfileBanner: View {
                 Image(systemName: "person.crop.circle.badge.exclamationmark")
                     .foregroundStyle(FitTodayColor.brandAccent)
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("Complete seu perfil")
+                    Text("programs.incomplete_profile.title".localized)
                         .font(.system(.subheadline, weight: .semibold))
                         .foregroundStyle(FitTodayColor.textPrimary)
-                    Text("Melhore suas recomendações respondendo mais perguntas")
+                    Text("programs.incomplete_profile.subtitle".localized)
                         .font(.system(.caption))
                         .foregroundStyle(FitTodayColor.textSecondary)
                 }

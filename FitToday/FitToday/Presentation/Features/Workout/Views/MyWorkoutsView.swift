@@ -252,7 +252,7 @@ struct MyWorkoutsView: View {
                 .font(.system(size: 16))
                 .foregroundStyle(FitTodayColor.textTertiary)
 
-            TextField("Buscar treinos...", text: $searchText)
+            TextField("workout.search_placeholder".localized, text: $searchText)
                 .font(FitTodayFont.ui(size: 15, weight: .medium))
                 .foregroundStyle(FitTodayColor.textPrimary)
 
@@ -380,14 +380,14 @@ struct WorkoutTemplateCard: View {
 
             // Stats
             HStack(spacing: FitTodaySpacing.md) {
-                statItem(icon: "figure.strengthtraining.traditional", value: "\(workout.exerciseCount)", label: "exercícios")
-                statItem(icon: "clock.fill", value: "~\(workout.estimatedDurationMinutes)", label: "min")
-                statItem(icon: "number", value: "\(workout.totalSets)", label: "séries")
+                statItem(icon: "figure.strengthtraining.traditional", value: "\(workout.exerciseCount)", label: "workout.card.exercises".localized)
+                statItem(icon: "clock.fill", value: "~\(workout.estimatedDurationMinutes)", label: "workout.card.minutes".localized)
+                statItem(icon: "number", value: "\(workout.totalSets)", label: "workout.card.sets".localized)
             }
 
             // Last used
             if let lastUsed = workout.lastUsedAt {
-                Text("Último uso: \(lastUsed, format: .relative(presentation: .named))")
+                Text("\("workout.card.last_used".localized) \(lastUsed, format: .relative(presentation: .named))")
                     .font(FitTodayFont.ui(size: 11, weight: .medium))
                     .foregroundStyle(FitTodayColor.textTertiary)
             }

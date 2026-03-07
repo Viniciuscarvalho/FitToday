@@ -974,3 +974,14 @@
 "fitorb.error_service_unavailable" = "O assistente IA não está disponível no momento.";
 "fitorb.limit_reached.title" = "Limite de Mensagens";
 "fitorb.limit_reached.message" = "Você atingiu o limite de mensagens diárias. Desbloqueie o Pro para mensagens ilimitadas.";
+"programs.search_placeholder" = "Buscar programa...";
+"programs.featured.title" = "Em Destaque";
+"programs.categories.title" = "Categorias";
+"programs.for_you" = "Para você";
+"workout.search_placeholder" = "Buscar treinos...";
+"workout.card.exercises" = "exercícios";
+"workout.card.minutes" = "min";
+"workout.card.sets" = "séries";
+"workout.card.last_used" = "Último uso:";
+"programs.incomplete_profile.title" = "Complete seu perfil";
+"programs.incomplete_profile.subtitle" = "Melhore suas recomendações respondendo mais perguntas";

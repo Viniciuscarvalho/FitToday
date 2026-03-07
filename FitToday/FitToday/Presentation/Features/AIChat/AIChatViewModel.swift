@@ -87,7 +87,7 @@ final class AIChatViewModel: ErrorPresenting {
         guard chatService != nil else {
             errorMessage = ErrorMessage(
                 title: "error.openai.not_configured.title".localized,
-                message: "fitorb.error_no_api_key".localized,
+                message: "fitorb.error_service_unavailable".localized,
                 action: .dismiss
             )
             return
@@ -140,6 +140,7 @@ final class AIChatViewModel: ErrorPresenting {
         typingTask?.cancel()
         typingTask = nil
         isTyping = false
+        isLoading = false
         messages.removeAll()
         try? await chatRepository?.clearHistory()
         await chatService?.invalidatePromptCache()
