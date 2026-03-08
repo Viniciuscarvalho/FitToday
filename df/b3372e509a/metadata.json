@@ -1,0 +1,28 @@
+{
+  "cli_version": "0.4.4",
+  "checkpoint_id": "dfb3372e509a",
+  "strategy": "manual-commit",
+  "branch": "feat/workout-live-activity",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "FitToday/FitToday/Presentation/Router/AppRouter.swift",
+    "FitToday/FitTodayWidgets/WorkoutLiveActivityWidget.swift",
+    "ops/sessions/20260308-212426.json"
+  ],
+  "sessions": [
+    {
+      "metadata": "/df/b3372e509a/0/metadata.json",
+      "transcript": "/df/b3372e509a/0/full.jsonl",
+      "context": "/df/b3372e509a/0/context.md",
+      "content_hash": "/df/b3372e509a/0/content_hash.txt",
+      "prompt": "/df/b3372e509a/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 14,
+    "cache_creation_tokens": 87261,
+    "cache_read_tokens": 925674,
+    "output_tokens": 2961,
+    "api_call_count": 12
+  }
+}

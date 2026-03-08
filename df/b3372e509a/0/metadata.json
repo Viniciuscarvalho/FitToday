@@ -1,0 +1,35 @@
+{
+  "cli_version": "0.4.4",
+  "checkpoint_id": "dfb3372e509a",
+  "session_id": "2afa1a55-c96a-4172-8f6e-fc3512c27bab",
+  "strategy": "manual-commit",
+  "created_at": "2026-03-08T21:24:42.071535Z",
+  "branch": "feat/workout-live-activity",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "FitToday/FitToday/Presentation/Router/AppRouter.swift",
+    "FitToday/FitTodayWidgets/WorkoutLiveActivityWidget.swift",
+    "ops/sessions/20260308-212426.json"
+  ],
+  "agent": "Claude Code",
+  "transcript_identifier_at_start": "f917868d-ac62-47e9-beca-10761f836159",
+  "checkpoint_transcript_start": 6096,
+  "transcript_lines_at_start": 6096,
+  "token_usage": {
+    "input_tokens": 14,
+    "cache_creation_tokens": 87261,
+    "cache_read_tokens": 925674,
+    "output_tokens": 2961,
+    "api_call_count": 12
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-03-08T21:24:38.28602Z",
+    "agent_lines": 0,
+    "human_added": 11,
+    "human_modified": 2,
+    "human_removed": 0,
+    "total_committed": 13,
+    "agent_percentage": 0
+  },
+  "transcript_path": ".claude/projects/-Users-viniciuscarvalho-Documents-FitToday/2afa1a55-c96a-4172-8f6e-fc3512c27bab.jsonl"
+}
