@@ -49,7 +49,7 @@ final class DebugEntitlementOverride: @unchecked Sendable {
     var entitlement: ProEntitlement {
         if isPro {
             return ProEntitlement(
-                isPro: true,
+                tier: .pro,
                 source: .promo,
                 expirationDate: Calendar.current.date(byAdding: .year, value: 1, to: Date())
             )

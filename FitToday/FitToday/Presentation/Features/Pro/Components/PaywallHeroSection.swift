@@ -36,12 +36,12 @@ struct PaywallHeroSection: View {
                     )
             }
 
-            Text("FitToday Pro")
-                .font(FitTodayFont.display(size: 32, weight: .extraBold))
+            Text("Evolua com FitToday")
+                .font(FitTodayFont.display(size: 28, weight: .extraBold))
                 .foregroundStyle(FitTodayColor.textPrimary)
 
-            Text("Treinos personalizados por IA\nque se adaptam ao seu corpo")
-                .font(FitTodayFont.ui(size: 17, weight: .medium))
+            Text("Treinos personalizados por IA,\nprogramas premium e muito mais")
+                .font(FitTodayFont.ui(size: 16, weight: .medium))
                 .foregroundStyle(FitTodayColor.textSecondary)
                 .multilineTextAlignment(.center)
         }

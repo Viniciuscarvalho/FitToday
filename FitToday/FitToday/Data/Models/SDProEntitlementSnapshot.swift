@@ -2,8 +2,6 @@
 //  SDProEntitlementSnapshot.swift
 //  FitToday
 //
-//  Created by AI on 04/01/26.
-//
 
 import Foundation
 import SwiftData
@@ -11,7 +9,8 @@ import SwiftData
 @Model
 final class SDProEntitlementSnapshot {
     @Attribute(.unique) var id: UUID
-    var isPro: Bool
+    var isPro: Bool          // kept for lightweight migration compatibility
+    var tierRaw: String      // SubscriptionTier.rawValue
     var sourceRaw: String
     var expirationDate: Date?
     var updatedAt: Date
@@ -19,18 +18,16 @@ final class SDProEntitlementSnapshot {
     init(
         id: UUID = UUID(),
         isPro: Bool,
+        tierRaw: String = SubscriptionTier.free.rawValue,
         sourceRaw: String,
         expirationDate: Date?,
         updatedAt: Date = .init()
     ) {
         self.id = id
         self.isPro = isPro
+        self.tierRaw = tierRaw
         self.sourceRaw = sourceRaw
         self.expirationDate = expirationDate
         self.updatedAt = updatedAt
     }
 }
-
-
-
-

@@ -4,20 +4,7 @@
 
   ],
   "products" : [
-    {
-      "displayPrice" : "37.90",
-      "internalID" : "F1A2B3C4-D5E6-7890-ABCD-123456789ABC",
-      "localizations" : [
-        {
-          "description" : "Desbloqueie todos os recursos Pro para sempre",
-          "displayName" : "FitToday Pro",
-          "locale" : "pt_BR"
-        }
-      ],
-      "productID" : "com.fittoday.pro.lifetime",
-      "referenceName" : "Pro Lifetime",
-      "type" : "NonConsumable"
-    }
+
   ],
   "settings" : {
     "_applicationInternalID" : "6757407118",
@@ -74,7 +61,110 @@
     ]
   },
   "subscriptionGroups" : [
-
+    {
+      "id" : "A1B2C3D4-E5F6-7890-ABCD-111111111111",
+      "localizations" : [
+        {
+          "locale" : "pt_BR",
+          "name" : "FitToday Pro"
+        }
+      ],
+      "name" : "FitToday Pro",
+      "products" : [
+        {
+          "adHocOfferCodeAreAllowed" : false,
+          "displayPrice" : "9.90",
+          "familySharable" : false,
+          "groupLevel" : 2,
+          "internalID" : "A1B2C3D4-0001-0001-0001-000000000001",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Acesso completo aos recursos Pro do FitToday",
+              "displayName" : "FitToday Pro Mensal",
+              "locale" : "pt_BR"
+            }
+          ],
+          "productID" : "com.fittoday.pro.monthly",
+          "recurringSubscriptionPeriod" : "P1M",
+          "referenceName" : "Pro Mensal",
+          "subscriptionGroupID" : "A1B2C3D4-E5F6-7890-ABCD-111111111111",
+          "type" : "RecurringSubscription"
+        },
+        {
+          "adHocOfferCodeAreAllowed" : false,
+          "displayPrice" : "79.90",
+          "familySharable" : false,
+          "groupLevel" : 1,
+          "internalID" : "A1B2C3D4-0001-0001-0001-000000000002",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Acesso completo aos recursos Pro do FitToday por um ano",
+              "displayName" : "FitToday Pro Anual",
+              "locale" : "pt_BR"
+            }
+          ],
+          "productID" : "com.fittoday.pro.annual",
+          "recurringSubscriptionPeriod" : "P1Y",
+          "referenceName" : "Pro Anual",
+          "subscriptionGroupID" : "A1B2C3D4-E5F6-7890-ABCD-111111111111",
+          "type" : "RecurringSubscription"
+        }
+      ]
+    },
+    {
+      "id" : "B2C3D4E5-F6A7-8901-BCDE-222222222222",
+      "localizations" : [
+        {
+          "locale" : "pt_BR",
+          "name" : "FitToday Elite"
+        }
+      ],
+      "name" : "FitToday Elite",
+      "products" : [
+        {
+          "adHocOfferCodeAreAllowed" : false,
+          "displayPrice" : "19.90",
+          "familySharable" : false,
+          "groupLevel" : 2,
+          "internalID" : "B2C3D4E5-0002-0002-0002-000000000003",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Acesso ilimitado a todos os recursos Elite do FitToday",
+              "displayName" : "FitToday Elite Mensal",
+              "locale" : "pt_BR"
+            }
+          ],
+          "productID" : "com.fittoday.elite.monthly",
+          "recurringSubscriptionPeriod" : "P1M",
+          "referenceName" : "Elite Mensal",
+          "subscriptionGroupID" : "B2C3D4E5-F6A7-8901-BCDE-222222222222",
+          "type" : "RecurringSubscription"
+        },
+        {
+          "adHocOfferCodeAreAllowed" : false,
+          "displayPrice" : "149.90",
+          "familySharable" : false,
+          "groupLevel" : 1,
+          "internalID" : "B2C3D4E5-0002-0002-0002-000000000004",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Acesso ilimitado a todos os recursos Elite do FitToday por um ano",
+              "displayName" : "FitToday Elite Anual",
+              "locale" : "pt_BR"
+            }
+          ],
+          "productID" : "com.fittoday.elite.annual",
+          "recurringSubscriptionPeriod" : "P1Y",
+          "referenceName" : "Elite Anual",
+          "subscriptionGroupID" : "B2C3D4E5-F6A7-8901-BCDE-222222222222",
+          "type" : "RecurringSubscription"
+        }
+      ]
+    }
   ],
   "version" : {
     "major" : 4,
