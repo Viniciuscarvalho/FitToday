@@ -15,6 +15,7 @@ struct ProgramsListView: View {
     @State private var viewModel: ProgramsListViewModel?
     @State private var dependencyError: String?
     @State private var hasInitialized = false
+    @State private var gridAppeared = false
 
     var body: some View {
         Group {
@@ -88,7 +89,7 @@ struct ProgramsListView: View {
         return HStack(spacing: FitTodaySpacing.sm) {
             Image(systemName: "magnifyingglass")
                 .foregroundStyle(FitTodayColor.textTertiary)
-            TextField("Buscar programa...", text: $vm.searchText)
+            TextField("programs.search_placeholder".localized, text: $vm.searchText)
                 .font(.system(.body))
                 .foregroundStyle(FitTodayColor.textPrimary)
         }
@@ -102,7 +103,7 @@ struct ProgramsListView: View {
 
     private func featuredSection(_ program: Program) -> some View {
         VStack(alignment: .leading, spacing: FitTodaySpacing.sm) {
-            Text("Em Destaque")
+            Text("programs.featured.title".localized)
                 .font(.system(.headline, weight: .semibold))
                 .foregroundStyle(FitTodayColor.textPrimary)
                 .padding(.horizontal, FitTodaySpacing.md)
@@ -110,45 +111,58 @@ struct ProgramsListView: View {
             Button {
                 router.push(.programDetail(program.id), on: .workout)
             } label: {
-                ZStack(alignment: .bottomLeading) {
-                    LinearGradient(
-                        colors: gradientColors(for: program.goalTag),
-                        startPoint: .topTrailing,
-                        endPoint: .bottomLeading
-                    )
-
-                    LinearGradient(
-                        colors: [.clear, .black.opacity(0.5)],
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )
-
-                    VStack(alignment: .leading, spacing: FitTodaySpacing.xs) {
-                        Spacer()
-
-                        Text(program.durationDescription)
-                            .font(.system(.caption, weight: .bold))
-                            .padding(.horizontal, FitTodaySpacing.sm)
-                            .padding(.vertical, 4)
-                            .background(.white.opacity(0.25))
-                            .clipShape(Capsule())
-
-                        Text(program.name)
-                            .font(.system(.title2, weight: .bold))
-
-                        HStack(spacing: FitTodaySpacing.sm) {
-                            Label(program.durationDescription, systemImage: "calendar")
-                            Label(program.level.displayName, systemImage: "chart.bar")
-                            Label(program.equipment.displayName, systemImage: program.equipment.iconName)
+                GeometryReader { geo in
+                    ZStack(alignment: .bottomLeading) {
+                        // Background: image or gradient
+                        if UIImage(named: program.heroImageName) != nil {
+                            Image(program.heroImageName)
+                                .resizable()
+                                .scaledToFill()
+                                .frame(width: geo.size.width, height: 200)
+                                .clipped()
+                        } else {
+                            LinearGradient(
+                                colors: gradientColors(for: program.goalTag),
+                                startPoint: .topTrailing,
+                                endPoint: .bottomLeading
+                            )
+                            .frame(width: geo.size.width, height: 200)
                         }
-                        .font(.system(.caption))
-                        .opacity(0.85)
+
+                        // Dark gradient so text is always readable
+                        LinearGradient(
+                            colors: [.clear, .black.opacity(0.75)],
+                            startPoint: .center,
+                            endPoint: .bottom
+                        )
+                        .frame(width: geo.size.width, height: 200)
+
+                        // Text content pinned to bottom-left
+                        VStack(alignment: .leading, spacing: FitTodaySpacing.xs) {
+                            Text(program.durationDescription)
+                                .font(.system(.caption, weight: .bold))
+                                .padding(.horizontal, FitTodaySpacing.sm)
+                                .padding(.vertical, 4)
+                                .background(.white.opacity(0.25))
+                                .clipShape(Capsule())
+
+                            Text(program.name)
+                                .font(.system(.title2, weight: .bold))
+
+                            HStack(spacing: FitTodaySpacing.sm) {
+                                Label(program.level.displayName, systemImage: "chart.bar")
+                                Label(program.equipment.displayName, systemImage: program.equipment.iconName)
+                            }
+                            .font(.system(.caption))
+                            .opacity(0.85)
+                        }
+                        .foregroundStyle(.white)
+                        .padding(FitTodaySpacing.md)
                     }
-                    .foregroundStyle(.white)
-                    .padding(FitTodaySpacing.md)
+                    .frame(width: geo.size.width, height: 200)
+                    .clipShape(RoundedRectangle(cornerRadius: FitTodayRadius.lg))
                 }
                 .frame(height: 200)
-                .clipShape(RoundedRectangle(cornerRadius: FitTodayRadius.lg))
             }
             .buttonStyle(.plain)
             .padding(.horizontal, FitTodaySpacing.md)
@@ -159,7 +173,7 @@ struct ProgramsListView: View {
 
     private func categoryChips(viewModel: ProgramsListViewModel) -> some View {
         VStack(alignment: .leading, spacing: FitTodaySpacing.sm) {
-            Text("Categorias")
+            Text("programs.categories.title".localized)
                 .font(.system(.headline, weight: .semibold))
                 .foregroundStyle(FitTodayColor.textPrimary)
                 .padding(.horizontal, FitTodaySpacing.md)
@@ -167,7 +181,7 @@ struct ProgramsListView: View {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: FitTodaySpacing.sm) {
                     chipButton(
-                        title: "Todos",
+                        title: "programs.category.all".localized,
                         icon: "square.grid.2x2",
                         isSelected: viewModel.selectedGoalTag == nil
                     ) {
@@ -210,34 +224,54 @@ struct ProgramsListView: View {
 
     private func programsGrid(viewModel: ProgramsListViewModel) -> some View {
         VStack(alignment: .leading, spacing: FitTodaySpacing.sm) {
-            Text("Programas Recomendados")
+            Text("programs.recommended.title".localized)
                 .font(.system(.headline, weight: .semibold))
                 .foregroundStyle(FitTodayColor.textPrimary)
                 .padding(.horizontal, FitTodaySpacing.md)
 
             if viewModel.filteredPrograms.isEmpty && !viewModel.isLoading {
-                Text("Nenhum programa encontrado")
+                Text("programs.empty.title".localized)
                     .font(.system(.subheadline))
                     .foregroundStyle(FitTodayColor.textSecondary)
                     .frame(maxWidth: .infinity, minHeight: 100)
             } else if viewModel.isLoading {
-                ProgressView()
-                    .frame(maxWidth: .infinity, minHeight: 100)
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: FitTodaySpacing.md) {
+                        ForEach(0..<4, id: \.self) { _ in
+                            RoundedRectangle(cornerRadius: FitTodayRadius.md)
+                                .fill(FitTodayColor.surface)
+                                .frame(width: 170, height: 180)
+                                .shimmer()
+                        }
+                    }
+                    .padding(.horizontal, FitTodaySpacing.md)
+                }
+                .frame(height: 200)
             } else {
                 ScrollView(.horizontal, showsIndicators: false) {
                     LazyHStack(spacing: FitTodaySpacing.md) {
-                        ForEach(viewModel.filteredPrograms) { program in
+                        ForEach(Array(viewModel.filteredPrograms.enumerated()), id: \.element.id) { index, program in
                             ProgramCard(
                                 program: program,
                                 isRecommended: viewModel.recommendedProgramIds.contains(program.id)
                             ) {
                                 router.push(.programDetail(program.id), on: .workout)
                             }
+                            .opacity(gridAppeared ? 1 : 0)
+                            .offset(x: gridAppeared ? 0 : 30)
+                            .animation(
+                                .easeOut(duration: 0.35).delay(Double(index) * 0.06),
+                                value: gridAppeared
+                            )
                         }
                     }
                     .padding(.horizontal, FitTodaySpacing.md)
                 }
                 .frame(height: 200)
+                .onAppear {
+                    gridAppeared = false
+                    withAnimation { gridAppeared = true }
+                }
             }
         }
     }
@@ -264,12 +298,20 @@ private struct ProgramCard: View {
         Button(action: onTap) {
             VStack(alignment: .leading, spacing: FitTodaySpacing.sm) {
                 ZStack(alignment: .topTrailing) {
-                    LinearGradient(
-                        colors: gradientColors(for: program.goalTag),
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                    .frame(height: 100)
+                    if UIImage(named: program.heroImageName) != nil {
+                        Image(program.heroImageName)
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                            .frame(height: 100)
+                            .clipped()
+                    } else {
+                        LinearGradient(
+                            colors: gradientColors(for: program.goalTag),
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                        .frame(height: 100)
+                    }
 
                     Text(program.durationDescription)
                         .font(.system(.caption2, weight: .bold))
@@ -283,7 +325,7 @@ private struct ProgramCard: View {
 
                 VStack(alignment: .leading, spacing: FitTodaySpacing.xs) {
                     if isRecommended {
-                        Text("Para você")
+                        Text("programs.for_you".localized)
                             .font(.system(.caption2, weight: .semibold))
                             .foregroundStyle(FitTodayColor.brandPrimary)
                             .padding(.horizontal, FitTodaySpacing.xs)
@@ -425,10 +467,10 @@ struct IncompleteProfileBanner: View {
                 Image(systemName: "person.crop.circle.badge.exclamationmark")
                     .foregroundStyle(FitTodayColor.brandAccent)
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("Complete seu perfil")
+                    Text("programs.incomplete_profile.title".localized)
                         .font(.system(.subheadline, weight: .semibold))
                         .foregroundStyle(FitTodayColor.textPrimary)
-                    Text("Melhore suas recomendações respondendo mais perguntas")
+                    Text("programs.incomplete_profile.subtitle".localized)
                         .font(.system(.caption))
                         .foregroundStyle(FitTodayColor.textSecondary)
                 }

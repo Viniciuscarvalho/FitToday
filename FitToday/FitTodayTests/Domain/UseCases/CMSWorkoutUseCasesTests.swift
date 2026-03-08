@@ -372,6 +372,8 @@ final class MockCMSWorkoutRepository: CMSWorkoutRepository, @unchecked Sendable 
         archiveWorkoutCalled = true
         capturedArchivedWorkoutId = id
     }
+
+    func registerStudent(firebaseUid: String, trainerId: String, displayName: String, email: String?) async throws {}
 }
 
 // MARK: - Fixtures

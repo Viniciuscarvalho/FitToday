@@ -10,6 +10,7 @@ import SwiftUI
 
 struct FitPrimaryButtonStyle: ButtonStyle {
     @Environment(\.isEnabled) private var isEnabled
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @ScaledMetric private var verticalPadding: CGFloat = 16
 
     func makeBody(configuration: Configuration) -> some View {
@@ -29,10 +30,15 @@ struct FitPrimaryButtonStyle: ButtonStyle {
                 }
             )
             .opacity(isEnabled ? 1 : 0.4)
-            .scaleEffect(configuration.isPressed ? 0.97 : 1)
-            .animation(.spring(response: 0.3, dampingFraction: 0.7), value: configuration.isPressed)
+            .scaleEffect(configuration.isPressed ? 0.95 : 1)
+            .animation(reduceMotion ? .none : .spring(response: 0.3, dampingFraction: 0.6), value: configuration.isPressed)
             .contentShape(Capsule())
             .fitGlowEffect(color: FitTodayColor.brandPrimary.opacity(isEnabled && !configuration.isPressed ? 0.3 : 0))
+            .onChange(of: configuration.isPressed) { _, isPressed in
+                if isPressed {
+                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                }
+            }
     }
 
     private func backgroundColor(configuration: Configuration) -> Color {
@@ -42,6 +48,7 @@ struct FitPrimaryButtonStyle: ButtonStyle {
 
 struct FitSecondaryButtonStyle: ButtonStyle {
     @Environment(\.isEnabled) private var isEnabled
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @ScaledMetric private var verticalPadding: CGFloat = 14
 
     func makeBody(configuration: Configuration) -> some View {
@@ -67,15 +74,21 @@ struct FitSecondaryButtonStyle: ButtonStyle {
             )
             .foregroundStyle(FitTodayColor.brandPrimary)
             .opacity(isEnabled ? (configuration.isPressed ? 0.7 : 1) : 0.4)
-            .scaleEffect(configuration.isPressed ? 0.98 : 1)
-            .animation(.spring(response: 0.3, dampingFraction: 0.7), value: configuration.isPressed)
+            .scaleEffect(configuration.isPressed ? 0.97 : 1)
+            .animation(reduceMotion ? .none : .spring(response: 0.3, dampingFraction: 0.6), value: configuration.isPressed)
             .contentShape(Capsule())
             .fitGlowEffect(color: FitTodayColor.brandPrimary.opacity(isEnabled && !configuration.isPressed ? 0.2 : 0))
+            .onChange(of: configuration.isPressed) { _, isPressed in
+                if isPressed {
+                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                }
+            }
     }
 }
 
 struct FitDestructiveButtonStyle: ButtonStyle {
     @Environment(\.isEnabled) private var isEnabled
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @ScaledMetric private var verticalPadding: CGFloat = 14
 
     func makeBody(configuration: Configuration) -> some View {
@@ -97,10 +110,15 @@ struct FitDestructiveButtonStyle: ButtonStyle {
             )
             .foregroundStyle(Color.white)
             .opacity(isEnabled ? 1 : 0.4)
-            .scaleEffect(configuration.isPressed ? 0.98 : 1)
-            .animation(.spring(response: 0.3, dampingFraction: 0.7), value: configuration.isPressed)
+            .scaleEffect(configuration.isPressed ? 0.97 : 1)
+            .animation(reduceMotion ? .none : .spring(response: 0.3, dampingFraction: 0.6), value: configuration.isPressed)
             .contentShape(Capsule())
-            .fitGlowEffect(color: FitTodayColor.error.opacity(isEnabled && !configuration.isPressed ? 0.2 : 0))  // Error glow
+            .fitGlowEffect(color: FitTodayColor.error.opacity(isEnabled && !configuration.isPressed ? 0.2 : 0))
+            .onChange(of: configuration.isPressed) { _, isPressed in
+                if isPressed {
+                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                }
+            }
     }
 }
 

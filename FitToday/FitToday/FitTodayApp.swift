@@ -24,9 +24,6 @@ struct FitTodayApp: App {
         // Configure Firebase
         FirebaseApp.configure()
 
-        // Bootstrap de segredos (apenas Debug) - popula Keychain a partir de Secrets.plist
-        KeychainBootstrap.runIfNeeded()
-
         let container = AppContainer.build()
         self.appContainer = container
         sessionStore = WorkoutSessionStore(resolver: container.container)

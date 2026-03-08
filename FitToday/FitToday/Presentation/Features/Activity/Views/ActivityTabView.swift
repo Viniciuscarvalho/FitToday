@@ -86,6 +86,7 @@ struct WorkoutHistoryView: View {
     @State private var selectedDate = Date()
     @State private var workouts: [WorkoutHistoryEntry] = []
     @State private var isLoading = true
+    @State private var listAppeared = false
 
     private var repository: WorkoutHistoryRepository? {
         resolver.resolve(WorkoutHistoryRepository.self)
@@ -145,24 +146,33 @@ struct WorkoutHistoryView: View {
                 emptyStateView
             } else {
                 LazyVStack(spacing: FitTodaySpacing.sm) {
-                    ForEach(workouts) { entry in
+                    ForEach(Array(workouts.enumerated()), id: \.element.id) { index, entry in
                         WorkoutEntryCard(entry: entry)
+                            .opacity(listAppeared ? 1 : 0)
+                            .offset(y: listAppeared ? 0 : 16)
+                            .animation(
+                                .easeOut(duration: 0.3).delay(Double(index) * 0.05),
+                                value: listAppeared
+                            )
                     }
+                }
+                .onAppear {
+                    listAppeared = false
+                    withAnimation { listAppeared = true }
                 }
             }
         }
     }
 
     private var loadingView: some View {
-        VStack(spacing: FitTodaySpacing.md) {
-            ProgressView()
-                .tint(FitTodayColor.brandPrimary)
-            Text("Carregando treinos...")
-                .font(FitTodayFont.ui(size: 14, weight: .medium))
-                .foregroundStyle(FitTodayColor.textSecondary)
+        VStack(spacing: FitTodaySpacing.sm) {
+            ForEach(0..<4, id: \.self) { _ in
+                RoundedRectangle(cornerRadius: FitTodayRadius.md)
+                    .fill(FitTodayColor.surface)
+                    .frame(height: 80)
+                    .shimmer()
+            }
         }
-        .frame(maxWidth: .infinity)
-        .padding(FitTodaySpacing.xl)
     }
 
     private var emptyStateView: some View {
@@ -474,6 +484,8 @@ struct ActivityStatsView: View {
     let resolver: Resolver
 
     @State private var viewModel: ActivityStatsViewModel?
+    @State private var chartAnimated = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         ScrollView {
@@ -506,7 +518,7 @@ struct ActivityStatsView: View {
                             Chart(viewModel.dailyEntries) { entry in
                                 BarMark(
                                     x: .value("Dia", entry.dayLabel),
-                                    y: .value("Treinos", entry.workouts)
+                                    y: .value("Treinos", chartAnimated ? entry.workouts : 0)
                                 )
                                 .foregroundStyle(FitTodayColor.brandPrimary.gradient)
                                 .cornerRadius(4)
@@ -534,6 +546,7 @@ struct ActivityStatsView: View {
                                     }
                                 }
                             }
+                            .animation(.easeOut(duration: 0.8), value: chartAnimated)
                             .frame(height: 180)
                         }
                     }
@@ -547,7 +560,7 @@ struct ActivityStatsView: View {
                             Chart(viewModel.dailyEntries) { entry in
                                 BarMark(
                                     x: .value("Dia", entry.dayLabel),
-                                    y: .value("Minutos", entry.minutes)
+                                    y: .value("Minutos", chartAnimated ? entry.minutes : 0)
                                 )
                                 .foregroundStyle(Color.orange.gradient)
                                 .cornerRadius(4)
@@ -575,6 +588,7 @@ struct ActivityStatsView: View {
                                     }
                                 }
                             }
+                            .animation(.easeOut(duration: 0.8).delay(0.15), value: chartAnimated)
                             .frame(height: 180)
                         }
                     }
@@ -588,7 +602,7 @@ struct ActivityStatsView: View {
                             Chart(viewModel.weeklyEntries) { entry in
                                 BarMark(
                                     x: .value("Semana", entry.weekLabel),
-                                    y: .value("Treinos", entry.workouts)
+                                    y: .value("Treinos", chartAnimated ? entry.workouts : 0)
                                 )
                                 .foregroundStyle(Color.green.gradient)
                                 .cornerRadius(4)
@@ -616,19 +630,43 @@ struct ActivityStatsView: View {
                                     }
                                 }
                             }
+                            .animation(.easeOut(duration: 0.8).delay(0.3), value: chartAnimated)
                             .frame(height: 180)
                         }
                     }
                 }
                 .padding(FitTodaySpacing.md)
+                .onAppear {
+                    guard !chartAnimated else { return }
+                    if reduceMotion {
+                        chartAnimated = true
+                    } else {
+                        withAnimation(.easeOut(duration: 0.8).delay(0.1)) {
+                            chartAnimated = true
+                        }
+                    }
+                }
                 } // end else (no error)
             } else {
-                VStack {
-                    Spacer(minLength: 100)
-                    ProgressView()
-                    Spacer(minLength: 100)
+                VStack(spacing: FitTodaySpacing.md) {
+                    HStack(spacing: FitTodaySpacing.md) {
+                        ForEach(0..<3, id: \.self) { _ in
+                            RoundedRectangle(cornerRadius: FitTodayRadius.md)
+                                .fill(FitTodayColor.surface)
+                                .frame(height: 80)
+                                .shimmer()
+                        }
+                    }
+                    RoundedRectangle(cornerRadius: FitTodayRadius.md)
+                        .fill(FitTodayColor.surface)
+                        .frame(height: 200)
+                        .shimmer()
+                    RoundedRectangle(cornerRadius: FitTodayRadius.md)
+                        .fill(FitTodayColor.surface)
+                        .frame(height: 200)
+                        .shimmer()
                 }
-                .frame(maxWidth: .infinity)
+                .padding(FitTodaySpacing.md)
             }
         }
         .scrollIndicators(.hidden)

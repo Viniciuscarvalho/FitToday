@@ -2,112 +2,88 @@
 //  NewOpenAIClient.swift
 //  FitToday
 //
-//  Created by AI on 09/02/26.
-//  Part of: Workout Experience Overhaul (Task 3.0)
+//  Proxies AI requests through Firebase Cloud Functions.
+//  The OpenAI API key lives on the server — never on the device.
 //
 
 import Foundation
+import FirebaseFunctions
 
-/// Simplified OpenAI client focused on workout generation.
+/// OpenAI client that proxies requests through Firebase Cloud Functions.
+///
+/// The API key is stored server-side as a Firebase secret. The client
+/// authenticates via the user's Firebase Auth token automatically.
 ///
 /// Key features:
-/// - Single responsibility: generate workouts via OpenAI API
-/// - Built-in retry logic (up to 2 retries on network errors)
-/// - No caching (handled at composer level if needed)
-/// - Clean error handling
-///
-/// - Note: Part of FR-002 (OpenAI Generation Enhancement) from PRD
+/// - No API key on the device
+/// - Built-in retry logic (up to 2 retries on transient errors)
+/// - Same public API as the previous direct-call implementation
 actor NewOpenAIClient: Sendable {
 
     // MARK: - Types
 
     enum ClientError: Error, LocalizedError {
-        case missingAPIKey
+        case notAuthenticated
         case invalidResponse
         case httpError(statusCode: Int, message: String)
         case decodingError(String)
         case emptyWorkoutResponse
+        case functionsError(String)
 
         var errorDescription: String? {
             switch self {
-            case .missingAPIKey:
-                return "OpenAI API key not configured"
+            case .notAuthenticated:
+                return "Authentication required to use AI features"
             case .invalidResponse:
-                return "Invalid response from OpenAI"
+                return "Invalid response from AI service"
             case .httpError(let code, let message):
                 return "HTTP \(code): \(message)"
             case .decodingError(let detail):
                 return "Failed to decode response: \(detail)"
             case .emptyWorkoutResponse:
-                return "OpenAI returned an empty workout response"
+                return "AI returned an empty workout response"
+            case .functionsError(let message):
+                return "AI service error: \(message)"
             }
         }
     }
 
     // MARK: - Configuration
 
-    private let apiKey: String
-    private let model: String
-    private let baseURL: URL
-    private let timeout: TimeInterval
-    private let maxTokens: Int
-    private let temperature: Double
+    private let functions: Functions
     private let maxRetries: Int
-
-    private let session: URLSession
 
     // MARK: - Initialization
 
-    init(
-        apiKey: String,
-        model: String = "gpt-4o-mini",
-        baseURL: URL = URL(string: "https://api.openai.com/v1/chat/completions")!,
-        timeout: TimeInterval = 60,
-        maxTokens: Int = 2000,
-        temperature: Double = 0.55,
-        maxRetries: Int = 2
-    ) {
-        self.apiKey = apiKey
-        self.model = model
-        self.baseURL = baseURL
-        self.timeout = timeout
-        self.maxTokens = maxTokens
-        self.temperature = temperature
+    init(maxRetries: Int = 2) {
+        self.functions = Functions.functions()
         self.maxRetries = maxRetries
-
-        let sessionConfig = URLSessionConfiguration.ephemeral
-        sessionConfig.timeoutIntervalForRequest = timeout
-        self.session = URLSession(configuration: sessionConfig)
-    }
-
-    /// Factory method to create client from user's stored API key
-    static func fromUserKey() -> NewOpenAIClient? {
-        guard let apiKey = UserAPIKeyManager.shared.getAPIKey(for: .openAI),
-              !apiKey.isEmpty else {
-            return nil
-        }
-
-        return NewOpenAIClient(apiKey: apiKey)
     }
 
     // MARK: - Public API
 
-    /// Generates a workout by sending a prompt to OpenAI.
+    /// Generates a workout by sending a prompt to the AI service via Firebase Functions.
     ///
-    /// - Parameter prompt: The complete prompt (system + user messages combined)
-    /// - Returns: Raw JSON data containing the workout response
+    /// - Parameter prompt: The complete prompt for workout generation
+    /// - Returns: Raw JSON data containing the ChatCompletion response
     /// - Throws: ClientError if the request fails after retries
     func generateWorkout(prompt: String) async throws -> Data {
         var lastError: Error?
 
-        // Retry loop
         for attempt in 0...maxRetries {
             do {
-                let data = try await performRequest(prompt: prompt)
+                let callable = functions.httpsCallable("generateWorkout")
+                let result = try await callable.call(["prompt": prompt])
+
+                guard let responseDict = result.data as? [String: Any] else {
+                    throw ClientError.invalidResponse
+                }
+
+                let data = try JSONSerialization.data(withJSONObject: responseDict)
 
                 #if DEBUG
                 if attempt > 0 {
-                    print("[NewOpenAIClient] ✅ Request succeeded on attempt \(attempt + 1)")
+                    print("[NewOpenAIClient] Request succeeded on attempt \(attempt + 1)")
                 }
                 #endif
 
@@ -116,26 +92,23 @@ actor NewOpenAIClient: Sendable {
                 lastError = error
 
                 #if DEBUG
-                print("[NewOpenAIClient] ⚠️ Attempt \(attempt + 1) failed: \(error.localizedDescription)")
+                print("[NewOpenAIClient] Attempt \(attempt + 1) failed: \(error.localizedDescription)")
                 #endif
 
-                // Don't retry on client errors (4xx)
-                if case ClientError.httpError(let code, _) = error, (400..<500).contains(code) {
-                    throw error
+                if let mapped = mapFunctionsError(error), isNonRetryable(mapped) {
+                    throw mapped
                 }
 
-                // Small delay before retry
                 if attempt < maxRetries {
-                    try? await Task.sleep(nanoseconds: 500_000_000) // 0.5 seconds
+                    try? await Task.sleep(nanoseconds: 500_000_000)
                 }
             }
         }
 
-        // All retries exhausted
-        throw lastError ?? ClientError.invalidResponse
+        throw lastError.flatMap(mapFunctionsError) ?? ClientError.invalidResponse
     }
 
-    /// Sends a chat completion request with conversation history.
+    /// Sends a chat completion request with conversation history via Firebase Functions.
     ///
     /// - Parameters:
     ///   - messages: Array of message dictionaries with "role" and "content" keys
@@ -151,21 +124,29 @@ actor NewOpenAIClient: Sendable {
 
         for attempt in 0...maxRetries {
             do {
-                let content = try await performChatRequest(
-                    messages: messages,
-                    maxTokens: maxTokens,
-                    temperature: temperature
-                )
+                let callable = functions.httpsCallable("sendChat")
+                let result = try await callable.call([
+                    "messages": messages,
+                    "maxTokens": maxTokens,
+                    "temperature": temperature,
+                ] as [String: Any])
+
+                guard let responseDict = result.data as? [String: Any],
+                      let content = responseDict["content"] as? String,
+                      !content.isEmpty else {
+                    throw ClientError.emptyWorkoutResponse
+                }
+
                 return content
             } catch {
                 lastError = error
 
                 #if DEBUG
-                print("[NewOpenAIClient] ⚠️ Chat attempt \(attempt + 1) failed: \(error.localizedDescription)")
+                print("[NewOpenAIClient] Chat attempt \(attempt + 1) failed: \(error.localizedDescription)")
                 #endif
 
-                if case ClientError.httpError(let code, _) = error, (400..<500).contains(code) {
-                    throw error
+                if let mapped = mapFunctionsError(error), isNonRetryable(mapped) {
+                    throw mapped
                 }
 
                 if attempt < maxRetries {
@@ -174,93 +155,43 @@ actor NewOpenAIClient: Sendable {
             }
         }
 
-        throw lastError ?? ClientError.invalidResponse
+        throw lastError.flatMap(mapFunctionsError) ?? ClientError.invalidResponse
     }
 
     // MARK: - Private Helpers
 
-    private func performRequest(prompt: String) async throws -> Data {
-        // 1. Build request
-        var request = URLRequest(url: baseURL)
-        request.httpMethod = "POST"
-        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.addValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
-
-        // 2. Build payload
-        let messages: [[String: String]] = [
-            [
-                "role": "system",
-                "content": "You are an expert personal trainer who creates personalized workout plans. Always respond with valid JSON following the requested schema."
-            ],
-            [
-                "role": "user",
-                "content": prompt
-            ]
-        ]
-
-        let payload: [String: Any] = [
-            "model": model,
-            "messages": messages,
-            "max_tokens": maxTokens,
-            "temperature": temperature,
-            "response_format": ["type": "json_object"]
-        ]
-
-        request.httpBody = try JSONSerialization.data(withJSONObject: payload)
-
-        // 3. Perform request
-        let (data, response) = try await session.data(for: request)
-
-        // 4. Validate response
-        guard let httpResponse = response as? HTTPURLResponse else {
-            throw ClientError.invalidResponse
+    private func mapFunctionsError(_ error: Error) -> ClientError? {
+        guard let functionsError = error as NSError?,
+              functionsError.domain == FunctionsErrorDomain else {
+            return nil
         }
 
-        guard (200..<300).contains(httpResponse.statusCode) else {
-            let message = String(data: data, encoding: .utf8) ?? "No details"
-            throw ClientError.httpError(statusCode: httpResponse.statusCode, message: message)
-        }
+        let code = FunctionsErrorCode(rawValue: functionsError.code)
+        let message = functionsError.localizedDescription
 
-        return data
+        switch code {
+        case .unauthenticated:
+            return .notAuthenticated
+        case .resourceExhausted:
+            return .httpError(statusCode: 429, message: message)
+        case .invalidArgument:
+            return .httpError(statusCode: 400, message: message)
+        case .internal:
+            return .functionsError(message)
+        default:
+            return .functionsError(message)
+        }
     }
 
-    private func performChatRequest(
-        messages: [[String: String]],
-        maxTokens: Int,
-        temperature: Double
-    ) async throws -> String {
-        var request = URLRequest(url: baseURL)
-        request.httpMethod = "POST"
-        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.addValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
-
-        let payload: [String: Any] = [
-            "model": model,
-            "messages": messages,
-            "max_tokens": maxTokens,
-            "temperature": temperature
-        ]
-
-        request.httpBody = try JSONSerialization.data(withJSONObject: payload)
-
-        let (data, response) = try await session.data(for: request)
-
-        guard let httpResponse = response as? HTTPURLResponse else {
-            throw ClientError.invalidResponse
+    private func isNonRetryable(_ error: ClientError) -> Bool {
+        switch error {
+        case .notAuthenticated:
+            return true
+        case .httpError(let code, _) where (400..<500).contains(code):
+            return true
+        default:
+            return false
         }
-
-        guard (200..<300).contains(httpResponse.statusCode) else {
-            let message = String(data: data, encoding: .utf8) ?? "No details"
-            throw ClientError.httpError(statusCode: httpResponse.statusCode, message: message)
-        }
-
-        let decoded = try JSONDecoder().decode(ChatCompletionResponse.self, from: data)
-
-        guard let content = decoded.choices.first?.message.content, !content.isEmpty else {
-            throw ClientError.emptyWorkoutResponse
-        }
-
-        return content
     }
 }
 

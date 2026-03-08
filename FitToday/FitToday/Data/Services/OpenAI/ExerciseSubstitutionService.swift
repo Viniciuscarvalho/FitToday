@@ -197,12 +197,9 @@ enum SubstitutionError: Error, LocalizedError {
 // MARK: - Factory
 
 struct ExerciseSubstitutionServiceFactory {
-    /// Cria o serviço de substituição se OpenAI estiver configurado
-    static func create() -> ExerciseSubstituting? {
-        guard let client = NewOpenAIClient.fromUserKey() else {
-            return nil
-        }
-        return ExerciseSubstitutionService(client: client)
+    /// Cria o serviço de substituição via Firebase Functions proxy
+    static func create() -> ExerciseSubstituting {
+        return ExerciseSubstitutionService(client: NewOpenAIClient())
     }
 }
 

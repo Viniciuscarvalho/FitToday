@@ -10,6 +10,8 @@ import SwiftUI
 
 struct TrainerEvolutionView: View {
     let workouts: [TrainerWorkout]
+    @State private var chartAnimated = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     private var totalWorkouts: Int {
         workouts.count
@@ -100,14 +102,14 @@ struct TrainerEvolutionView: View {
                 Chart(chartData) { point in
                     LineMark(
                         x: .value("trainer.evolution.date".localized, point.date),
-                        y: .value("trainer.evolution.sets".localized, point.value)
+                        y: .value("trainer.evolution.sets".localized, chartAnimated ? point.value : 0)
                     )
                     .foregroundStyle(FitTodayColor.brandPrimary)
                     .interpolationMethod(.catmullRom)
 
                     AreaMark(
                         x: .value("trainer.evolution.date".localized, point.date),
-                        y: .value("trainer.evolution.sets".localized, point.value)
+                        y: .value("trainer.evolution.sets".localized, chartAnimated ? point.value : 0)
                     )
                     .foregroundStyle(
                         .linearGradient(
@@ -118,6 +120,7 @@ struct TrainerEvolutionView: View {
                     )
                     .interpolationMethod(.catmullRom)
                 }
+                .animation(.easeOut(duration: 0.8), value: chartAnimated)
                 .chartXAxis {
                     AxisMarks(values: .automatic) { _ in
                         AxisGridLine(stroke: StrokeStyle(lineWidth: 0.5))
@@ -138,6 +141,16 @@ struct TrainerEvolutionView: View {
                 .padding(FitTodaySpacing.md)
                 .background(FitTodayColor.surface)
                 .clipShape(RoundedRectangle(cornerRadius: FitTodayRadius.md))
+                .onAppear {
+                    guard !chartAnimated else { return }
+                    if reduceMotion {
+                        chartAnimated = true
+                    } else {
+                        withAnimation(.easeOut(duration: 0.8).delay(0.2)) {
+                            chartAnimated = true
+                        }
+                    }
+                }
             } else {
                 Text("trainer.evolution.not_enough_data".localized)
                     .font(FitTodayFont.ui(size: 14, weight: .medium))

@@ -15,7 +15,19 @@ struct RestTimerView: View {
     let onSkip: () -> Void
     
     @State private var showTimer = false
-    
+
+    /// Ring colors transition: blue → yellow → red as time runs out
+    private var timerRingColors: [Color] {
+        let pct = timerStore.progressPercentage
+        if pct > 0.5 {
+            return [FitTodayColor.brandPrimary, FitTodayColor.brandSecondary]
+        } else if pct > 0.2 {
+            return [FitTodayColor.warning, FitTodayColor.brandPrimary]
+        } else {
+            return [FitTodayColor.error, FitTodayColor.warning]
+        }
+    }
+
     var body: some View {
         VStack(spacing: FitTodaySpacing.lg) {
             if showTimer {
@@ -70,12 +82,12 @@ struct RestTimerView: View {
                     .stroke(FitTodayColor.surface, lineWidth: 8)
                     .frame(width: 140, height: 140)
                 
-                // Progress ring
+                // Progress ring with color transition (green → yellow → red)
                 Circle()
                     .trim(from: 0, to: timerStore.progressPercentage)
                     .stroke(
                         LinearGradient(
-                            colors: [FitTodayColor.brandPrimary, FitTodayColor.brandSecondary],
+                            colors: timerRingColors,
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         ),
@@ -85,12 +97,14 @@ struct RestTimerView: View {
                     .rotationEffect(.degrees(-90))
                     .animation(.linear(duration: 0.1), value: timerStore.progressPercentage)
                 
-                // Time display
+                // Time display (pulses in last 5 seconds)
                 VStack(spacing: 4) {
                     Text(timerStore.formattedTime)
                         .font(FitTodayFont.display(size: 40, weight: .bold))
-                        .foregroundStyle(FitTodayColor.textPrimary)
+                        .foregroundStyle(timerStore.remainingSeconds <= 5 ? FitTodayColor.error : FitTodayColor.textPrimary)
                         .monospacedDigit()
+                        .scaleEffect(timerStore.remainingSeconds <= 3 && timerStore.remainingSeconds > 0 ? 1.05 : 1.0)
+                        .animation(.easeInOut(duration: 0.3), value: timerStore.remainingSeconds)
                     
                     Text("descanso")
                         .font(FitTodayFont.ui(size: 13, weight: .medium))

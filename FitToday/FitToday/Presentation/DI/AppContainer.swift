@@ -147,21 +147,15 @@ struct AppContainer {
         container.register(EnhancedLocalWorkoutPlanComposer.self) { _ in enhancedLocalComposer }
             .inObjectScope(.container)
 
-        // WorkoutPlanComposing: Use OpenAI if available, otherwise enhanced local
+        // WorkoutPlanComposing: AI via Firebase Functions proxy (key lives on server)
+        // Local fallback is used inside the composer on network/AI errors
         container.register(WorkoutPlanComposing.self) { resolver in
             let historyRepository = resolver.resolve(WorkoutHistoryRepository.self)!
-
-            // Try to create OpenAI composer if API key is configured
-            if let client = NewOpenAIClient.fromUserKey() {
-                return NewOpenAIWorkoutComposer(
-                    client: client,
-                    localFallback: enhancedLocalComposer,
-                    historyRepository: historyRepository
-                )
-            } else {
-                // No API key - use enhanced local composer
-                return enhancedLocalComposer
-            }
+            return NewOpenAIWorkoutComposer(
+                client: NewOpenAIClient(),
+                localFallback: enhancedLocalComposer,
+                historyRepository: historyRepository
+            )
         }
         .inObjectScope(.container)
         

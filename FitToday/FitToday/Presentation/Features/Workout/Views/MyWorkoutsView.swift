@@ -21,6 +21,7 @@ struct MyWorkoutsView: View {
     @State private var searchText = ""
     @State private var workoutToDelete: CustomWorkoutTemplate?
     @State private var showDeleteConfirmation = false
+    @State private var listAppeared = false
 
     private var filteredWorkouts: [CustomWorkoutTemplate] {
         if searchText.isEmpty {
@@ -53,14 +54,18 @@ struct MyWorkoutsView: View {
     // MARK: - Loading View
 
     private var loadingView: some View {
-        VStack(spacing: FitTodaySpacing.lg) {
-            ProgressView()
-                .tint(FitTodayColor.brandPrimary)
-            Text("common.loading".localized)
-                .font(FitTodayFont.ui(size: 15, weight: .medium))
-                .foregroundStyle(FitTodayColor.textSecondary)
+        ScrollView {
+            VStack(spacing: FitTodaySpacing.sm) {
+                ForEach(0..<4, id: \.self) { _ in
+                    RoundedRectangle(cornerRadius: FitTodayRadius.md)
+                        .fill(FitTodayColor.surface)
+                        .frame(height: 100)
+                        .shimmer()
+                }
+            }
+            .padding(FitTodaySpacing.md)
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .scrollDisabled(true)
     }
 
     // MARK: - Empty State
@@ -182,7 +187,7 @@ struct MyWorkoutsView: View {
             }
 
             // Workout cards
-            ForEach(filteredWorkouts) { workout in
+            ForEach(Array(filteredWorkouts.enumerated()), id: \.element.id) { index, workout in
                 Button {
                     router.push(.customWorkoutBuilder(workout.id), on: .workout)
                 } label: {
@@ -204,7 +209,17 @@ struct MyWorkoutsView: View {
                     }
                 }
                 .padding(.horizontal, FitTodaySpacing.md)
+                .opacity(listAppeared ? 1 : 0)
+                .offset(y: listAppeared ? 0 : 16)
+                .animation(
+                    .easeOut(duration: 0.3).delay(Double(index) * 0.06),
+                    value: listAppeared
+                )
             }
+        }
+        .onAppear {
+            listAppeared = false
+            withAnimation { listAppeared = true }
         }
         .confirmationDialog(
             "workout.delete.confirm".localized,
@@ -237,7 +252,7 @@ struct MyWorkoutsView: View {
                 .font(.system(size: 16))
                 .foregroundStyle(FitTodayColor.textTertiary)
 
-            TextField("Buscar treinos...", text: $searchText)
+            TextField("workout.search_placeholder".localized, text: $searchText)
                 .font(FitTodayFont.ui(size: 15, weight: .medium))
                 .foregroundStyle(FitTodayColor.textPrimary)
 
@@ -365,14 +380,14 @@ struct WorkoutTemplateCard: View {
 
             // Stats
             HStack(spacing: FitTodaySpacing.md) {
-                statItem(icon: "figure.strengthtraining.traditional", value: "\(workout.exerciseCount)", label: "exercícios")
-                statItem(icon: "clock.fill", value: "~\(workout.estimatedDurationMinutes)", label: "min")
-                statItem(icon: "number", value: "\(workout.totalSets)", label: "séries")
+                statItem(icon: "figure.strengthtraining.traditional", value: "\(workout.exerciseCount)", label: "workout.card.exercises".localized)
+                statItem(icon: "clock.fill", value: "~\(workout.estimatedDurationMinutes)", label: "workout.card.minutes".localized)
+                statItem(icon: "number", value: "\(workout.totalSets)", label: "workout.card.sets".localized)
             }
 
             // Last used
             if let lastUsed = workout.lastUsedAt {
-                Text("Último uso: \(lastUsed, format: .relative(presentation: .named))")
+                Text("\("workout.card.last_used".localized) \(lastUsed, format: .relative(presentation: .named))")
                     .font(FitTodayFont.ui(size: 11, weight: .medium))
                     .foregroundStyle(FitTodayColor.textTertiary)
             }

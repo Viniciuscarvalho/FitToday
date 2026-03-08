@@ -116,14 +116,26 @@ struct HomeView: View {
 
     private var loadingView: some View {
         VStack(spacing: FitTodaySpacing.md) {
-            ProgressView()
-                .tint(FitTodayColor.brandPrimary)
-            Text("common.loading".localized)
-                .font(FitTodayFont.ui(size: 14, weight: .medium))
-                .foregroundStyle(FitTodayColor.textSecondary)
+            RoundedRectangle(cornerRadius: FitTodayRadius.lg)
+                .fill(FitTodayColor.surface)
+                .frame(height: 120)
+                .shimmer()
+
+            HStack(spacing: FitTodaySpacing.md) {
+                ForEach(0..<3, id: \.self) { _ in
+                    RoundedRectangle(cornerRadius: FitTodayRadius.md)
+                        .fill(FitTodayColor.surface)
+                        .frame(height: 80)
+                        .shimmer()
+                }
+            }
+
+            RoundedRectangle(cornerRadius: FitTodayRadius.lg)
+                .fill(FitTodayColor.surface)
+                .frame(height: 100)
+                .shimmer()
         }
-        .frame(maxWidth: .infinity)
-        .frame(height: 200)
+        .padding(.horizontal)
     }
 
     // MARK: - Setup Profile Card
