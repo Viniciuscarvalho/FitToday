@@ -22,6 +22,7 @@ struct ProfileProView: View {
     @State private var streakDays: Int = 0
     @State private var totalMinutes: Int = 0
     @State private var completedWorkouts: Int = 0
+    @State private var isPersonalTrainerEnabled = false
 
     #if DEBUG
     @State private var debugModeEnabled = false
@@ -56,7 +57,9 @@ struct ProfileProView: View {
                 appleHealthCard
 
                 // Personal Trainer
-                personalTrainerCard
+                if isPersonalTrainerEnabled {
+                    personalTrainerCard
+                }
 
                 // Training Profile
                 trainingProfileSection
@@ -89,6 +92,9 @@ struct ProfileProView: View {
         .task {
             await loadEntitlement()
             await loadProfileData()
+            if let featureFlags = resolver.resolve(FeatureFlagChecking.self) {
+                isPersonalTrainerEnabled = await featureFlags.isFeatureEnabled(.personalTrainerEnabled)
+            }
         }
         .sheet(isPresented: $showingPaywall) {
             paywallSheet
