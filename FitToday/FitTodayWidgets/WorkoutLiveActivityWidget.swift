@@ -3,10 +3,13 @@ import WidgetKit
 import SwiftUI
 
 struct WorkoutLiveActivityWidget: Widget {
+    private let workoutDeepLink = URL(string: "fittoday://workout/execution")!
+
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: WorkoutActivityAttributes.self) { context in
             // Lock Screen / StandBy banner
             lockScreenView(context: context)
+                .widgetURL(workoutDeepLink)
         } dynamicIsland: { context in
             DynamicIsland {
                 // Expanded Region
@@ -93,6 +96,7 @@ struct WorkoutLiveActivityWidget: Widget {
                     .font(.system(size: 12, weight: .bold))
                     .foregroundStyle(stateColor(context.state.workoutState))
             }
+            .widgetURL(workoutDeepLink)
         }
     }
 
