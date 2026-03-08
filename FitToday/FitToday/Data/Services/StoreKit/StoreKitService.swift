@@ -168,7 +168,7 @@ import StoreKit
     // MARK: - Private Helpers
 
     private func activeSubscriptionExpiry() async -> Date? {
-        guard let activeID else { return nil }
+        guard let activeID = activeProductID else { return nil }
         for await result in Transaction.currentEntitlements {
             if case .verified(let tx) = result, tx.productID == activeID {
                 return tx.expirationDate
