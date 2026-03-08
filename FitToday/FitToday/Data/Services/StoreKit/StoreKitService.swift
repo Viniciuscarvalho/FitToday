@@ -6,12 +6,16 @@
 import Foundation
 import StoreKit
 
-/// Serviço responsável por interagir com StoreKit 2 para compra única (non-consumable).
+/// Service responsible for StoreKit 2 auto-renewable subscription purchases.
 @MainActor
 @Observable final class StoreKitService {
     private(set) var products: [Product] = []
     private(set) var purchaseState: PurchaseState = .idle
-    private(set) var hasProAccess = false
+    private(set) var currentTier: SubscriptionTier = .free
+    private(set) var activeProductID: String?
+
+    // Backwards compat
+    var hasProAccess: Bool { currentTier != .free }
 
     private nonisolated(unsafe) var transactionListener: Task<Void, Never>?
     private let logger: (String) -> Void
@@ -40,12 +44,18 @@ import StoreKit
         purchaseState = .loading
         do {
             let storeProducts = try await Product.products(for: StoreKitProductID.allProducts)
-            products = storeProducts
+            // Sort: Elite Annual, Elite Monthly, Pro Annual, Pro Monthly
+            products = storeProducts.sorted { lhs, rhs in
+                let lTier = StoreKitProductID.tier(for: lhs.id).level
+                let rTier = StoreKitProductID.tier(for: rhs.id).level
+                if lTier != rTier { return lTier > rTier }
+                return StoreKitProductID.isAnnual(lhs.id) && !StoreKitProductID.isAnnual(rhs.id)
+            }
             purchaseState = .idle
             logger("Loaded \(products.count) products")
         } catch {
             logger("Failed to load products: \(error.localizedDescription)")
-            purchaseState = .failed("Não foi possível carregar os produtos.")
+            purchaseState = .failed("Não foi possível carregar os planos.")
         }
     }
 
@@ -79,7 +89,6 @@ import StoreKit
 
             @unknown default:
                 purchaseState = .idle
-                logger("Unknown purchase result")
                 return false
             }
         } catch {
@@ -98,9 +107,9 @@ import StoreKit
         do {
             try await AppStore.sync()
             await refreshPurchaseStatus()
-            purchaseState = hasProAccess ? .success : .idle
-            logger("Restore completed. Has Pro: \(hasProAccess)")
-            return hasProAccess
+            purchaseState = currentTier != .free ? .success : .idle
+            logger("Restore completed. Tier: \(currentTier.rawValue)")
+            return currentTier != .free
         } catch {
             purchaseState = .failed("Não foi possível restaurar compras.")
             logger("Restore failed: \(error.localizedDescription)")
@@ -108,49 +117,65 @@ import StoreKit
         }
     }
 
-    // MARK: - Check Purchase Status
+    // MARK: - Check Subscription Status
 
     func refreshPurchaseStatus() async {
-        var isActive = false
+        var highestTier: SubscriptionTier = .free
+        var activeID: String?
 
         for await verificationResult in Transaction.currentEntitlements {
-            switch verificationResult {
-            case .verified(let transaction):
-                if StoreKitProductID.allProducts.contains(transaction.productID) {
-                    if transaction.revocationDate == nil {
-                        isActive = true
-                        logger("Active entitlement found: \(transaction.productID)")
-                    }
-                }
-            case .unverified(_, let error):
-                logger("Unverified transaction: \(error.localizedDescription)")
+            guard case .verified(let transaction) = verificationResult else { continue }
+            guard StoreKitProductID.allProducts.contains(transaction.productID) else { continue }
+            guard transaction.revocationDate == nil else { continue }
+
+            // For auto-renewable: check expiration
+            if let expiry = transaction.expirationDate, expiry < Date() { continue }
+
+            let tier = StoreKitProductID.tier(for: transaction.productID)
+            if tier.level > highestTier.level {
+                highestTier = tier
+                activeID = transaction.productID
             }
         }
 
-        hasProAccess = isActive
+        currentTier = highestTier
+        activeProductID = activeID
+        logger("Refreshed status — tier: \(highestTier.rawValue), product: \(activeID ?? "none")")
     }
 
-    // MARK: - Get Current Entitlement Info
+    // MARK: - Current Entitlement
 
     func getCurrentEntitlement() async -> ProEntitlement {
-        for await verificationResult in Transaction.currentEntitlements {
-            if case .verified(let transaction) = verificationResult {
-                if StoreKitProductID.allProducts.contains(transaction.productID) {
-                    if transaction.revocationDate == nil {
-                        return ProEntitlement(
-                            isPro: true,
-                            source: .storeKit,
-                            expirationDate: nil
-                        )
-                    }
-                }
-            }
-        }
-
-        return .free
+        await refreshPurchaseStatus()
+        guard currentTier != .free else { return .free }
+        return ProEntitlement(
+            tier: currentTier,
+            source: .storeKit,
+            expirationDate: await activeSubscriptionExpiry()
+        )
     }
 
-    // MARK: - Transaction Listener
+    // MARK: - Product Accessors
+
+    func products(for tier: SubscriptionTier) -> [Product] {
+        products.filter { StoreKitProductID.tier(for: $0.id) == tier }
+    }
+
+    func product(id: String) -> Product? {
+        products.first { $0.id == id }
+    }
+
+    // MARK: - Private Helpers
+
+    private func activeSubscriptionExpiry() async -> Date? {
+        guard let activeID = activeProductID else { return nil }
+        for await result in Transaction.currentEntitlements {
+            if case .verified(let tx) = result, tx.productID == activeID {
+                return tx.expirationDate
+            }
+        }
+        return nil
+    }
 
     private func startTransactionListener() {
         transactionListener = Task.detached { [weak self] in
@@ -163,28 +188,18 @@ import StoreKit
     private func handleTransactionUpdate(_ result: VerificationResult<Transaction>) async {
         switch result {
         case .verified(let transaction):
-            logger("Transaction update received: \(transaction.productID)")
+            logger("Transaction update: \(transaction.productID)")
             await transaction.finish()
             await refreshPurchaseStatus()
         case .unverified(_, let error):
-            logger("Unverified transaction update: \(error.localizedDescription)")
+            logger("Unverified transaction: \(error.localizedDescription)")
         }
     }
-
-    // MARK: - Helpers
 
     private func checkVerified<T>(_ result: VerificationResult<T>) throws -> T {
         switch result {
-        case .unverified(_, let error):
-            throw error
-        case .verified(let safe):
-            return safe
+        case .unverified(_, let error): throw error
+        case .verified(let safe): return safe
         }
-    }
-
-    // MARK: - Product Accessors
-
-    var lifetimeProduct: Product? {
-        products.first { $0.id == StoreKitProductID.proLifetime }
     }
 }
