@@ -113,6 +113,13 @@ final class AIChatViewModel: ErrorPresenting {
                     if messages.last?.role == .user {
                         messages.removeLast()
                     }
+                    // Show limit message as assistant bubble, then offer upgrade
+                    let limitMessage = AIChatMessage(
+                        role: .assistant,
+                        content: "fitorb.limit_reached.message".localized
+                    )
+                    messages.append(limitMessage)
+                    try? await chatRepository?.saveMessage(limitMessage)
                     showPaywall = true
                     return
                 }
@@ -122,7 +129,12 @@ final class AIChatViewModel: ErrorPresenting {
             try? await chatRepository?.saveMessage(userMessage)
 
             do {
-                let response = try await chatService!.sendMessage(text, history: messages)
+                let isPremium = (try? await featureGating?.currentEntitlement())?.isPro ?? false
+                let response = try await chatService!.sendMessage(
+                    text,
+                    history: messages,
+                    isPremium: isPremium
+                )
 
                 // Register chat usage
                 await usageTracker?.registerChatUsage()
@@ -130,6 +142,7 @@ final class AIChatViewModel: ErrorPresenting {
                 // Animate typing effect
                 await animateTyping(response: response)
             } catch {
+                isTyping = false
                 handleError(error)
             }
             isLoading = false
