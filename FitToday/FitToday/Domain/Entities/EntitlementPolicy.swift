@@ -108,7 +108,7 @@ struct EntitlementPolicy {
     static let freeChallengesLimit = 5
 
     /// Numero de mensagens AI chat por dia para usuarios Free
-    static let freeAIChatMessagesPerDay = 1
+    static let freeAIChatMessagesPerDay = 2
 
     // MARK: - Verificação de Acesso
 
@@ -228,7 +228,7 @@ struct EntitlementPolicy {
         [
             (.aiWorkoutGeneration, "1/semana", "2/dia"),
             (.simultaneousChallenges, "5", "∞"),
-            (.aiChat, "1/dia", "ilimitado")
+            (.aiChat, "2/dia", "ilimitado")
         ]
     }
 }

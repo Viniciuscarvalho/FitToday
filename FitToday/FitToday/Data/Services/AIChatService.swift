@@ -52,8 +52,8 @@ actor AIChatService {
     // MARK: - Public API
 
     /// Sends a message along with the conversation history and returns the assistant response.
-    func sendMessage(_ message: String, history: [AIChatMessage]) async throws -> String {
-        let systemPrompt = await buildContextualPrompt()
+    func sendMessage(_ message: String, history: [AIChatMessage], isPremium: Bool = false) async throws -> String {
+        let systemPrompt = await buildContextualPrompt(isPremium: isPremium)
 
         var chatMessages: [[String: String]] = [
             ["role": "system", "content": systemPrompt]
@@ -81,7 +81,7 @@ actor AIChatService {
 
     // MARK: - Private
 
-    private func buildContextualPrompt() async -> String {
+    private func buildContextualPrompt(isPremium: Bool) async -> String {
         if let cached = cachedSystemPrompt {
             return cached
         }
@@ -94,16 +94,17 @@ actor AIChatService {
             let prompt = promptBuilder.buildSystemPrompt(
                 profile: profile,
                 stats: stats,
-                recentWorkouts: recentWorkouts
+                recentWorkouts: recentWorkouts,
+                isPremium: isPremium
             )
             cachedSystemPrompt = prompt
             return prompt
         } catch {
-            // Fallback to generic prompt if repos fail
             let prompt = promptBuilder.buildSystemPrompt(
                 profile: nil,
                 stats: nil,
-                recentWorkouts: []
+                recentWorkouts: [],
+                isPremium: isPremium
             )
             cachedSystemPrompt = prompt
             return prompt

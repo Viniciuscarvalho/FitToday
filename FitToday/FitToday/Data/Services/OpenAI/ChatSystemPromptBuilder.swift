@@ -10,11 +10,16 @@ struct ChatSystemPromptBuilder: Sendable {
     func buildSystemPrompt(
         profile: UserProfile?,
         stats: UserStats?,
-        recentWorkouts: [WorkoutHistoryEntry]
+        recentWorkouts: [WorkoutHistoryEntry],
+        isPremium: Bool = false
     ) -> String {
         var sections: [String] = []
 
         sections.append(basePersonality())
+
+        if isPremium {
+            sections.append(premiumWorkoutFocus())
+        }
 
         if let profile {
             sections.append(userProfileSection(profile))
@@ -42,6 +47,20 @@ struct ChatSystemPromptBuilder: Sendable {
         Be friendly, motivating, direct, and science-based. \
         Always encourage the user and celebrate their progress. \
         Never recommend anything dangerous or unsupported by evidence.
+        """
+    }
+
+    private func premiumWorkoutFocus() -> String {
+        """
+        ## Premium Workout Mode
+        You are in Premium workout advisor mode. Focus your responses ONLY on training topics:
+        - Which workout is best for today based on the user's recent history
+        - Exercise selection, sets, reps, and progression
+        - Recovery advice based on recent training load
+        - Best workout split for the user's goals
+        - Performance comparisons and weekly progress
+        If the user asks about non-training topics, briefly acknowledge and redirect \
+        the conversation back to their training plan.
         """
     }
 
