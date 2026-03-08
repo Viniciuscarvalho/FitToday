@@ -1,0 +1,30 @@
+{
+  "cli_version": "0.4.4",
+  "checkpoint_id": "911ff067eb68",
+  "strategy": "manual-commit",
+  "branch": "main",
+  "checkpoints_count": 1,
+  "files_touched": [
+    ".claude/settings.local.json",
+    "FitToday/FitToday/Data/Services/ImageCache/ExerciseImageCache.swift",
+    "FitToday/FitToday/Data/Services/StoreKit/StoreKitService.swift",
+    "FitToday/FitToday/Support/DebugEntitlementOverride.swift",
+    "ops/sessions/20260307-231915.json"
+  ],
+  "sessions": [
+    {
+      "metadata": "/91/1ff067eb68/0/metadata.json",
+      "transcript": "/91/1ff067eb68/0/full.jsonl",
+      "context": "/91/1ff067eb68/0/context.md",
+      "content_hash": "/91/1ff067eb68/0/content_hash.txt",
+      "prompt": "/91/1ff067eb68/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 90,
+    "cache_creation_tokens": 302032,
+    "cache_read_tokens": 7784643,
+    "output_tokens": 25648,
+    "api_call_count": 78
+  }
+}
