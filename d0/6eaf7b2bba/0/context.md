@@ -360,3 +360,7 @@ Tool loaded.
 
 Tool loaded.
 
+### Prompt 72
+
+o schema de widgets está sobescrevendo o normal do aplicativo
+

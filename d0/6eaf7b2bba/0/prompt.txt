@@ -2032,3 +2032,7 @@ Tool loaded.
 ---
 
 Tool loaded.
+
+---
+
+o schema de widgets está sobescrevendo o normal do aplicativo
