@@ -44,7 +44,6 @@ enum AppRoute: Hashable {
     case exerciseDetail
     case workoutExecution  // Nova view de execução com timer e pause/play
     case workoutExercisePreview(ExercisePrescription)  // Preview de exercício (não altera índice)
-    case workoutPreview(ProgramWorkout)  // Preview de treino antes de iniciar (Task 7.0)
     case workoutSummary
     case paywall
     case programDetail(String)  // Detalhe do programa
