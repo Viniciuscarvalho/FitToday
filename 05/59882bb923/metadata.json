@@ -1,0 +1,27 @@
+{
+  "cli_version": "0.4.4",
+  "checkpoint_id": "0559882bb923",
+  "strategy": "manual-commit",
+  "branch": "fix/pro-77-challenges-empty-state",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "FitToday/FitToday/Presentation/Features/Activity/Views/ChallengesView.swift",
+    "ops/sessions/20260309-223803.json"
+  ],
+  "sessions": [
+    {
+      "metadata": "/05/59882bb923/0/metadata.json",
+      "transcript": "/05/59882bb923/0/full.jsonl",
+      "context": "/05/59882bb923/0/context.md",
+      "content_hash": "/05/59882bb923/0/content_hash.txt",
+      "prompt": "/05/59882bb923/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 148,
+    "cache_creation_tokens": 149995,
+    "cache_read_tokens": 1026407,
+    "output_tokens": 3605,
+    "api_call_count": 8
+  }
+}
