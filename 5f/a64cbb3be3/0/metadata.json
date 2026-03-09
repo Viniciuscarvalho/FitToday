@@ -1,0 +1,39 @@
+{
+  "cli_version": "0.4.4",
+  "checkpoint_id": "5fa64cbb3be3",
+  "session_id": "2afa1a55-c96a-4172-8f6e-fc3512c27bab",
+  "strategy": "manual-commit",
+  "created_at": "2026-03-09T22:23:05.510659Z",
+  "branch": "fix/pro-77-challenges-empty-state",
+  "checkpoints_count": 1,
+  "files_touched": [
+    ".claude/settings.local.json",
+    "FitToday/FitToday/Presentation/Features/Activity/Views/ChallengesView.swift",
+    "ops/sessions/20260308-204029.json",
+    "ops/sessions/20260308-211451.json",
+    "ops/sessions/20260308-212426.json",
+    "ops/sessions/20260308-215326.json",
+    "ops/sessions/20260309-222248.json"
+  ],
+  "agent": "Claude Code",
+  "transcript_identifier_at_start": "324ff626-0bc5-4bfd-bc9f-68c6f8cac753",
+  "checkpoint_transcript_start": 6496,
+  "transcript_lines_at_start": 6496,
+  "token_usage": {
+    "input_tokens": 3602,
+    "cache_creation_tokens": 138228,
+    "cache_read_tokens": 2555158,
+    "output_tokens": 7433,
+    "api_call_count": 21
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-03-09T22:23:01.479837Z",
+    "agent_lines": 163,
+    "human_added": 0,
+    "human_modified": 0,
+    "human_removed": 55,
+    "total_committed": 163,
+    "agent_percentage": 100
+  },
+  "transcript_path": ".claude/projects/-Users-viniciuscarvalho-Documents-FitToday/2afa1a55-c96a-4172-8f6e-fc3512c27bab.jsonl"
+}
