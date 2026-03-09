@@ -13,12 +13,15 @@ struct WorkoutExecutionView: View {
     @Environment(\.dependencyResolver) private var resolver
     @Environment(AppRouter.self) private var router
     @Environment(WorkoutSessionStore.self) private var sessionStore
+    @Environment(\.scenePhase) private var scenePhase
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     @State private var restTimerStore = RestTimerStore()
     @State private var workoutTimerStore = WorkoutTimerStore()
     @State private var translationService = ExerciseTranslationService()
+    @State private var liveActivityManager = WorkoutLiveActivityManager()
+    @State private var liveActivityUpdateTimer: Timer?
     @State private var exerciseDescription: String = ""
     @State private var isPaused = false
     @State private var showRestTimer = false
@@ -38,10 +41,24 @@ struct WorkoutExecutionView: View {
         .toolbar(.hidden, for: .tabBar)
         .onAppear {
             workoutTimerStore.start()
+            startLiveActivity()
         }
         .onDisappear {
             workoutTimerStore.pause()
             restTimerStore.stop()
+            stopLiveActivityUpdates()
+        }
+        .onChange(of: scenePhase) { _, newPhase in
+            switch newPhase {
+            case .background:
+                updateLiveActivityState()
+            case .active:
+                if !isPaused {
+                    startLiveActivityUpdates()
+                }
+            default:
+                break
+            }
         }
         .overlay {
             if showRestTimer || restTimerStore.isActive {
@@ -489,10 +506,12 @@ struct WorkoutExecutionView: View {
 
     private func finishWorkout() {
         restTimerStore.stop()
+        stopLiveActivityUpdates()
         sessionStore.recordElapsedTime(workoutTimerStore.elapsedSeconds)
         workoutTimerStore.reset()
 
         Task {
+            await liveActivityManager.endActivity()
             do {
                 try await sessionStore.finish(status: .completed)
                 navigateToCompletion()
@@ -503,7 +522,68 @@ struct WorkoutExecutionView: View {
     }
 
     private func navigateToCompletion() {
+        stopLiveActivityUpdates()
+        Task { await liveActivityManager.endActivity() }
         router.push(.workoutSummary, on: .home)
+    }
+
+    // MARK: - Live Activity
+
+    private func startLiveActivity() {
+        guard let plan = sessionStore.plan else { return }
+        let exerciseName = sessionStore.effectiveCurrentExerciseName
+
+        Task {
+            try? await liveActivityManager.startActivity(
+                workoutTitle: plan.title,
+                totalExercises: sessionStore.exerciseCount,
+                initialExerciseName: exerciseName
+            )
+            startLiveActivityUpdates()
+        }
+    }
+
+    private func startLiveActivityUpdates() {
+        stopLiveActivityUpdates()
+        liveActivityUpdateTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
+            Task { @MainActor in
+                updateLiveActivityState()
+            }
+        }
+    }
+
+    private func stopLiveActivityUpdates() {
+        liveActivityUpdateTimer?.invalidate()
+        liveActivityUpdateTimer = nil
+    }
+
+    private func updateLiveActivityState() {
+        guard liveActivityManager.isActivityActive else { return }
+
+        let workoutState: WorkoutActivityAttributes.ContentState.WorkoutState
+        if isPaused {
+            workoutState = .paused
+        } else if restTimerStore.isActive {
+            workoutState = .resting
+        } else {
+            workoutState = .active
+        }
+
+        let completedSets = sessionStore.currentExerciseProgress?.completedSetsCount ?? 0
+        let totalSets = sessionStore.currentExerciseProgress?.totalSets ?? 0
+        let restSeconds = restTimerStore.isActive ? restTimerStore.remainingSeconds : nil
+
+        Task {
+            await liveActivityManager.updateActivity(
+                exerciseName: sessionStore.effectiveCurrentExerciseName,
+                series: "\(completedSets)/\(totalSets)",
+                restSeconds: restSeconds,
+                totalTime: workoutTimerStore.formattedTime,
+                canGoNext: sessionStore.isCurrentExerciseComplete,
+                completionPercentage: Int(sessionStore.overallProgress * 100),
+                workoutState: workoutState
+            )
+        }
     }
 }
 

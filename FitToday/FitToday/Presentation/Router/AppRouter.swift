@@ -44,7 +44,6 @@ enum AppRoute: Hashable {
     case exerciseDetail
     case workoutExecution  // Nova view de execução com timer e pause/play
     case workoutExercisePreview(ExercisePrescription)  // Preview de exercício (não altera índice)
-    case workoutPreview(ProgramWorkout)  // Preview de treino antes de iniciar (Task 7.0)
     case workoutSummary
     case paywall
     case programDetail(String)  // Detalhe do programa
@@ -77,6 +76,7 @@ struct DeepLink {
         case groupInvite(groupId: String)
         case trainerDashboard
         case trainerChat
+        case workoutExecution
     }
 
     let destination: Destination
@@ -93,6 +93,12 @@ struct DeepLink {
         if host == "group", path.hasPrefix("/invite/") {
             let groupId = String(path.dropFirst("/invite/".count))
             destination = .groupInvite(groupId: groupId)
+            return
+        }
+
+        // Handle workout routes: fittoday://workout/execution
+        if host == "workout", path == "/execution" {
+            destination = .workoutExecution
             return
         }
 
@@ -193,6 +199,8 @@ protocol AppRouting: AnyObject {
         case .trainerChat:
             select(tab: .home)
             push(.trainerChat, on: .home)
+        case .workoutExecution:
+            push(.workoutExecution, on: selectedTab)
         }
     }
 

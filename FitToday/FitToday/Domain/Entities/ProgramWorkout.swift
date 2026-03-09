@@ -86,6 +86,70 @@ struct WorkoutCustomization: Codable, Sendable {
     }
 }
 
+// MARK: - Conversion to WorkoutPlan
+
+extension ProgramWorkout {
+    func toWorkoutPlan() -> WorkoutPlan {
+        let exercisePrescriptions = exercises.map { programExercise -> ExercisePrescription in
+            let catalog = programExercise.catalogExercise
+            let workoutExercise = WorkoutExercise(
+                id: catalog.id,
+                name: catalog.name,
+                mainMuscle: MuscleGroup(rawValue: catalog.category ?? "") ?? .fullBody,
+                equipment: Self.mapEquipment(catalog.equipment),
+                instructions: Self.extractInstructions(from: catalog),
+                media: nil
+            )
+
+            return ExercisePrescription(
+                exercise: workoutExercise,
+                sets: programExercise.sets,
+                reps: IntRange(
+                    programExercise.repsRange.lowerBound,
+                    programExercise.repsRange.upperBound
+                ),
+                restInterval: TimeInterval(programExercise.restSeconds),
+                tip: programExercise.notes
+            )
+        }
+
+        return WorkoutPlan(
+            id: UUID(),
+            title: title,
+            focus: .fullBody,
+            estimatedDurationMinutes: estimatedDurationMinutes,
+            intensity: .moderate,
+            exercises: exercisePrescriptions,
+            createdAt: Date()
+        )
+    }
+
+    private static func mapEquipment(_ equipmentIds: [Int]) -> EquipmentType {
+        guard let first = equipmentIds.first else { return .bodyweight }
+        switch first {
+        case 1: return .barbell
+        case 3: return .dumbbell
+        case 8: return .machine
+        case 10: return .kettlebell
+        case 7: return .bodyweight
+        case 9: return .resistanceBand
+        case 6: return .pullupBar
+        default: return .bodyweight
+        }
+    }
+
+    private static func extractInstructions(from catalog: CatalogExercise) -> [String] {
+        guard let description = catalog.description, !description.isEmpty else {
+            return ["Realize o exercício com boa técnica."]
+        }
+        let lines = description
+            .components(separatedBy: CharacterSet.newlines)
+            .map { $0.trimmingCharacters(in: .whitespaces) }
+            .filter { !$0.isEmpty }
+        return lines.isEmpty ? ["Realize o exercício com boa técnica."] : lines
+    }
+}
+
 // MARK: - Factory Methods
 
 extension ProgramWorkout {

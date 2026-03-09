@@ -14,6 +14,7 @@ struct ProgramWorkoutDetailView: View {
     let resolver: Resolver
 
     @Environment(AppRouter.self) private var router
+    @Environment(WorkoutSessionStore.self) private var sessionStore
     @State private var exercises: [ProgramExercise]
     @State private var deletedExerciseIds: Set<String> = []
     @State private var editMode: EditMode = .inactive
@@ -325,7 +326,8 @@ struct ProgramWorkoutDetailView: View {
                 estimatedDurationMinutes: workout.estimatedDurationMinutes,
                 exercises: exercises
             )
-            router.push(.workoutPreview(customizedWorkout), on: router.selectedTab)
+            sessionStore.start(with: customizedWorkout.toWorkoutPlan())
+            router.push(.workoutExecution, on: router.selectedTab)
         } label: {
             HStack(spacing: FitTodaySpacing.sm) {
                 Image(systemName: "play.fill")

@@ -10,6 +10,7 @@ import Swinject
 
 struct HomeView: View {
     @Environment(AppRouter.self) private var router
+    @Environment(WorkoutSessionStore.self) private var sessionStore
 
     @State private var viewModel: HomeViewModel
 
@@ -73,7 +74,8 @@ struct HomeView: View {
                         workout: todayWorkout,
                         programName: viewModel.todayProgramName,
                         onStartWorkout: {
-                            router.push(.workoutPreview(todayWorkout), on: .home)
+                            sessionStore.start(with: todayWorkout.toWorkoutPlan())
+                            router.push(.workoutExecution, on: .home)
                         }
                     )
                 }
