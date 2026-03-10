@@ -28,3 +28,7 @@ Agora preciso fazer algumas correções e deixar tudo ajustado para o lançament
 3) Retirar do paywall, a duplicação Treinos IA ilimitados, já possui dizendo isso no texto do FitOrb
 4) Na área do FitOrb, deixar bem claro que as iterações são apenas para treinos e dicas, o chat não é um assistente geral, ele está direcionado apenas para ajudar na evolução física do usuário e que há um limite de iterações diárias.
 Tudo isso utilizando as boas práticas de iOS e corrigindo leaks de memória existentes para ter um aplicativo com performance excelente, /feature-marker —interactive -prd-fix-pro77
+
+---
+
+Realize o /commit e push na branch atual

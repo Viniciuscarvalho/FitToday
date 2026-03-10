@@ -20,3 +20,7 @@ Agora preciso fazer algumas correções e deixar tudo ajustado para o lançament
 1) No paywall, existe algumas ofertas de features que não foram implementadas, são elas, Substituição inteligente de exercícios, programas premium de treinamento, além da liberação da feature do personal apenas se a pessoal pagar o plano elite que está disponível
 2) Além disso, o mapeamento dos exercícios e imagens tem que ser condizentes com o que está no FireStore, pois hoje est�...
 
+### Prompt 5
+
+Realize o /commit e push na branch atual
+
