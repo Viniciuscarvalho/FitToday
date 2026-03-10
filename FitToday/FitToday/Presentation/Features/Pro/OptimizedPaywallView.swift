@@ -378,10 +378,7 @@ struct OptimizedPaywallView: View {
 
     private func features(for tier: SubscriptionTier) -> [PaywallFeature] {
         var list: [PaywallFeature] = [
-            .init(icon: "bolt.fill", title: "Treinos IA Ilimitados", subtitle: tier == .pro ? "2 treinos IA por dia" : "Ilimitado"),
-            .init(icon: "waveform.path.ecg", title: "Substituição inteligente de exercícios", subtitle: nil),
             .init(icon: "chart.bar.fill", title: "Histórico completo de treinos", subtitle: nil),
-            .init(icon: "checkmark.seal.fill", title: "Programas premium de treinamento", subtitle: nil),
             .init(icon: "bubble.left.and.bubble.right.fill", title: "FitOrb — Assistente IA", subtitle: tier == .pro ? "Chat IA ilimitado" : "Chat com contexto expandido"),
         ]
         if tier == .elite {

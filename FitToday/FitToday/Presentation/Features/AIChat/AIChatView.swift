@@ -100,6 +100,11 @@ struct AIChatView: View {
 
                 FitOrbView()
 
+                // Daily usage badge (shown only for free users with usage)
+                if viewModel.dailyMessagesUsed > 0 {
+                    dailyUsageBadge
+                }
+
                 // Quick action chips
                 VStack(spacing: FitTodaySpacing.sm) {
                     Text("fitorb.try_asking".localized)
@@ -130,6 +135,25 @@ struct AIChatView: View {
                 Spacer(minLength: FitTodaySpacing.xl)
             }
         }
+    }
+
+    // MARK: - Daily Usage Badge
+
+    private var dailyUsageBadge: some View {
+        let isAtLimit = viewModel.dailyMessagesUsed >= viewModel.dailyMessagesLimit
+        let label = isAtLimit
+            ? "fitorb.daily_limit_reached".localized
+            : String(format: "fitorb.daily_limit".localized, viewModel.dailyMessagesUsed, viewModel.dailyMessagesLimit)
+
+        return Text(label)
+            .font(FitTodayFont.ui(size: 12, weight: .medium))
+            .foregroundStyle(isAtLimit ? FitTodayColor.error : FitTodayColor.textTertiary)
+            .padding(.horizontal, FitTodaySpacing.md)
+            .padding(.vertical, 6)
+            .background(
+                (isAtLimit ? FitTodayColor.error : FitTodayColor.textTertiary).opacity(0.1)
+            )
+            .clipShape(Capsule())
     }
 
     // MARK: - Messages List

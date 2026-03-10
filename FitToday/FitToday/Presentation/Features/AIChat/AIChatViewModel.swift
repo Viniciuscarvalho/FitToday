@@ -21,6 +21,8 @@ final class AIChatViewModel: ErrorPresenting {
     var errorMessage: ErrorMessage?
     var showPaywall: Bool = false
     private(set) var quickActions: [String] = []
+    private(set) var dailyMessagesUsed: Int = 0
+    let dailyMessagesLimit: Int = EntitlementPolicy.freeAIChatMessagesPerDay
 
     // MARK: - Private
 
@@ -78,6 +80,11 @@ final class AIChatViewModel: ErrorPresenting {
             handleError(error)
         }
         await loadQuickActions()
+        await refreshDailyUsage()
+    }
+
+    func refreshDailyUsage() async {
+        dailyMessagesUsed = await usageTracker?.dailyChatUsageCount() ?? 0
     }
 
     func sendMessage() {
@@ -138,6 +145,7 @@ final class AIChatViewModel: ErrorPresenting {
 
                 // Register chat usage
                 await usageTracker?.registerChatUsage()
+                await refreshDailyUsage()
 
                 // Animate typing effect
                 await animateTyping(response: response)

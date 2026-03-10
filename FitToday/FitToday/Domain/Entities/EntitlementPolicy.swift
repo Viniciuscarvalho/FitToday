@@ -58,6 +58,7 @@ enum FeatureAccessResult {
     case allowed
     case limitReached(remaining: Int, limit: Int)
     case requiresPro(feature: ProFeature)
+    case requiresElite(feature: ProFeature)
     case trialExpired
     case featureDisabled(reason: String)
 
@@ -80,6 +81,8 @@ enum FeatureAccessResult {
             return "Você atingiu o limite de \(limit) usos. Desbloqueie o Pro para mais."
         case .requiresPro(let feature):
             return "\(feature.displayName) é um recurso Pro. Desbloqueie o Pro para acessar."
+        case .requiresElite(let feature):
+            return "\(feature.displayName) é exclusivo do plano Elite. Faça upgrade para acessar."
         case .trialExpired:
             return "Seu período de teste terminou. Desbloqueie o Pro para continuar."
         case .featureDisabled(let reason):
@@ -136,7 +139,7 @@ struct EntitlementPolicy {
             return .allowed
         }
 
-        // Pro — acesso com limites diários em IA
+        // Pro — acesso com limites diários em IA (Personal Trainer é Elite-only)
         if entitlement.isPro {
             switch feature {
             case .aiWorkoutGeneration:
@@ -144,6 +147,8 @@ struct EntitlementPolicy {
                     return .limitReached(remaining: 0, limit: proAIWorkoutsPerDay)
                 }
                 return .allowed
+            case .personalTrainer, .trainerWorkouts:
+                return .requiresElite(feature: feature)
             default:
                 return .allowed
             }
@@ -169,30 +174,41 @@ struct EntitlementPolicy {
             }
             return .allowed
 
+        case .personalTrainer, .trainerWorkouts:
+            return .requiresElite(feature: feature)
+
         case .aiExerciseSubstitution,
              .unlimitedHistory,
              .advancedDOMSAdjustment,
              .premiumPrograms,
-             .customizableSettings,
-             .personalTrainer,
-             .trainerWorkouts:
+             .customizableSettings:
             return .requiresPro(feature: feature)
         }
     }
 
-    /// Verifica se uma feature é totalmente bloqueada para Free
+    /// Verifica se uma feature é totalmente bloqueada para Free (requer Pro ou Elite)
     static func isProOnly(_ feature: ProFeature) -> Bool {
         switch feature {
         case .aiWorkoutGeneration, .simultaneousChallenges, .aiChat:
             return false // Free tem acesso limitado
+        case .personalTrainer, .trainerWorkouts:
+            return false // Elite-only, não Pro-only
         case .aiExerciseSubstitution,
              .unlimitedHistory,
              .advancedDOMSAdjustment,
              .premiumPrograms,
-             .customizableSettings,
-             .personalTrainer,
-             .trainerWorkouts:
+             .customizableSettings:
             return true
+        }
+    }
+
+    /// Verifica se uma feature é exclusiva do plano Elite
+    static func isEliteOnly(_ feature: ProFeature) -> Bool {
+        switch feature {
+        case .personalTrainer, .trainerWorkouts:
+            return true
+        default:
+            return false
         }
     }
 

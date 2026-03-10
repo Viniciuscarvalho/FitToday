@@ -950,7 +950,10 @@
 
 // MARK: - FitOrb AI Chat
 "fitorb.title" = "FitOrb";
-"fitorb.subtitle" = "Seu Assistente Fitness com IA";
+"fitorb.subtitle" = "Seu assistente de treinos e evolução física";
+"fitorb.scope_note" = "Focado em treinos, exercícios e dicas fitness";
+"fitorb.daily_limit" = "%d/%d mensagens hoje";
+"fitorb.daily_limit_reached" = "Limite diário atingido · Upgrade para Pro";
 "fitorb.try_asking" = "Tente perguntar:";
 "fitorb.thinking" = "Pensando...";
 "fitorb.input_placeholder" = "Pergunte ao FitOrb...";
