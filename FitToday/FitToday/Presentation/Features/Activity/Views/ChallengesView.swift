@@ -253,22 +253,77 @@ struct ChallengesFullListView: View {
         .padding(FitTodaySpacing.xl)
     }
 
+    @ViewBuilder
     private var emptyStateView: some View {
-        VStack(spacing: FitTodaySpacing.md) {
-            Image(systemName: isInGroup ? "trophy.circle" : "person.2.circle")
-                .font(.system(size: 48))
-                .foregroundStyle(FitTodayColor.textTertiary)
+        if isInGroup {
+            inGroupEmptyState
+        } else {
+            noGroupEmptyState
+        }
+    }
 
-            Text(isInGroup ? "Nenhum desafio encontrado" : "Entre em um grupo")
-                .font(FitTodayFont.ui(size: 17, weight: .semiBold))
-                .foregroundStyle(FitTodayColor.textPrimary)
+    // MARK: - No Group Empty State
 
-            Text(isInGroup
-                 ? "Os desafios semanais serão criados automaticamente"
-                 : "Participe de um grupo para acessar desafios e competir com amigos")
-                .font(FitTodayFont.ui(size: 14, weight: .medium))
-                .foregroundStyle(FitTodayColor.textSecondary)
-                .multilineTextAlignment(.center)
+    private var noGroupEmptyState: some View {
+        VStack(spacing: FitTodaySpacing.lg) {
+            // Hero illustration
+            ZStack {
+                Circle()
+                    .fill(FitTodayColor.brandPrimary.opacity(0.1))
+                    .frame(width: 100, height: 100)
+
+                Image(systemName: "trophy.fill")
+                    .font(.system(size: 44))
+                    .foregroundStyle(FitTodayColor.brandPrimary)
+            }
+
+            VStack(spacing: FitTodaySpacing.sm) {
+                Text("Desafie seus amigos")
+                    .font(FitTodayFont.ui(size: 20, weight: .bold))
+                    .foregroundStyle(FitTodayColor.textPrimary)
+
+                Text("Crie ou entre em um grupo para competir em desafios semanais e manter a motivação em alta")
+                    .font(FitTodayFont.ui(size: 15, weight: .medium))
+                    .foregroundStyle(FitTodayColor.textSecondary)
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
+            // Benefits list
+            VStack(alignment: .leading, spacing: FitTodaySpacing.md) {
+                benefitRow(icon: "flame.fill", color: .orange, text: "Desafios semanais de streak e check-in")
+                benefitRow(icon: "chart.bar.fill", color: FitTodayColor.brandPrimary, text: "Ranking em tempo real com seu grupo")
+                benefitRow(icon: "bell.badge.fill", color: .purple, text: "Notificações para manter você no ritmo")
+            }
+            .padding(FitTodaySpacing.md)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(
+                RoundedRectangle(cornerRadius: FitTodayRadius.md)
+                    .fill(FitTodayColor.surface)
+            )
+
+            // CTAs
+            VStack(spacing: FitTodaySpacing.sm) {
+                Button {
+                    showCreateGroup = true
+                } label: {
+                    HStack(spacing: FitTodaySpacing.sm) {
+                        Image(systemName: "plus.circle.fill")
+                        Text("Criar Grupo")
+                    }
+                }
+                .fitPrimaryStyle()
+
+                Button {
+                    showJoinGroup = true
+                } label: {
+                    HStack(spacing: FitTodaySpacing.sm) {
+                        Image(systemName: "person.badge.plus")
+                        Text("Entrar com Código de Convite")
+                    }
+                }
+                .fitSecondaryStyle()
+            }
 
             if let errorMessage = viewModel?.errorMessage {
                 Text(errorMessage)
@@ -276,37 +331,11 @@ struct ChallengesFullListView: View {
                     .foregroundStyle(FitTodayColor.error)
                     .multilineTextAlignment(.center)
             }
-
-            // Group creation/join buttons (only when not in a group)
-            if !isInGroup {
-                VStack(spacing: FitTodaySpacing.sm) {
-                    Button {
-                        showCreateGroup = true
-                    } label: {
-                        HStack(spacing: FitTodaySpacing.sm) {
-                            Image(systemName: "plus.circle.fill")
-                            Text("Criar Grupo")
-                        }
-                    }
-                    .fitPrimaryStyle()
-
-                    Button {
-                        showJoinGroup = true
-                    } label: {
-                        HStack(spacing: FitTodaySpacing.sm) {
-                            Image(systemName: "person.badge.plus")
-                            Text("Entrar em Grupo")
-                        }
-                    }
-                    .fitSecondaryStyle()
-                }
-                .padding(.top, FitTodaySpacing.md)
-            }
         }
         .frame(maxWidth: .infinity)
-        .padding(FitTodaySpacing.xl)
+        .padding(FitTodaySpacing.lg)
         .sheet(isPresented: $showCreateGroup) {
-            CreateGroupView(resolver: resolver) { group in
+            CreateGroupView(resolver: resolver) { _ in
                 Task {
                     await viewModel?.refresh()
                 }
@@ -319,6 +348,151 @@ struct ChallengesFullListView: View {
                 }
             }
         }
+    }
+
+    private func benefitRow(icon: String, color: Color, text: String) -> some View {
+        HStack(spacing: FitTodaySpacing.md) {
+            Image(systemName: icon)
+                .font(.system(size: 16))
+                .foregroundStyle(color)
+                .frame(width: 24)
+
+            Text(text)
+                .font(FitTodayFont.ui(size: 14, weight: .medium))
+                .foregroundStyle(FitTodayColor.textPrimary)
+        }
+    }
+
+    // MARK: - In Group Empty State
+
+    private var inGroupEmptyState: some View {
+        VStack(spacing: FitTodaySpacing.lg) {
+            ZStack {
+                Circle()
+                    .fill(FitTodayColor.brandPrimary.opacity(0.1))
+                    .frame(width: 80, height: 80)
+
+                Image(systemName: "person.3.fill")
+                    .font(.system(size: 32))
+                    .foregroundStyle(FitTodayColor.brandPrimary)
+            }
+
+            VStack(spacing: FitTodaySpacing.sm) {
+                Text("Convide amigos para competir")
+                    .font(FitTodayFont.ui(size: 20, weight: .bold))
+                    .foregroundStyle(FitTodayColor.textPrimary)
+
+                Text("Compartilhe o código do grupo com seus amigos. Desafios semanais são criados automaticamente quando o grupo está ativo!")
+                    .font(FitTodayFont.ui(size: 15, weight: .medium))
+                    .foregroundStyle(FitTodayColor.textSecondary)
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
+            // Invite CTA
+            if let groupId = viewModel?.currentGroupId {
+                let links = GenerateInviteLinkUseCase().execute(groupId: groupId)
+                ShareLink(
+                    item: links.shareURL,
+                    subject: Text("Convite para FitToday"),
+                    message: Text("Entre no meu grupo no FitToday e vamos competir juntos! 💪")
+                ) {
+                    HStack(spacing: FitTodaySpacing.sm) {
+                        Image(systemName: "square.and.arrow.up.fill")
+                        Text("Convidar Amigos")
+                    }
+                    .font(FitTodayFont.ui(size: 16, weight: .bold))
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(FitTodaySpacing.md)
+                    .background(FitTodayColor.brandPrimary)
+                    .clipShape(RoundedRectangle(cornerRadius: FitTodayRadius.md))
+                }
+                .buttonStyle(.plain)
+            }
+
+            // Challenge types preview
+            VStack(alignment: .leading, spacing: FitTodaySpacing.sm) {
+                Text("Desafios disponíveis")
+                    .font(FitTodayFont.ui(size: 15, weight: .semiBold))
+                    .foregroundStyle(FitTodayColor.textPrimary)
+
+                challengePreviewRow(
+                    icon: "checkmark.circle.fill",
+                    title: "Check-ins Semanais",
+                    subtitle: "Complete 7 check-ins por semana",
+                    color: FitTodayColor.brandPrimary
+                )
+                challengePreviewRow(
+                    icon: "flame.fill",
+                    title: "Streak Semanal",
+                    subtitle: "Treine 7 dias consecutivos",
+                    color: .orange
+                )
+            }
+
+            // Create another group option
+            VStack(spacing: FitTodaySpacing.sm) {
+                Text("Você pode criar até 3 grupos")
+                    .font(FitTodayFont.ui(size: 13, weight: .medium))
+                    .foregroundStyle(FitTodayColor.textTertiary)
+
+                Button {
+                    showCreateGroup = true
+                } label: {
+                    HStack(spacing: FitTodaySpacing.sm) {
+                        Image(systemName: "plus.circle.fill")
+                        Text("Criar Outro Grupo")
+                    }
+                }
+                .fitSecondaryStyle()
+            }
+
+            if let errorMessage = viewModel?.errorMessage {
+                Text(errorMessage)
+                    .font(FitTodayFont.ui(size: 12, weight: .medium))
+                    .foregroundStyle(FitTodayColor.error)
+                    .multilineTextAlignment(.center)
+            }
+        }
+        .frame(maxWidth: .infinity)
+        .padding(FitTodaySpacing.lg)
+        .sheet(isPresented: $showCreateGroup) {
+            CreateGroupView(resolver: resolver) { _ in
+                Task {
+                    await viewModel?.refresh()
+                }
+            }
+        }
+    }
+
+    private func challengePreviewRow(icon: String, title: String, subtitle: String, color: Color) -> some View {
+        HStack(spacing: FitTodaySpacing.md) {
+            Image(systemName: icon)
+                .font(.system(size: 24))
+                .foregroundStyle(color)
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(FitTodayFont.ui(size: 15, weight: .semiBold))
+                    .foregroundStyle(FitTodayColor.textPrimary)
+
+                Text(subtitle)
+                    .font(FitTodayFont.ui(size: 13, weight: .medium))
+                    .foregroundStyle(FitTodayColor.textSecondary)
+            }
+
+            Spacer()
+        }
+        .padding(FitTodaySpacing.md)
+        .background(
+            RoundedRectangle(cornerRadius: FitTodayRadius.md)
+                .fill(FitTodayColor.surface)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: FitTodayRadius.md)
+                .stroke(color.opacity(0.2), lineWidth: 1)
+        )
     }
 }
 

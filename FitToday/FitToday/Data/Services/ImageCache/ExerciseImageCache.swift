@@ -195,16 +195,10 @@ actor ExerciseImageCache {
 
                     return image
                 } catch {
-                    #if DEBUG
-                    print("[ExerciseImageCache] Path not found: \(storagePath)")
-                    #endif
                     continue
                 }
             }
 
-            #if DEBUG
-            print("[ExerciseImageCache] No image found for exercise: \(exerciseId)")
-            #endif
             return nil
         }
 

@@ -44,6 +44,12 @@ struct FitOrbView: View {
             Text("fitorb.subtitle".localized)
                 .font(FitTodayFont.ui(size: 14, weight: .medium))
                 .foregroundStyle(FitTodayColor.textSecondary)
+
+            // Scope note
+            Text("fitorb.scope_note".localized)
+                .font(FitTodayFont.ui(size: 12, weight: .medium))
+                .foregroundStyle(FitTodayColor.textTertiary)
+                .multilineTextAlignment(.center)
         }
         .onAppear {
             isPulsing = true

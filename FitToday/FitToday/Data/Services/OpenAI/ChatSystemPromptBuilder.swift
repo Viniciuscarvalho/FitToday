@@ -16,6 +16,7 @@ struct ChatSystemPromptBuilder: Sendable {
         var sections: [String] = []
 
         sections.append(basePersonality())
+        sections.append(fitnessOnlyScope())
 
         if isPremium {
             sections.append(premiumWorkoutFocus())
@@ -47,6 +48,16 @@ struct ChatSystemPromptBuilder: Sendable {
         Be friendly, motivating, direct, and science-based. \
         Always encourage the user and celebrate their progress. \
         Never recommend anything dangerous or unsupported by evidence.
+        """
+    }
+
+    private func fitnessOnlyScope() -> String {
+        """
+        ## Scope
+        You only answer questions related to physical fitness, exercise, training, sports nutrition, \
+        recovery, and physical health. If the user asks about anything outside this scope \
+        (general knowledge, coding, politics, entertainment, etc.), politely decline and redirect \
+        them to ask something fitness-related instead.
         """
     }
 
