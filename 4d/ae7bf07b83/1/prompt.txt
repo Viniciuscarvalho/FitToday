@@ -1,0 +1,1 @@
+faça a sincronia dessa branch com a main para buscar as modificaçõe que já tinha subido anteriormente.
