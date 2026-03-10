@@ -2,16 +2,42 @@
   "cli_version": "0.4.4",
   "checkpoint_id": "4dae7bf07b83",
   "strategy": "manual-commit",
-  "branch": "fix/pro-77-challenges-empty-state",
+  "branch": "feat/pro-72-76-charts-enrichment",
   "checkpoints_count": 3,
   "files_touched": [
+    ".claude/logs/build_20260310_192847.log",
+    ".claude/logs/build_20260310_192949.log",
+    ".claude/logs/build_20260310_193030.log",
+    ".claude/logs/build_20260310_193102.log",
+    ".claude/logs/build_20260310_193111.log",
+    ".claude/logs/build_20260310_193149.log",
+    ".claude/logs/build_20260310_193216.log",
+    ".claude/settings.local.json",
     "Config/AppInfo.plist",
+    "FitToday/FitToday.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved",
     "FitToday/FitToday.xcodeproj/xcshareddata/xcschemes/FitToday.xcscheme",
+    "FitToday/FitToday/Data/Services/HealthKit/HealthDataService.swift",
     "FitToday/FitToday/Data/Services/ImageCache/ExerciseImageCache.swift",
+    "FitToday/FitToday/Data/Services/OpenAI/ChatSystemPromptBuilder.swift",
+    "FitToday/FitToday/Domain/Entities/EntitlementPolicy.swift",
+    "FitToday/FitToday/Presentation/DI/AppContainer.swift",
+    "FitToday/FitToday/Presentation/DesignSystem/DesignTokens.swift",
+    "FitToday/FitToday/Presentation/Features/AIChat/AIChatView.swift",
+    "FitToday/FitToday/Presentation/Features/AIChat/AIChatViewModel.swift",
     "FitToday/FitToday/Presentation/Features/AIChat/Components/FitOrbView.swift",
+    "FitToday/FitToday/Presentation/Features/Activity/ViewModels/ActivityStatsViewModel.swift",
+    "FitToday/FitToday/Presentation/Features/Activity/Views/ActivityTabView.swift",
     "FitToday/FitToday/Presentation/Features/Activity/Views/ChallengesView.swift",
+    "FitToday/FitToday/Presentation/Features/Activity/Views/ConsistencyHeatmapView.swift",
+    "FitToday/FitToday/Presentation/Features/Activity/Views/WeeklyVolumeChartView.swift",
+    "FitToday/FitToday/Presentation/Features/Activity/Views/WeightProgressChartView.swift",
+    "FitToday/FitToday/Presentation/Features/Pro/OptimizedPaywallView.swift",
+    "FitToday/FitToday/Resources/en.lproj/Localizable.strings",
+    "FitToday/FitToday/Resources/pt-BR.lproj/Localizable.strings",
     "ops/sessions/20260310-013726.json",
-    "ops/sessions/20260310-014541.json"
+    "ops/sessions/20260310-014541.json",
+    "ops/sessions/20260310-021528.json",
+    "ops/sessions/20260310-021733.json"
   ],
   "sessions": [
     {
@@ -37,10 +63,10 @@
     }
   ],
   "token_usage": {
-    "input_tokens": 1654,
-    "cache_creation_tokens": 180814,
-    "cache_read_tokens": 5086183,
-    "output_tokens": 14123,
-    "api_call_count": 51
+    "input_tokens": 1727,
+    "cache_creation_tokens": 461523,
+    "cache_read_tokens": 11777997,
+    "output_tokens": 46120,
+    "api_call_count": 120
   }
 }

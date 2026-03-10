@@ -28,3 +28,18 @@ Realize o /commit e push na branch atual
 
 O build não excutando corretamente em FitOrbView, todas o build da aplicação tem que estar funcionando
 
+### Prompt 7
+
+Gostaria de fazer o release para envio para apple utilizando o meu script que contem o asc onde faz o bump corretamente da versão e sobe uma versão para apple connect, ./deploy.sh appstore —release
+
+### Prompt 8
+
+Gostaria de fazer o release para envio para apple utilizando o meu script que contem o asc onde faz o bump corretamente da versão e sobe uma versão para apple connect, ./deploy.sh appstore —release, puxe da branch main para o envio ser o correto.
+
+### Prompt 9
+
+Eu possuo 5 issues no Linear a respeito de um enriquecimento de toda a área de graficos e com todas as animações que a área demanda, lembrando que alguns desses gráficos, os mais avançados só serão disponibilizados para usuários pro ou elite.
+https://linear.app/secondbrainclaw/issue/PRO-72/healthdataservice-foundation
+https://linear.app/secondbrainclaw/issue/PRO-73/define-charts-color-palette-and-design-system
+https://linear.app/secondbrainclaw/issue/PRO-74/consistency-calendar-chart-he...
+

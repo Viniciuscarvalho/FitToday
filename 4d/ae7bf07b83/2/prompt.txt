@@ -36,3 +36,22 @@ Realize o /commit e push na branch atual
 ---
 
 O build não excutando corretamente em FitOrbView, todas o build da aplicação tem que estar funcionando
+
+---
+
+Gostaria de fazer o release para envio para apple utilizando o meu script que contem o asc onde faz o bump corretamente da versão e sobe uma versão para apple connect, ./deploy.sh appstore —release
+
+---
+
+Gostaria de fazer o release para envio para apple utilizando o meu script que contem o asc onde faz o bump corretamente da versão e sobe uma versão para apple connect, ./deploy.sh appstore —release, puxe da branch main para o envio ser o correto.
+
+---
+
+Eu possuo 5 issues no Linear a respeito de um enriquecimento de toda a área de graficos e com todas as animações que a área demanda, lembrando que alguns desses gráficos, os mais avançados só serão disponibilizados para usuários pro ou elite.
+https://linear.app/secondbrainclaw/issue/PRO-72/healthdataservice-foundation
+https://linear.app/secondbrainclaw/issue/PRO-73/define-charts-color-palette-and-design-system
+https://linear.app/secondbrainclaw/issue/PRO-74/consistency-calendar-chart-heatmap-last-3-months
+https://linear.app/secondbrainclaw/issue/PRO-75/weekly-workout-volume-chart-bar-chart-trend-line
+https://linear.app/secondbrainclaw/issue/PRO-76/weight-progress-chart-line-trend
+Lembrando que todos os critérios de aceite das tarefas tem que ser cobertos.
+Essa implementação dos gráficos tem que ser feita em uma branch separada respeitando o worktree flow do git, ao finalizar e estiver tudo buildando corretamente, faça o /commit e crie o PR com essa modificação.
