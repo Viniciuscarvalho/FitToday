@@ -7,3 +7,24 @@ A branch que está aberta e com a modificação correta é esta, dê um stash de
 ---
 
 apenas mudar de branch, commit essas modificações nessa branch local
+
+---
+
+Agora preciso fazer algumas correções e deixar tudo ajustado para o lançamento do app corretamente,
+1) No paywall, existe algumas ofertas de features que não foram implementadas, são elas, Substituição inteligente de exercícios, programas premium de treinamento, além da liberação da feature do personal apenas se a pessoal pagar o plano elite que está disponível
+2) Além disso, o mapeamento dos exercícios e imagens tem que ser condizentes com o que está no FireStore, pois hoje está ocasionando erros, 
+[ExerciseImageCache] listAll failed for exercises/back_neck_stretch: User does not have permission to access gs://fittoday-2aaff.firebasestorage.app/exercises/back_neck_stretch.
+[ExerciseImageCache] listAll failed for exercises/abdominal_stabilization: User does not have permission to access gs://fittoday-2aaff.firebasestorage.app/exercises/abdominal_stabilization.
+[ExerciseImageCache] listAll failed for exercises/bus_drivers: User does not have permission to access gs://fittoday-2aaff.firebasestorage.app/exercises/bus_drivers.
+[ExerciseImageCache] Fallback path not found: exercises/back_neck_stretch/media/0.jpg
+[ExerciseImageCache] listAll failed for exercises/chest_supported_rear_delt_raise: User does not have permission to access gs://fittoday-2aaff.firebasestorage.app/exercises/chest_supported_rear_delt_raise.
+[ExerciseImageCache] Fallback path not found: exercises/abdominal_stabilization/media/0.jpg
+[ExerciseImageCache] Fallback path not found: exercises/chest_supported_rear_delt_raise/media/0.jpg
+[ExerciseImageCache] Fallback path not found: exercises/back_neck_stretch/thumbnail/0.webp
+[ExerciseImageCache] Fallback path not found: exercises/abdominal_stabilization/thumbnail/0.webp
+[ExerciseImageCache] Fallback path not found: exercises/bus_drivers/media/0.jpg
+[ExerciseImageCache] Fallback path not found: exercises/chest_supported_rear_delt_raise/thumbnail/0.webp
+[ExerciseImageCache] Fallback path not found: exercises/bus_drivers/thumbnail/0.webp
+3) Retirar do paywall, a duplicação Treinos IA ilimitados, já possui dizendo isso no texto do FitOrb
+4) Na área do FitOrb, deixar bem claro que as iterações são apenas para treinos e dicas, o chat não é um assistente geral, ele está direcionado apenas para ajudar na evolução física do usuário e que há um limite de iterações diárias.
+Tudo isso utilizando as boas práticas de iOS e corrigindo leaks de memória existentes para ter um aplicativo com performance excelente, /feature-marker —interactive -prd-fix-pro77
