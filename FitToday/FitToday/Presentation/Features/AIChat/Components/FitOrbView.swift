@@ -47,7 +47,7 @@ struct FitOrbView: View {
 
             // Scope note
             Text("fitorb.scope_note".localized)
-                .font(FitTodayFont.ui(size: 12, weight: .regular))
+                .font(FitTodayFont.ui(size: 12, weight: .medium))
                 .foregroundStyle(FitTodayColor.textTertiary)
                 .multilineTextAlignment(.center)
         }
