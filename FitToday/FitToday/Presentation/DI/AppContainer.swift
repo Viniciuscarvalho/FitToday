@@ -163,7 +163,11 @@ struct AppContainer {
         let healthKitService = HealthKitService()
         container.register(HealthKitServicing.self) { _ in healthKitService }
             .inObjectScope(.container)
-        
+
+        // PRO-72: HealthDataService for body mass / weight data
+        container.register(HealthDataServicing.self) { _ in HealthDataService() }
+            .inObjectScope(.container)
+
         // Note: HealthKitHistorySyncService is registered later after SyncWorkoutCompletionUseCase is available
 
         // HealthKit Workout Sync Use Case - auto-exports workouts and imports calories

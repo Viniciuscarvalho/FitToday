@@ -49,16 +49,32 @@ final class ActivityStatsViewModel {
     private(set) var isLoading = false
     private(set) var errorMessage: String?
 
+    // PRO-74: Heatmap data
+    private(set) var heatmapData: [Date: Int] = [:]
+
+    // PRO-75: Weekly volume entries
+    private(set) var volumeEntries: [WeeklyVolumeEntry] = []
+
+    // PRO-76: Weight entries
+    private(set) var weightEntries: [WeightEntry] = []
+
+    // Entitlement for gating
+    private(set) var entitlement: ProEntitlement = .free
+
     // MARK: - Dependencies
 
     private let historyRepository: WorkoutHistoryRepository?
     private let syncService: HealthKitHistorySyncService?
+    private let healthDataService: HealthDataServicing?
+    private let entitlementRepository: EntitlementRepository?
 
     // MARK: - Init
 
     init(resolver: Resolver) {
         self.historyRepository = resolver.resolve(WorkoutHistoryRepository.self)
         self.syncService = resolver.resolve(HealthKitHistorySyncService.self)
+        self.healthDataService = resolver.resolve(HealthDataServicing.self)
+        self.entitlementRepository = resolver.resolve(EntitlementRepository.self)
     }
 
     // MARK: - Load
@@ -69,6 +85,9 @@ final class ActivityStatsViewModel {
         defer { isLoading = false }
 
         do {
+            // Load entitlement
+            entitlement = (try? await entitlementRepository?.currentEntitlement()) ?? .free
+
             // BUG 5 FIX: single sync call — importExternalWorkouts already covers
             // external sources; syncLastDays was a redundant duplicate.
             try? await syncService?.importExternalWorkouts(days: 30)
@@ -79,6 +98,26 @@ final class ActivityStatsViewModel {
             stats = buildStats(from: completed)
             dailyEntries = buildDailyEntries(from: completed)
             weeklyEntries = buildWeeklyEntries(from: completed)
+
+            // PRO-74: Build heatmap (free for all users)
+            heatmapData = buildHeatmapData(from: completed)
+
+            // PRO-75: Build volume entries (Pro+)
+            if entitlement.isPro {
+                volumeEntries = buildVolumeEntries(from: completed)
+            }
+
+            // PRO-76: Fetch weight data (Pro+)
+            if entitlement.isPro {
+                do {
+                    try? await healthDataService?.requestBodyMassAuthorization()
+                    weightEntries = try await healthDataService?.fetchWeightEntries(days: 90) ?? []
+                } catch {
+                    #if DEBUG
+                    print("[ActivityStatsViewModel] Weight fetch error: \(error)")
+                    #endif
+                }
+            }
         } catch {
             errorMessage = error.localizedDescription
             #if DEBUG
@@ -212,6 +251,41 @@ final class ActivityStatsViewModel {
                 workouts: weekEntries.count,
                 minutes: weekEntries.reduce(0) { $0 + effectiveDuration($1) },
                 calories: weekEntries.reduce(0) { $0 + ($1.caloriesBurned ?? 0) }
+            )
+        }
+    }
+
+    // MARK: - PRO-74: Heatmap Data
+
+    private func buildHeatmapData(from entries: [WorkoutHistoryEntry]) -> [Date: Int] {
+        let calendar = Calendar.current
+        var map: [Date: Int] = [:]
+        for entry in entries {
+            let day = calendar.startOfDay(for: entry.date)
+            map[day, default: 0] += 1
+        }
+        return map
+    }
+
+    // MARK: - PRO-75: Volume Entries
+
+    private func buildVolumeEntries(from entries: [WorkoutHistoryEntry]) -> [WeeklyVolumeEntry] {
+        let calendar = Calendar.current
+        let today = Date()
+
+        return (0..<8).reversed().compactMap { weeksAgo -> WeeklyVolumeEntry? in
+            guard let weekStart = calendar.date(byAdding: .weekOfYear, value: -weeksAgo, to: today.startOfWeek) else {
+                return nil
+            }
+            guard let weekEnd = calendar.date(byAdding: .day, value: 7, to: weekStart) else {
+                return nil
+            }
+
+            let weekEntries = entries.filter { $0.date >= weekStart && $0.date < weekEnd }
+            return WeeklyVolumeEntry(
+                weekLabel: weekStart.formatted(.dateTime.day().month(.abbreviated)),
+                totalMinutes: weekEntries.reduce(0) { $0 + effectiveDuration($1) },
+                workoutCount: weekEntries.count
             )
         }
     }

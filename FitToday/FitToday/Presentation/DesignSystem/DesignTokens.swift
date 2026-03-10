@@ -123,6 +123,29 @@ enum FitTodayColor {
         endPoint: .bottomTrailing
     )
 
+    // MARK: - Chart Color Palette (PRO-73)
+
+    /// Primary chart bar/line color (blue brand)
+    static let chartPrimary = adaptiveColor(light: "#3B82F6", dark: "#60A5FA")
+    /// Secondary chart color (teal)
+    static let chartSecondary = adaptiveColor(light: "#14B8A6", dark: "#2DD4BF")
+    /// Accent chart color (orange)
+    static let chartAccent = adaptiveColor(light: "#F97316", dark: "#FB923C")
+    /// Weight chart line color (violet)
+    static let chartWeight = adaptiveColor(light: "#8B5CF6", dark: "#A78BFA")
+    /// Volume chart color (emerald)
+    static let chartVolume = adaptiveColor(light: "#10B981", dark: "#34D399")
+    /// Trend line color (muted)
+    static let chartTrend = adaptiveColor(light: "#94A3B8", dark: "#64748B")
+
+    // Heatmap intensity levels (green scale)
+    static let heatmapNone = adaptiveColor(light: "#F1F5F9", dark: "#1E1E1E")
+    static let heatmapLow = adaptiveColor(light: "#BBF7D0", dark: "#14532D")
+    static let heatmapMedium = adaptiveColor(light: "#4ADE80", dark: "#22C55E")
+    static let heatmapHigh = adaptiveColor(light: "#16A34A", dark: "#4ADE80")
+
+    /// Pro-gated chart overlay
+    static let chartLocked = adaptiveColor(light: "#94A3B8", dark: "#475569")
 }
 
 // MARK: - Spacing System (8pt Grid)
