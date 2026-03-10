@@ -1,0 +1,27 @@
+{
+  "cli_version": "0.4.4",
+  "checkpoint_id": "4dae7bf07b83",
+  "strategy": "manual-commit",
+  "branch": "fix/exercise-image-discovery",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "FitToday/FitToday/Presentation/Features/Activity/Views/ChallengesView.swift",
+    "ops/sessions/20260310-013726.json"
+  ],
+  "sessions": [
+    {
+      "metadata": "/4d/ae7bf07b83/0/metadata.json",
+      "transcript": "/4d/ae7bf07b83/0/full.jsonl",
+      "context": "/4d/ae7bf07b83/0/context.md",
+      "content_hash": "/4d/ae7bf07b83/0/content_hash.txt",
+      "prompt": "/4d/ae7bf07b83/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 12,
+    "cache_creation_tokens": 8719,
+    "cache_read_tokens": 1252204,
+    "output_tokens": 2408,
+    "api_call_count": 10
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "cli_version": "0.4.4",
+  "checkpoint_id": "4dae7bf07b83",
+  "session_id": "02c1ef1e-2d82-4947-9047-cf259d945349",
+  "strategy": "manual-commit",
+  "created_at": "2026-03-10T01:37:32.093743Z",
+  "branch": "fix/exercise-image-discovery",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "FitToday/FitToday/Presentation/Features/Activity/Views/ChallengesView.swift",
+    "ops/sessions/20260310-013726.json"
+  ],
+  "agent": "Claude Code",
+  "transcript_identifier_at_start": "59f92e32-671b-4159-9062-88ceb4f2cf36",
+  "checkpoint_transcript_start": 148,
+  "transcript_lines_at_start": 148,
+  "token_usage": {
+    "input_tokens": 12,
+    "cache_creation_tokens": 8719,
+    "cache_read_tokens": 1252204,
+    "output_tokens": 2408,
+    "api_call_count": 10
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-03-10T01:37:31.79129Z",
+    "agent_lines": 0,
+    "human_added": 0,
+    "human_modified": 1,
+    "human_removed": 1,
+    "total_committed": 1,
+    "agent_percentage": 0
+  },
+  "transcript_path": ".claude/projects/-Users-viniciuscarvalho-Documents-FitToday/02c1ef1e-2d82-4947-9047-cf259d945349.jsonl"
+}
