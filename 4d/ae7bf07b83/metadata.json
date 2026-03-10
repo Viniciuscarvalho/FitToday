@@ -8,10 +8,10 @@
     "Config/AppInfo.plist",
     "FitToday/FitToday.xcodeproj/xcshareddata/xcschemes/FitToday.xcscheme",
     "FitToday/FitToday/Data/Services/ImageCache/ExerciseImageCache.swift",
+    "FitToday/FitToday/Presentation/Features/AIChat/Components/FitOrbView.swift",
     "FitToday/FitToday/Presentation/Features/Activity/Views/ChallengesView.swift",
     "ops/sessions/20260310-013726.json",
-    "ops/sessions/20260310-014541.json",
-    "ops/sessions/20260310-021733.json"
+    "ops/sessions/20260310-014541.json"
   ],
   "sessions": [
     {
@@ -37,10 +37,10 @@
     }
   ],
   "token_usage": {
-    "input_tokens": 1628,
-    "cache_creation_tokens": 50527,
-    "cache_read_tokens": 1994961,
-    "output_tokens": 10358,
-    "api_call_count": 27
+    "input_tokens": 1654,
+    "cache_creation_tokens": 180814,
+    "cache_read_tokens": 5086183,
+    "output_tokens": 14123,
+    "api_call_count": 51
   }
 }

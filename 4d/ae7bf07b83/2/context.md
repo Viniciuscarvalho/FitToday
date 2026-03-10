@@ -24,3 +24,7 @@ Agora preciso fazer algumas correções e deixar tudo ajustado para o lançament
 
 Realize o /commit e push na branch atual
 
+### Prompt 6
+
+O build não excutando corretamente em FitOrbView, todas o build da aplicação tem que estar funcionando
+
