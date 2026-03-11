@@ -152,18 +152,17 @@ struct ProfileProView: View {
                     .font(.system(size: 14))
                     .foregroundStyle(FitTodayColor.textSecondary)
 
-                // Sync status
+                // Active features status
                 HStack(spacing: FitTodaySpacing.md) {
-                    syncStatusItem(icon: "checkmark.icloud.fill", label: "settings.pro.cloud_sync".localized, isActive: true)
                     syncStatusItem(icon: "heart.fill", label: "settings.pro.apple_health".localized, isActive: true)
                     syncStatusItem(icon: "bolt.fill", label: "settings.pro.ai_workouts".localized, isActive: true)
                 }
                 .padding(.top, 4)
 
                 HStack(spacing: 6) {
-                    Image(systemName: "infinity")
+                    Image(systemName: "checkmark.seal.fill")
                         .font(.system(size: 12, weight: .semibold))
-                    Text("settings.pro.manage".localized)
+                    Text("settings.pro.subscription_active".localized)
                         .font(.system(size: 14, weight: .semibold))
                 }
                 .foregroundStyle(FitTodayColor.success)
@@ -184,7 +183,7 @@ struct ProfileProView: View {
                 // Features preview
                 VStack(alignment: .leading, spacing: 8) {
                     featureItem(icon: "sparkles", text: "settings.pro.unlimited_ai".localized)
-                    featureItem(icon: "icloud.fill", text: "settings.pro.cloud_devices".localized)
+                    featureItem(icon: "chart.bar.fill", text: "settings.pro.advanced_charts".localized)
                     featureItem(icon: "heart.fill", text: "settings.pro.health_integration".localized)
                 }
                 .padding(.top, 4)

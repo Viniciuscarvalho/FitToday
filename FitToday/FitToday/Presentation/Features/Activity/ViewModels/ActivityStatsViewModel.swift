@@ -85,8 +85,16 @@ final class ActivityStatsViewModel {
         defer { isLoading = false }
 
         do {
-            // Load entitlement
+            // Load entitlement (respect debug override in DEBUG builds)
+            #if DEBUG
+            if DebugEntitlementOverride.shared.isEnabled {
+                entitlement = DebugEntitlementOverride.shared.entitlement
+            } else {
+                entitlement = (try? await entitlementRepository?.currentEntitlement()) ?? .free
+            }
+            #else
             entitlement = (try? await entitlementRepository?.currentEntitlement()) ?? .free
+            #endif
 
             // BUG 5 FIX: single sync call — importExternalWorkouts already covers
             // external sources; syncLastDays was a redundant duplicate.
