@@ -76,6 +76,15 @@ struct CMSTrainerReview: Codable, Sendable, Identifiable {
     let createdAt: Date?
 }
 
+// MARK: - Create Review Request
+
+struct CMSCreateReviewRequest: Codable, Sendable {
+    let studentId: String
+    let studentName: String
+    let rating: Int
+    let comment: String?
+}
+
 // MARK: - Program List Response
 
 struct CMSProgramListResponse: Codable, Sendable {
