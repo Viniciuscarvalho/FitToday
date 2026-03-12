@@ -1,0 +1,35 @@
+{
+  "cli_version": "0.4.4",
+  "checkpoint_id": "4a8c33dc1758",
+  "session_id": "0abaad50-9dd5-4fc5-985e-0bdc570e6226",
+  "strategy": "manual-commit",
+  "created_at": "2026-03-12T21:49:27.01652Z",
+  "branch": "feat/pro-89-social-feed",
+  "checkpoints_count": 2,
+  "files_touched": [
+    "FitToday/FitToday/Domain/Entities/FeatureFlag.swift",
+    "FitToday/FitToday/Presentation/Features/Activity/Views/ActivityTabView.swift",
+    "FitToday/FitTodayTests/Presentation/Features/SocialFeed/SocialFeedFeatureFlagTests.swift",
+    "ops/sessions/20260312-214419.json",
+    "ops/sessions/20260312-214917.json",
+    "remoteconfig.template.json"
+  ],
+  "agent": "Claude Code",
+  "token_usage": {
+    "input_tokens": 1561,
+    "cache_creation_tokens": 77728,
+    "cache_read_tokens": 1390620,
+    "output_tokens": 6884,
+    "api_call_count": 24
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-03-12T21:49:26.751948Z",
+    "agent_lines": 184,
+    "human_added": 203,
+    "human_modified": 1,
+    "human_removed": 0,
+    "total_committed": 388,
+    "agent_percentage": 47.42268041237113
+  },
+  "transcript_path": ".claude/projects/-Users-viniciuscarvalho-Documents-FitToday/0abaad50-9dd5-4fc5-985e-0bdc570e6226.jsonl"
+}
