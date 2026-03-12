@@ -51,7 +51,8 @@ struct SocialFeedView: View {
             .padding()
         }
         .refreshable {
-            await viewModel.loadFeed()
+            viewModel.stopObserving()
+            viewModel.startObserving()
         }
         .task {
             viewModel.startObserving()

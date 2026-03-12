@@ -61,7 +61,11 @@ actor FirebaseFeedService {
                 .whereField("groupId", isEqualTo: groupId)
                 .order(by: "createdAt", descending: true)
                 .limit(to: 50)
-                .addSnapshotListener { snapshot, _ in
+                .addSnapshotListener { snapshot, error in
+                    if error != nil {
+                        continuation.yield([])
+                        return
+                    }
                     guard let snapshot else { return }
                     let posts = snapshot.documents.compactMap {
                         try? $0.data(as: FBFeedPost.self)

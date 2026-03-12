@@ -40,9 +40,6 @@ final class SocialFeedViewModel {
     // MARK: - Load
 
     func loadFeed() async {
-        isLoading = true
-        defer { isLoading = false }
-
         do {
             guard let user = try await authRepository.currentUser() else {
                 errorMessage = FeedError.notAuthenticated.localizedDescription
@@ -71,22 +68,29 @@ final class SocialFeedViewModel {
 
             do {
                 guard let user = try await authRepository.currentUser(),
-                      let groupId = user.currentGroupId else { return }
+                      let groupId = user.currentGroupId else {
+                    self.isLoading = false
+                    return
+                }
                 currentUserId = user.id
                 currentGroupId = groupId
 
                 for await newPosts in feedRepository.observePosts(groupId: groupId) {
+                    if Task.isCancelled { break }
                     self.posts = newPosts
                     self.isLoading = false
                 }
+            } catch is CancellationError {
+                // Expected when stopObserving() is called
             } catch {
                 self.errorMessage = error.localizedDescription
             }
+            self.isLoading = false
         }
         isLoading = true
     }
 
-    nonisolated func stopObserving() {
+    func stopObserving() {
         observeTask?.cancel()
         observeTask = nil
     }
@@ -134,7 +138,7 @@ final class SocialFeedViewModel {
         return post.isLiked(by: userId)
     }
 
-    deinit {
-        stopObserving()
+    nonisolated deinit {
+        observeTask?.cancel()
     }
 }
