@@ -3,7 +3,7 @@
   "checkpoint_id": "4dae7bf07b83",
   "strategy": "manual-commit",
   "branch": "feat/pro-89-social-feed",
-  "checkpoints_count": 5,
+  "checkpoints_count": 7,
   "files_touched": [
     ".claude/logs/build_20260310_192847.log",
     ".claude/logs/build_20260310_192949.log",
@@ -20,17 +20,44 @@
     "FitToday/.claude/logs/build_20260312_093827.log",
     "FitToday/.claude/logs/build_20260312_094111.log",
     "FitToday/.claude/logs/build_20260312_094512.log",
+    "FitToday/.claude/logs/build_20260312_180649.log",
+    "FitToday/.claude/logs/build_20260312_180843.log",
+    "FitToday/.claude/logs/build_20260312_181010.log",
+    "FitToday/.claude/logs/build_20260312_181042.log",
+    "FitToday/.claude/logs/build_20260312_181116.log",
+    "FitToday/.claude/logs/build_20260312_181146.log",
+    "FitToday/.claude/logs/build_20260312_181239.log",
+    "FitToday/.claude/logs/build_20260312_181321.log",
     "FitToday/FitToday.xcodeproj/xcshareddata/xcschemes/FitToday.xcscheme",
     "FitToday/FitToday/Data/Models/CMSTrainerModels.swift",
+    "FitToday/FitToday/Data/Models/FBFeedModels.swift",
+    "FitToday/FitToday/Data/Repositories/FirebaseFeedRepository.swift",
     "FitToday/FitToday/Data/Repositories/FirebasePersonalTrainerRepository.swift",
     "FitToday/FitToday/Data/Services/CMS/CMSTrainerService.swift",
+    "FitToday/FitToday/Data/Services/Firebase/FirebaseFeedService.swift",
     "FitToday/FitToday/Data/Services/ImageCache/ExerciseImageCache.swift",
+    "FitToday/FitToday/Domain/Entities/FeedModels.swift",
+    "FitToday/FitToday/Domain/Protocols/FeedRepository.swift",
+    "FitToday/FitToday/Domain/UseCases/CreateFeedPostUseCase.swift",
+    "FitToday/FitToday/Domain/UseCases/DeleteFeedPostUseCase.swift",
     "FitToday/FitToday/Presentation/DI/AppContainer.swift",
+    "FitToday/FitToday/Presentation/Features/Activity/Views/ActivityTabView.swift",
     "FitToday/FitToday/Presentation/Features/Activity/Views/ChallengesView.swift",
     "FitToday/FitToday/Presentation/Features/PersonalTrainer/Components/TrainerReviewSheet.swift",
     "FitToday/FitToday/Presentation/Features/PersonalTrainer/TrainerDashboardView.swift",
+    "FitToday/FitToday/Presentation/Features/SocialFeed/ViewModels/CreatePostViewModel.swift",
+    "FitToday/FitToday/Presentation/Features/SocialFeed/ViewModels/FeedCommentsViewModel.swift",
+    "FitToday/FitToday/Presentation/Features/SocialFeed/ViewModels/SocialFeedViewModel.swift",
+    "FitToday/FitToday/Presentation/Features/SocialFeed/Views/CreatePostView.swift",
+    "FitToday/FitToday/Presentation/Features/SocialFeed/Views/FeedCommentsView.swift",
+    "FitToday/FitToday/Presentation/Features/SocialFeed/Views/FeedPostCardView.swift",
+    "FitToday/FitToday/Presentation/Features/SocialFeed/Views/SocialFeedView.swift",
+    "FitToday/FitToday/Presentation/Features/Workout/WorkoutCompletionView.swift",
+    "FitToday/FitToday/Presentation/Root/TabRootView.swift",
+    "FitToday/FitToday/Presentation/Router/AppRouter.swift",
     "FitToday/FitToday/Resources/en.lproj/Localizable.strings",
     "FitToday/FitToday/Resources/pt-BR.lproj/Localizable.strings",
+    "FitToday/FitTodayTests/Presentation/Features/SocialFeed/SocialFeedViewModelTests.swift",
     "ops/sessions/20260310-013726.json",
     "ops/sessions/20260310-014541.json",
     "ops/sessions/20260310-021528.json",
@@ -40,7 +67,9 @@
     "ops/sessions/20260311-111828.json",
     "ops/sessions/20260312-122946.json",
     "ops/sessions/20260312-124730.json",
-    "ops/sessions/20260312-151710.json"
+    "ops/sessions/20260312-151710.json",
+    "ops/sessions/20260312-202654.json",
+    "ops/sessions/20260312-211552.json"
   ],
   "sessions": [
     {
@@ -70,13 +99,20 @@
       "context": "/4d/ae7bf07b83/3/context.md",
       "content_hash": "/4d/ae7bf07b83/3/content_hash.txt",
       "prompt": "/4d/ae7bf07b83/3/prompt.txt"
+    },
+    {
+      "metadata": "/4d/ae7bf07b83/4/metadata.json",
+      "transcript": "/4d/ae7bf07b83/4/full.jsonl",
+      "context": "/4d/ae7bf07b83/4/context.md",
+      "content_hash": "/4d/ae7bf07b83/4/content_hash.txt",
+      "prompt": "/4d/ae7bf07b83/4/prompt.txt"
     }
   ],
   "token_usage": {
-    "input_tokens": 16563,
-    "cache_creation_tokens": 217383,
-    "cache_read_tokens": 10382630,
-    "output_tokens": 28009,
-    "api_call_count": 103
+    "input_tokens": 17539,
+    "cache_creation_tokens": 431075,
+    "cache_read_tokens": 20329067,
+    "output_tokens": 71099,
+    "api_call_count": 207
   }
 }
