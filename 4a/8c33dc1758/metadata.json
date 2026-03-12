@@ -1,0 +1,26 @@
+{
+  "cli_version": "0.4.4",
+  "checkpoint_id": "4a8c33dc1758",
+  "strategy": "manual-commit",
+  "branch": "feat/pro-89-social-feed",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "ops/sessions/20260312-211634.json"
+  ],
+  "sessions": [
+    {
+      "metadata": "/4a/8c33dc1758/0/metadata.json",
+      "transcript": "/4a/8c33dc1758/0/full.jsonl",
+      "context": "/4a/8c33dc1758/0/context.md",
+      "content_hash": "/4a/8c33dc1758/0/content_hash.txt",
+      "prompt": "/4a/8c33dc1758/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 3,
+    "cache_creation_tokens": 1227,
+    "cache_read_tokens": 70172,
+    "output_tokens": 49,
+    "api_call_count": 1
+  }
+}
