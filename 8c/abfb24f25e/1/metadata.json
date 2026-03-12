@@ -1,9 +1,11 @@
 {
   "cli_version": "0.4.4",
   "checkpoint_id": "8cabfb24f25e",
+  "session_id": "2101968d-0fea-4320-9eb8-aadb673285f0",
   "strategy": "manual-commit",
+  "created_at": "2026-03-12T23:27:43.528721Z",
   "branch": "feat/pro-89-social-feed",
-  "checkpoints_count": 6,
+  "checkpoints_count": 5,
   "files_touched": [
     "FitToday/.claude/logs/build_20260312_195707.log",
     "FitToday/.claude/logs/build_20260312_195950.log",
@@ -13,32 +15,26 @@
     "FitToday/FitToday/Data/Services/Firebase/FirebaseFeedService.swift",
     "FitToday/FitToday/Presentation/Features/SocialFeed/ViewModels/SocialFeedViewModel.swift",
     "FitToday/FitToday/Presentation/Features/SocialFeed/Views/SocialFeedView.swift",
-    "ops/sessions/20260312-215714.json",
     "ops/sessions/20260312-224055.json",
     "ops/sessions/20260312-224330.json",
     "ops/sessions/20260312-232727.json"
   ],
-  "sessions": [
-    {
-      "metadata": "/8c/abfb24f25e/0/metadata.json",
-      "transcript": "/8c/abfb24f25e/0/full.jsonl",
-      "context": "/8c/abfb24f25e/0/context.md",
-      "content_hash": "/8c/abfb24f25e/0/content_hash.txt",
-      "prompt": "/8c/abfb24f25e/0/prompt.txt"
-    },
-    {
-      "metadata": "/8c/abfb24f25e/1/metadata.json",
-      "transcript": "/8c/abfb24f25e/1/full.jsonl",
-      "context": "/8c/abfb24f25e/1/context.md",
-      "content_hash": "/8c/abfb24f25e/1/content_hash.txt",
-      "prompt": "/8c/abfb24f25e/1/prompt.txt"
-    }
-  ],
+  "agent": "Claude Code",
   "token_usage": {
-    "input_tokens": 85,
-    "cache_creation_tokens": 134195,
-    "cache_read_tokens": 5768798,
-    "output_tokens": 35030,
-    "api_call_count": 64
-  }
+    "input_tokens": 77,
+    "cache_creation_tokens": 132528,
+    "cache_read_tokens": 5297746,
+    "output_tokens": 34293,
+    "api_call_count": 58
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-03-12T23:27:43.150855Z",
+    "agent_lines": 18,
+    "human_added": 507,
+    "human_modified": 3,
+    "human_removed": 0,
+    "total_committed": 528,
+    "agent_percentage": 3.4090909090909087
+  },
+  "transcript_path": ".claude/projects/-Users-viniciuscarvalho-Documents-FitToday/2101968d-0fea-4320-9eb8-aadb673285f0.jsonl"
 }
