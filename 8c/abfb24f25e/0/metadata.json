@@ -1,0 +1,33 @@
+{
+  "cli_version": "0.4.4",
+  "checkpoint_id": "8cabfb24f25e",
+  "session_id": "0abaad50-9dd5-4fc5-985e-0bdc570e6226",
+  "strategy": "manual-commit",
+  "created_at": "2026-03-12T23:27:14.638185Z",
+  "branch": "feat/pro-89-social-feed",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "ops/sessions/20260312-215714.json"
+  ],
+  "agent": "Claude Code",
+  "transcript_identifier_at_start": "99828af2-016f-47b8-b5cf-4d18c7edda54",
+  "checkpoint_transcript_start": 243,
+  "transcript_lines_at_start": 243,
+  "token_usage": {
+    "input_tokens": 8,
+    "cache_creation_tokens": 1667,
+    "cache_read_tokens": 471052,
+    "output_tokens": 737,
+    "api_call_count": 6
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-03-12T23:27:14.138534Z",
+    "agent_lines": 0,
+    "human_added": 101,
+    "human_modified": 1,
+    "human_removed": 0,
+    "total_committed": 102,
+    "agent_percentage": 0
+  },
+  "transcript_path": ".claude/projects/-Users-viniciuscarvalho-Documents-FitToday/0abaad50-9dd5-4fc5-985e-0bdc570e6226.jsonl"
+}
