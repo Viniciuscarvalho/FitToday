@@ -633,6 +633,39 @@ struct AppContainer {
 
         // ========== END PERSONAL WORKOUTS ==========
 
+        // ========== SOCIAL FEED (PRO-89) ==========
+
+        let feedService = FirebaseFeedService()
+        container.register(FirebaseFeedService.self) { _ in feedService }
+            .inObjectScope(.container)
+
+        container.register(FeedRepository.self) { resolver in
+            FirebaseFeedRepository(
+                feedService: resolver.resolve(FirebaseFeedService.self)!,
+                storageService: resolver.resolve(StorageServicing.self)!
+            )
+        }
+        .inObjectScope(.container)
+
+        container.register(CreateFeedPostUseCase.self) { resolver in
+            CreateFeedPostUseCase(
+                feedRepository: resolver.resolve(FeedRepository.self)!,
+                authRepository: resolver.resolve(AuthenticationRepository.self)!,
+                imageCompressor: resolver.resolve(ImageCompressing.self)!
+            )
+        }
+        .inObjectScope(.container)
+
+        container.register(DeleteFeedPostUseCase.self) { resolver in
+            DeleteFeedPostUseCase(
+                feedRepository: resolver.resolve(FeedRepository.self)!,
+                authRepository: resolver.resolve(AuthenticationRepository.self)!
+            )
+        }
+        .inObjectScope(.container)
+
+        // ========== END SOCIAL FEED ==========
+
         return AppContainer(container: container, router: router, modelContainer: modelContainer)
     }
 

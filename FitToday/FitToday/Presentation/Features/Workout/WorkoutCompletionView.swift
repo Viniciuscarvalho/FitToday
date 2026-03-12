@@ -37,6 +37,10 @@ struct WorkoutCompletionView: View {
     @State private var isInGroup = false
     @State private var currentEntry: WorkoutHistoryEntry?
 
+    // Social feed post state
+    @State private var showCreatePost = false
+    @State private var showPostSuccess = false
+
     // Success feedback
     @State private var didPlayHaptic = false
     @State private var showCompletionCelebration = false
@@ -92,6 +96,17 @@ struct WorkoutCompletionView: View {
                     Label("Fazer Check-in com Foto", systemImage: "camera.fill")
                 }
                 .fitPrimaryStyle()
+                .padding(.horizontal)
+            }
+
+            // Social feed post button (after rating, for users in a group)
+            if status == .completed && hasRated && isInGroup {
+                Button {
+                    showCreatePost = true
+                } label: {
+                    Label("Postar no Feed", systemImage: "square.and.arrow.up")
+                }
+                .fitSecondaryStyle()
                 .padding(.horizontal)
             }
 
@@ -190,6 +205,22 @@ struct WorkoutCompletionView: View {
                 )
             }
         }
+        .sheet(isPresented: $showCreatePost) {
+            if let createUseCase = resolver.resolve(CreateFeedPostUseCase.self) {
+                CreatePostView(
+                    viewModel: CreatePostViewModel(
+                        createPostUseCase: createUseCase,
+                        workoutTitle: sessionStore.plan?.title ?? "Treino",
+                        workoutDurationMinutes: sessionStore.lastWorkoutElapsedSeconds / 60,
+                        exerciseCount: sessionStore.completedExercisesCount,
+                        totalVolume: nil
+                    ),
+                    onSuccess: {
+                        showPostSuccess = true
+                    }
+                )
+            }
+        }
         .overlay {
             if showCompletionCelebration {
                 CelebrationOverlay(type: .checkInComplete)
@@ -207,6 +238,16 @@ struct WorkoutCompletionView: View {
                     .task {
                         try? await Task.sleep(for: .seconds(3))
                         showCelebration = false
+                    }
+            }
+            if showPostSuccess {
+                CelebrationOverlay(type: .checkInComplete)
+                    .onTapGesture {
+                        showPostSuccess = false
+                    }
+                    .task {
+                        try? await Task.sleep(for: .seconds(3))
+                        showPostSuccess = false
                     }
             }
         }

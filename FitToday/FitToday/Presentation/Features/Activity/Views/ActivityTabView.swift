@@ -11,6 +11,7 @@ import Swinject
 
 /// Segments available in the Activity tab.
 enum ActivitySegment: String, CaseIterable {
+    case feed = "Feed"
     case history = "Histórico"
     case challenges = "Desafios"
     case stats = "Stats"
@@ -21,6 +22,13 @@ struct ActivityTabView: View {
     let resolver: Resolver
 
     @State private var selectedSegment: ActivitySegment = .history
+    @State private var isSocialFeedEnabled = false
+
+    private var availableSegments: [ActivitySegment] {
+        ActivitySegment.allCases.filter { segment in
+            segment != .feed || isSocialFeedEnabled
+        }
+    }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -31,6 +39,11 @@ struct ActivityTabView: View {
 
             // Content
             TabView(selection: $selectedSegment) {
+                if isSocialFeedEnabled {
+                    feedTab
+                        .tag(ActivitySegment.feed)
+                }
+
                 WorkoutHistoryView(resolver: resolver)
                     .tag(ActivitySegment.history)
 
@@ -45,13 +58,44 @@ struct ActivityTabView: View {
         .background(FitTodayColor.background)
         .navigationTitle("Atividade")
         .navigationBarTitleDisplayMode(.large)
+        .task {
+            guard let featureFlags = resolver.resolve(FeatureFlagChecking.self) else { return }
+            isSocialFeedEnabled = await featureFlags.isFeatureEnabled(.socialFeedEnabled)
+        }
+    }
+
+    // MARK: - Feed Tab
+
+    @ViewBuilder
+    private var feedTab: some View {
+        if let feedRepo = resolver.resolve(FeedRepository.self),
+           let authRepo = resolver.resolve(AuthenticationRepository.self),
+           let deleteUseCase = resolver.resolve(DeleteFeedPostUseCase.self) {
+            SocialFeedView(
+                viewModel: SocialFeedViewModel(
+                    feedRepository: feedRepo,
+                    authRepository: authRepo,
+                    deleteFeedPostUseCase: deleteUseCase
+                )
+            )
+        } else {
+            VStack(spacing: FitTodaySpacing.md) {
+                Image(systemName: "person.3.fill")
+                    .font(.system(size: 48))
+                    .foregroundStyle(FitTodayColor.textSecondary)
+                Text("Entre em um grupo para ver o feed")
+                    .font(.subheadline)
+                    .foregroundStyle(FitTodayColor.textSecondary)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+        }
     }
 
     // MARK: - Segmented Control
 
     private var segmentedControl: some View {
         HStack(spacing: FitTodaySpacing.xs) {
-            ForEach(ActivitySegment.allCases, id: \.self) { segment in
+            ForEach(availableSegments, id: \.self) { segment in
                 Button {
                     withAnimation(.easeInOut(duration: 0.2)) {
                         selectedSegment = segment
