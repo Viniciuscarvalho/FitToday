@@ -39,6 +39,9 @@ enum FeatureFlagKey: String, CaseIterable, Sendable {
     /// Enables group streak tracking and display.
     case groupStreaksEnabled = "group_streaks_enabled"
 
+    /// Enables social feed with workout proof posts.
+    case socialFeedEnabled = "social_feed_enabled"
+
     // MARK: - Health & Sync
 
     /// Enables Apple Health read/write integration.
@@ -102,6 +105,7 @@ enum FeatureFlagKey: String, CaseIterable, Sendable {
         case .leaderboardEnabled: return "Leaderboard"
         case .checkInEnabled: return "Check-In"
         case .groupStreaksEnabled: return "Group Streaks"
+        case .socialFeedEnabled: return "Social Feed"
         // Health
         case .healthKitSyncEnabled: return "Apple Health Sync"
         case .statsChartsEnabled: return "Stats Charts"
@@ -130,7 +134,8 @@ enum FeatureFlagKey: String, CaseIterable, Sendable {
     var defaultValue: Bool {
         switch self {
         // Unreleased features — disabled by default
-        case .personalTrainerEnabled,
+        case .socialFeedEnabled,
+             .personalTrainerEnabled,
              .cmsWorkoutSyncEnabled,
              .trainerChatEnabled,
              .maintenanceModeEnabled,

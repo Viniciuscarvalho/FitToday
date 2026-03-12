@@ -22,6 +22,13 @@ struct ActivityTabView: View {
     let resolver: Resolver
 
     @State private var selectedSegment: ActivitySegment = .history
+    @State private var isSocialFeedEnabled = false
+
+    private var availableSegments: [ActivitySegment] {
+        ActivitySegment.allCases.filter { segment in
+            segment != .feed || isSocialFeedEnabled
+        }
+    }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -32,8 +39,10 @@ struct ActivityTabView: View {
 
             // Content
             TabView(selection: $selectedSegment) {
-                feedTab
-                    .tag(ActivitySegment.feed)
+                if isSocialFeedEnabled {
+                    feedTab
+                        .tag(ActivitySegment.feed)
+                }
 
                 WorkoutHistoryView(resolver: resolver)
                     .tag(ActivitySegment.history)
@@ -49,6 +58,10 @@ struct ActivityTabView: View {
         .background(FitTodayColor.background)
         .navigationTitle("Atividade")
         .navigationBarTitleDisplayMode(.large)
+        .task {
+            guard let featureFlags = resolver.resolve(FeatureFlagChecking.self) else { return }
+            isSocialFeedEnabled = await featureFlags.isFeatureEnabled(.socialFeedEnabled)
+        }
     }
 
     // MARK: - Feed Tab
@@ -82,7 +95,7 @@ struct ActivityTabView: View {
 
     private var segmentedControl: some View {
         HStack(spacing: FitTodaySpacing.xs) {
-            ForEach(ActivitySegment.allCases, id: \.self) { segment in
+            ForEach(availableSegments, id: \.self) { segment in
                 Button {
                     withAnimation(.easeInOut(duration: 0.2)) {
                         selectedSegment = segment
