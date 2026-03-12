@@ -634,6 +634,35 @@ struct ActivityStatsView: View {
                             .frame(height: 180)
                         }
                     }
+
+                    // PRO-74: Consistency Heatmap (free)
+                    ConsistencyHeatmapView(workoutDates: viewModel.heatmapData)
+
+                    // PRO-75: Weekly Volume Chart (Pro+)
+                    if viewModel.entitlement.isPro {
+                        WeeklyVolumeChartView(
+                            entries: viewModel.volumeEntries,
+                            animated: chartAnimated
+                        )
+                    } else {
+                        proLockedSection(
+                            title: "Volume Semanal",
+                            description: "Acompanhe sua evolução de volume de treino"
+                        )
+                    }
+
+                    // PRO-76: Weight Progress Chart (Pro+)
+                    if viewModel.entitlement.isPro {
+                        WeightProgressChartView(
+                            entries: viewModel.weightEntries,
+                            animated: chartAnimated
+                        )
+                    } else {
+                        proLockedSection(
+                            title: "Evolução de Peso",
+                            description: "Visualize sua progressão de peso com dados do Apple Health"
+                        )
+                    }
                 }
                 .padding(FitTodaySpacing.md)
                 .onAppear {
@@ -751,6 +780,41 @@ struct ActivityStatsView: View {
             return m > 0 ? "\(h)h \(m)m" : "\(h)h"
         }
         return "\(minutes)m"
+    }
+
+    // MARK: - Pro Locked Section
+
+    private func proLockedSection(title: String, description: String) -> some View {
+        VStack(spacing: FitTodaySpacing.md) {
+            Image(systemName: "lock.fill")
+                .font(.system(size: 28))
+                .foregroundStyle(FitTodayColor.chartLocked)
+
+            Text(title)
+                .font(FitTodayFont.ui(size: 17, weight: .bold))
+                .foregroundStyle(FitTodayColor.textPrimary)
+
+            Text(description)
+                .font(FitTodayFont.ui(size: 13, weight: .medium))
+                .foregroundStyle(FitTodayColor.textSecondary)
+                .multilineTextAlignment(.center)
+
+            Text("Desbloqueie com o Pro")
+                .font(FitTodayFont.ui(size: 12, weight: .bold))
+                .foregroundStyle(.white)
+                .padding(.horizontal, FitTodaySpacing.md)
+                .padding(.vertical, FitTodaySpacing.sm)
+                .background(
+                    Capsule()
+                        .fill(FitTodayColor.brandPrimary)
+                )
+        }
+        .frame(maxWidth: .infinity)
+        .padding(FitTodaySpacing.xl)
+        .background(
+            RoundedRectangle(cornerRadius: FitTodayRadius.md)
+                .fill(FitTodayColor.surface)
+        )
     }
 }
 

@@ -230,19 +230,19 @@
 "settings.pro.free" = "Plano Gratuito";
 "settings.pro.title" = "FitToday Pro";
 "settings.pro.access_all" = "Voce tem acesso a todos os recursos premium";
-"settings.pro.cloud_sync" = "Sincronizacao na Nuvem";
 "settings.pro.apple_health" = "Apple Health";
 "settings.pro.ai_workouts" = "Treinos com IA";
-"settings.pro.manage" = "Pro Vitalicio Ativo";
+"settings.pro.manage" = "Assinatura Ativa";
 "settings.pro.upgrade" = "Desbloquear Pro";
-"settings.pro.unlock_description" = "Desbloqueie treinos ilimitados com IA, sincronizacao na nuvem e integracao com Apple Health";
+"settings.pro.unlock_description" = "Desbloqueie treinos ilimitados com IA, graficos avancados e integracao com Apple Health";
 "settings.pro.unlimited_ai" = "Treinos Ilimitados com IA";
-"settings.pro.cloud_devices" = "Sincronizacao Entre Dispositivos";
+"settings.pro.advanced_charts" = "Graficos Avancados";
 "settings.pro.health_integration" = "Integracao com Apple Health";
 "settings.pro.try_free" = "Experimente Pro Gratis";
 "settings.pro.unlock" = "Desbloquear Pro";
 "settings.pro.connected" = "Conectado";
 "settings.pro.connect_sync" = "Conecte para sincronizar treinos";
+"settings.pro.subscription_active" = "Assinatura Ativa";
 "settings.personal_trainer" = "Personal Trainer";
 "settings.personal_trainer_desc" = "Conecte-se ao seu personal";
 "settings.theme" = "Tema";
@@ -919,9 +919,21 @@
 // MARK: - Trainer Dashboard
 "trainer.dashboard.online" = "Online";
 "trainer.dashboard.disconnect" = "Desconectar";
+"trainer.dashboard.review" = "Avaliar Trainer";
 "trainer.dashboard.tab.chat" = "Chat";
 "trainer.dashboard.tab.history" = "Histórico";
 "trainer.dashboard.tab.evolution" = "Evolução";
+
+// MARK: - Trainer Review
+"trainer.review.title" = "Avaliar Trainer";
+"trainer.review.cancel" = "Cancelar";
+"trainer.review.rating_prompt" = "Como foi sua experiência?";
+"trainer.review.comment_label" = "Comentário (opcional)";
+"trainer.review.submit" = "Enviar Avaliação";
+"trainer.review.success" = "Avaliação Enviada!";
+"trainer.review.thanks" = "Obrigado por avaliar seu trainer. Sua opinião ajuda outros alunos.";
+"trainer.review.done" = "Concluir";
+"trainer.review.error_generic" = "Erro ao enviar avaliação. Tente novamente.";
 
 // MARK: - Welcome Onboarding
 "welcome.page1.title" = "Acompanhe Seus Treinos";

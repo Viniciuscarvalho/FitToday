@@ -163,7 +163,11 @@ struct AppContainer {
         let healthKitService = HealthKitService()
         container.register(HealthKitServicing.self) { _ in healthKitService }
             .inObjectScope(.container)
-        
+
+        // PRO-72: HealthDataService for body mass / weight data
+        container.register(HealthDataServicing.self) { _ in HealthDataService() }
+            .inObjectScope(.container)
+
         // Note: HealthKitHistorySyncService is registered later after SyncWorkoutCompletionUseCase is available
 
         // HealthKit Workout Sync Use Case - auto-exports workouts and imports calories
@@ -468,10 +472,11 @@ struct AppContainer {
         }
         .inObjectScope(.container)
 
-        // Trainer Student Repository (same implementation, different protocol)
+        // Trainer Student Repository — CMS API for connections, Firebase for real-time observation
         container.register(TrainerStudentRepository.self) { resolver in
             FirebasePersonalTrainerRepository(
-                service: resolver.resolve(FirebasePersonalTrainerService.self)!
+                service: resolver.resolve(FirebasePersonalTrainerService.self)!,
+                cmsService: resolver.resolve(CMSTrainerService.self)
             )
         }
         .inObjectScope(.container)

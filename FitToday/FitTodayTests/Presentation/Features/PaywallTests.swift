@@ -23,9 +23,12 @@ final class PaywallTests: XCTestCase {
 
     @MainActor
     func testStoreKitProductIDConstants() {
-        XCTAssertEqual(StoreKitProductID.proLifetime, "com.fittoday.pro.lifetime")
-        XCTAssertEqual(StoreKitProductID.allProducts.count, 1)
-        XCTAssertTrue(StoreKitProductID.allProducts.contains(StoreKitProductID.proLifetime))
+        XCTAssertEqual(StoreKitProductID.proMonthly, "com.fittoday.pro.monthly")
+        XCTAssertEqual(StoreKitProductID.proAnnual, "com.fittoday.pro.annual")
+        XCTAssertEqual(StoreKitProductID.eliteMonthly, "com.fittoday.elite.monthly")
+        XCTAssertEqual(StoreKitProductID.eliteAnnual, "com.fittoday.elite.annual")
+        XCTAssertEqual(StoreKitProductID.allProducts.count, 4)
+        XCTAssertTrue(StoreKitProductID.allProducts.contains(StoreKitProductID.proMonthly))
     }
 
     // MARK: - PurchaseState Tests
@@ -59,9 +62,9 @@ final class PaywallTests: XCTestCase {
         XCTAssertNil(entitlement.expirationDate)
     }
 
-    func testProEntitlementLifetime() {
+    func testProEntitlementPro() {
         let entitlement = ProEntitlement(
-            isPro: true,
+            tier: .pro,
             source: .storeKit,
             expirationDate: nil
         )
@@ -110,7 +113,7 @@ final class PaywallTests: XCTestCase {
     }
 
     func testFeatureAccessForProUser() {
-        let proEntitlement = ProEntitlement(isPro: true, source: .storeKit, expirationDate: nil)
+        let proEntitlement = ProEntitlement(tier: .pro, source: .storeKit, expirationDate: nil)
 
         XCTAssertTrue(proEntitlement.isPro)
 

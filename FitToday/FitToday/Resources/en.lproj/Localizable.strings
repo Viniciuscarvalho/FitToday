@@ -230,19 +230,19 @@
 "settings.pro.free" = "Free Plan";
 "settings.pro.title" = "FitToday Pro";
 "settings.pro.access_all" = "You have access to all premium features";
-"settings.pro.cloud_sync" = "Cloud Sync";
 "settings.pro.apple_health" = "Apple Health";
 "settings.pro.ai_workouts" = "AI Workouts";
-"settings.pro.manage" = "Lifetime Pro Active";
+"settings.pro.manage" = "Subscription Active";
 "settings.pro.upgrade" = "Unlock Pro";
-"settings.pro.unlock_description" = "Unlock unlimited AI workouts, cloud sync, and Apple Health integration";
+"settings.pro.unlock_description" = "Unlock unlimited AI workouts, advanced charts, and Apple Health integration";
 "settings.pro.unlimited_ai" = "Unlimited AI Workouts";
-"settings.pro.cloud_devices" = "Cloud Sync Across Devices";
+"settings.pro.advanced_charts" = "Advanced Charts";
 "settings.pro.health_integration" = "Apple Health Integration";
 "settings.pro.try_free" = "Try Pro Free";
 "settings.pro.unlock" = "Unlock Pro";
 "settings.pro.connected" = "Connected";
 "settings.pro.connect_sync" = "Connect to sync workouts";
+"settings.pro.subscription_active" = "Subscription Active";
 "settings.personal_trainer" = "Personal Trainer";
 "settings.personal_trainer_desc" = "Connect with your trainer";
 "settings.theme" = "Theme";
@@ -919,9 +919,21 @@
 // MARK: - Trainer Dashboard
 "trainer.dashboard.online" = "Online";
 "trainer.dashboard.disconnect" = "Disconnect";
+"trainer.dashboard.review" = "Review Trainer";
 "trainer.dashboard.tab.chat" = "Chat";
 "trainer.dashboard.tab.history" = "History";
 "trainer.dashboard.tab.evolution" = "Evolution";
+
+// MARK: - Trainer Review
+"trainer.review.title" = "Review Trainer";
+"trainer.review.cancel" = "Cancel";
+"trainer.review.rating_prompt" = "How was your experience?";
+"trainer.review.comment_label" = "Comment (optional)";
+"trainer.review.submit" = "Submit Review";
+"trainer.review.success" = "Review Submitted!";
+"trainer.review.thanks" = "Thank you for reviewing your trainer. Your feedback helps other students.";
+"trainer.review.done" = "Done";
+"trainer.review.error_generic" = "Error submitting review. Please try again.";
 
 // MARK: - Welcome Onboarding
 "welcome.page1.title" = "Track Your Workouts";

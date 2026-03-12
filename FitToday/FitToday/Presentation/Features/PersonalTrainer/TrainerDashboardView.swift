@@ -18,6 +18,7 @@ struct TrainerDashboardView: View {
     let resolver: Resolver
 
     @State private var selectedTab: TrainerDashboardTab
+    @State private var showReviewSheet = false
 
     init(
         trainer: PersonalTrainer,
@@ -45,6 +46,15 @@ struct TrainerDashboardView: View {
             tabContent
         }
         .background(FitTodayColor.background)
+        .sheet(isPresented: $showReviewSheet) {
+            TrainerReviewSheet(
+                trainerId: trainer.id,
+                trainerName: trainer.displayName,
+                currentUserId: currentUserId,
+                onDismiss: { showReviewSheet = false },
+                onSuccess: { showReviewSheet = false }
+            )
+        }
     }
 
     // MARK: - Trainer Header
@@ -73,6 +83,12 @@ struct TrainerDashboardView: View {
             Spacer()
 
             Menu {
+                Button {
+                    showReviewSheet = true
+                } label: {
+                    Label("trainer.dashboard.review".localized, systemImage: "star")
+                }
+
                 Button(role: .destructive) {
                     onDisconnect()
                 } label: {
