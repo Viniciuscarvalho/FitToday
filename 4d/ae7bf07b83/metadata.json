@@ -2,8 +2,8 @@
   "cli_version": "0.4.4",
   "checkpoint_id": "4dae7bf07b83",
   "strategy": "manual-commit",
-  "branch": "feat/pro-72-76-charts-enrichment",
-  "checkpoints_count": 4,
+  "branch": "feat/pro-89-social-feed",
+  "checkpoints_count": 5,
   "files_touched": [
     ".claude/logs/build_20260310_192847.log",
     ".claude/logs/build_20260310_192949.log",
@@ -39,7 +39,8 @@
     "ops/sessions/20260310-231653.json",
     "ops/sessions/20260311-111828.json",
     "ops/sessions/20260312-122946.json",
-    "ops/sessions/20260312-124730.json"
+    "ops/sessions/20260312-124730.json",
+    "ops/sessions/20260312-151710.json"
   ],
   "sessions": [
     {
@@ -62,13 +63,20 @@
       "context": "/4d/ae7bf07b83/2/context.md",
       "content_hash": "/4d/ae7bf07b83/2/content_hash.txt",
       "prompt": "/4d/ae7bf07b83/2/prompt.txt"
+    },
+    {
+      "metadata": "/4d/ae7bf07b83/3/metadata.json",
+      "transcript": "/4d/ae7bf07b83/3/full.jsonl",
+      "context": "/4d/ae7bf07b83/3/context.md",
+      "content_hash": "/4d/ae7bf07b83/3/content_hash.txt",
+      "prompt": "/4d/ae7bf07b83/3/prompt.txt"
     }
   ],
   "token_usage": {
-    "input_tokens": 16553,
-    "cache_creation_tokens": 183710,
-    "cache_read_tokens": 10217078,
-    "output_tokens": 27582,
-    "api_call_count": 97
+    "input_tokens": 16563,
+    "cache_creation_tokens": 217383,
+    "cache_read_tokens": 10382630,
+    "output_tokens": 28009,
+    "api_call_count": 103
   }
 }

@@ -1,0 +1,9 @@
+codex mcp add linear --url https://mcp.linear.app/mcp
+
+---
+
+claude mcp add --transport http linear-server https://mcp.linear.app/mcp
+
+---
+
+[Request interrupted by user]
