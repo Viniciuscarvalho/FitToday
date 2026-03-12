@@ -76,6 +76,32 @@ struct CMSTrainerReview: Codable, Sendable, Identifiable {
     let createdAt: Date?
 }
 
+// MARK: - Connection Request
+
+struct CMSConnectionRequest: Codable, Sendable {
+    let studentId: String
+    let studentName: String
+}
+
+// MARK: - Connection Response
+
+struct CMSConnectionResponse: Codable, Sendable {
+    let id: String
+    let trainerId: String
+    let studentId: String
+    let status: String
+    let createdAt: Date?
+}
+
+// MARK: - Connection Status Response
+
+struct CMSConnectionStatusResponse: Codable, Sendable {
+    let connected: Bool
+    let status: String?
+    let relationshipId: String?
+    let connectedAt: Date?
+}
+
 // MARK: - Create Review Request
 
 struct CMSCreateReviewRequest: Codable, Sendable {

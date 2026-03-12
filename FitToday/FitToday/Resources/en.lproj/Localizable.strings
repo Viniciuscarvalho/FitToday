@@ -919,9 +919,21 @@
 // MARK: - Trainer Dashboard
 "trainer.dashboard.online" = "Online";
 "trainer.dashboard.disconnect" = "Disconnect";
+"trainer.dashboard.review" = "Review Trainer";
 "trainer.dashboard.tab.chat" = "Chat";
 "trainer.dashboard.tab.history" = "History";
 "trainer.dashboard.tab.evolution" = "Evolution";
+
+// MARK: - Trainer Review
+"trainer.review.title" = "Review Trainer";
+"trainer.review.cancel" = "Cancel";
+"trainer.review.rating_prompt" = "How was your experience?";
+"trainer.review.comment_label" = "Comment (optional)";
+"trainer.review.submit" = "Submit Review";
+"trainer.review.success" = "Review Submitted!";
+"trainer.review.thanks" = "Thank you for reviewing your trainer. Your feedback helps other students.";
+"trainer.review.done" = "Done";
+"trainer.review.error_generic" = "Error submitting review. Please try again.";
 
 // MARK: - Welcome Onboarding
 "welcome.page1.title" = "Track Your Workouts";

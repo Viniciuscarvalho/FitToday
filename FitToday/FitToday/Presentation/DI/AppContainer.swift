@@ -472,10 +472,11 @@ struct AppContainer {
         }
         .inObjectScope(.container)
 
-        // Trainer Student Repository (same implementation, different protocol)
+        // Trainer Student Repository — CMS API for connections, Firebase for real-time observation
         container.register(TrainerStudentRepository.self) { resolver in
             FirebasePersonalTrainerRepository(
-                service: resolver.resolve(FirebasePersonalTrainerService.self)!
+                service: resolver.resolve(FirebasePersonalTrainerService.self)!,
+                cmsService: resolver.resolve(CMSTrainerService.self)
             )
         }
         .inObjectScope(.container)

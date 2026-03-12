@@ -12,7 +12,6 @@ struct TrainerReviewSheet: View {
     let trainerId: String
     let trainerName: String
     let currentUserId: String
-    let currentUserName: String
     let onDismiss: () -> Void
     let onSuccess: () -> Void
 
@@ -172,9 +171,11 @@ struct TrainerReviewSheet: View {
             return
         }
 
+        let userName = UserDefaults.standard.string(forKey: "socialUserDisplayName") ?? "Athlete"
+
         let request = CMSCreateReviewRequest(
             studentId: currentUserId,
-            studentName: currentUserName,
+            studentName: userName,
             rating: rating,
             comment: comment.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : comment.trimmingCharacters(in: .whitespacesAndNewlines)
         )

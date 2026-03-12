@@ -9,18 +9,23 @@ import Foundation
 
 // MARK: - Firebase Personal Trainer Repository
 
-/// Firebase implementation of personal trainer and trainer-student repositories.
+/// Implementation of personal trainer and trainer-student repositories.
 ///
-/// Uses `FirebasePersonalTrainerService` for Firestore operations and
-/// `PersonalTrainerMapper` for DTO-to-domain conversions.
+/// Uses `CMSTrainerService` for connection API calls (POST/GET connect)
+/// and `FirebasePersonalTrainerService` for real-time observation.
 final class FirebasePersonalTrainerRepository: PersonalTrainerRepository, TrainerStudentRepository, @unchecked Sendable {
 
     private let service: FirebasePersonalTrainerService
+    private let cmsService: CMSTrainerService?
 
     // MARK: - Initialization
 
-    init(service: FirebasePersonalTrainerService = FirebasePersonalTrainerService()) {
+    init(
+        service: FirebasePersonalTrainerService = FirebasePersonalTrainerService(),
+        cmsService: CMSTrainerService? = nil
+    ) {
         self.service = service
+        self.cmsService = cmsService
     }
 
     // MARK: - PersonalTrainerRepository
@@ -64,19 +69,29 @@ final class FirebasePersonalTrainerRepository: PersonalTrainerRepository, Traine
         studentId: String,
         studentDisplayName: String
     ) async throws -> String {
+        guard let cmsService else {
+            throw DomainError.repositoryFailure(reason: "CMS service not available")
+        }
+
         do {
-            return try await service.requestConnection(
-                trainerId: trainerId,
+            let request = CMSConnectionRequest(
                 studentId: studentId,
-                studentDisplayName: studentDisplayName
+                studentName: studentDisplayName
             )
-        } catch let error as NSError {
-            switch error.code {
-            case 409:
+            let response = try await cmsService.requestConnection(
+                trainerId: trainerId,
+                connection: request
+            )
+            return response.id
+        } catch let error as CMSServiceError {
+            switch error {
+            case .unexpectedStatus(409):
                 throw DomainError.invalidInput(reason: "Connection already exists with this trainer")
             default:
                 throw DomainError.repositoryFailure(reason: error.localizedDescription)
             }
+        } catch {
+            throw DomainError.repositoryFailure(reason: error.localizedDescription)
         }
     }
 

@@ -90,6 +90,35 @@ actor CMSTrainerService {
         return try await execute(request: request)
     }
 
+    // MARK: - Connection API
+
+    /// POST /api/trainers/[id]/connect — Request connection with a trainer.
+    func requestConnection(
+        trainerId: String,
+        connection: CMSConnectionRequest
+    ) async throws -> CMSConnectionResponse {
+        let url = configuration.baseURL.appendingPathComponent("/api/trainers/\(trainerId)/connect")
+        var request = try await buildRequest(url: url, method: "POST")
+        request.httpBody = try encoder.encode(connection)
+        return try await execute(request: request)
+    }
+
+    /// GET /api/trainers/[id]/connect — Check connection status with a trainer.
+    func checkConnectionStatus(
+        trainerId: String,
+        studentId: String
+    ) async throws -> CMSConnectionStatusResponse {
+        var components = URLComponents(url: configuration.baseURL.appendingPathComponent("/api/trainers/\(trainerId)/connect"), resolvingAgainstBaseURL: true)!
+        components.queryItems = [
+            URLQueryItem(name: "studentId", value: studentId)
+        ]
+        guard let url = components.url else { throw CMSServiceError.invalidURL }
+        let request = try await buildRequest(url: url, method: "GET")
+        return try await execute(request: request)
+    }
+
+    // MARK: - Reviews API
+
     /// POST /api/trainers/[id]/reviews — Submit a review for a trainer.
     func submitReview(
         trainerId: String,
