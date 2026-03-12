@@ -66,3 +66,21 @@ Summary:
 
 Continue de onde parou
 
+### Prompt 14
+
+A conexão com o personal está correta hoje, é possível enviar e receber mensagem através do chat? todas as chamadas estão corretas? | Método | Endpoint                   | Descrição                          |
+| ------ | -------------------------- | ---------------------------------- |
+| GET    | /api/trainers              | Listar trainers                    |
+| GET    | /api/trainers/count        | Total de trainers                  |
+| GET    | /api/trainers/[id]         | Detalhes do...
+
+### Prompt 15
+
+O POST connect deve ser feito através da API ou diretamente pelo Firebase? 
+E implemente o POST reviews
+
+### Prompt 16
+
+Stop hook feedback:
+Prompt hook condition was not met: Session stop hook requires manual review. Cannot auto-assess without reading full transcript. User's final request was to analyze the Personal Trainer API implementation - Claude completed: (1) POST /reviews endpoint + UI, (2) POST/GET /connect migration from Firebase to CMS API. However, critical item missing: Tests were NOT written or updated despite significant code changes (new models, service methods, repository logic, UI). The code com...
+
