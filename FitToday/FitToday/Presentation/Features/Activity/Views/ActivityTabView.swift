@@ -11,6 +11,7 @@ import Swinject
 
 /// Segments available in the Activity tab.
 enum ActivitySegment: String, CaseIterable {
+    case feed = "Feed"
     case history = "Histórico"
     case challenges = "Desafios"
     case stats = "Stats"
@@ -31,6 +32,9 @@ struct ActivityTabView: View {
 
             // Content
             TabView(selection: $selectedSegment) {
+                feedTab
+                    .tag(ActivitySegment.feed)
+
                 WorkoutHistoryView(resolver: resolver)
                     .tag(ActivitySegment.history)
 
@@ -45,6 +49,33 @@ struct ActivityTabView: View {
         .background(FitTodayColor.background)
         .navigationTitle("Atividade")
         .navigationBarTitleDisplayMode(.large)
+    }
+
+    // MARK: - Feed Tab
+
+    @ViewBuilder
+    private var feedTab: some View {
+        if let feedRepo = resolver.resolve(FeedRepository.self),
+           let authRepo = resolver.resolve(AuthenticationRepository.self),
+           let deleteUseCase = resolver.resolve(DeleteFeedPostUseCase.self) {
+            SocialFeedView(
+                viewModel: SocialFeedViewModel(
+                    feedRepository: feedRepo,
+                    authRepository: authRepo,
+                    deleteFeedPostUseCase: deleteUseCase
+                )
+            )
+        } else {
+            VStack(spacing: FitTodaySpacing.md) {
+                Image(systemName: "person.3.fill")
+                    .font(.system(size: 48))
+                    .foregroundStyle(FitTodayColor.textSecondary)
+                Text("Entre em um grupo para ver o feed")
+                    .font(.subheadline)
+                    .foregroundStyle(FitTodayColor.textSecondary)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+        }
     }
 
     // MARK: - Segmented Control

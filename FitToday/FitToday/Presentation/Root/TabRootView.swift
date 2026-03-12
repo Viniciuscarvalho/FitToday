@@ -185,6 +185,23 @@ struct TabRootView: View {
             CMSWorkoutFeedbackView(workoutId: workoutId, resolver: resolver)
         case .aiChat:
             AIChatView(resolver: resolver)
+        case .socialFeed:
+            if let feedRepo = resolver.resolve(FeedRepository.self),
+               let authRepo = resolver.resolve(AuthenticationRepository.self),
+               let deleteUseCase = resolver.resolve(DeleteFeedPostUseCase.self) {
+                SocialFeedView(
+                    viewModel: SocialFeedViewModel(
+                        feedRepository: feedRepo,
+                        authRepository: authRepo,
+                        deleteFeedPostUseCase: deleteUseCase
+                    )
+                )
+            } else {
+                PlaceholderView(
+                    title: "Feed Social",
+                    message: "Erro ao carregar o feed."
+                )
+            }
         }
     }
 }

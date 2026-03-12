@@ -65,6 +65,7 @@ enum AppRoute: Hashable {
     case cmsWorkoutDetail(String)  // CMS workout detail by ID
     case cmsWorkoutFeedback(String)  // CMS workout feedback by ID
     case aiChat  // AI Fitness Assistant (FitOrb)
+    case socialFeed  // Social feed with workout proofs
 }
 
 struct DeepLink {
