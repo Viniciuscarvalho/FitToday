@@ -106,9 +106,7 @@ final class EntitlementPolicyTests: XCTestCase {
             .unlimitedHistory,
             .advancedDOMSAdjustment,
             .premiumPrograms,
-            .customizableSettings,
-            .personalTrainer,
-            .trainerWorkouts
+            .customizableSettings
         ]
 
         for feature in proOnlyFeatures {
@@ -119,6 +117,12 @@ final class EntitlementPolicyTests: XCTestCase {
                 XCTFail("Free user should not have access to \(feature)")
             }
         }
+
+        // Personal Trainer is accessible to all users
+        let trainerResult = EntitlementPolicy.canAccess(.personalTrainer, entitlement: freeEntitlement)
+        XCTAssertTrue(trainerResult.isAllowed)
+        let trainerWorkoutsResult = EntitlementPolicy.canAccess(.trainerWorkouts, entitlement: freeEntitlement)
+        XCTAssertTrue(trainerWorkoutsResult.isAllowed)
     }
 
     // MARK: - Feature Access Result Tests
@@ -157,8 +161,8 @@ final class EntitlementPolicyTests: XCTestCase {
 
     func testProOnlyFeaturesCount() {
         let proOnlyFeatures = EntitlementPolicy.proOnlyFeatures
-        // aiExerciseSubstitution, unlimitedHistory, advancedDOMSAdjustment, premiumPrograms, customizableSettings, personalTrainer, trainerWorkouts
-        XCTAssertEqual(proOnlyFeatures.count, 7)
+        // aiExerciseSubstitution, unlimitedHistory, advancedDOMSAdjustment, premiumPrograms, customizableSettings
+        XCTAssertEqual(proOnlyFeatures.count, 5)
     }
 
     func testLimitedFreeFeaturesCount() {
