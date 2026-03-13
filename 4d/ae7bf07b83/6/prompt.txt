@@ -1,0 +1,85 @@
+Implement the following plan:
+
+# Fix: Add Terms of Use & Privacy Policy links to Paywall (App Store Rejection)
+
+## Context
+
+Apple rejected the app because the subscription paywall (`OptimizedPaywallView.swift`) does not include functional links to Terms of Use (EULA) and Privacy Policy. Apple requires all auto-renewable subscription flows to include:
+
+- Title of auto-renewing subscription
+- Length of subscription
+- Price of subscription
+- **Functional links to Privacy Policy and Terms of Use (EULA)**
+
+The paywall currently only has a text disclaimer ("A assinatura é renovada automaticamente...") in the `legalFooter` section (line 300-308) with **no clickable links**. The links already exist in `LegalSection.swift` and `AppInfoFooter.swift` pointing to `https://fittoday.app/terms` and `https://fittoday.app/privacy`.
+
+## Plan
+
+### 1. Add Terms & Privacy links to the paywall's `legalFooter`
+
+**File:** `FitToday/Presentation/Features/Pro/OptimizedPaywallView.swift` (lines 300-308)
+
+Update the `legalFooter` computed property to add the Terms and Privacy links below the existing auto-renewal disclaimer text. Reuse the same URLs already used in `AppInfoFooter.swift`:
+
+```swift
+private var legalFooter: some View {
+    VStack(spacing: FitTodaySpacing.xs) {
+        Text("paywall.legal.auto_renew".localized)
+            .font(FitTodayFont.ui(size: 11, weight: .medium))
+            .foregroundStyle(FitTodayColor.textTertiary)
+            .multilineTextAlignment(.center)
+
+        HStack(spacing: FitTodaySpacing.md) {
+            Link("paywall.legal.terms".localized, destination: URL(string: "https://fittoday.app/terms")!)
+            Text("•").foregroundStyle(FitTodayColor.textTertiary)
+            Link("paywall.legal.privacy".localized, destination: URL(string: "https://fittoday.app/privacy")!)
+        }
+        .font(FitTodayFont.ui(size: 11, weight: .medium))
+        .foregroundStyle(FitTodayColor.brandPrimary)
+    }
+    .padding(.horizontal, FitTodaySpacing.sm)
+}
+```
+
+### 2. Add localization keys
+
+**Files:**
+
+- `Resources/en.lproj/Localizable.strings`
+- `Resources/pt-BR.lproj/Localizable.strings`
+
+Add keys:
+
+- `"paywall.legal.auto_renew"` — existing disclaimer text
+- `"paywall.legal.terms"` — "Terms of Use" / "Termos de Uso"
+- `"paywall.legal.privacy"` — "Privacy Policy" / "Política de Privacidade"
+
+### 3. Commit
+
+## Files to Modify
+
+1. `FitToday/FitToday/Presentation/Features/Pro/OptimizedPaywallView.swift` — add links to `legalFooter`
+2. `FitToday/FitToday/Resources/en.lproj/Localizable.strings` — add 3 keys
+3. `FitToday/FitToday/Resources/pt-BR.lproj/Localizable.strings` — add 3 keys
+
+## Verification
+
+1. Build the project
+2. Open the paywall screen and confirm Terms/Privacy links appear below the auto-renewal text
+3. Tap each link to verify they open in Safari
+
+
+If you need specific details from before exiting plan mode (like exact code snippets, error messages, or content you generated), read the full transcript at: /Users/viniciuscarvalho/.REDACTED.jsonl
+
+If this plan can be broken down into multiple independent tasks, consider using the TeamCreate tool to create a team and parallelize the work.
+
+---
+
+<task-notification>
+<task-id>b2qk0amdo</task-id>
+<tool-use-id>REDACTED</tool-use-id>
+<output-file>REDACTED.output</output-file>
+<status>completed</status>
+<summary>Background command "set -a && source '/Users/viniciuscarvalho/Documents/FitToday/.env' && set +a && cd /Users/viniciuscarvalho/Documents/FitToday/FitToday && xcodebuild -scheme FitToday -destination 'platform=iOS Simulator,name=iPhone 16' build 2>&1 | tail -20" completed (exit code 0)</summary>
+</task-notification>
+Read the output file to retrieve the result: REDACTED.output
