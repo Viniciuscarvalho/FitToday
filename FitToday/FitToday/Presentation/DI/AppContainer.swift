@@ -633,6 +633,20 @@ struct AppContainer {
 
         // ========== END PERSONAL WORKOUTS ==========
 
+        // ========== GAMIFICATION (PRO-90) ==========
+
+        container.register(XPRepository.self) { _ in
+            SwiftDataXPRepository(modelContainer: modelContainer)
+        }.inObjectScope(.container)
+
+        container.register(AwardXPUseCase.self) { resolver in
+            AwardXPUseCase(
+                xpRepository: resolver.resolve(XPRepository.self)!
+            )
+        }.inObjectScope(.container)
+
+        // ========== END GAMIFICATION ==========
+
         // ========== SOCIAL FEED (PRO-89) ==========
 
         let feedService = FirebaseFeedService()
@@ -679,7 +693,8 @@ struct AppContainer {
             SDCustomWorkoutTemplate.self,
             SDCustomWorkoutCompletion.self,
             SDSavedRoutine.self,
-            SDChatMessage.self
+            SDChatMessage.self,
+            SDUserXP.self
         ])
         
         // Configuração com migração automática leve

@@ -42,6 +42,12 @@ struct HomeView: View {
                 )
                 .padding(.horizontal)
 
+                // XP Level card (gamification)
+                if viewModel.isGamificationEnabled, let userXP = viewModel.userXP {
+                    XPLevelCard(userXP: userXP)
+                        .padding(.horizontal)
+                }
+
                 // Daily stats summary
                 DailyStatsCard(
                     workoutsThisWeek: viewModel.workoutsThisWeek,

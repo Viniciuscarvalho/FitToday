@@ -44,6 +44,8 @@ enum HomeJourneyState: Equatable {
     private(set) var historyEntries: [WorkoutHistoryEntry] = []
     private(set) var isAiWorkoutEnabled = true
     private(set) var isPersonalTrainerEnabled = false
+    private(set) var isGamificationEnabled = false
+    private(set) var userXP: UserXP?
     private(set) var personalTrainerCardState: PersonalTrainerHomeCardState = .loading
     private(set) var todayWorkoutId: String?
     private(set) var todayWorkout: ProgramWorkout?
@@ -264,6 +266,7 @@ enum HomeJourneyState: Equatable {
         if let featureFlags = resolver.resolve(FeatureFlagChecking.self) {
             isAiWorkoutEnabled = await featureFlags.isFeatureEnabled(.aiWorkoutGenerationEnabled)
             isPersonalTrainerEnabled = await featureFlags.isFeatureEnabled(.personalTrainerEnabled)
+            isGamificationEnabled = await featureFlags.isFeatureEnabled(.gamificationEnabled)
         }
 
         // Load user info from UserDefaults or Firebase Auth
@@ -307,16 +310,18 @@ enum HomeJourneyState: Equatable {
                 journeyState = .workoutCompleted(profile: profile)
                 async let programsTask: Void = loadProgramsAndWorkouts(profile: profile)
                 async let ptTask: Void = loadPersonalTrainerState()
-                _ = await (programsTask, ptTask)
+                async let xpTask: Void = loadUserXP()
+                _ = await (programsTask, ptTask, xpTask)
                 return
             }
 
             journeyState = .workoutReady(profile: profile)
 
-            // Carregar programas e personal trainer em paralelo
+            // Carregar programas, personal trainer e XP em paralelo
             async let programsTask: Void = loadProgramsAndWorkouts(profile: profile)
             async let personalTrainerTask: Void = loadPersonalTrainerState()
-            _ = await (programsTask, personalTrainerTask)
+            async let xpTask: Void = loadUserXP()
+            _ = await (programsTask, personalTrainerTask, xpTask)
 
         } catch {
             journeyState = .error(message: "Não foi possível carregar seus dados.")
@@ -387,6 +392,25 @@ enum HomeJourneyState: Equatable {
         } catch {
             #if DEBUG
             print("[Home] Erro ao carregar treino do dia: \(error)")
+            #endif
+        }
+    }
+
+    // MARK: - Gamification
+
+    private func loadUserXP() async {
+        guard isGamificationEnabled,
+              let xpRepo = resolver.resolve(XPRepository.self) else {
+            userXP = nil
+            return
+        }
+
+        do {
+            userXP = try await xpRepo.getUserXP()
+        } catch {
+            userXP = nil
+            #if DEBUG
+            print("[Home] Failed to load user XP: \(error)")
             #endif
         }
     }
