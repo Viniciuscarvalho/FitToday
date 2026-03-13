@@ -74,6 +74,9 @@ final class FirebasePersonalTrainerRepository: PersonalTrainerRepository, Traine
         }
 
         do {
+            // Ensure the user has role "student" in the CMS before connecting
+            try await cmsService.ensureStudentRole(displayName: studentDisplayName)
+
             let request = CMSConnectionRequest(
                 studentId: studentId,
                 studentName: studentDisplayName
