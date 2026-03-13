@@ -1015,3 +1015,8 @@
 "gamification.level.tita" = "Titã";
 "gamification.level.lenda" = "Lenda";
 "gamification.level.imortal" = "Imortal";
+
+// MARK: - Paywall Legal
+"paywall.legal.auto_renew" = "A assinatura é renovada automaticamente. Cancele a qualquer momento nas configurações do dispositivo.";
+"paywall.legal.terms" = "Termos de Uso";
+"paywall.legal.privacy" = "Política de Privacidade";
