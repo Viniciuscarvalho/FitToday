@@ -31,4 +31,14 @@ enum XPLevel: String, Sendable, Codable {
         case .imortal: return "flame.fill"
         }
     }
+
+    var localizationKey: String {
+        switch self {
+        case .iniciante: return "gamification.level.iniciante"
+        case .guerreiro: return "gamification.level.guerreiro"
+        case .tita: return "gamification.level.tita"
+        case .lenda: return "gamification.level.lenda"
+        case .imortal: return "gamification.level.imortal"
+        }
+    }
 }

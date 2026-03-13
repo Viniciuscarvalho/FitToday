@@ -31,15 +31,15 @@ struct LevelUpCelebrationView: View {
                     .font(.system(size: 64))
                     .foregroundStyle(FitTodayColor.brandPrimary)
 
-                Text("Parabéns!")
+                Text("gamification.level_up.title".localized)
                     .font(.system(.largeTitle, weight: .bold))
                     .foregroundStyle(FitTodayColor.textPrimary)
 
-                Text("Nível \(level)")
+                Text("gamification.level_up.level_format".localized(with: level))
                     .font(.system(.title, weight: .bold))
                     .foregroundStyle(FitTodayColor.brandPrimary)
 
-                Text(levelTitle.rawValue)
+                Text(levelTitle.localizationKey.localized)
                     .font(.system(.title2, weight: .semibold))
                     .foregroundStyle(FitTodayColor.textSecondary)
             }

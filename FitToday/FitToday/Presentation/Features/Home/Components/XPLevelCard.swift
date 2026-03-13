@@ -18,13 +18,13 @@ struct XPLevelCard: View {
                     .font(.system(size: 14))
                     .foregroundStyle(FitTodayColor.brandPrimary)
 
-                Text("Nível \(userXP.level) — \(userXP.levelTitle.rawValue)")
+                Text("gamification.xp_card.level_format".localized(with: userXP.level, userXP.levelTitle.localizationKey.localized))
                     .font(FitTodayFont.ui(size: 14, weight: .semiBold))
                     .foregroundStyle(FitTodayColor.textPrimary)
 
                 Spacer()
 
-                Text("\(userXP.currentLevelXP) / 1000 XP")
+                Text("gamification.xp_card.xp_progress_format".localized(with: userXP.currentLevelXP))
                     .font(FitTodayFont.ui(size: 12, weight: .medium))
                     .foregroundStyle(FitTodayColor.textSecondary)
             }
@@ -59,8 +59,56 @@ struct XPLevelCard: View {
     }
 }
 
+/// Loading placeholder for XP card while data is being fetched.
+struct XPLevelCardLoading: View {
+    var body: some View {
+        HStack(spacing: FitTodaySpacing.sm) {
+            ProgressView()
+                .tint(FitTodayColor.brandPrimary)
+
+            Text("gamification.xp_card.loading".localized)
+                .font(FitTodayFont.ui(size: 14, weight: .medium))
+                .foregroundStyle(FitTodayColor.textSecondary)
+
+            Spacer()
+        }
+        .padding(FitTodaySpacing.md)
+        .background(FitTodayColor.surface)
+        .clipShape(RoundedRectangle(cornerRadius: FitTodayRadius.md))
+    }
+}
+
+/// Empty state shown when user has no XP yet.
+struct XPLevelCardEmpty: View {
+    var body: some View {
+        VStack(spacing: FitTodaySpacing.xs) {
+            HStack(spacing: FitTodaySpacing.xs) {
+                Image(systemName: "star")
+                    .font(.system(size: 14))
+                    .foregroundStyle(FitTodayColor.brandPrimary)
+
+                Text("gamification.xp_card.empty.title".localized)
+                    .font(FitTodayFont.ui(size: 14, weight: .semiBold))
+                    .foregroundStyle(FitTodayColor.textPrimary)
+
+                Spacer()
+            }
+
+            Text("gamification.xp_card.empty.message".localized)
+                .font(FitTodayFont.ui(size: 12, weight: .medium))
+                .foregroundStyle(FitTodayColor.textSecondary)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .padding(FitTodaySpacing.md)
+        .background(FitTodayColor.surface)
+        .clipShape(RoundedRectangle(cornerRadius: FitTodayRadius.md))
+    }
+}
+
 #Preview {
     VStack(spacing: 16) {
+        XPLevelCardLoading()
+        XPLevelCardEmpty()
         XPLevelCard(userXP: UserXP(totalXP: 750))
         XPLevelCard(userXP: UserXP(totalXP: 4500))
         XPLevelCard(userXP: UserXP(totalXP: 0))

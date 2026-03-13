@@ -43,9 +43,17 @@ struct HomeView: View {
                 .padding(.horizontal)
 
                 // XP Level card (gamification)
-                if viewModel.isGamificationEnabled, let userXP = viewModel.userXP {
-                    XPLevelCard(userXP: userXP)
-                        .padding(.horizontal)
+                if viewModel.isGamificationEnabled {
+                    if viewModel.isLoadingXP {
+                        XPLevelCardLoading()
+                            .padding(.horizontal)
+                    } else if let userXP = viewModel.userXP, userXP.totalXP > 0 {
+                        XPLevelCard(userXP: userXP)
+                            .padding(.horizontal)
+                    } else {
+                        XPLevelCardEmpty()
+                            .padding(.horizontal)
+                    }
                 }
 
                 // Daily stats summary

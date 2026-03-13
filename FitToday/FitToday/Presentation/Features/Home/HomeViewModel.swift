@@ -46,6 +46,7 @@ enum HomeJourneyState: Equatable {
     private(set) var isPersonalTrainerEnabled = false
     private(set) var isGamificationEnabled = false
     private(set) var userXP: UserXP?
+    private(set) var isLoadingXP = false
     private(set) var personalTrainerCardState: PersonalTrainerHomeCardState = .loading
     private(set) var todayWorkoutId: String?
     private(set) var todayWorkout: ProgramWorkout?
@@ -404,6 +405,9 @@ enum HomeJourneyState: Equatable {
             userXP = nil
             return
         }
+
+        isLoadingXP = true
+        defer { isLoadingXP = false }
 
         do {
             userXP = try await xpRepo.getUserXP()

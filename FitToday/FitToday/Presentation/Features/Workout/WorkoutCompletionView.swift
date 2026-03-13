@@ -80,7 +80,7 @@ struct WorkoutCompletionView: View {
 
             // XP earned badge
             if let result = xpAwardResult {
-                Text("+\(result.xpAwarded) XP")
+                Text("gamification.xp_earned_format".localized(with: result.xpAwarded))
                     .font(.system(.title3, weight: .bold))
                     .foregroundStyle(FitTodayColor.brandPrimary)
                     .padding(.horizontal, FitTodaySpacing.md)
