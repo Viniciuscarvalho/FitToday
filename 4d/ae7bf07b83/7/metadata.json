@@ -1,0 +1,32 @@
+{
+  "cli_version": "0.4.4",
+  "checkpoint_id": "4dae7bf07b83",
+  "session_id": "cc0aac91-c7dc-4b49-9f16-b0876a265ac8",
+  "strategy": "manual-commit",
+  "created_at": "2026-03-13T20:37:48.3977Z",
+  "branch": "feat/pro-90-xp-levels-system",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "FitToday/FitToday/Resources/en.lproj/Localizable.strings",
+    "FitToday/FitToday/Resources/pt-BR.lproj/Localizable.strings",
+    "ops/sessions/20260313-203705.json"
+  ],
+  "agent": "Claude Code",
+  "token_usage": {
+    "input_tokens": 205,
+    "cache_creation_tokens": 46455,
+    "cache_read_tokens": 684412,
+    "output_tokens": 4270,
+    "api_call_count": 18
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-03-13T20:37:47.722763Z",
+    "agent_lines": 0,
+    "human_added": 111,
+    "human_modified": 1,
+    "human_removed": 0,
+    "total_committed": 112,
+    "agent_percentage": 0
+  },
+  "transcript_path": ".claude/projects/-Users-viniciuscarvalho-Documents-FitToday/cc0aac91-c7dc-4b49-9f16-b0876a265ac8.jsonl"
+}

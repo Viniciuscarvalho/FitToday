@@ -2,8 +2,8 @@
   "cli_version": "0.4.4",
   "checkpoint_id": "4dae7bf07b83",
   "strategy": "manual-commit",
-  "branch": "fix/app-store-eula-links",
-  "checkpoints_count": 11,
+  "branch": "feat/pro-90-xp-levels-system",
+  "checkpoints_count": 12,
   "files_touched": [
     ".claude/logs/build_20260310_192847.log",
     ".claude/logs/build_20260310_192949.log",
@@ -79,7 +79,8 @@
     "ops/sessions/20260313-002522.json",
     "ops/sessions/20260313-202539.json",
     "ops/sessions/20260313-203025.json",
-    "ops/sessions/20260313-203046.json"
+    "ops/sessions/20260313-203046.json",
+    "ops/sessions/20260313-203705.json"
   ],
   "sessions": [
     {
@@ -130,13 +131,20 @@
       "context": "/4d/ae7bf07b83/6/context.md",
       "content_hash": "/4d/ae7bf07b83/6/content_hash.txt",
       "prompt": "/4d/ae7bf07b83/6/prompt.txt"
+    },
+    {
+      "metadata": "/4d/ae7bf07b83/7/metadata.json",
+      "transcript": "/4d/ae7bf07b83/7/full.jsonl",
+      "context": "/4d/ae7bf07b83/7/context.md",
+      "content_hash": "/4d/ae7bf07b83/7/content_hash.txt",
+      "prompt": "/4d/ae7bf07b83/7/prompt.txt"
     }
   ],
   "token_usage": {
-    "input_tokens": 17572,
-    "cache_creation_tokens": 554083,
-    "cache_read_tokens": 21369455,
-    "output_tokens": 76507,
-    "api_call_count": 228
+    "input_tokens": 17777,
+    "cache_creation_tokens": 600538,
+    "cache_read_tokens": 22053867,
+    "output_tokens": 80777,
+    "api_call_count": 246
   }
 }
