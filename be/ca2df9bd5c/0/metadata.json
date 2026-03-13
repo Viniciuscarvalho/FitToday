@@ -1,0 +1,39 @@
+{
+  "cli_version": "0.4.4",
+  "checkpoint_id": "beca2df9bd5c",
+  "session_id": "70442f59-21f5-4345-8181-892bfb2f8afc",
+  "strategy": "manual-commit",
+  "created_at": "2026-03-13T21:17:35.846029Z",
+  "branch": "fix/personal-trainer-access-all-users",
+  "checkpoints_count": 2,
+  "files_touched": [
+    "FitToday/.claude/logs/build_20260313_181209.log",
+    "FitToday/.claude/logs/build_20260313_181432.log",
+    "FitToday/.claude/logs/build_20260313_181528.log",
+    "FitToday/FitToday/Domain/Entities/EntitlementPolicy.swift",
+    "FitToday/FitToday/Domain/UseCases/PersonalTrainerUseCases.swift",
+    "FitToday/FitToday/Presentation/Features/Home/HomeViewModel.swift",
+    "FitToday/FitToday/Presentation/Features/PersonalTrainer/PersonalTrainerViewModel.swift",
+    "FitToday/FitToday/Presentation/Features/Pro/ProfileProView.swift",
+    "FitToday/FitTodayTests/Domain/EntitlementPolicyTests.swift",
+    "ops/sessions/20260313-211706.json"
+  ],
+  "agent": "Claude Code",
+  "token_usage": {
+    "input_tokens": 58,
+    "cache_creation_tokens": 183460,
+    "cache_read_tokens": 3848967,
+    "output_tokens": 14272,
+    "api_call_count": 50
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-03-13T21:17:32.858113Z",
+    "agent_lines": 0,
+    "human_added": 197,
+    "human_modified": 27,
+    "human_removed": 0,
+    "total_committed": 198,
+    "agent_percentage": 0
+  },
+  "transcript_path": ".claude/projects/-Users-viniciuscarvalho-Documents-FitToday/70442f59-21f5-4345-8181-892bfb2f8afc.jsonl"
+}
