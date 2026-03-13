@@ -1000,3 +1000,8 @@
 "workout.card.last_used" = "Último uso:";
 "programs.incomplete_profile.title" = "Complete seu perfil";
 "programs.incomplete_profile.subtitle" = "Melhore suas recomendações respondendo mais perguntas";
+
+// MARK: - Paywall Legal
+"paywall.legal.auto_renew" = "A assinatura é renovada automaticamente. Cancele a qualquer momento nas configurações do dispositivo.";
+"paywall.legal.terms" = "Termos de Uso";
+"paywall.legal.privacy" = "Política de Privacidade";
