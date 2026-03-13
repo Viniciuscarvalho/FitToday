@@ -299,10 +299,18 @@ struct OptimizedPaywallView: View {
 
     private var legalFooter: some View {
         VStack(spacing: FitTodaySpacing.xs) {
-            Text("A assinatura é renovada automaticamente. Cancele a qualquer momento nas configurações do dispositivo.")
+            Text("paywall.legal.auto_renew".localized)
                 .font(FitTodayFont.ui(size: 11, weight: .medium))
                 .foregroundStyle(FitTodayColor.textTertiary)
                 .multilineTextAlignment(.center)
+
+            HStack(spacing: FitTodaySpacing.md) {
+                Link("paywall.legal.terms".localized, destination: URL(string: "https://fittoday.app/terms")!)
+                Text("•").foregroundStyle(FitTodayColor.textTertiary)
+                Link("paywall.legal.privacy".localized, destination: URL(string: "https://fittoday.app/privacy")!)
+            }
+            .font(FitTodayFont.ui(size: 11, weight: .medium))
+            .foregroundStyle(FitTodayColor.brandPrimary)
         }
         .padding(.horizontal, FitTodaySpacing.sm)
     }
