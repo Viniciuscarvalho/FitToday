@@ -1,0 +1,849 @@
+A minha feature já está inserida no remote config, paga que eu possa desliga-la, https://console.firebase.google.com/project/fittoday-2aaff/config/env/firebase, como ela é exibida para o usuário? somente se tiver um desafio vinculado ou criado?
+
+---
+
+Hoje ela não está aparecendo, só mostra histórico, desafios e stats
+
+---
+
+O valor da remote config está como true no firebase, como mostra a imagem
+
+---
+
+[Image: source: REDACTED de Tela 2026-03-12 às 19.44.39.png]
+
+---
+
+[Request interrupted by user]
+
+---
+
+Encontrei só um problema, ao tentar fazer o pull to refresh no feed, o loading está em loop eternamente, se atente para regras de concurrency do aplicativo, isso é de extrema importância
+
+---
+
+<task-notification>
+<task-id>bufpxv73n</task-id>
+<tool-use-id>toolu_01Kyb2en37ZstG7VcnPcqcAQ</tool-use-id>
+<output-file>REDACTED.output</output-file>
+<status>completed</status>
+<summary>Background command "set -a && source '/Users/viniciuscarvalho/Documents/FitToday/.env' && set +a && cd /Users/viniciuscarvalho/Documents/FitToday/FitToday && xcodebuild build -scheme FitToday -destination 'platform=iOS Simulator,name=iPhone 16' -quiet 2>&1 | tail -30" completed (exit code 0)</summary>
+</task-notification>
+Read the output file to retrieve the result: REDACTED.output
+
+---
+
+<task-notification>
+<task-id>b9f9kvwpb</task-id>
+<tool-use-id>REDACTED</tool-use-id>
+<output-file>REDACTED.output</output-file>
+<status>failed</status>
+<summary>Background command "xcodebuild build -scheme FitToday -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -quiet 2>&1 | grep -E "error:|BUILD" 2>> '/Users/viniciuscarvalho/Documents/FitToday/FitToday/.claude/logs/build_20260312_195707.log'" failed with exit code 2</summary>
+</task-notification>
+Read the output file to retrieve the result: REDACTED.output
+
+---
+
+Ao entrar na tela ele não está apresentando o valor de empty state caso não tenha nenhum feed e depois que faz o pull to refresh está dando missing or insufficient permissions
+
+---
+
+<task-notification>
+<task-id>baj0rl86r</task-id>
+<tool-use-id>REDACTED</tool-use-id>
+<output-file>REDACTED.output</output-file>
+<status>completed</status>
+<summary>Background command "xcodebuild build -scheme FitToday -destination "platform=iOS Simulator,name=iPhone 17 Pro" -quiet 2>&1 2>> '/Users/viniciuscarvalho/Documents/FitToday/FitToday/.claude/logs/build_20260312_201112.log'" completed (exit code 0)</summary>
+</task-notification>
+Read the output file to retrieve the result: REDACTED.output
+
+---
+
+realize o commit e push dessas ultimas correções para a branch
+
+---
+
+# Claude Command: Commit
+
+This command helps you create well-formatted commits with conventional commit messages and emoji.
+
+## Usage
+
+To create a commit, just type:
+```
+/commit
+```
+
+Or with options:
+```
+/commit --no-verify
+```
+
+## What This Command Does
+
+1. Unless specified with `--no-verify`, automatically runs pre-commit checks:
+   - `pnpm lint` to ensure code quality
+   - `pnpm build` to verify the build succeeds
+   - `pnpm generate:docs` to update documentation
+2. Checks which files are staged with `git status`
+3. If 0 files are staged, automatically adds all modified and new files with `git add`
+4. Performs a `git diff` to understand what changes are being committed
+5. Analyzes the diff to determine if multiple distinct logical changes are present
+6. If multiple distinct changes are detected, suggests breaking the commit into multiple smaller commits
+7. For each commit (or the single commit if not split), creates a commit message using emoji conventional commit format
+
+## Best Practices for Commits
+
+- **Verify before committing**: Ensure code is linted, builds correctly, and documentation is updated
+- **Atomic commits**: Each commit should contain related changes that serve a single purpose
+- **Split large changes**: If changes touch multiple concerns, split them into separate commits
+- **Conventional commit format**: Use the format `<type>: <description>` where type is one of:
+  - `feat`: A new feature
+  - `fix`: A bug fix
+  - `docs`: Documentation changes
+  - `style`: Code style changes (formatting, etc)
+  - `refactor`: Code changes that neither fix bugs nor add features
+  - `perf`: Performance improvements
+  - `test`: Adding or fixing tests
+  - `chore`: Changes to the build process, tools, etc.
+- **Present tense, imperative mood**: Write commit messages as commands (e.g., "add feature" not "added feature")
+- **Concise first line**: Keep the first line under 72 characters
+- **Emoji**: Each commit type is paired with an appropriate emoji:
+  - ✨ `feat`: New feature
+  - 🐛 `fix`: Bug fix
+  - 📝 `docs`: Documentation
+  - 💄 `style`: Formatting/style
+  - ♻️ `refactor`: Code refactoring
+  - ⚡️ `perf`: Performance improvements
+  - ✅ `test`: Tests
+  - 🔧 `chore`: Tooling, configuration
+  - 🚀 `ci`: CI/CD improvements
+  - 🗑️ `revert`: Reverting changes
+  - 🧪 `test`: Add a failing test
+  - 🚨 `fix`: Fix compiler/linter warnings
+  - 🔒️ `fix`: Fix security issues
+  - 👥 `chore`: Add or update contributors
+  - 🚚 `refactor`: Move or rename resources
+  - 🏗️ `refactor`: Make architectural changes
+  - 🔀 `chore`: Merge branches
+  - 📦️ `chore`: Add or update compiled files or packages
+  - ➕ `chore`: Add a dependency
+  - ➖ `chore`: Remove a dependency
+  - 🌱 `chore`: Add or update seed files
+  - 🧑‍💻 `chore`: Improve developer experience
+  - 🧵 `feat`: Add or update code related to multithreading or concurrency
+  - 🔍️ `feat`: Improve SEO
+  - 🏷️ `feat`: Add or update types
+  - 💬 `feat`: Add or update text and literals
+  - 🌐 `feat`: Internationalization and localization
+  - 👔 `feat`: Add or update business logic
+  - 📱 `feat`: Work on responsive design
+  - 🚸 `feat`: Improve user experience / usability
+  - 🩹 `fix`: Simple fix for a non-critical issue
+  - 🥅 `fix`: Catch errors
+  - 👽️ `fix`: Update code due to external API changes
+  - 🔥 `fix`: Remove code or files
+  - 🎨 `style`: Improve structure/format of the code
+  - 🚑️ `fix`: Critical hotfix
+  - 🎉 `chore`: Begin a project
+  - 🔖 `chore`: Release/Version tags
+  - 🚧 `wip`: Work in progress
+  - 💚 `fix`: Fix CI build
+  - 📌 `chore`: Pin dependencies to specific versions
+  - 👷 `ci`: Add or update CI build system
+  - 📈 `feat`: Add or update analytics or tracking code
+  - ✏️ `fix`: Fix typos
+  - ⏪️ `revert`: Revert changes
+  - 📄 `chore`: Add or update license
+  - 💥 `feat`: Introduce breaking changes
+  - 🍱 `assets`: Add or update assets
+  - ♿️ `feat`: Improve accessibility
+  - 💡 `docs`: Add or update comments in source code
+  - 🗃️ `db`: Perform database related changes
+  - 🔊 `feat`: Add or update logs
+  - 🔇 `fix`: Remove logs
+  - 🤡 `test`: Mock things
+  - 🥚 `feat`: Add or update an easter egg
+  - 🙈 `chore`: Add or update .gitignore file
+  - 📸 `test`: Add or update snapshots
+  - ⚗️ `experiment`: Perform experiments
+  - 🚩 `feat`: Add, update, or remove feature flags
+  - 💫 `ui`: Add or update animations and transitions
+  - ⚰️ `refactor`: Remove dead code
+  - 🦺 `feat`: Add or update code related to validation
+  - ✈️ `feat`: Improve offline support
+
+## Guidelines for Splitting Commits
+
+When analyzing the diff, consider splitting commits based on these criteria:
+
+1. **Different concerns**: Changes to unrelated parts of the codebase
+2. **Different types of changes**: Mixing features, fixes, refactoring, etc.
+3. **File patterns**: Changes to different types of files (e.g., source code vs documentation)
+4. **Logical grouping**: Changes that would be easier to understand or review separately
+5. **Size**: Very large changes that would be clearer if broken down
+
+## Examples
+
+Good commit messages:
+- ✨ feat: add user authentication system
+- 🐛 fix: resolve memory leak in rendering process
+- 📝 docs: update API documentation with new endpoints
+- ♻️ refactor: simplify error handling logic in parser
+- 🚨 fix: resolve linter warnings in component files
+- 🧑‍💻 chore: improve developer tooling setup process
+- 👔 feat: implement business logic for transaction validation
+- 🩹 fix: address minor styling inconsistency in header
+- 🚑️ fix: patch critical security vulnerability in auth flow
+- 🎨 style: reorganize component structure for better readability
+- 🔥 fix: remove deprecated legacy code
+- 🦺 feat: add input validation for user registration form
+- 💚 fix: resolve failing CI pipeline tests
+- 📈 feat: implement analytics tracking for user engagement
+- 🔒️ fix: strengthen authentication password requirements
+- ♿️ feat: improve form accessibility for screen readers
+
+Example of splitting commits:
+- First commit: ✨ feat: add new solc version type definitions
+- Second commit: 📝 docs: update documentation for new solc versions
+- Third commit: 🔧 chore: update package.json dependencies
+- Fourth commit: 🏷️ feat: add type definitions for new API endpoints
+- Fifth commit: 🧵 feat: improve concurrency handling in worker threads
+- Sixth commit: 🚨 fix: resolve linting issues in new code
+- Seventh commit: ✅ test: add unit tests for new solc version features
+- Eighth commit: 🔒️ fix: update dependencies with security vulnerabilities
+
+## Command Options
+
+- `--no-verify`: Skip running the pre-commit checks (lint, build, generate:docs)
+
+## Important Notes
+
+- By default, pre-commit checks (`pnpm lint`, `pnpm build`, `pnpm generate:docs`) will run to ensure code quality
+- If these checks fail, you'll be asked if you want to proceed with the commit anyway or fix the issues first
+- If specific files are already staged, the command will only commit those files
+- If no files are staged, it will automatically stage all modified and new files
+- The commit message will be constructed based on the changes detected
+- Before committing, the command will review the diff to identify if multiple commits would be more appropriate
+- If suggesting multiple commits, it will help you stage and commit the changes separately
+- Always reviews the commit diff to ensure the message matches the changes
+- Do NOT add Claude co-authorship footer to commits
+
+---
+
+https://linear.app/secondbrainclaw/issue/PRO-90/12-sistema-de-streaks-and-xp-com-niveis /feature-marker --interactive -prd-sistema-breaks-niveis
+
+---
+
+Base directory for this skill: /Users/viniciuscarvalho/.claude/skills/feature-marker
+
+# feature-marker
+
+Automates feature development with a 5-phase workflow:
+
+1. **Inputs Gate** - Validates `prd.md`, `techspec.md`, `tasks.md` exist; generates them via `~/.claude/commands/` if missing.
+2. **Analysis & Planning** - Auto-installs product-manager skill if missing; reads docs, creates implementation plan.
+3. **Implementation** - Executes tasks with progress tracking.
+4. **Tests & Validation** - Runs platform-appropriate test suites and build validation.
+   Auto-detects: Swift/Xcode (+ XcodeBuildMCP simulator), Node.js, Rust, Python, Go.
+5. **Commit & PR** - Auto-installs enhanced commit command if missing; commits changes using professional workflow and creates PR (auto-detects git platform).
+
+## Platform Support
+
+feature-marker works with any tech stack:
+
+- 🍎 **iOS/Swift** — `swift test` + SwiftLint + XcodeBuildMCP simulator validation
+- 🟨 **Node.js/TypeScript** — auto-detects npm/yarn/pnpm/bun + Jest/Vitest
+- 🦀 **Rust** — `cargo test` + `cargo clippy`
+- 🐍 **Python** — `pytest` + ruff/flake8
+- 🐹 **Go** — `go test` + `go vet`
+
+iOS/Xcode projects get additional simulator validation via XcodeBuildMCP (optional, non-blocking).
+The platform is auto-detected once at workflow start and cached — no configuration required.
+
+## Usage
+
+```
+/feature-marker <feature-slug>
+```
+
+**Example**:
+```
+/feature-marker prd-user-authentication
+```
+
+### Interactive Mode
+
+```
+/feature-marker --interactive <feature-slug>
+```
+
+Opens a menu to select execution mode:
+- **Full Workflow** - Default, generates missing files and executes all phases
+- **Tasks Only** - Uses existing files, skips generation phase
+- **Ralph Loop** - Autonomous continuous execution with ralph-wiggum
+- **Spec-Driven** - Multi-agent review + worktree isolation via spec-workflow
+- **Test Only** - Runs tests phase exclusively using platform-appropriate test guidance (Swift Testing for iOS, Jest/Vitest for Node.js, etc.)
+
+Works both in terminal (TTY menu) and Claude CLI (AskUserQuestion prompt).
+
+**Direct mode selection** (skip menu):
+```
+/feature-marker --mode full <feature-slug>
+/feature-marker --mode tasks-only <feature-slug>
+/feature-marker --mode ralph-loop <feature-slug>
+/feature-marker --mode spec-driven <feature-slug>
+/feature-marker --mode test-only <feature-slug>
+```
+
+## Prerequisites
+
+### Commands
+
+The following commands must be available in `~/.claude/commands/`:
+
+- `create-prd.md` - Creates a new PRD from requirements discussion
+- `generate-spec.md` - Generates technical specification from PRD
+- `generate-tasks.md` - Breaks down feature spec into implementable tasks
+
+### Templates
+
+The commands above read templates from `~/.claude/docs/specs/` to generate structured documents.
+
+Required templates:
+- `~/.claude/docs/specs/prd-template.md` - Product Requirements Document template
+- `~/.claude/docs/specs/techspec-template.md` - Technical Specification template
+- `~/.claude/docs/specs/tasks-template.md` - Tasks breakdown template
+
+**Template Format**: Templates should be markdown files with placeholders and structure that commands will use to generate feature-specific documents.
+
+**Setup**: Ensure these templates exist before running feature-marker:
+```bash
+ls ~/.claude/docs/specs/
+# Should show: prd-template.md, techspec-template.md, tasks-template.md
+```
+
+**Note**: If templates are missing, commands in `~/.claude/commands/` will fail to generate files.
+
+### Project Structure
+
+**Feature Documents** (generated in project):
+```
+./tasks/
+└── prd-{feature-name}/
+    ├── prd.md            ← Generated from ~/.claude/docs/specs/prd-template.md
+    ├── techspec.md       ← Generated from ~/.claude/docs/specs/techspec-template.md
+    ├── tasks.md          ← Generated from ~/.claude/docs/specs/tasks-template.md
+    └── {num}_task.md     ← Individual task files (optional)
+```
+
+**State Directory** (checkpoint & progress):
+```
+.claude/feature-state/{feature-name}/
+├── checkpoint.json
+├── analysis.md
+├── plan.md
+├── progress.md
+├── test-results.md
+└── pr-url.txt
+```
+
+**User Configuration** (required setup):
+```
+~/.claude/
+├── commands/           ← Commands that generate files
+│   ├── create-prd.md
+│   ├── generate-spec.md
+│   └── generate-tasks.md
+└── docs/
+    └── specs/          ← Templates used by commands
+        ├── prd-template.md
+        ├── techspec-template.md
+        └── tasks-template.md
+```
+
+## Behavior
+
+When invoked, the skill:
+
+1. **Validates inputs** - Checks if `./tasks/prd-{feature-slug}/` contains required files
+   - If all files exist → Skips to step 3
+   - If any file is missing → Proceeds to step 2
+2. **Generates ONLY missing files** - Existing files are never overwritten:
+   - Missing PRD → `/create-prd`
+   - Missing Tech Spec → `/generate-spec {feature-slug}`
+   - Missing Tasks → `/generate-tasks {feature-slug}`
+3. **Auto-installs missing dependencies**:
+   - **Phase 1**: Checks for `product-manager` skill
+     - If missing: Installs via `npx skills add https://github.com/aj-geddes/claude-code-bmad-skills --skill product-manager`
+     - If user already has it: Uses user's version
+     - If installation fails: Continues without it (non-blocking)
+   - **Phase 4**: Checks for `/commit` command
+     - If missing: Copies from bundled `resources/commit.md` to `~/.claude/commands/commit.md`
+     - If user already has it: Uses user's version
+     - If installation fails: Falls back to standard commit workflow
+4. **Executes 5-phase workflow** via the `feature-marker` agent
+5. **Persists state** - Saves checkpoints after each phase/task for resume capability
+
+**Important**: The workflow is smart about file detection and dependencies:
+- ✅ Files/skills/commands exist → Uses them directly, no regeneration or reinstallation
+- ⚠️ Missing → Installs/generates only what's needed
+- 🔒 Never overwrites existing content
+- 👤 **User's versions always have priority** over bundled/auto-installed versions
+
+## Auto-Installed Dependencies
+
+Feature-marker automatically installs missing dependencies to enhance the workflow:
+
+### Product Manager Skill (Phase 1)
+
+**What it does**: Provides advanced PRD analysis, requirements validation, and product management capabilities.
+
+**Installation**:
+- **Check**: Phase 1 checks for `~/.claude/skills/product-manager/SKILL.md`
+- **Install**: If missing and `npx` available, runs:
+  ```bash
+  npx skills add https://github.com/aj-geddes/claude-code-bmad-skills --skill product-manager
+  ```
+- **Priority**: Uses user's existing skill if already installed
+- **Fallback**: Continues without it if installation fails (non-blocking)
+
+**Benefits**:
+- Enhanced requirement analysis
+- Better PRD validation
+- Improved feature planning
+
+### Enhanced Commit Command (Phase 4)
+
+**What it does**: Professional commit workflow with validation, splitting, and conventional commit format.
+
+**Installation**:
+- **Check**: Phase 4 checks for `~/.claude/commands/commit.md`
+- **Install**: If missing, copies from bundled `resources/commit.md` to `~/.claude/commands/commit.md`
+- **Priority**: Uses user's existing command if already installed
+- **Fallback**: Uses standard commit workflow if installation fails
+
+**Features**:
+- Pre-commit validation (lint, build, docs)
+- Intelligent commit splitting
+- Conventional commit format with emojis
+- Smart file staging
+- No Co-Authored-By footer (as per command design)
+
+**Example Output**:
+```bash
+✨ feat: add user authentication system
+🐛 fix: resolve memory leak in rendering process
+📝 docs: update API documentation
+♻️ refactor: simplify error handling logic
+```
+
+### Manual Installation
+
+If auto-installation fails, you can install manually:
+
+**Product Manager Skill**:
+```bash
+npx skills add https://github.com/aj-geddes/claude-code-bmad-skills --skill product-manager
+```
+
+**Commit Command**:
+```bash
+cp ~/.claude/skills/feature-marker/resources/commit.md ~/.claude/commands/commit.md
+```
+
+## Template Setup Guide
+
+### Template Directory Structure
+
+Commands in `~/.claude/commands/` read templates from a centralized location:
+
+```
+~/.claude/docs/specs/
+├── prd-template.md          # Product Requirements Document template
+├── techspec-template.md     # Technical Specification template
+└── tasks-template.md        # Task breakdown template
+```
+
+### Why Templates in ~/.claude/docs/specs?
+
+- **Centralized**: All projects share the same templates
+- **User-controlled**: Users can customize their own templates
+- **Portable**: Commands reference templates via standard path
+- **Separation**: Templates are not in project repositories
+
+### Template Content
+
+Each template should be a markdown file with:
+- Clear section structure
+- Placeholder text or variables
+- Examples and formatting guidelines
+
+Commands read these templates and populate them with feature-specific content.
+
+### Setup Verification
+
+To verify your setup is complete:
+
+```bash
+# Check templates exist
+ls -l ~/.claude/docs/specs/
+
+# Check commands exist
+ls -l ~/.claude/commands/
+
+# Test feature-marker
+/feature-marker --interactive prd-test-feature
+```
+
+If templates are missing, create them in `~/.claude/docs/specs/` before running feature-marker.
+
+## Plan Mode Integration
+
+When the user has used Claude's built-in plan mode before invoking feature-marker, the agent automatically:
+
+1. **Detects the most recent plan** from `~/.claude/plans/` (sorted by modification time)
+2. **Reads project conventions** from `./CLAUDE.md` at the project root (if present)
+3. **Uses both as rich context** to enhance PRD generation and reduce redundant clarification questions
+
+This is automatic and requires no additional flags or options. If no plan or CLAUDE.md exists, the workflow proceeds normally.
+
+**Recommended flow**:
+```
+1. Use Claude plan mode to explore the codebase and think through the feature
+2. Exit plan mode
+3. Run /feature-marker --interactive <feature-slug>
+4. Select "Full Workflow"
+5. The plan content automatically enriches PRD generation
+```
+
+## Checkpoint & Resume
+
+If interrupted (Ctrl+C, session crash, etc.), re-invoke with the same feature slug to resume:
+
+```
+/feature-marker prd-user-authentication
+```
+
+The skill will:
+- Detect existing checkpoint
+- Show current progress (phase, task index)
+- Ask if you want to resume or start fresh
+
+## Platform Detection
+
+In Phase 4, the skill auto-detects your git platform and selects the appropriate PR skill:
+
+| Platform | Detection | PR Skill |
+|----------|-----------|----------|
+| GitHub | `github.com` in remote URL | `checking-pr` |
+| Azure DevOps | `dev.azure.com` in remote URL | `azure-pr` |
+| GitLab | `gitlab.com` in remote URL | `checking-pr` |
+| Bitbucket | `bitbucket.org` in remote URL | `checking-pr` |
+| Other | (fallback) | `checking-pr` |
+
+## Configuration
+
+Override default behavior with `.feature-marker.json` in your repository root:
+
+```json
+{
+  "pr_skill": "custom-pr-skill",
+  "skip_pr": false,
+  "test_command": "npm run test:ci",
+  "docs_path": "./tasks",
+  "state_path": ".claude/feature-state"
+}
+```
+
+## Error Handling
+
+| Scenario | Behavior |
+|----------|----------|
+| Missing files | Auto-generate via commands |
+| No git repo | Fail early with helpful message |
+| No tests | Skip Phase 3 with warning |
+| Test failures | Report issues, allow fix, offer retry |
+| Unknown platform | Fallback to `checking-pr` |
+| PR skill unavailable | Commit only, log manual instructions |
+
+## Example Sessions
+
+### Example 1: All Files Exist (No Generation Needed)
+```
+> /feature-marker prd-user-authentication
+
+Checking for existing checkpoint...
+No checkpoint found. Starting new workflow.
+
+Phase 0: Inputs Gate
+✓ prd.md exists
+✓ techspec.md exists
+✓ tasks.md exists
+✅ All files present. Skipping generation.
+
+Phase 1: Analysis & Planning
+Reading existing documents...
+Creating implementation plan...
+Checkpoint saved.
+
+Phase 2: Implementation
+[1/6] Create User entity... ✓
+[2/6] Add authentication service... ✓
+...
+```
+
+### Example 2: Partial Files (Generates Only Missing)
+```
+> /feature-marker prd-payment-integration
+
+Checking for existing checkpoint...
+No checkpoint found. Starting new workflow.
+
+Phase 0: Inputs Gate
+✓ prd.md exists
+✗ techspec.md missing → Generating via /generate-spec...
+✓ tasks.md exists
+
+✅ Generated missing file. All inputs ready.
+
+Phase 1: Analysis & Planning
+Reading documents...
+Creating implementation plan...
+Checkpoint saved.
+...
+```
+
+### Example 3: Complete Workflow with Auto-Install
+```
+> /feature-marker prd-new-feature
+
+Phase 0: Inputs Gate
+✗ prd.md missing → Generating via /create-prd...
+✗ techspec.md missing → Generating via /generate-spec...
+✗ tasks.md missing → Generating via /generate-tasks...
+
+Phase 1: Analysis & Planning
+⚙️  Installing product-manager skill...
+✓ product-manager skill installed successfully
+Reading PRD, Tech Spec, and Tasks...
+Creating implementation plan...
+Checkpoint saved.
+
+Phase 2: Implementation
+[1/6] Create User entity... ✓
+[2/6] Add authentication service... ✓
+[3/6] Implement login endpoint... ✓
+[4/6] Add JWT token handling... ✓
+[5/6] Create logout endpoint... ✓
+[6/6] Add session management... ✓
+Checkpoint saved.
+
+Phase 3: Tests & Validation
+✅ Platform detected: Node.js / Next.js (pnpm)
+Running: jest --findRelatedTests src/api/users.ts
+✅ 14 passed, 0 failed
+Lint: pnpm run lint ✅
+Checkpoint saved.
+
+Phase 4: Commit & PR
+⚙️  Installing commit command...
+✓ commit command installed successfully
+Using enhanced commit workflow (/commit)...
+✨ feat: implement user authentication system
+Detected platform: GitHub
+Creating PR via /checking-pr...
+
+✓ Feature complete!
+PR URL: https://github.com/user/repo/pull/42
+```
+
+### Example 4: Using Existing User Tools
+```
+> /feature-marker prd-payment-feature
+
+Phase 0: Inputs Gate
+✓ All inputs validated.
+
+Phase 1: Analysis & Planning
+✓ product-manager skill already installed (using user's version)
+...
+
+Phase 4: Commit & PR
+✓ commit command already exists (using user's version)
+...
+```
+
+
+ARGUMENTS: --interactive -prd-sistema-breaks-niveis
+
+---
+
+This session is being continued from a previous conversation that ran out of context. The summary below covers the earlier portion of the conversation.
+
+Summary:
+1. Primary Request and Intent:
+   - **Social Feed Bug Fixes (PRO-89)**: User reported three issues with the social feed feature: (a) feed tab not appearing despite Remote Config being `true`, (b) pull-to-refresh causing infinite loading loop (primary concern with emphasis on Swift concurrency rules), (c) empty state not showing when no feed posts exist, and (d) "missing or insufficient permissions" error on pull-to-refresh.
+   - **Commit and Push**: User explicitly asked to commit and push the social feed fixes to the current branch `feat/pro-89-social-feed`.
+   - **PRO-90 Feature Planning**: User invoked `/feature-marker --interactive -prd-sistema-breaks-niveis` for Linear issue PRO-90 "Sistema de Streaks & XP com Níveis". Selected "Full Workflow" mode to generate PRD, TechSpec, and Tasks, then execute all implementation phases.
+
+2. Key Technical Concepts:
+   - **Swift 6 Strict Concurrency**: `@MainActor`, `nonisolated(unsafe)`, `nonisolated deinit`, `Task` isolation inheritance
+   - **MVVM + @Observable**: Project architecture pattern with Swinject DI
+   - **SwiftUI `.refreshable` and `.task`**: Lifecycle modifiers and their interaction with async observer patterns
+   - **AsyncStream**: Firestore snapshot listeners wrapped in `AsyncStream` with `continuation.yield()`/`continuation.finish()`
+   - **Firebase Remote Config**: Feature flags with `FeatureFlagKey` enum, `defaultValue`, and `RemoteConfigService` actor
+   - **Firestore `addSnapshotListener` vs `getDocuments()`**: Snapshot listeners can serve from cache; `getDocuments()` requires server validation of security rules
+   - **SwiftData**: Local persistence with singleton pattern (`id = "current"`)
+   - **Dual persistence**: SwiftData (local) + Firestore (remote) with Firestore as source of truth
+
+3. Files and Code Sections:
+
+   - **`FitToday/Presentation/Features/SocialFeed/ViewModels/SocialFeedViewModel.swift`** — Core file with concurrency bug fixes
+     - Removed `isLoading = true` / `defer { isLoading = false }` from `loadFeed()` to prevent race condition with observer
+     - Added `CancellationError` handling in `startObserving()` catch block
+     - Added `self.isLoading = false` in all exit paths (guard early return, after for-await loop, after catch)
+     - Added `if Task.isCancelled { break }` inside the `for await` loop
+     - Changed `stopObserving()` from `nonisolated` to normal `@MainActor` method
+     - Changed `deinit` to `nonisolated deinit` with direct `observeTask?.cancel()`
+     - Kept `nonisolated(unsafe)` on `observeTask` property (required for deinit access)
+     ```swift
+     func loadFeed() async {
+         do {
+             guard let user = try await authRepository.currentUser() else {
+                 errorMessage = FeedError.notAuthenticated.localizedDescription
+                 return
+             }
+             currentUserId = user.id
+             currentGroupId = user.currentGroupId
+             guard let groupId = user.currentGroupId else {
+                 errorMessage = FeedError.notInGroup.localizedDescription
+                 return
+             }
+             posts = try await feedRepository.getPosts(groupId: groupId, limit: 50, after: nil)
+         } catch {
+             errorMessage = error.localizedDescription
+         }
+     }
+
+     func startObserving() {
+         observeTask?.cancel()
+         observeTask = Task { [weak self] in
+             guard let self else { return }
+             do {
+                 guard let user = try await authRepository.currentUser(),
+                       let groupId = user.currentGroupId else {
+                     self.isLoading = false
+                     return
+                 }
+                 currentUserId = user.id
+                 currentGroupId = groupId
+                 for await newPosts in feedRepository.observePosts(groupId: groupId) {
+                     if Task.isCancelled { break }
+                     self.posts = newPosts
+                     self.isLoading = false
+                 }
+             } catch is CancellationError {
+                 // Expected when stopObserving() is called
+             } catch {
+                 self.errorMessage = error.localizedDescription
+             }
+             self.isLoading = false
+         }
+         isLoading = true
+     }
+     ```
+
+   - **`FitToday/Presentation/Features/SocialFeed/Views/SocialFeedView.swift`** — View with refreshable fix
+     - Changed `.refreshable` from `await viewModel.loadFeed()` to `stopObserving()` + `startObserving()` to avoid `getDocuments()` permissions error
+     ```swift
+     .refreshable {
+         viewModel.stopObserving()
+         viewModel.startObserving()
+     }
+     .task {
+         viewModel.startObserving()
+     }
+     .onDisappear {
+         viewModel.stopObserving()
+     }
+     ```
+
+   - **`FitToday/Data/Services/Firebase/FirebaseFeedService.swift`** — Snapshot listener error handling fix
+     - Changed from ignoring errors (`snapshot, _`) to handling them (`snapshot, error`)
+     - Yields empty array on error instead of silently returning (which caused stream to never emit, keeping `isLoading = true` forever)
+     ```swift
+     .addSnapshotListener { snapshot, error in
+         if error != nil {
+             continuation.yield([])
+             return
+         }
+         guard let snapshot else { return }
+         let posts = snapshot.documents.compactMap {
+             try? $0.data(as: FBFeedPost.self)
+         }
+         continuation.yield(posts)
+     }
+     ```
+
+   - **`FitToday/Domain/Entities/FeatureFlag.swift`** — Read for understanding feature flag pattern (not modified in this session)
+
+   - **`FitToday/Data/Services/RemoteConfig/RemoteConfigService.swift`** — Read for understanding Remote Config flow (not modified)
+
+   - **`FitToday/Data/Repositories/RemoteConfigFeatureFlagRepository.swift`** — Read for understanding caching (not modified)
+
+   - **`FitToday/Data/Repositories/FirebaseFeedRepository.swift`** — Read for understanding the AsyncStream wrapping pattern (not modified)
+
+   - **`FitToday/Presentation/Features/Activity/Views/ActivityTabView.swift`** — Read to understand social feed tab visibility logic (gated by `isSocialFeedEnabled` state)
+
+   - **PRO-90 Generated Files:**
+     - **`tasks/prd-sistema-breaks-niveis/prd.md`** — PRD with problem statement, solution (Duolingo-style XP/Levels), 6 functional requirements (XP Award, Level System, Level-Up Animation, Home Display, Streak Risk Notification, Feature Flag), NFRs, release phases, risks
+     - **`tasks/prd-sistema-breaks-niveis/techspec.md`** — Technical specification with architecture (MVVM + @Observable + Swinject), data models (UserXP, XPLevel, XPTransaction, SDUserXP, FBUserXP), repository pattern, AwardXPUseCase, UI components (XPLevelCard, LevelUpCelebrationView), integration points (WorkoutCompletionView, HomeViewModel)
+     - **`tasks/prd-sistema-breaks-niveis/tasks.md`** — 7 tasks: (1) Domain Entities + Feature Flag [S], (2) XP Repository [M], (3) AwardXP Use Case [M], (4) Home Screen XP Level Card [M], (5) Level-Up Celebration View [M], (6) Workout Completion Integration [S], (7) Unit Tests [M]
+
+4. Errors and Fixes:
+   - **Build error: `main actor-isolated property 'observeTask' can not be referenced from a nonisolated context`**: When `stopObserving()` was changed from `nonisolated` to `@MainActor`, the `deinit` (which is inherently nonisolated) couldn't access `observeTask`. Fixed by: (a) keeping `nonisolated(unsafe)` on `observeTask`, (b) using `nonisolated deinit` with direct `observeTask?.cancel()` instead of calling `stopObserving()`.
+   - **Safety hook blocking git commit**: The `block-dangerous-commands.sh` hook falsely detected "curl .* | sh" pattern in heredoc commit messages. Fixed by using the `/commit` skill instead which uses a simpler `-m` flag format.
+   - **xcodebuild simulator not found**: `iPhone 16` simulator didn't exist. Fixed by using `iPhone 17 Pro` from the available destinations list.
+   - **Empty state not showing**: Root cause was `FirebaseFeedService.observePosts()` silently ignoring snapshot listener errors (line 64: `snapshot, _`). When Firestore returned a permissions error, `snapshot` was `nil`, the `guard` returned, the stream never emitted, and `isLoading` stayed `true` forever. Fixed by yielding empty array on error.
+   - **Permissions error on pull-to-refresh**: `loadFeed()` used `getDocuments()` which requires server-side rule validation and failed. `addSnapshotListener` used by the observer can serve from cache. Fixed by making refreshable restart the observer instead of calling `loadFeed()`.
+
+5. Problem Solving:
+   - Diagnosed the race condition between `loadFeed()` and `startObserving()` both writing to `isLoading` and `posts` concurrently on `@MainActor`
+   - Identified that `CancellationError` from `stopObserving()` was being caught by the generic catch block and setting `errorMessage` (showing unwanted error alerts)
+   - Traced the empty state bug through the full chain: `SocialFeedView` → `SocialFeedViewModel.startObserving()` → `FeedRepository.observePosts()` → `FirebaseFeedService.observePosts()` → Firestore snapshot listener ignoring errors
+   - Explored the FitToday codebase extensively for PRO-90 planning: found existing streak tracking (`UserStats`, `WeekStreakRow`, `UserStatsCalculator`), workout completion flow, push notification absence, feature flag patterns, Firestore collections, and user profile model
+
+6. All User Messages:
+   - "A minha feature já está inserida no remote config, paga que eu possa desliga-la, https://console.firebase.google.com/project/fittoday-2aaff/config/env/firebase, como ela é exibida para o usuário? somente se tiver um desafio vinculado ou criado?"
+   - "Hoje ela não está aparecendo, só mostra histórico, desafios e stats"
+   - "O valor da remote config está como true no firebase, como mostra a imagem" [with screenshot showing social_feed_enabled = true]
+   - "[User interrupted] Encontrei só um problema, ao tentar fazer o pull to refresh no feed, o loading está em loop eternamente, se atente para regras de concurrency do aplicativo, isso é de extrema importância"
+   - "Ao entrar na tela ele não está apresentando o valor de empty state caso não tenha nenhum feed e depois que faz o pull to refresh está dando missing or insufficient permissions"
+   - "realize o commit e push dessas ultimas correções para a branch"
+   - "https://linear.app/secondbrainclaw/issue/PRO-90/12-sistema-de-streaks-and-xp-com-niveis /feature-marker --interactive -prd-sistema-breaks-niveis"
+   - Selected "Full Workflow (Recommended)" in the interactive menu
+
+7. Pending Tasks:
+   - **PRO-90 feature-marker workflow**: Phase 0 (Inputs Gate) is complete — PRD, TechSpec, and Tasks are generated. The workflow needs to continue with:
+     - Phase 1: Analysis & Planning (read docs, create implementation plan)
+     - Phase 2: Implementation (execute 7 tasks)
+     - Phase 3: Tests & Validation
+     - Phase 4: Commit & PR
+   - The feature needs a new branch (suggested by Linear: `viniciuscarvalho789/pro-90-12-sistema-de-streaks-xp-com-niveis`)
+
+8. Current Work:
+   Immediately before the summary request, I had just completed generating the three documents for the feature-marker workflow for PRO-90:
+   - `tasks/prd-sistema-breaks-niveis/prd.md` — Product Requirements Document
+   - `tasks/prd-sistema-breaks-niveis/techspec.md` — Technical Specification
+   - `tasks/prd-sistema-breaks-niveis/tasks.md` — Task breakdown (7 tasks)
+   
+   The feature-marker "Full Workflow" was initiated by the user with `/feature-marker --interactive -prd-sistema-breaks-niveis`. Phase 0 (Inputs Gate) completed successfully with all 3 files generated. The workflow is mid-execution.
+
+9. Optional Next Step:
+   Continue the feature-marker Full Workflow — proceed to **Phase 1: Analysis & Planning**. This involves reading the generated PRD, TechSpec, and Tasks, creating an implementation plan, saving checkpoint state to `.claude/feature-state/prd-sistema-breaks-niveis/`, and then moving to Phase 2 (Implementation) starting with Task 1.0 (Domain Entities + Feature Flag). A new git branch should be created for PRO-90 before implementation begins.
+   
+   User's exact request: Selected "Full Workflow (Recommended)" for `/feature-marker --interactive -prd-sistema-breaks-niveis`, and the last completed step was generating `tasks.md`. The workflow should continue sequentially through all 5 phases.
+
+If you need specific details from before compaction (like exact code snippets, error messages, or content you generated), read the full transcript at: /Users/viniciuscarvalho/.REDACTED.jsonl
+Continue the conversation from where it left off without asking the user any further questions. Resume directly — do not acknowledge the summary, do not recap what was happening, do not preface with "I'll continue" or similar. Pick up the last task as if the break never happened.
