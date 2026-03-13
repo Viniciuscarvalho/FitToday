@@ -1,1 +1,48 @@
 Lembrando que todas as strings devem estar em Localizable e também deve conter empty states e estados de loading bem definidos. Realize o commit após as alterações
+
+---
+
+<task-notification>
+<task-id>bddqhbplo</task-id>
+<tool-use-id>toolu_0127t7jZZgZAnR9Ju9QyQ3q8</tool-use-id>
+<output-file>REDACTED.output</output-file>
+<status>completed</status>
+<summary>Background command "set -a && source '/Users/viniciuscarvalho/Documents/FitToday/.env' && set +a && cd /Users/viniciuscarvalho/Documents/FitToday/FitToday && xcodebuild -project FitToday.xcodeproj -scheme FitToday -destination 'platform=iOS Simulator,name=iPhone 16' build 2>&1 | tail -30" completed (exit code 0)</summary>
+</task-notification>
+Read the output file to retrieve the result: REDACTED.output
+
+---
+
+<task-notification>
+<task-id>butqj2vso</task-id>
+<tool-use-id>toolu_01Bo1E1qnBttbYV5iCwR9Kdc</tool-use-id>
+<output-file>REDACTED.output</output-file>
+<status>completed</status>
+<summary>Background command "set -a && source '/Users/viniciuscarvalho/Documents/FitToday/.env' && set +a && cd /Users/viniciuscarvalho/Documents/FitToday/FitToday && xcodebuild -project FitToday.xcodeproj -scheme FitToday -destination 'platform=iOS Simulator,name=iPhone 17 Pro' build 2>&1 | tail -20" completed (exit code 0)</summary>
+</task-notification>
+Read the output file to retrieve the result: REDACTED.output
+
+---
+
+Recebi uma recusa da apple, esse foi o review, The following information needs to be included within the app:
+
+- A functional link to the Terms of Use (EULA)
+
+You can use SubscriptionStoreView to easily include all of the required information in the app's purchase flow.
+
+The following information needs to be included in the App Store metadata:
+
+- A functional link to the Terms of Use (EULA). If you are using the standard Apple Terms of Use (EULA), include a link to the Terms of Use in the App Description. If you are using a custom EULA, add it in App Store Connect.
+
+Next Steps
+
+Update the app and App Store metadata to include the information specified above.
+
+Resources
+
+Apps offering auto-renewable subscriptions must include all of the following required information in the app itself:
+
+- Title of auto-renewing subscription (this may be the same as the In-App Purchase product name)
+- Length of subscription
+- Price of subscription, and price per unit if appropriate
+- Functional links to the privacy policy and Terms of Use (EULA)

@@ -3,9 +3,9 @@
   "checkpoint_id": "4dae7bf07b83",
   "session_id": "c3a1071c-d9d3-4eeb-8ae6-224bdc2cd8bc",
   "strategy": "manual-commit",
-  "created_at": "2026-03-13T00:24:59.229174Z",
+  "created_at": "2026-03-13T20:30:19.121414Z",
   "branch": "feat/pro-90-xp-levels-system",
-  "checkpoints_count": 1,
+  "checkpoints_count": 2,
   "files_touched": [
     "FitToday/FitToday/Domain/Entities/XPLevel.swift",
     "FitToday/FitToday/Presentation/Features/Home/Components/XPLevelCard.swift",
@@ -15,24 +15,28 @@
     "FitToday/FitToday/Presentation/Features/Workout/WorkoutCompletionView.swift",
     "FitToday/FitToday/Resources/en.lproj/Localizable.strings",
     "FitToday/FitToday/Resources/pt-BR.lproj/Localizable.strings",
-    "ops/sessions/20260313-002451.json"
+    "ops/sessions/20260313-002522.json",
+    "ops/sessions/20260313-202539.json"
   ],
   "agent": "Claude Code",
+  "transcript_identifier_at_start": "87cda7ca-cdb7-4597-a790-63dfcae3faf4",
+  "checkpoint_transcript_start": 358,
+  "transcript_lines_at_start": 358,
   "token_usage": {
-    "input_tokens": 39,
-    "cache_creation_tokens": 80968,
-    "cache_read_tokens": 2383944,
-    "output_tokens": 10234,
-    "api_call_count": 35
+    "input_tokens": 13,
+    "cache_creation_tokens": 98137,
+    "cache_read_tokens": 536956,
+    "output_tokens": 1981,
+    "api_call_count": 7
   },
   "initial_attribution": {
-    "calculated_at": "2026-03-13T00:24:58.816757Z",
-    "agent_lines": 0,
-    "human_added": 447,
-    "human_modified": 4,
+    "calculated_at": "2026-03-13T20:30:18.409363Z",
+    "agent_lines": 1,
+    "human_added": 213,
+    "human_modified": 1,
     "human_removed": 0,
-    "total_committed": 451,
-    "agent_percentage": 0
+    "total_committed": 215,
+    "agent_percentage": 0.46511627906976744
   },
   "transcript_path": ".claude/projects/-Users-viniciuscarvalho-Documents-FitToday/c3a1071c-d9d3-4eeb-8ae6-224bdc2cd8bc.jsonl"
 }
