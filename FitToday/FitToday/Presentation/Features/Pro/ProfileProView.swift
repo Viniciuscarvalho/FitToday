@@ -315,23 +315,9 @@ struct ProfileProView: View {
 
                 Spacer()
 
-                if entitlement.isPro {
-                    Image(systemName: "chevron.right")
-                        .font(.system(size: 14))
-                        .foregroundStyle(FitTodayColor.textTertiary)
-                } else {
-                    Text("PRO")
-                        .font(.system(size: 10, weight: .bold))
-                        .foregroundStyle(.white)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(FitTodayColor.brandPrimary)
-                        .clipShape(Capsule())
-
-                    Image(systemName: "chevron.right")
-                        .font(.system(size: 14))
-                        .foregroundStyle(FitTodayColor.textTertiary)
-                }
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 14))
+                    .foregroundStyle(FitTodayColor.textTertiary)
             }
             .padding(FitTodaySpacing.md)
             .background(FitTodayColor.surface)

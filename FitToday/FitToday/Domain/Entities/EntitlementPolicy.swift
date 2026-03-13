@@ -148,7 +148,7 @@ struct EntitlementPolicy {
                 }
                 return .allowed
             case .personalTrainer, .trainerWorkouts:
-                return .requiresElite(feature: feature)
+                return .allowed
             default:
                 return .allowed
             }
@@ -175,7 +175,7 @@ struct EntitlementPolicy {
             return .allowed
 
         case .personalTrainer, .trainerWorkouts:
-            return .requiresElite(feature: feature)
+            return .allowed
 
         case .aiExerciseSubstitution,
              .unlimitedHistory,
@@ -192,7 +192,7 @@ struct EntitlementPolicy {
         case .aiWorkoutGeneration, .simultaneousChallenges, .aiChat:
             return false // Free tem acesso limitado
         case .personalTrainer, .trainerWorkouts:
-            return false // Elite-only, não Pro-only
+            return false // Acessível para todos os usuários
         case .aiExerciseSubstitution,
              .unlimitedHistory,
              .advancedDOMSAdjustment,
@@ -206,7 +206,7 @@ struct EntitlementPolicy {
     static func isEliteOnly(_ feature: ProFeature) -> Bool {
         switch feature {
         case .personalTrainer, .trainerWorkouts:
-            return true
+            return false
         default:
             return false
         }
