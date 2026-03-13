@@ -1,0 +1,38 @@
+{
+  "cli_version": "0.4.4",
+  "checkpoint_id": "4dae7bf07b83",
+  "session_id": "c3a1071c-d9d3-4eeb-8ae6-224bdc2cd8bc",
+  "strategy": "manual-commit",
+  "created_at": "2026-03-13T00:24:59.229174Z",
+  "branch": "feat/pro-90-xp-levels-system",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "FitToday/FitToday/Domain/Entities/XPLevel.swift",
+    "FitToday/FitToday/Presentation/Features/Home/Components/XPLevelCard.swift",
+    "FitToday/FitToday/Presentation/Features/Home/HomeView.swift",
+    "FitToday/FitToday/Presentation/Features/Home/HomeViewModel.swift",
+    "FitToday/FitToday/Presentation/Features/Workout/LevelUpCelebrationView.swift",
+    "FitToday/FitToday/Presentation/Features/Workout/WorkoutCompletionView.swift",
+    "FitToday/FitToday/Resources/en.lproj/Localizable.strings",
+    "FitToday/FitToday/Resources/pt-BR.lproj/Localizable.strings",
+    "ops/sessions/20260313-002451.json"
+  ],
+  "agent": "Claude Code",
+  "token_usage": {
+    "input_tokens": 39,
+    "cache_creation_tokens": 80968,
+    "cache_read_tokens": 2383944,
+    "output_tokens": 10234,
+    "api_call_count": 35
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-03-13T00:24:58.816757Z",
+    "agent_lines": 0,
+    "human_added": 447,
+    "human_modified": 4,
+    "human_removed": 0,
+    "total_committed": 451,
+    "agent_percentage": 0
+  },
+  "transcript_path": ".claude/projects/-Users-viniciuscarvalho-Documents-FitToday/c3a1071c-d9d3-4eeb-8ae6-224bdc2cd8bc.jsonl"
+}
