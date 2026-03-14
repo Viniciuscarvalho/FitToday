@@ -810,3 +810,28 @@ Full transcript available at: REDACTED.output
 <usage><total_tokens>31037</total_tokens><tool_uses>15</tool_uses><duration_ms>75190</duration_ms></usage>
 </task-notification>
 Full transcript available at: REDACTED.output
+
+---
+
+<task-notification>
+<task-id>a964bfc429657a550</task-id>
+<tool-use-id>REDACTED</tool-use-id>
+<output-file>REDACTED.output</output-file>
+<status>completed</status>
+<summary>Agent "Implement Task 6: Use Cases" completed</summary>
+<result>The file has been created. Here is a summary of what was done:
+
+**Created:** `/Users/viniciuscarvalho/Documents/FitToday/FitToday/FitToday/Domain/UseCases/LeagueUseCases.swift`
+
+**Three use cases implemented:**
+
+1. **GetCurrentLeagueUseCase** -- Fetches the current user's active league. Returns `nil` if the `leaguesEnabled` feature flag is disabled. Delegates to `LeagueRepository.getCurrentLeague()`.
+
+2. **ObserveLeagueUseCase** -- Observes real-time updates for a specific league via `AsyncThrowingStream<League, Error>`. No feature flag check since the caller has already verified access before subscribing.
+
+3. **GetLeagueHistoryUseCase** -- Fetches past season results as `[LeagueResult]`. Returns an empty array if the `leaguesEnabled` feature flag is disabled. Delegates to `LeagueRepository.getHistory()`.
+
+All three use cases follow the established project patterns: `final class`, `@unchecked Sendable`, dependency injection of `LeagueRepository` (protocol) and `FeatureFlagChecking` where needed.</result>
+<usage><total_tokens>24882</total_tokens><tool_uses>8</tool_uses><duration_ms>32008</duration_ms></usage>
+</task-notification>
+Full transcript available at: REDACTED.output
