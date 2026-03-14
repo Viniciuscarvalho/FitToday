@@ -45,8 +45,10 @@ enum HomeJourneyState: Equatable {
     private(set) var isAiWorkoutEnabled = true
     private(set) var isPersonalTrainerEnabled = false
     private(set) var isGamificationEnabled = false
+    private(set) var isLeaguesEnabled = false
     private(set) var userXP: UserXP?
     private(set) var isLoadingXP = false
+    private(set) var currentLeague: League?
     private(set) var personalTrainerCardState: PersonalTrainerHomeCardState = .loading
     private(set) var todayWorkoutId: String?
     private(set) var todayWorkout: ProgramWorkout?
@@ -110,6 +112,22 @@ enum HomeJourneyState: Equatable {
         case .weightLoss: return "goal.badge.weight_loss".localized
         case .performance: return "goal.badge.performance".localized
         }
+    }
+
+    // MARK: - League Computed
+
+    var leagueUserRank: Int {
+        currentLeague?.members.first(where: { $0.isCurrentUser })?.rank ?? 0
+    }
+
+    var leagueCountdownText: String {
+        guard let endDate = currentLeague?.endDate else { return "" }
+        let remaining = endDate.timeIntervalSince(Date())
+        guard remaining > 0 else { return "" }
+        let days = Int(remaining) / 86400
+        let hours = (Int(remaining) % 86400) / 3600
+        if days > 0 { return "\(days)d \(hours)h" }
+        return "\(hours)h"
     }
 
     // MARK: - Quick Stats
@@ -268,6 +286,7 @@ enum HomeJourneyState: Equatable {
             isAiWorkoutEnabled = await featureFlags.isFeatureEnabled(.aiWorkoutGenerationEnabled)
             isPersonalTrainerEnabled = await featureFlags.isFeatureEnabled(.personalTrainerEnabled)
             isGamificationEnabled = await featureFlags.isFeatureEnabled(.gamificationEnabled)
+            isLeaguesEnabled = await featureFlags.isFeatureEnabled(.leaguesEnabled)
         }
 
         // Load user info from UserDefaults or Firebase Auth
@@ -312,17 +331,19 @@ enum HomeJourneyState: Equatable {
                 async let programsTask: Void = loadProgramsAndWorkouts(profile: profile)
                 async let ptTask: Void = loadPersonalTrainerState()
                 async let xpTask: Void = loadUserXP()
-                _ = await (programsTask, ptTask, xpTask)
+                async let leagueTask: Void = loadCurrentLeague()
+                _ = await (programsTask, ptTask, xpTask, leagueTask)
                 return
             }
 
             journeyState = .workoutReady(profile: profile)
 
-            // Carregar programas, personal trainer e XP em paralelo
+            // Carregar programas, personal trainer, XP e liga em paralelo
             async let programsTask: Void = loadProgramsAndWorkouts(profile: profile)
             async let personalTrainerTask: Void = loadPersonalTrainerState()
             async let xpTask: Void = loadUserXP()
-            _ = await (programsTask, personalTrainerTask, xpTask)
+            async let leagueTask: Void = loadCurrentLeague()
+            _ = await (programsTask, personalTrainerTask, xpTask, leagueTask)
 
         } catch {
             journeyState = .error(message: "Não foi possível carregar seus dados.")
@@ -415,6 +436,25 @@ enum HomeJourneyState: Equatable {
             userXP = nil
             #if DEBUG
             print("[Home] Failed to load user XP: \(error)")
+            #endif
+        }
+    }
+
+    // MARK: - Leagues
+
+    private func loadCurrentLeague() async {
+        guard isLeaguesEnabled,
+              let useCase = resolver.resolve(GetCurrentLeagueUseCase.self) else {
+            currentLeague = nil
+            return
+        }
+
+        do {
+            currentLeague = try await useCase.execute()
+        } catch {
+            currentLeague = nil
+            #if DEBUG
+            print("[Home] Failed to load current league: \(error)")
             #endif
         }
     }

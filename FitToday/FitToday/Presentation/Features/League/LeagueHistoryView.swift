@@ -7,7 +7,7 @@ import SwiftUI
 
 /// Displays past league seasons with tier, rank, and promotion/demotion indicators.
 struct LeagueHistoryView: View {
-    @Bindable var viewModel: LeagueViewModel
+    var viewModel: LeagueViewModel
 
     var body: some View {
         Group {

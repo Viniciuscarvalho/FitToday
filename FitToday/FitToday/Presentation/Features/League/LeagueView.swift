@@ -34,24 +34,16 @@ struct LeagueView: View {
                 }
             }
         }
-        .task {
-            await viewModel.loadLeague()
-        }
-        .refreshable {
-            await viewModel.loadLeague()
-        }
+        .task { await viewModel.loadLeague() }
+        .refreshable { await viewModel.loadLeague() }
         .fullScreenCover(isPresented: $viewModel.showPromotionAnimation) {
             if let tier = viewModel.league?.tier {
-                LeaguePromotionView(tier: tier) {
-                    viewModel.showPromotionAnimation = false
-                }
+                LeaguePromotionView(tier: tier) { viewModel.showPromotionAnimation = false }
             }
         }
         .fullScreenCover(isPresented: $viewModel.showDemotionAnimation) {
             if let tier = viewModel.league?.tier {
-                LeagueDemotionView(tier: tier) {
-                    viewModel.showDemotionAnimation = false
-                }
+                LeagueDemotionView(tier: tier) { viewModel.showDemotionAnimation = false }
             }
         }
     }
@@ -62,20 +54,22 @@ struct LeagueView: View {
         ScrollViewReader { proxy in
             ScrollView {
                 VStack(spacing: FitTodaySpacing.lg) {
-                    // Tier badge and season info
-                    headerSection(league)
+                    // Header
+                    VStack(spacing: FitTodaySpacing.sm) {
+                        LeagueTierBadge(tier: league.tier, size: .large)
+                        Text("league.season_week".localized(with: league.seasonWeek))
+                            .font(FitTodayFont.ui(size: 14, weight: .medium))
+                            .foregroundStyle(FitTodayColor.textSecondary)
+                    }
+                    .padding(.top, FitTodaySpacing.sm)
 
-                    // Countdown
                     if !viewModel.countdownText.isEmpty {
                         Text(viewModel.countdownText)
                             .font(FitTodayFont.ui(size: 13, weight: .medium))
                             .foregroundStyle(FitTodayColor.textSecondary)
                     }
 
-                    // Zone labels
-                    zoneDivider("league.promotion_zone".localized, color: FitTodayColor.success)
-
-                    // Members list
+                    // Members list with zone indicators
                     LazyVStack(spacing: FitTodaySpacing.xs) {
                         ForEach(league.members.sorted(by: { $0.rank < $1.rank })) { member in
                             LeagueRankingRow(member: member, totalMembers: league.members.count)
@@ -83,47 +77,16 @@ struct LeagueView: View {
                         }
                     }
                     .padding(.horizontal)
-
-                    zoneDivider("league.demotion_zone".localized, color: FitTodayColor.error)
                 }
                 .padding(.vertical, FitTodaySpacing.md)
             }
             .onAppear {
-                if let currentUserId = league.members.first(where: { $0.isCurrentUser })?.userId {
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                        withAnimation {
-                            proxy.scrollTo(currentUserId, anchor: .center)
-                        }
-                    }
+                guard let uid = league.members.first(where: { $0.isCurrentUser })?.userId else { return }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                    withAnimation { proxy.scrollTo(uid, anchor: .center) }
                 }
             }
         }
-    }
-
-    private func headerSection(_ league: League) -> some View {
-        VStack(spacing: FitTodaySpacing.sm) {
-            LeagueTierBadge(tier: league.tier, size: .large)
-
-            Text("league.season_week".localized(with: league.seasonWeek))
-                .font(FitTodayFont.ui(size: 14, weight: .medium))
-                .foregroundStyle(FitTodayColor.textSecondary)
-        }
-        .padding(.top, FitTodaySpacing.sm)
-    }
-
-    private func zoneDivider(_ text: String, color: Color) -> some View {
-        HStack(spacing: FitTodaySpacing.xs) {
-            Rectangle()
-                .fill(color.opacity(0.3))
-                .frame(height: 1)
-            Text(text)
-                .font(FitTodayFont.ui(size: 11, weight: .semiBold))
-                .foregroundStyle(color)
-            Rectangle()
-                .fill(color.opacity(0.3))
-                .frame(height: 1)
-        }
-        .padding(.horizontal)
     }
 
     // MARK: - States

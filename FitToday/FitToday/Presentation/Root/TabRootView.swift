@@ -202,6 +202,11 @@ struct TabRootView: View {
                     message: "Erro ao carregar o feed."
                 )
             }
+        case .league:
+            LeagueView(resolver: resolver)
+        case .leagueHistory:
+            let viewModel = LeagueViewModel(resolver: resolver)
+            LeagueHistoryView(viewModel: viewModel)
         }
     }
 }
