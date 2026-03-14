@@ -1,0 +1,752 @@
+Implement the following plan:
+
+# PRO-101: Fix Permission Error on Personal Trainer Profile Access
+
+## Context
+
+Users receive a 403 error ("Você não tem permissão para acessar este recurso") when trying to view/search personal trainers. The error comes from the **CMS API** (REST), not do Firestore.
+
+**Root cause**: O `CMSTrainerService.buildRequest()` envia SEMPRE um header `Authorization: Bearer {token}` em todas as requests — inclusive nos endpoints públicos como `GET /api/trainers`. Quando o Firebase ID token é inválido, expirado, ou não reconhecido pelo middleware de auth do CMS, o backend retorna HTTP 403. Porém, esses endpoints funcionam sem auth (verificado: `GET /api/trainers` retorna 200 sem header).
+
+## Approach
+
+Adicionar um parâmetro `requiresAuth` ao `buildRequest()` para que endpoints públicos (read-only) não enviem o header de autenticação. Endpoints que requerem autenticação (connect, reviews) continuam enviando.
+
+## Changes
+
+### 1. `CMSTrainerService.swift` (arquivo principal)
+
+**Path**: `FitToday/FitToday/Data/Services/CMS/CMSTrainerService.swift`
+
+Modificar `buildRequest()` (linha 165):
+
+```swift
+private func buildRequest(url: URL, method: String, requiresAuth: Bool = false) async throws -> URLRequest {
+    var request = URLRequest(url: url)
+    request.httpMethod = method
+    request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+    request.setValue("application/json", forHTTPHeaderField: "Accept")
+
+    if requiresAuth {
+        if let tokenProvider {
+            let token = try await tokenProvider()
+            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        } else if let apiKey = configuration.apiKey {
+            request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
+        }
+    }
+
+    return request
+}
+```
+
+Marcar endpoints que necessitam auth com `requiresAuth: true`:
+
+- `requestConnection()` (linha 101) — POST, precisa de auth
+- `checkConnectionStatus()` (linha 116) — GET, precisa de auth (dados do aluno)
+- `submitReview()` (linha 129) — POST, precisa de auth
+
+Endpoints públicos ficam com default `false` (sem mudança nas chamadas):
+
+- `fetchTrainers()` — lista pública do marketplace
+- `fetchTrainerCount()` — contagem pública
+- `fetchTrainer(id:)` — perfil público
+- `fetchTrainerReviews()` — reviews públicos
+- `fetchPrograms()` / `fetchProgram(id:)` — programas públicos
+
+### 2. Nenhuma outra mudança necessária
+
+- **Firestore rules**: Corretas (`allow read: if isAuthenticated()` para trainers)
+- **DI Container**: Não precisa mudar
+- **ViewModels/Views**: Erro já é tratado via `.alert`
+- **Use Cases**: Sem mudança
+
+## Verification
+
+1. Buildar o app e abrir a tela de Personal Trainer
+2. Verificar que a listagem de trainers carrega sem erro 403
+3. Verificar que a busca por nome funciona
+4. Verificar que busca por invite code funciona
+5. Verificar que o botão "Conectar" ainda funciona (requer auth)
+6. Testar com usuário free e pro — ambos devem ver trainers
+7. Rodar tests existentes: `EntitlementPolicyTests`, `PersonalTrainerViewModelTests`
+
+
+If you need specific details from before exiting plan mode (like exact code snippets, error messages, or content you generated), read the full transcript at: /Users/viniciuscarvalho/.REDACTED.jsonl
+
+If this plan can be broken down into multiple independent tasks, consider using the TeamCreate tool to create a team and parallelize the work.
+
+---
+
+O erro permanece sendo 403, https://web-cms-pink.vercel.REDACTED
+[CMSTrainerService] Status: 403
+[PersonalTrainerViewModel] Error requesting connection: repositoryFailure(reason: "You don\'t have permission to access this resource")
+
+---
+
+Stop hook feedback:
+Prompt hook condition was not met: Claude did not complete the planned tasks. The plan explicitly stated: "Verification: 1. Build app and open Personal Trainer screen 2. Verify listting loads without 403 3. Verify search works 4. Verify invite code search works 5. Verify connect button still works 6. Test with free and pro users 7. Run existing tests: EntitlementPolicyTests, PersonalTrainerViewModelTests". No tests were run, no verification was performed, and no build was attempted. Claude also failed to notice that the root cause diagnosed (missing 'role' field) is DIFFERENT from the original plan, which focused on the 'requiresAuth' parameter. While the 'role' field fix is correct and necessary, Claude should have either: (1) tested the changes, (2) created a task list to track the verification steps, or (3) explicitly communicated that the plan changed. Additionally, the 'requiresAuth' parameter changes may be incomplete - the plan called for marking 3 endpoints with 'requiresAuth: true', but Claude only added 'requiresAuth: true' to requestConnection (line 101) and checkConnectionStatus (line 116), but may have missed submitReview or the changes may not match all planned endpoints. No verification that public endpoints still work without auth was done.
+
+---
+
+iOS app integration needed:
+
+  After a user signs up/signs in, call:
+  POST /api/users/me
+  Authorization: Bearer <firebase_id_token>
+  Content-Type: application/json
+
+  { "role": "student", "displayName": "..." }
+
+  This ensures the Firestore document has role: 'student' before the student tries to
+  connect with a trainer.
+
+  ---
+  To test the full flow after deploy:
+  1. Student calls POST /api/users/me with their Firebase token → confirms role:
+  'student' is set
+  2. Student calls POST /api/trainers/<trainer_id>/connect → should return 201
+  3. Trainer opens CMS /cms/connections → should see the pending connection
+  notification and be able to accept
+
+---
+
+<task-notification>
+<task-id>b392h4xji</task-id>
+<tool-use-id>toolu_018SZBVeaj9evkvLWGxky89L</tool-use-id>
+<output-file>REDACTED.output</output-file>
+<status>completed</status>
+<summary>Background command "set -a && source '/Users/viniciuscarvalho/Documents/FitToday/.env' && set +a && cd /Users/viniciuscarvalho/Documents/FitToday/FitToday && xcodebuild -project FitToday.xcodeproj -scheme FitToday -destination 'platform=iOS Simulator,name=iPhone 16' build 2>&1 | tail -20" completed (exit code 0)</summary>
+</task-notification>
+Read the output file to retrieve the result: REDACTED.output
+
+---
+
+<task-notification>
+<task-id>bqw8xpi34</task-id>
+<tool-use-id>REDACTED</tool-use-id>
+<output-file>REDACTED.output</output-file>
+<status>completed</status>
+<summary>Background command "set -a && source '/Users/viniciuscarvalho/Documents/FitToday/.env' && set +a && cd /Users/viniciuscarvalho/Documents/FitToday/FitToday && xcodebuild -project FitToday.xcodeproj -scheme FitToday -destination 'platform=iOS Simulator,name=iPhone 17 Pro' build 2>&1 | tail -30" completed (exit code 0)</summary>
+</task-notification>
+Read the output file to retrieve the result: REDACTED.output
+
+---
+
+Continua com o mesmo problema ao tentar fazer o request de envio de solicitação para conectar, sendo que o backend já está fornecendo e recebendo com o header do firebase, https://web-cms-pink.vercel.REDACTED
+[CMSTrainerService] Status: 403
+[PersonalTrainerViewModel] Error requesting connection: repositoryFailure(reason: "You don\'t have permission to access this resource")
+
+---
+
+<task-notification>
+<task-id>bf1m32o8r</task-id>
+<tool-use-id>REDACTED</tool-use-id>
+<output-file>REDACTED.output</output-file>
+<status>completed</status>
+<summary>Background command "set -a && source '/Users/viniciuscarvalho/Documents/FitToday/.env' && set +a && cd /Users/viniciuscarvalho/Documents/FitToday/FitToday && xcodebuild -project FitToday.xcodeproj -scheme FitToday -destination "platform=iOS Simulator,name=iPhone 17 Pro" build > /tmp/build-output.txt 2>&1 && echo "BUILD OK" || echo "BUILD FAILED"" completed (exit code 0)</summary>
+</task-notification>
+Read the output file to retrieve the result: REDACTED.output
+
+---
+
+Stop hook feedback:
+Prompt hook condition was not met: Claude did not complete the planned implementation. The original plan (PRO-101: Fix Permission Error on Personal Trainer Profile Access) explicitly required: 1) Modify CMSTrainerService.buildRequest() with requiresAuth parameter, 2) Mark 3 endpoints with requiresAuth: true, 3) Run verification tests (EntitlementPolicyTests, PersonalTrainerViewModelTests), 4) Verify 7 manual test steps. Claude: (a) Initially implemented requiresAuth correctly but then diagnosed a DIFFERENT root cause (missing 'role' field in Firestore) unrelated to the original plan, (b) Reverted the Firestore changes and added ensureStudentRole() API call as a workaround instead of fixing the root cause properly, (c) Did NOT run any actual tests - test target has pre-existing compilation errors that were not fixed, (d) Did NOT perform manual verification steps, (e) Created PR #107 but it's incomplete because the user is still reporting 403 errors, (f) Finally added debug logging but asked user to test and report results rather than completing the investigation. The session ends without confirming the fix works or all requirements met.
+
+---
+
+O log apresentado, [CMSTrainerService] POST https://web-cms-pink.vercel.REDACTED
+[CMSTrainerService] Status: 403
+[CMSTrainerService] 403 body: {"error":"Only students can connect to a trainer","code":"FORBIDDEN"}
+[PersonalTrainerViewModel] Error requesting connection: repositoryFailure(reason: "You don\'t have permission to access this resource")
+
+---
+
+<task-notification>
+<task-id>bsuvmglul</task-id>
+<tool-use-id>toolu_01Py6CCobQUcJhtgMwnZV2oP</tool-use-id>
+<output-file>REDACTED.output</output-file>
+<status>completed</status>
+<summary>Background command "Clean Xcode build" completed (exit code 0)</summary>
+</task-notification>
+Read the output file to retrieve the result: REDACTED.output
+
+---
+
+<task-notification>
+<task-id>bleks2uq7</task-id>
+<tool-use-id>REDACTED</tool-use-id>
+<output-file>REDACTED.output</output-file>
+<status>completed</status>
+<summary>Background command "Clean build FitToday" completed (exit code 0)</summary>
+</task-notification>
+Read the output file to retrieve the result: REDACTED.output
+
+---
+
+O erro apresentado foi o mesmo, mesmo fazendo o clean e instalação novamente, [CMSTrainerService] ensureStudentRole succeeded — uid: 24KSs3KQWvhBUQtGTKMdE2qHPIP2, role: admin
+[CMSTrainerService] POST https://web-cms-pink.vercel.REDACTED
+[CMSTrainerService] Status: 403
+[CMSTrainerService] 403 body: {"error":"Only students can connect to a trainer","code":"FORBIDDEN"}
+[PersonalTrainerViewModel] Error requesting connection: repositoryFailure(reason: "You don\'t have permission to access this resource")
+
+---
+
+Volte para a branch feat/pro-90-xp-levels-system e quero fazer o teste para ver se está cumprindo,  Enable gamification_enabled in Firebase Remote Config
+ Complete a workout and verify +100 XP awarded and shown in completion view
+ Check home screen shows XP Level Card with correct level and progress bar
+ Accumulate XP to cross 1000 threshold and verify level-up celebration plays
+ Verify streak bonus: 7+ day streak gives +200 XP, 30+ day streak gives +500 XP
+ Disable feature flag and verify no XP components visible anywhere
+ Verify accessibilityReduceMotion skips confetti animation a flag já está habilitada no Firebase e não consta que a feature está aparecendo.
+
+---
+
+<task-notification>
+<task-id>b569i10my</task-id>
+<tool-use-id>toolu_012Vy1oRZoX8z2rGtUuExUQi</tool-use-id>
+<output-file>REDACTED.output</output-file>
+<status>completed</status>
+<summary>Background command "Build with Remote Config debug logging" completed (exit code 0)</summary>
+</task-notification>
+Read the output file to retrieve the result: REDACTED.output
+
+---
+
+Gamification está funcionando, mas ele deve contar ou olhar os exercícios que estão registrados no Apple Health para contar com o XP também, isso pode acabar afastando usuários, ele deve observar os treinos que são registrados e estão contando no aplicativo, para ter um ecossistema único de registro e contagem de pontos.
+
+---
+
+Qualquer treino do HealthKit conta, mesmo valor de XP, somente os novos treinos a partir de agora.
+
+---
+
+e push para a branch em questão
+
+---
+
+há conflitos nos arquivos de Localizable, corrija-os
+
+---
+
+Preciso criar o fluxo para essa nova feature, https://linear.app/secondbrainclaw/issue/PRO-91/13-desafios-20-com-sistema-de-ligas, lembrando que todas as features vão estar em volta de uma remote config para colocar no Firebase, após todos os criterios de aceites todos preenchidos, crie uma nova branch com essa nova feature. Utilize o /feature-marker --interactive prd-sistema-ligas
+
+---
+
+Base directory for this skill: /Users/viniciuscarvalho/.claude/skills/feature-marker
+
+# feature-marker
+
+Automates feature development with a 5-phase workflow:
+
+1. **Inputs Gate** - Validates `prd.md`, `techspec.md`, `tasks.md` exist; generates them via `~/.claude/commands/` if missing.
+2. **Analysis & Planning** - Auto-installs product-manager skill if missing; reads docs, creates implementation plan.
+3. **Implementation** - Executes tasks with progress tracking.
+4. **Tests & Validation** - Runs platform-appropriate test suites and build validation.
+   Auto-detects: Swift/Xcode (+ XcodeBuildMCP simulator), Node.js, Rust, Python, Go.
+5. **Commit & PR** - Auto-installs enhanced commit command if missing; commits changes using professional workflow and creates PR (auto-detects git platform).
+
+## Platform Support
+
+feature-marker works with any tech stack:
+
+- 🍎 **iOS/Swift** — `swift test` + SwiftLint + XcodeBuildMCP simulator validation
+- 🟨 **Node.js/TypeScript** — auto-detects npm/yarn/pnpm/bun + Jest/Vitest
+- 🦀 **Rust** — `cargo test` + `cargo clippy`
+- 🐍 **Python** — `pytest` + ruff/flake8
+- 🐹 **Go** — `go test` + `go vet`
+
+iOS/Xcode projects get additional simulator validation via XcodeBuildMCP (optional, non-blocking).
+The platform is auto-detected once at workflow start and cached — no configuration required.
+
+## Usage
+
+```
+/feature-marker <feature-slug>
+```
+
+**Example**:
+```
+/feature-marker prd-user-authentication
+```
+
+### Interactive Mode
+
+```
+/feature-marker --interactive <feature-slug>
+```
+
+Opens a menu to select execution mode:
+- **Full Workflow** - Default, generates missing files and executes all phases
+- **Tasks Only** - Uses existing files, skips generation phase
+- **Ralph Loop** - Autonomous continuous execution with ralph-wiggum
+- **Spec-Driven** - Multi-agent review + worktree isolation via spec-workflow
+- **Test Only** - Runs tests phase exclusively using platform-appropriate test guidance (Swift Testing for iOS, Jest/Vitest for Node.js, etc.)
+
+Works both in terminal (TTY menu) and Claude CLI (AskUserQuestion prompt).
+
+**Direct mode selection** (skip menu):
+```
+/feature-marker --mode full <feature-slug>
+/feature-marker --mode tasks-only <feature-slug>
+/feature-marker --mode ralph-loop <feature-slug>
+/feature-marker --mode spec-driven <feature-slug>
+/feature-marker --mode test-only <feature-slug>
+```
+
+## Prerequisites
+
+### Commands
+
+The following commands must be available in `~/.claude/commands/`:
+
+- `create-prd.md` - Creates a new PRD from requirements discussion
+- `generate-spec.md` - Generates technical specification from PRD
+- `generate-tasks.md` - Breaks down feature spec into implementable tasks
+
+### Templates
+
+The commands above read templates from `~/.claude/docs/specs/` to generate structured documents.
+
+Required templates:
+- `~/.claude/docs/specs/prd-template.md` - Product Requirements Document template
+- `~/.claude/docs/specs/techspec-template.md` - Technical Specification template
+- `~/.claude/docs/specs/tasks-template.md` - Tasks breakdown template
+
+**Template Format**: Templates should be markdown files with placeholders and structure that commands will use to generate feature-specific documents.
+
+**Setup**: Ensure these templates exist before running feature-marker:
+```bash
+ls ~/.claude/docs/specs/
+# Should show: prd-template.md, techspec-template.md, tasks-template.md
+```
+
+**Note**: If templates are missing, commands in `~/.claude/commands/` will fail to generate files.
+
+### Project Structure
+
+**Feature Documents** (generated in project):
+```
+./tasks/
+└── prd-{feature-name}/
+    ├── prd.md            ← Generated from ~/.claude/docs/specs/prd-template.md
+    ├── techspec.md       ← Generated from ~/.claude/docs/specs/techspec-template.md
+    ├── tasks.md          ← Generated from ~/.claude/docs/specs/tasks-template.md
+    └── {num}_task.md     ← Individual task files (optional)
+```
+
+**State Directory** (checkpoint & progress):
+```
+.claude/feature-state/{feature-name}/
+├── checkpoint.json
+├── analysis.md
+├── plan.md
+├── progress.md
+├── test-results.md
+└── pr-url.txt
+```
+
+**User Configuration** (required setup):
+```
+~/.claude/
+├── commands/           ← Commands that generate files
+│   ├── create-prd.md
+│   ├── generate-spec.md
+│   └── generate-tasks.md
+└── docs/
+    └── specs/          ← Templates used by commands
+        ├── prd-template.md
+        ├── techspec-template.md
+        └── tasks-template.md
+```
+
+## Behavior
+
+When invoked, the skill:
+
+1. **Validates inputs** - Checks if `./tasks/prd-{feature-slug}/` contains required files
+   - If all files exist → Skips to step 3
+   - If any file is missing → Proceeds to step 2
+2. **Generates ONLY missing files** - Existing files are never overwritten:
+   - Missing PRD → `/create-prd`
+   - Missing Tech Spec → `/generate-spec {feature-slug}`
+   - Missing Tasks → `/generate-tasks {feature-slug}`
+3. **Auto-installs missing dependencies**:
+   - **Phase 1**: Checks for `product-manager` skill
+     - If missing: Installs via `npx skills add https://github.com/aj-geddes/claude-code-bmad-skills --skill product-manager`
+     - If user already has it: Uses user's version
+     - If installation fails: Continues without it (non-blocking)
+   - **Phase 4**: Checks for `/commit` command
+     - If missing: Copies from bundled `resources/commit.md` to `~/.claude/commands/commit.md`
+     - If user already has it: Uses user's version
+     - If installation fails: Falls back to standard commit workflow
+4. **Executes 5-phase workflow** via the `feature-marker` agent
+5. **Persists state** - Saves checkpoints after each phase/task for resume capability
+
+**Important**: The workflow is smart about file detection and dependencies:
+- ✅ Files/skills/commands exist → Uses them directly, no regeneration or reinstallation
+- ⚠️ Missing → Installs/generates only what's needed
+- 🔒 Never overwrites existing content
+- 👤 **User's versions always have priority** over bundled/auto-installed versions
+
+## Auto-Installed Dependencies
+
+Feature-marker automatically installs missing dependencies to enhance the workflow:
+
+### Product Manager Skill (Phase 1)
+
+**What it does**: Provides advanced PRD analysis, requirements validation, and product management capabilities.
+
+**Installation**:
+- **Check**: Phase 1 checks for `~/.claude/skills/product-manager/SKILL.md`
+- **Install**: If missing and `npx` available, runs:
+  ```bash
+  npx skills add https://github.com/aj-geddes/claude-code-bmad-skills --skill product-manager
+  ```
+- **Priority**: Uses user's existing skill if already installed
+- **Fallback**: Continues without it if installation fails (non-blocking)
+
+**Benefits**:
+- Enhanced requirement analysis
+- Better PRD validation
+- Improved feature planning
+
+### Enhanced Commit Command (Phase 4)
+
+**What it does**: Professional commit workflow with validation, splitting, and conventional commit format.
+
+**Installation**:
+- **Check**: Phase 4 checks for `~/.claude/commands/commit.md`
+- **Install**: If missing, copies from bundled `resources/commit.md` to `~/.claude/commands/commit.md`
+- **Priority**: Uses user's existing command if already installed
+- **Fallback**: Uses standard commit workflow if installation fails
+
+**Features**:
+- Pre-commit validation (lint, build, docs)
+- Intelligent commit splitting
+- Conventional commit format with emojis
+- Smart file staging
+- No Co-Authored-By footer (as per command design)
+
+**Example Output**:
+```bash
+✨ feat: add user authentication system
+🐛 fix: resolve memory leak in rendering process
+📝 docs: update API documentation
+♻️ refactor: simplify error handling logic
+```
+
+### Manual Installation
+
+If auto-installation fails, you can install manually:
+
+**Product Manager Skill**:
+```bash
+npx skills add https://github.com/aj-geddes/claude-code-bmad-skills --skill product-manager
+```
+
+**Commit Command**:
+```bash
+cp ~/.claude/skills/feature-marker/resources/commit.md ~/.claude/commands/commit.md
+```
+
+## Template Setup Guide
+
+### Template Directory Structure
+
+Commands in `~/.claude/commands/` read templates from a centralized location:
+
+```
+~/.claude/docs/specs/
+├── prd-template.md          # Product Requirements Document template
+├── techspec-template.md     # Technical Specification template
+└── tasks-template.md        # Task breakdown template
+```
+
+### Why Templates in ~/.claude/docs/specs?
+
+- **Centralized**: All projects share the same templates
+- **User-controlled**: Users can customize their own templates
+- **Portable**: Commands reference templates via standard path
+- **Separation**: Templates are not in project repositories
+
+### Template Content
+
+Each template should be a markdown file with:
+- Clear section structure
+- Placeholder text or variables
+- Examples and formatting guidelines
+
+Commands read these templates and populate them with feature-specific content.
+
+### Setup Verification
+
+To verify your setup is complete:
+
+```bash
+# Check templates exist
+ls -l ~/.claude/docs/specs/
+
+# Check commands exist
+ls -l ~/.claude/commands/
+
+# Test feature-marker
+/feature-marker --interactive prd-test-feature
+```
+
+If templates are missing, create them in `~/.claude/docs/specs/` before running feature-marker.
+
+## Plan Mode Integration
+
+When the user has used Claude's built-in plan mode before invoking feature-marker, the agent automatically:
+
+1. **Detects the most recent plan** from `~/.claude/plans/` (sorted by modification time)
+2. **Reads project conventions** from `./CLAUDE.md` at the project root (if present)
+3. **Uses both as rich context** to enhance PRD generation and reduce redundant clarification questions
+
+This is automatic and requires no additional flags or options. If no plan or CLAUDE.md exists, the workflow proceeds normally.
+
+**Recommended flow**:
+```
+1. Use Claude plan mode to explore the codebase and think through the feature
+2. Exit plan mode
+3. Run /feature-marker --interactive <feature-slug>
+4. Select "Full Workflow"
+5. The plan content automatically enriches PRD generation
+```
+
+## Checkpoint & Resume
+
+If interrupted (Ctrl+C, session crash, etc.), re-invoke with the same feature slug to resume:
+
+```
+/feature-marker prd-user-authentication
+```
+
+The skill will:
+- Detect existing checkpoint
+- Show current progress (phase, task index)
+- Ask if you want to resume or start fresh
+
+## Platform Detection
+
+In Phase 4, the skill auto-detects your git platform and selects the appropriate PR skill:
+
+| Platform | Detection | PR Skill |
+|----------|-----------|----------|
+| GitHub | `github.com` in remote URL | `checking-pr` |
+| Azure DevOps | `dev.azure.com` in remote URL | `azure-pr` |
+| GitLab | `gitlab.com` in remote URL | `checking-pr` |
+| Bitbucket | `bitbucket.org` in remote URL | `checking-pr` |
+| Other | (fallback) | `checking-pr` |
+
+## Configuration
+
+Override default behavior with `.feature-marker.json` in your repository root:
+
+```json
+{
+  "pr_skill": "custom-pr-skill",
+  "skip_pr": false,
+  "test_command": "npm run test:ci",
+  "docs_path": "./tasks",
+  "state_path": ".claude/feature-state"
+}
+```
+
+## Error Handling
+
+| Scenario | Behavior |
+|----------|----------|
+| Missing files | Auto-generate via commands |
+| No git repo | Fail early with helpful message |
+| No tests | Skip Phase 3 with warning |
+| Test failures | Report issues, allow fix, offer retry |
+| Unknown platform | Fallback to `checking-pr` |
+| PR skill unavailable | Commit only, log manual instructions |
+
+## Example Sessions
+
+### Example 1: All Files Exist (No Generation Needed)
+```
+> /feature-marker prd-user-authentication
+
+Checking for existing checkpoint...
+No checkpoint found. Starting new workflow.
+
+Phase 0: Inputs Gate
+✓ prd.md exists
+✓ techspec.md exists
+✓ tasks.md exists
+✅ All files present. Skipping generation.
+
+Phase 1: Analysis & Planning
+Reading existing documents...
+Creating implementation plan...
+Checkpoint saved.
+
+Phase 2: Implementation
+[1/6] Create User entity... ✓
+[2/6] Add authentication service... ✓
+...
+```
+
+### Example 2: Partial Files (Generates Only Missing)
+```
+> /feature-marker prd-payment-integration
+
+Checking for existing checkpoint...
+No checkpoint found. Starting new workflow.
+
+Phase 0: Inputs Gate
+✓ prd.md exists
+✗ techspec.md missing → Generating via /generate-spec...
+✓ tasks.md exists
+
+✅ Generated missing file. All inputs ready.
+
+Phase 1: Analysis & Planning
+Reading documents...
+Creating implementation plan...
+Checkpoint saved.
+...
+```
+
+### Example 3: Complete Workflow with Auto-Install
+```
+> /feature-marker prd-new-feature
+
+Phase 0: Inputs Gate
+✗ prd.md missing → Generating via /create-prd...
+✗ techspec.md missing → Generating via /generate-spec...
+✗ tasks.md missing → Generating via /generate-tasks...
+
+Phase 1: Analysis & Planning
+⚙️  Installing product-manager skill...
+✓ product-manager skill installed successfully
+Reading PRD, Tech Spec, and Tasks...
+Creating implementation plan...
+Checkpoint saved.
+
+Phase 2: Implementation
+[1/6] Create User entity... ✓
+[2/6] Add authentication service... ✓
+[3/6] Implement login endpoint... ✓
+[4/6] Add JWT token handling... ✓
+[5/6] Create logout endpoint... ✓
+[6/6] Add session management... ✓
+Checkpoint saved.
+
+Phase 3: Tests & Validation
+✅ Platform detected: Node.js / Next.js (pnpm)
+Running: jest --findRelatedTests src/api/users.ts
+✅ 14 passed, 0 failed
+Lint: pnpm run lint ✅
+Checkpoint saved.
+
+Phase 4: Commit & PR
+⚙️  Installing commit command...
+✓ commit command installed successfully
+Using enhanced commit workflow (/commit)...
+✨ feat: implement user authentication system
+Detected platform: GitHub
+Creating PR via /checking-pr...
+
+✓ Feature complete!
+PR URL: https://github.com/user/repo/pull/42
+```
+
+### Example 4: Using Existing User Tools
+```
+> /feature-marker prd-payment-feature
+
+Phase 0: Inputs Gate
+✓ All inputs validated.
+
+Phase 1: Analysis & Planning
+✓ product-manager skill already installed (using user's version)
+...
+
+Phase 4: Commit & PR
+✓ commit command already exists (using user's version)
+...
+```
+
+
+ARGUMENTS: --interactive prd-sistema-ligas
+
+---
+
+1, full workflow
+
+---
+
+<task-notification>
+<task-id>a66af24839b792a8d</task-id>
+<tool-use-id>toolu_01WYZiGKwiXwuMrSoirHE5gp</tool-use-id>
+<output-file>REDACTED.output</output-file>
+<status>completed</status>
+<summary>Agent "Generate PRD for league system" completed</summary>
+<result>PRD created at `/Users/viniciuscarvalho/Documents/FitToday/tasks/prd-sistema-ligas/prd.md`.
+
+Summary of what was done:
+
+- Investigated the existing codebase to ground the PRD in real project structures: `FeatureFlagKey` enum, `EntitlementPolicy`, `ProFeature`, `SubscriptionTier` (free/pro/elite), `UserXP`, `AwardXPUseCase`, and `XPRepository`
+- Used the existing PRD format from PRO-90 (prd-sistema-breaks-niveis) as style reference
+- Created a complete PRD with all 12 sections covering:
+  - **8 functional requirements** (FR-001 through FR-008): league display, promotion/demotion, animations, push notifications, weekly reset consumption, history, feature flag `leagues_enabled`, and entitlement gating
+  - **5 league tiers**: Bronze (free), Silver (Pro), Gold (Pro), Diamond (Pro), Legend (Elite) -- mapped to existing `SubscriptionTier` enum
+  - **Clear iOS-only scope**: the app consumes league data from Firestore; Cloud Functions and backend API are explicitly out of scope
+  - **Integration points** with existing code: `FeatureFlagKey`, `EntitlementPolicy`/`ProFeature`, `AwardXPUseCase`/`XPRepository`, and Firestore snapshot listeners
+  - **4-sprint release plan** gated by the `leagues_enabled` feature flag</result>
+<usage><total_tokens>31902</total_tokens><tool_uses>19</tool_uses><duration_ms>153579</duration_ms></usage>
+</task-notification>
+Full transcript available at: REDACTED.output
+
+---
+
+<task-notification>
+<task-id>a56e2d84d20712b7b</task-id>
+<tool-use-id>REDACTED</tool-use-id>
+<output-file>REDACTED.output</output-file>
+<status>completed</status>
+<summary>Agent "Generate Tasks for league system" completed</summary>
+<result>Tasks breakdown file created at `/Users/viniciuscarvalho/Documents/FitToday/tasks/prd-sistema-ligas/tasks.md`.
+
+**Summary of what was done:**
+
+- Investigated the existing codebase to align file paths, naming conventions, and patterns with the project's established structure
+- Referenced existing implementations: `FeatureFlagKey` enum, `EntitlementPolicy`/`ProFeature`, `XPRepository` protocol pattern, `FirebaseLeaderboardService` actor pattern, `FBUserXP` DTO pattern, `AppContainer` Swinject registration style, and Localizable.strings locations
+- Created 15 ordered tasks following the dependency chain: Domain (1-2) -> Data (3-5) -> Use Cases (6) -> DI (7) -> Presentation (8-13) -> Localization (14) -> Tests (15)
+- Each task includes status, effort estimate, dependencies, description, specific file paths, and checkbox acceptance criteria
+- Tasks are atomic and scoped for single-session implementation</result>
+<usage><total_tokens>32648</total_tokens><tool_uses>20</tool_uses><duration_ms>133411</duration_ms></usage>
+</task-notification>
+Full transcript available at: REDACTED.output
+
+---
+
+<task-notification>
+<task-id>ab5a3ee1553a0e318</task-id>
+<tool-use-id>toolu_01PKg3Qx9cPUKE2Cbbpb6z6G</tool-use-id>
+<output-file>REDACTED.output</output-file>
+<status>completed</status>
+<summary>Agent "Generate TechSpec for league system" completed</summary>
+<result>The technical specification has been created at `/Users/viniciuscarvalho/Documents/FitToday/tasks/prd-sistema-ligas/techspec.md`.
+
+**Summary of what was done:**
+
+I investigated the existing codebase to align the techspec with actual patterns:
+- **DI pattern:** Swinject `Resolver` injection (from `LeaderboardViewModel`, `AppContainer.swift`)
+- **DTO naming:** `FB*` prefix convention (from `FBUserXP`, `FBLeague` models in `Data/DTOs/` and `Data/Models/`)
+- **Mapper pattern:** Extension-based `toDomain()` / `toFirestore()` (from `SocialUserMapper.swift`)
+- **Service pattern:** `actor`-based Firebase services (from `FirebaseLeaderboardService`)
+- **Repository pattern:** `final class` + `@unchecked Sendable` (from `FirebaseLeaderboardRepository`)
+- **ViewModel pattern:** `@MainActor @Observable final class` with `Resolver` (from `LeaderboardViewModel`)
+- **Feature flags:** `FeatureFlagKey` enum with `defaultValue` (from `FeatureFlag.swift`)
+- **Entitlements:** `ProFeature` enum + `EntitlementPolicy.canAccess()` + `SubscriptionTier` (free/pro/elite)
+
+The spec covers all 10 requested sections with concrete Swift code aligned to the project's conventions, Firestore collection schemas, file placement following the existing directory structure, and a phased implementation order.</result>
+<usage><total_tokens>51714</total_tokens><tool_uses>32</tool_uses><duration_ms>188896</duration_ms></usage>
+</task-notification>
+Full transcript available at: REDACTED.output

@@ -1,0 +1,41 @@
+{
+  "cli_version": "0.4.4",
+  "checkpoint_id": "a5872d349af5",
+  "strategy": "manual-commit",
+  "branch": "feat/pro-91-league-system",
+  "checkpoints_count": 5,
+  "files_touched": [
+    "FitToday/FitToday/Data/Mappers/SocialUserMapper.swift",
+    "FitToday/FitToday/Data/Models/CMSTrainerModels.swift",
+    "FitToday/FitToday/Data/Repositories/FirebasePersonalTrainerRepository.swift",
+    "FitToday/FitToday/Data/Services/CMS/CMSTrainerService.swift",
+    "FitToday/FitToday/Data/Services/Firebase/FirebaseAuthService.swift",
+    "FitToday/FitToday/Data/Services/HealthKit/HealthKitHistorySyncService.swift",
+    "FitToday/FitToday/Data/Services/RemoteConfig/RemoteConfigService.swift",
+    "FitToday/FitToday/Presentation/DI/AppContainer.swift",
+    "FitToday/FitToday/Resources/en.lproj/Localizable.strings",
+    "FitToday/FitToday/Resources/pt-BR.lproj/Localizable.strings",
+    "ops/sessions/20260314-215008.json",
+    "ops/sessions/20260314-215229.json",
+    "ops/sessions/20260314-215424.json",
+    "ops/sessions/20260314-215451.json",
+    "ops/sessions/20260314-215605.json",
+    "remoteconfig.template.json"
+  ],
+  "sessions": [
+    {
+      "metadata": "/a5/872d349af5/0/metadata.json",
+      "transcript": "/a5/872d349af5/0/full.jsonl",
+      "context": "/a5/872d349af5/0/context.md",
+      "content_hash": "/a5/872d349af5/0/content_hash.txt",
+      "prompt": "/a5/872d349af5/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 31,
+    "cache_creation_tokens": 21031,
+    "cache_read_tokens": 3324449,
+    "output_tokens": 5470,
+    "api_call_count": 17
+  }
+}
