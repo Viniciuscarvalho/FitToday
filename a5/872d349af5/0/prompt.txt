@@ -901,3 +901,102 @@ All files use localized strings with `league.` key prefix and the project's desi
 <usage><total_tokens>33907</total_tokens><tool_uses>36</tool_uses><duration_ms>160099</duration_ms></usage>
 </task-notification>
 Full transcript available at: REDACTED.output
+
+---
+
+<task-notification>
+<task-id>a1398ff68202c935c</task-id>
+<tool-use-id>toolu_01DRMuF68ZaWyKVbJxSDbCFo</tool-use-id>
+<output-file>REDACTED.output</output-file>
+<status>completed</status>
+<summary>Agent "Implement Tasks 10-13: League screens" completed</summary>
+<result>Everything looks correct. Let me do a final summary of all changes.
+
+Here is a summary of all the work completed for Tasks 10-13 (League System Presentation Layer):
+
+---
+
+**Task 10 -- Main League Screen**
+- Created `/Users/viniciuscarvalho/Documents/FitToday/FitToday/FitToday/Presentation/Features/League/LeagueView.swift` (124 lines)
+- Shows `LeagueTierBadge` (large) with season info and countdown timer
+- Full scrollable member list using `LeagueRankingRow` (sorted by rank)
+- `ScrollViewReader` auto-scrolls to current user on appear
+- Loading state with `ProgressView`, empty state when no league assigned
+- Toolbar button navigating to `LeagueHistoryView`
+- Pull-to-refresh via `.refreshable`
+- Full-screen covers for promotion/demotion animations
+- Uses `@State private var viewModel: LeagueViewModel` initialized from resolver
+
+**Task 11 -- Promotion/Demotion Animations**
+- Created `/Users/viniciuscarvalho/Documents/FitToday/FitToday/FitToday/Presentation/Features/League/LeaguePromotionView.swift` (69 lines)
+  - Confetti-like particle animation with random colored circles
+  - Shows new tier badge (large), "Promoted!" text, tier name
+  - Auto-dismisses after 5 seconds; respects `accessibilityReduceMotion`
+  - Dismiss button
+
+- Created `/Users/viniciuscarvalho/Documents/FitToday/FitToday/FitToday/Presentation/Features/League/LeagueDemotionView.swift` (80 lines)
+  - Subtle shake animation on the tier badge
+  - Shows tier badge, "Demoted" text, tier name, encouragement message
+  - Auto-dismisses after 5 seconds; respects `accessibilityReduceMotion`
+  - Dismiss button
+
+Both use only SwiftUI native animations (`.spring`, `withAnimation`, `.repeatCount`).
+
+**Task 12 -- League History**
+- Created `/Users/viniciuscarvalho/Documents/FitToday/FitToday/FitToday/Presentation/Features/League/LeagueHistoryView.swift` (77 lines)
+- List of past seasons ordered by most recent
+- Each row: season week, tier badge (small), XP earned, final rank
+- Green arrow up for promotion, red arrow down for demotion
+- Loading state and empty state
+- Uses `LeagueViewModel.loadHistory()`
+
+**Task 13 -- HomeView Integration**
+- Edited `/Users/viniciuscarvalho/Documents/FitToday/FitToday/FitToday/Presentation/Features/Home/HomeView.swift`
+  - Added `LeagueHomeCard` section after the gamification XP section, gated by `isLeaguesEnabled` and `currentLeague != nil`
+  - Tapping navigates to `.league` route on home tab
+
+- Edited `/Users/viniciuscarvalho/Documents/FitToday/FitToday/FitToday/Presentation/Features/Home/HomeViewModel.swift`
+  - Added `isLeaguesEnabled` and `currentLeague` properties
+  - Added `leagueUserRank` and `leagueCountdownText` computed properties
+  - Added feature flag check: `isLeaguesEnabled = await featureFlags.isFeatureEnabled(.leaguesEnabled)`
+  - Added `loadCurrentLeague()` method using `GetCurrentLeagueUseCase`
+  - Called `loadCurrentLeague()` in parallel with other loads in `loadUserData()`
+
+**Router changes:**
+- Added `case league` and `case leagueHistory` to `AppRoute` in `/Users/viniciuscarvalho/Documents/FitToday/FitToday/FitToday/Presentation/Router/AppRouter.swift`
+- Added navigation destinations in `/Users/viniciuscarvalho/Documents/FitToday/FitToday/FitToday/Presentation/Root/TabRootView.swift`
+
+All localization keys use the `league.` prefix. All new views are under their respective line limits.</result>
+<usage><total_tokens>66420</total_tokens><tool_uses>71</tool_uses><duration_ms>356768</duration_ms></usage>
+</task-notification>
+Full transcript available at: REDACTED.output
+
+---
+
+<task-notification>
+<task-id>a173828e8e0ca279a</task-id>
+<tool-use-id>toolu_01GhtLpv6muXGr1swTKrNhcs</tool-use-id>
+<output-file>REDACTED.output</output-file>
+<status>completed</status>
+<summary>Agent "Implement Task 14: Localization" completed</summary>
+<result>All strings are correctly added. Here is a summary of the work done:
+
+**Task 14 completed: Added all league-related localization strings.**
+
+I read all 9 league-related source files to identify every localization key used in the code, then appended 25 string entries to both Localizable.strings files under a `// MARK: - Leagues` header.
+
+**Keys added (25 total):**
+- 5 tier names: `league.tier.bronze/silver/gold/diamond/legend`
+- 6 main screen keys: `league.title`, `league.season_week`, `league.season_ended`, `league.loading`, `league.empty.title`, `league.empty.message`
+- 1 ranking key: `league.ranking.xp_format`
+- 2 promotion keys: `league.promoted.title`, `league.promoted.dismiss`
+- 3 demotion keys: `league.demoted.title`, `league.demoted.message`, `league.demoted.dismiss`
+- 5 history keys: `league.history.title`, `league.history.season_week`, `league.history.xp_earned`, `league.history.empty.title`, `league.history.empty.message`
+- 2 home card keys: `league.home_card.your_rank`, `league.home_card.view`
+
+**Files modified:**
+- `/Users/viniciuscarvalho/Documents/FitToday/FitToday/FitToday/Resources/en.lproj/Localizable.strings`
+- `/Users/viniciuscarvalho/Documents/FitToday/FitToday/FitToday/Resources/pt-BR.lproj/Localizable.strings`</result>
+<usage><total_tokens>29753</total_tokens><tool_uses>16</tool_uses><duration_ms>51394</duration_ms></usage>
+</task-notification>
+Full transcript available at: REDACTED.output

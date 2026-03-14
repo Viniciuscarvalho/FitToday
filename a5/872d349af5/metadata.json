@@ -3,9 +3,21 @@
   "checkpoint_id": "a5872d349af5",
   "strategy": "manual-commit",
   "branch": "feat/pro-91-league-system",
-  "checkpoints_count": 1,
+  "checkpoints_count": 2,
   "files_touched": [
-    "ops/sessions/20260314-220947.json"
+    "FitToday/FitToday/Data/Mappers/SocialUserMapper.swift",
+    "FitToday/FitToday/Data/Models/CMSTrainerModels.swift",
+    "FitToday/FitToday/Data/Repositories/FirebasePersonalTrainerRepository.swift",
+    "FitToday/FitToday/Data/Services/CMS/CMSTrainerService.swift",
+    "FitToday/FitToday/Data/Services/Firebase/FirebaseAuthService.swift",
+    "FitToday/FitToday/Data/Services/HealthKit/HealthKitHistorySyncService.swift",
+    "FitToday/FitToday/Data/Services/RemoteConfig/RemoteConfigService.swift",
+    "FitToday/FitToday/Presentation/DI/AppContainer.swift",
+    "FitToday/FitToday/Resources/en.lproj/Localizable.strings",
+    "FitToday/FitToday/Resources/pt-BR.lproj/Localizable.strings",
+    "ops/sessions/20260314-221405.json",
+    "ops/sessions/20260314-221441.json",
+    "remoteconfig.template.json"
   ],
   "sessions": [
     {
@@ -17,10 +29,10 @@
     }
   ],
   "token_usage": {
-    "input_tokens": 3,
-    "cache_creation_tokens": 2827,
-    "cache_read_tokens": 229164,
-    "output_tokens": 32,
-    "api_call_count": 1
+    "input_tokens": 7,
+    "cache_creation_tokens": 7850,
+    "cache_read_tokens": 703710,
+    "output_tokens": 2645,
+    "api_call_count": 3
   }
 }

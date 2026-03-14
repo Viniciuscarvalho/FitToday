@@ -3,31 +3,43 @@
   "checkpoint_id": "a5872d349af5",
   "session_id": "2da754b2-67b2-4efe-8f6b-26d03c69059b",
   "strategy": "manual-commit",
-  "created_at": "2026-03-14T22:11:37.049931Z",
+  "created_at": "2026-03-14T22:15:01.655164Z",
   "branch": "feat/pro-91-league-system",
-  "checkpoints_count": 1,
+  "checkpoints_count": 2,
   "files_touched": [
-    "ops/sessions/20260314-220947.json"
+    "FitToday/FitToday/Data/Mappers/SocialUserMapper.swift",
+    "FitToday/FitToday/Data/Models/CMSTrainerModels.swift",
+    "FitToday/FitToday/Data/Repositories/FirebasePersonalTrainerRepository.swift",
+    "FitToday/FitToday/Data/Services/CMS/CMSTrainerService.swift",
+    "FitToday/FitToday/Data/Services/Firebase/FirebaseAuthService.swift",
+    "FitToday/FitToday/Data/Services/HealthKit/HealthKitHistorySyncService.swift",
+    "FitToday/FitToday/Data/Services/RemoteConfig/RemoteConfigService.swift",
+    "FitToday/FitToday/Presentation/DI/AppContainer.swift",
+    "FitToday/FitToday/Resources/en.lproj/Localizable.strings",
+    "FitToday/FitToday/Resources/pt-BR.lproj/Localizable.strings",
+    "ops/sessions/20260314-221405.json",
+    "ops/sessions/20260314-221441.json",
+    "remoteconfig.template.json"
   ],
   "agent": "Claude Code",
-  "transcript_identifier_at_start": "e4bc188f-b7b2-4ffc-9455-9234333825fa",
-  "checkpoint_transcript_start": 1151,
-  "transcript_lines_at_start": 1151,
+  "transcript_identifier_at_start": "57186257-0b6d-4e27-bdb8-dc6ff775d188",
+  "checkpoint_transcript_start": 1159,
+  "transcript_lines_at_start": 1159,
   "token_usage": {
-    "input_tokens": 3,
-    "cache_creation_tokens": 2827,
-    "cache_read_tokens": 229164,
-    "output_tokens": 32,
-    "api_call_count": 1
+    "input_tokens": 7,
+    "cache_creation_tokens": 7850,
+    "cache_read_tokens": 703710,
+    "output_tokens": 2645,
+    "api_call_count": 3
   },
   "initial_attribution": {
-    "calculated_at": "2026-03-14T22:11:36.144081Z",
-    "agent_lines": 1,
-    "human_added": 656,
+    "calculated_at": "2026-03-14T22:15:00.681384Z",
+    "agent_lines": 2,
+    "human_added": 284,
     "human_modified": 0,
     "human_removed": 0,
-    "total_committed": 657,
-    "agent_percentage": 0.15220700152207
+    "total_committed": 286,
+    "agent_percentage": 0.6993006993006993
   },
   "transcript_path": ".claude/projects/-Users-viniciuscarvalho-Documents-FitToday/2da754b2-67b2-4efe-8f6b-26d03c69059b.jsonl"
 }
