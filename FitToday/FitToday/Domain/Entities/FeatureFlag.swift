@@ -45,6 +45,9 @@ enum FeatureFlagKey: String, CaseIterable, Sendable {
     /// Enables XP/Level gamification system.
     case gamificationEnabled = "gamification_enabled"
 
+    /// Enables the league ranking system (Bronze → Legend).
+    case leaguesEnabled = "leagues_enabled"
+
     // MARK: - Health & Sync
 
     /// Enables Apple Health read/write integration.
