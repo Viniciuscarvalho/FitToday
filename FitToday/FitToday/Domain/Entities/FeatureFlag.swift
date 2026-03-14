@@ -144,6 +144,7 @@ enum FeatureFlagKey: String, CaseIterable, Sendable {
         // Unreleased features — disabled by default
         case .socialFeedEnabled,
              .gamificationEnabled,
+             .leaguesEnabled,
              .personalTrainerEnabled,
              .cmsWorkoutSyncEnabled,
              .trainerChatEnabled,
