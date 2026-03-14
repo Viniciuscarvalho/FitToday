@@ -3,7 +3,7 @@
   "checkpoint_id": "a5872d349af5",
   "strategy": "manual-commit",
   "branch": "feat/pro-91-league-system",
-  "checkpoints_count": 5,
+  "checkpoints_count": 1,
   "files_touched": [
     "FitToday/FitToday/Data/Mappers/SocialUserMapper.swift",
     "FitToday/FitToday/Data/Models/CMSTrainerModels.swift",
@@ -15,11 +15,7 @@
     "FitToday/FitToday/Presentation/DI/AppContainer.swift",
     "FitToday/FitToday/Resources/en.lproj/Localizable.strings",
     "FitToday/FitToday/Resources/pt-BR.lproj/Localizable.strings",
-    "ops/sessions/20260314-215008.json",
-    "ops/sessions/20260314-215229.json",
-    "ops/sessions/20260314-215424.json",
-    "ops/sessions/20260314-215451.json",
-    "ops/sessions/20260314-215605.json",
+    "ops/sessions/20260314-215831.json",
     "remoteconfig.template.json"
   ],
   "sessions": [
@@ -32,10 +28,10 @@
     }
   ],
   "token_usage": {
-    "input_tokens": 31,
-    "cache_creation_tokens": 21031,
-    "cache_read_tokens": 3324449,
-    "output_tokens": 5470,
-    "api_call_count": 17
+    "input_tokens": 5,
+    "cache_creation_tokens": 8578,
+    "cache_read_tokens": 623671,
+    "output_tokens": 1672,
+    "api_call_count": 3
   }
 }
