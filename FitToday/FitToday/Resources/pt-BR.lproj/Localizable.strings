@@ -1020,3 +1020,43 @@
 "paywall.legal.auto_renew" = "A assinatura é renovada automaticamente. Cancele a qualquer momento nas configurações do dispositivo.";
 "paywall.legal.terms" = "Termos de Uso";
 "paywall.legal.privacy" = "Política de Privacidade";
+
+// MARK: - Leagues
+
+// Tier names
+"league.tier.bronze" = "Bronze";
+"league.tier.silver" = "Prata";
+"league.tier.gold" = "Ouro";
+"league.tier.diamond" = "Diamante";
+"league.tier.legend" = "Lenda";
+
+// Main league screen
+"league.title" = "Sua Liga";
+"league.season_week" = "Semana %d";
+"league.season_ended" = "Temporada encerrada";
+"league.loading" = "Carregando liga...";
+"league.empty.title" = "Nenhuma liga ainda";
+"league.empty.message" = "Complete treinos para entrar em uma liga!";
+
+// Ranking
+"league.ranking.xp_format" = "%d XP";
+
+// Promotion
+"league.promoted.title" = "Promovido!";
+"league.promoted.dismiss" = "Continuar";
+
+// Demotion
+"league.demoted.title" = "Rebaixado";
+"league.demoted.message" = "Continue treinando para subir!";
+"league.demoted.dismiss" = "Continuar";
+
+// History
+"league.history.title" = "Histórico";
+"league.history.season_week" = "Semana %d";
+"league.history.xp_earned" = "%d XP ganhos";
+"league.history.empty.title" = "Nenhum histórico ainda";
+"league.history.empty.message" = "Suas temporadas passadas aparecerão aqui.";
+
+// Home card
+"league.home_card.your_rank" = "Posição #%d";
+"league.home_card.view" = "Ver Liga";
