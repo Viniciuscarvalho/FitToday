@@ -94,20 +94,17 @@ extension LeagueResult {
 
 extension FBLeague {
     static func fixture(
-        id: String? = "league1",
         tier: String = "bronze",
         seasonWeek: Int = 1,
         startDate: Timestamp? = Timestamp(date: Date()),
         endDate: Timestamp? = Timestamp(date: Date().addingTimeInterval(7 * 24 * 3600))
     ) -> FBLeague {
-        var league = FBLeague(
+        FBLeague(
             tier: tier,
             seasonWeek: seasonWeek,
             startDate: startDate,
             endDate: endDate
         )
-        // DocumentID is set by Firestore; for tests we work with the mapped output
-        return league
     }
 }
 

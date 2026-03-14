@@ -102,7 +102,5 @@ final class LeagueViewModel {
         }
     }
 
-    deinit {
-        observationTask?.cancel()
-    }
+    // deinit removed to avoid @MainActor isolation issues
 }
