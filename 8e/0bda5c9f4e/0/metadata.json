@@ -1,0 +1,36 @@
+{
+  "cli_version": "0.4.4",
+  "checkpoint_id": "8e0bda5c9f4e",
+  "session_id": "2da754b2-67b2-4efe-8f6b-26d03c69059b",
+  "strategy": "manual-commit",
+  "created_at": "2026-03-14T21:46:49.725698Z",
+  "branch": "feat/pro-90-xp-levels-system",
+  "checkpoints_count": 2,
+  "files_touched": [
+    "FitToday/FitToday/Resources/en.lproj/Localizable.strings",
+    "FitToday/FitToday/Resources/pt-BR.lproj/Localizable.strings",
+    "ops/sessions/20260314-214441.json",
+    "ops/sessions/20260314-214637.json"
+  ],
+  "agent": "Claude Code",
+  "transcript_identifier_at_start": "6d8a247c-752b-422d-be68-0cb209c90189",
+  "checkpoint_transcript_start": 919,
+  "transcript_lines_at_start": 919,
+  "token_usage": {
+    "input_tokens": 17,
+    "cache_creation_tokens": 4733,
+    "cache_read_tokens": 2363974,
+    "output_tokens": 2709,
+    "api_call_count": 13
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-03-14T21:46:48.915448Z",
+    "agent_lines": 0,
+    "human_added": 202,
+    "human_modified": 2,
+    "human_removed": 0,
+    "total_committed": 204,
+    "agent_percentage": 0
+  },
+  "transcript_path": ".claude/projects/-Users-viniciuscarvalho-Documents-FitToday/2da754b2-67b2-4efe-8f6b-26d03c69059b.jsonl"
+}
