@@ -98,7 +98,7 @@ actor CMSTrainerService {
         connection: CMSConnectionRequest
     ) async throws -> CMSConnectionResponse {
         let url = configuration.baseURL.appendingPathComponent("/api/trainers/\(trainerId)/connect")
-        var request = try await buildRequest(url: url, method: "POST")
+        var request = try await buildRequest(url: url, method: "POST", requiresAuth: true)
         request.httpBody = try encoder.encode(connection)
         return try await execute(request: request)
     }
@@ -113,7 +113,7 @@ actor CMSTrainerService {
             URLQueryItem(name: "studentId", value: studentId)
         ]
         guard let url = components.url else { throw CMSServiceError.invalidURL }
-        let request = try await buildRequest(url: url, method: "GET")
+        let request = try await buildRequest(url: url, method: "GET", requiresAuth: true)
         return try await execute(request: request)
     }
 
@@ -125,7 +125,7 @@ actor CMSTrainerService {
         review: CMSCreateReviewRequest
     ) async throws -> CMSTrainerReview {
         let url = configuration.baseURL.appendingPathComponent("/api/trainers/\(trainerId)/reviews")
-        var request = try await buildRequest(url: url, method: "POST")
+        var request = try await buildRequest(url: url, method: "POST", requiresAuth: true)
         request.httpBody = try encoder.encode(review)
         return try await execute(request: request)
     }
@@ -160,19 +160,36 @@ actor CMSTrainerService {
         return try await execute(request: request)
     }
 
+    // MARK: - User Role API
+
+    /// POST /api/users/me — Ensure the current user has role "student" in the CMS.
+    /// This must be called before attempting to connect with a trainer.
+    func ensureStudentRole(displayName: String) async throws {
+        let url = configuration.baseURL.appendingPathComponent("/api/users/me")
+        var request = try await buildRequest(url: url, method: "POST", requiresAuth: true)
+        let body: [String: String] = ["role": "student", "displayName": displayName]
+        request.httpBody = try encoder.encode(body)
+        let response: CMSUserProfileResponse = try await execute(request: request)
+        #if DEBUG
+        print("[CMSTrainerService] ensureStudentRole succeeded — uid: \(response.uid), role: \(response.role ?? "nil")")
+        #endif
+    }
+
     // MARK: - Private Helpers
 
-    private func buildRequest(url: URL, method: String) async throws -> URLRequest {
+    private func buildRequest(url: URL, method: String, requiresAuth: Bool = false) async throws -> URLRequest {
         var request = URLRequest(url: url)
         request.httpMethod = method
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue("application/json", forHTTPHeaderField: "Accept")
 
-        if let tokenProvider {
-            let token = try await tokenProvider()
-            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        } else if let apiKey = configuration.apiKey {
-            request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
+        if requiresAuth {
+            if let tokenProvider {
+                let token = try await tokenProvider()
+                request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+            } else if let apiKey = configuration.apiKey {
+                request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
+            }
         }
 
         return request
@@ -206,8 +223,20 @@ actor CMSTrainerService {
                 #endif
                 throw CMSServiceError.decodingFailed(error)
             }
-        case 401: throw CMSServiceError.unauthorized
-        case 403: throw CMSServiceError.forbidden
+        case 401:
+            #if DEBUG
+            if let body = String(data: data, encoding: .utf8) {
+                print("[CMSTrainerService] 401 body: \(body.prefix(500))")
+            }
+            #endif
+            throw CMSServiceError.unauthorized
+        case 403:
+            #if DEBUG
+            if let body = String(data: data, encoding: .utf8) {
+                print("[CMSTrainerService] 403 body: \(body.prefix(500))")
+            }
+            #endif
+            throw CMSServiceError.forbidden
         case 404: throw CMSServiceError.notFound
         case 429: throw CMSServiceError.rateLimited
         case 500...599: throw CMSServiceError.serverError(httpResponse.statusCode)

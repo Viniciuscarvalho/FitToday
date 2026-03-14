@@ -135,3 +135,11 @@ struct CMSProgram: Codable, Sendable, Identifiable {
     let createdAt: Date?
     let updatedAt: Date?
 }
+
+// MARK: - User Profile Response
+
+struct CMSUserProfileResponse: Codable, Sendable {
+    let uid: String
+    let role: String?
+    let displayName: String?
+}
