@@ -217,3 +217,29 @@ Summary of what was done:
 
 implementacao
 
+### Prompt 27
+
+<task-notification>
+<task-id>a795342eff16139f3</task-id>
+<tool-use-id>REDACTED</tool-use-id>
+<output-file>REDACTED.output</output-file>
+<status>completed</status>
+<summary>Agent "Implement Task 1: Domain entities" completed</summary>
+<result>All three files have been created. Here is a summary of the work done:
+
+**Created 3 domain layer files for the League...
+
+### Prompt 28
+
+<task-notification>
+<task-id>a831d1adebb02ee4b</task-id>
+<tool-use-id>REDACTED</tool-use-id>
+<output-file>REDACTED.output</output-file>
+<status>completed</status>
+<summary>Agent "Implement Task 2: Feature flag + entitlement" completed</summary>
+<result>All three files look correct. Here is a summary of the changes made.
+
+---
+
+**Summary of changes for PRO-91...
+

@@ -3,9 +3,9 @@
   "checkpoint_id": "a5872d349af5",
   "session_id": "2da754b2-67b2-4efe-8f6b-26d03c69059b",
   "strategy": "manual-commit",
-  "created_at": "2026-03-14T21:58:41.987471Z",
+  "created_at": "2026-03-14T22:04:59.677443Z",
   "branch": "feat/pro-91-league-system",
-  "checkpoints_count": 1,
+  "checkpoints_count": 2,
   "files_touched": [
     "FitToday/FitToday/Data/Mappers/SocialUserMapper.swift",
     "FitToday/FitToday/Data/Models/CMSTrainerModels.swift",
@@ -17,28 +17,29 @@
     "FitToday/FitToday/Presentation/DI/AppContainer.swift",
     "FitToday/FitToday/Resources/en.lproj/Localizable.strings",
     "FitToday/FitToday/Resources/pt-BR.lproj/Localizable.strings",
-    "ops/sessions/20260314-215831.json",
+    "ops/sessions/20260314-215904.json",
+    "ops/sessions/20260314-220446.json",
     "remoteconfig.template.json"
   ],
   "agent": "Claude Code",
-  "transcript_identifier_at_start": "7109dac1-ec8f-4feb-aeac-a0270e420160",
-  "checkpoint_transcript_start": 1053,
-  "transcript_lines_at_start": 1053,
+  "transcript_identifier_at_start": "2cb26c2c-9758-473d-9343-aedf92bbac42",
+  "checkpoint_transcript_start": 1074,
+  "transcript_lines_at_start": 1074,
   "token_usage": {
-    "input_tokens": 5,
-    "cache_creation_tokens": 8578,
-    "cache_read_tokens": 623671,
-    "output_tokens": 1672,
-    "api_call_count": 3
+    "input_tokens": 14,
+    "cache_creation_tokens": 8856,
+    "cache_read_tokens": 2174245,
+    "output_tokens": 3426,
+    "api_call_count": 10
   },
   "initial_attribution": {
-    "calculated_at": "2026-03-14T21:58:40.860347Z",
-    "agent_lines": 0,
-    "human_added": 150,
+    "calculated_at": "2026-03-14T22:04:58.512182Z",
+    "agent_lines": 2,
+    "human_added": 229,
     "human_modified": 0,
     "human_removed": 0,
-    "total_committed": 150,
-    "agent_percentage": 0
+    "total_committed": 231,
+    "agent_percentage": 0.8658008658008658
   },
   "transcript_path": ".claude/projects/-Users-viniciuscarvalho-Documents-FitToday/2da754b2-67b2-4efe-8f6b-26d03c69059b.jsonl"
 }
