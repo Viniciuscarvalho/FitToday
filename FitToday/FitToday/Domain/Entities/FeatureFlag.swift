@@ -113,6 +113,7 @@ enum FeatureFlagKey: String, CaseIterable, Sendable {
         case .groupStreaksEnabled: return "Group Streaks"
         case .socialFeedEnabled: return "Social Feed"
         case .gamificationEnabled: return "Gamification (XP/Levels)"
+        case .leaguesEnabled: return "Leagues"
         // Health
         case .healthKitSyncEnabled: return "Apple Health Sync"
         case .statsChartsEnabled: return "Stats Charts"
