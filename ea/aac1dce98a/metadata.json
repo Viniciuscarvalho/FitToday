@@ -1,0 +1,30 @@
+{
+  "cli_version": "0.4.4",
+  "checkpoint_id": "eaaac1dce98a",
+  "strategy": "manual-commit",
+  "branch": "fix/pro-101-trainer-connect-permission",
+  "checkpoints_count": 4,
+  "files_touched": [
+    "FitToday/FitToday/Data/Services/CMS/CMSTrainerService.swift",
+    "ops/sessions/20260313-235914.json",
+    "ops/sessions/20260314-185223.json",
+    "ops/sessions/20260314-185243.json",
+    "ops/sessions/20260314-191819.json"
+  ],
+  "sessions": [
+    {
+      "metadata": "/ea/aac1dce98a/0/metadata.json",
+      "transcript": "/ea/aac1dce98a/0/full.jsonl",
+      "context": "/ea/aac1dce98a/0/context.md",
+      "content_hash": "/ea/aac1dce98a/0/content_hash.txt",
+      "prompt": "/ea/aac1dce98a/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 35,
+    "cache_creation_tokens": 141460,
+    "cache_read_tokens": 3421126,
+    "output_tokens": 7837,
+    "api_call_count": 27
+  }
+}

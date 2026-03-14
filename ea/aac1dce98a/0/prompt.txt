@@ -1,0 +1,161 @@
+Implement the following plan:
+
+# PRO-101: Fix Permission Error on Personal Trainer Profile Access
+
+## Context
+
+Users receive a 403 error ("Você não tem permissão para acessar este recurso") when trying to view/search personal trainers. The error comes from the **CMS API** (REST), not do Firestore.
+
+**Root cause**: O `CMSTrainerService.buildRequest()` envia SEMPRE um header `Authorization: Bearer {token}` em todas as requests — inclusive nos endpoints públicos como `GET /api/trainers`. Quando o Firebase ID token é inválido, expirado, ou não reconhecido pelo middleware de auth do CMS, o backend retorna HTTP 403. Porém, esses endpoints funcionam sem auth (verificado: `GET /api/trainers` retorna 200 sem header).
+
+## Approach
+
+Adicionar um parâmetro `requiresAuth` ao `buildRequest()` para que endpoints públicos (read-only) não enviem o header de autenticação. Endpoints que requerem autenticação (connect, reviews) continuam enviando.
+
+## Changes
+
+### 1. `CMSTrainerService.swift` (arquivo principal)
+
+**Path**: `FitToday/FitToday/Data/Services/CMS/CMSTrainerService.swift`
+
+Modificar `buildRequest()` (linha 165):
+
+```swift
+private func buildRequest(url: URL, method: String, requiresAuth: Bool = false) async throws -> URLRequest {
+    var request = URLRequest(url: url)
+    request.httpMethod = method
+    request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+    request.setValue("application/json", forHTTPHeaderField: "Accept")
+
+    if requiresAuth {
+        if let tokenProvider {
+            let token = try await tokenProvider()
+            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        } else if let apiKey = configuration.apiKey {
+            request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
+        }
+    }
+
+    return request
+}
+```
+
+Marcar endpoints que necessitam auth com `requiresAuth: true`:
+
+- `requestConnection()` (linha 101) — POST, precisa de auth
+- `checkConnectionStatus()` (linha 116) — GET, precisa de auth (dados do aluno)
+- `submitReview()` (linha 129) — POST, precisa de auth
+
+Endpoints públicos ficam com default `false` (sem mudança nas chamadas):
+
+- `fetchTrainers()` — lista pública do marketplace
+- `fetchTrainerCount()` — contagem pública
+- `fetchTrainer(id:)` — perfil público
+- `fetchTrainerReviews()` — reviews públicos
+- `fetchPrograms()` / `fetchProgram(id:)` — programas públicos
+
+### 2. Nenhuma outra mudança necessária
+
+- **Firestore rules**: Corretas (`allow read: if isAuthenticated()` para trainers)
+- **DI Container**: Não precisa mudar
+- **ViewModels/Views**: Erro já é tratado via `.alert`
+- **Use Cases**: Sem mudança
+
+## Verification
+
+1. Buildar o app e abrir a tela de Personal Trainer
+2. Verificar que a listagem de trainers carrega sem erro 403
+3. Verificar que a busca por nome funciona
+4. Verificar que busca por invite code funciona
+5. Verificar que o botão "Conectar" ainda funciona (requer auth)
+6. Testar com usuário free e pro — ambos devem ver trainers
+7. Rodar tests existentes: `EntitlementPolicyTests`, `PersonalTrainerViewModelTests`
+
+
+If you need specific details from before exiting plan mode (like exact code snippets, error messages, or content you generated), read the full transcript at: /Users/viniciuscarvalho/.REDACTED.jsonl
+
+If this plan can be broken down into multiple independent tasks, consider using the TeamCreate tool to create a team and parallelize the work.
+
+---
+
+O erro permanece sendo 403, https://web-cms-pink.vercel.REDACTED
+[CMSTrainerService] Status: 403
+[PersonalTrainerViewModel] Error requesting connection: repositoryFailure(reason: "You don\'t have permission to access this resource")
+
+---
+
+Stop hook feedback:
+Prompt hook condition was not met: Claude did not complete the planned tasks. The plan explicitly stated: "Verification: 1. Build app and open Personal Trainer screen 2. Verify listting loads without 403 3. Verify search works 4. Verify invite code search works 5. Verify connect button still works 6. Test with free and pro users 7. Run existing tests: EntitlementPolicyTests, PersonalTrainerViewModelTests". No tests were run, no verification was performed, and no build was attempted. Claude also failed to notice that the root cause diagnosed (missing 'role' field) is DIFFERENT from the original plan, which focused on the 'requiresAuth' parameter. While the 'role' field fix is correct and necessary, Claude should have either: (1) tested the changes, (2) created a task list to track the verification steps, or (3) explicitly communicated that the plan changed. Additionally, the 'requiresAuth' parameter changes may be incomplete - the plan called for marking 3 endpoints with 'requiresAuth: true', but Claude only added 'requiresAuth: true' to requestConnection (line 101) and checkConnectionStatus (line 116), but may have missed submitReview or the changes may not match all planned endpoints. No verification that public endpoints still work without auth was done.
+
+---
+
+iOS app integration needed:
+
+  After a user signs up/signs in, call:
+  POST /api/users/me
+  Authorization: Bearer <firebase_id_token>
+  Content-Type: application/json
+
+  { "role": "student", "displayName": "..." }
+
+  This ensures the Firestore document has role: 'student' before the student tries to
+  connect with a trainer.
+
+  ---
+  To test the full flow after deploy:
+  1. Student calls POST /api/users/me with their Firebase token → confirms role:
+  'student' is set
+  2. Student calls POST /api/trainers/<trainer_id>/connect → should return 201
+  3. Trainer opens CMS /cms/connections → should see the pending connection
+  notification and be able to accept
+
+---
+
+<task-notification>
+<task-id>b392h4xji</task-id>
+<tool-use-id>toolu_018SZBVeaj9evkvLWGxky89L</tool-use-id>
+<output-file>REDACTED.output</output-file>
+<status>completed</status>
+<summary>Background command "set -a && source '/Users/viniciuscarvalho/Documents/FitToday/.env' && set +a && cd /Users/viniciuscarvalho/Documents/FitToday/FitToday && xcodebuild -project FitToday.xcodeproj -scheme FitToday -destination 'platform=iOS Simulator,name=iPhone 16' build 2>&1 | tail -20" completed (exit code 0)</summary>
+</task-notification>
+Read the output file to retrieve the result: REDACTED.output
+
+---
+
+<task-notification>
+<task-id>bqw8xpi34</task-id>
+<tool-use-id>REDACTED</tool-use-id>
+<output-file>REDACTED.output</output-file>
+<status>completed</status>
+<summary>Background command "set -a && source '/Users/viniciuscarvalho/Documents/FitToday/.env' && set +a && cd /Users/viniciuscarvalho/Documents/FitToday/FitToday && xcodebuild -project FitToday.xcodeproj -scheme FitToday -destination 'platform=iOS Simulator,name=iPhone 17 Pro' build 2>&1 | tail -30" completed (exit code 0)</summary>
+</task-notification>
+Read the output file to retrieve the result: REDACTED.output
+
+---
+
+Continua com o mesmo problema ao tentar fazer o request de envio de solicitação para conectar, sendo que o backend já está fornecendo e recebendo com o header do firebase, https://web-cms-pink.vercel.REDACTED
+[CMSTrainerService] Status: 403
+[PersonalTrainerViewModel] Error requesting connection: repositoryFailure(reason: "You don\'t have permission to access this resource")
+
+---
+
+<task-notification>
+<task-id>bf1m32o8r</task-id>
+<tool-use-id>REDACTED</tool-use-id>
+<output-file>REDACTED.output</output-file>
+<status>completed</status>
+<summary>Background command "set -a && source '/Users/viniciuscarvalho/Documents/FitToday/.env' && set +a && cd /Users/viniciuscarvalho/Documents/FitToday/FitToday && xcodebuild -project FitToday.xcodeproj -scheme FitToday -destination "platform=iOS Simulator,name=iPhone 17 Pro" build > /tmp/build-output.txt 2>&1 && echo "BUILD OK" || echo "BUILD FAILED"" completed (exit code 0)</summary>
+</task-notification>
+Read the output file to retrieve the result: REDACTED.output
+
+---
+
+Stop hook feedback:
+Prompt hook condition was not met: Claude did not complete the planned implementation. The original plan (PRO-101: Fix Permission Error on Personal Trainer Profile Access) explicitly required: 1) Modify CMSTrainerService.buildRequest() with requiresAuth parameter, 2) Mark 3 endpoints with requiresAuth: true, 3) Run verification tests (EntitlementPolicyTests, PersonalTrainerViewModelTests), 4) Verify 7 manual test steps. Claude: (a) Initially implemented requiresAuth correctly but then diagnosed a DIFFERENT root cause (missing 'role' field in Firestore) unrelated to the original plan, (b) Reverted the Firestore changes and added ensureStudentRole() API call as a workaround instead of fixing the root cause properly, (c) Did NOT run any actual tests - test target has pre-existing compilation errors that were not fixed, (d) Did NOT perform manual verification steps, (e) Created PR #107 but it's incomplete because the user is still reporting 403 errors, (f) Finally added debug logging but asked user to test and report results rather than completing the investigation. The session ends without confirming the fix works or all requirements met.
+
+---
+
+O log apresentado, [CMSTrainerService] POST https://web-cms-pink.vercel.REDACTED
+[CMSTrainerService] Status: 403
+[CMSTrainerService] 403 body: {"error":"Only students can connect to a trainer","code":"FORBIDDEN"}
+[PersonalTrainerViewModel] Error requesting connection: repositoryFailure(reason: "You don\'t have permission to access this resource")
