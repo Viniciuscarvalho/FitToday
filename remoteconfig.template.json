@@ -63,6 +63,13 @@
           },
           "description": "Enables social feed with workout proof posts (PRO-89)",
           "valueType": "BOOLEAN"
+        },
+        "gamification_enabled": {
+          "defaultValue": {
+            "value": "true"
+          },
+          "description": "Enables XP/Level gamification system (PRO-90)",
+          "valueType": "BOOLEAN"
         }
       }
     },

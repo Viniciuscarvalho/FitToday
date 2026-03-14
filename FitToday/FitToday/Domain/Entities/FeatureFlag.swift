@@ -42,6 +42,9 @@ enum FeatureFlagKey: String, CaseIterable, Sendable {
     /// Enables social feed with workout proof posts.
     case socialFeedEnabled = "social_feed_enabled"
 
+    /// Enables XP/Level gamification system.
+    case gamificationEnabled = "gamification_enabled"
+
     // MARK: - Health & Sync
 
     /// Enables Apple Health read/write integration.
@@ -106,6 +109,7 @@ enum FeatureFlagKey: String, CaseIterable, Sendable {
         case .checkInEnabled: return "Check-In"
         case .groupStreaksEnabled: return "Group Streaks"
         case .socialFeedEnabled: return "Social Feed"
+        case .gamificationEnabled: return "Gamification (XP/Levels)"
         // Health
         case .healthKitSyncEnabled: return "Apple Health Sync"
         case .statsChartsEnabled: return "Stats Charts"
@@ -135,6 +139,7 @@ enum FeatureFlagKey: String, CaseIterable, Sendable {
         switch self {
         // Unreleased features — disabled by default
         case .socialFeedEnabled,
+             .gamificationEnabled,
              .personalTrainerEnabled,
              .cmsWorkoutSyncEnabled,
              .trainerChatEnabled,

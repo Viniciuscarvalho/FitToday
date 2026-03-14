@@ -1001,6 +1001,21 @@
 "programs.incomplete_profile.title" = "Complete your profile";
 "programs.incomplete_profile.subtitle" = "Improve your recommendations by answering more questions";
 
+// MARK: - Gamification / XP Levels
+"gamification.xp_card.level_format" = "Level %d — %@";
+"gamification.xp_card.xp_progress_format" = "%d / 1000 XP";
+"gamification.xp_card.loading" = "Loading XP...";
+"gamification.xp_card.empty.title" = "Start Earning XP";
+"gamification.xp_card.empty.message" = "Complete workouts to earn XP and level up!";
+"gamification.level_up.title" = "Congratulations!";
+"gamification.level_up.level_format" = "Level %d";
+"gamification.xp_earned_format" = "+%d XP";
+"gamification.level.iniciante" = "Beginner";
+"gamification.level.guerreiro" = "Warrior";
+"gamification.level.tita" = "Titan";
+"gamification.level.lenda" = "Legend";
+"gamification.level.imortal" = "Immortal";
+
 // MARK: - Paywall Legal
 "paywall.legal.auto_renew" = "Subscription auto-renews. Cancel anytime in device settings.";
 "paywall.legal.terms" = "Terms of Use";

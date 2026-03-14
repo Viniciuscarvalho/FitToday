@@ -41,6 +41,10 @@ struct WorkoutCompletionView: View {
     @State private var showCreatePost = false
     @State private var showPostSuccess = false
 
+    // XP/Level state
+    @State private var xpAwardResult: XPAwardResult?
+    @State private var showLevelUp = false
+
     // Success feedback
     @State private var didPlayHaptic = false
     @State private var showCompletionCelebration = false
@@ -72,6 +76,19 @@ struct WorkoutCompletionView: View {
             // Workout summary statistics for completed workouts
             if status == .completed {
                 workoutSummaryCard
+            }
+
+            // XP earned badge
+            if let result = xpAwardResult {
+                Text("gamification.xp_earned_format".localized(with: result.xpAwarded))
+                    .font(.system(.title3, weight: .bold))
+                    .foregroundStyle(FitTodayColor.brandPrimary)
+                    .padding(.horizontal, FitTodaySpacing.md)
+                    .padding(.vertical, FitTodaySpacing.xs)
+                    .background(
+                        Capsule()
+                            .fill(FitTodayColor.brandPrimary.opacity(0.15))
+                    )
             }
 
             // Rating prompt for completed workouts
@@ -171,6 +188,7 @@ struct WorkoutCompletionView: View {
             await checkGroupMembership()
             loadCurrentEntry()
             playSuccessHapticIfNeeded()
+            await awardXPIfNeeded()
         }
         .sheet(isPresented: $showProfilePrompt) {
             if let resolver = resolver as? Resolver {
@@ -249,6 +267,13 @@ struct WorkoutCompletionView: View {
                         try? await Task.sleep(for: .seconds(3))
                         showPostSuccess = false
                     }
+            }
+            if showLevelUp, let result = xpAwardResult {
+                LevelUpCelebrationView(
+                    level: result.newLevel,
+                    levelTitle: XPLevel(level: result.newLevel),
+                    onDismiss: { showLevelUp = false }
+                )
             }
         }
         .onChange(of: hasRated) { _, rated in
@@ -397,6 +422,32 @@ struct WorkoutCompletionView: View {
             healthKitExportMessage = "Exportado para Apple Health."
         } catch {
             healthKitExportMessage = "Falha ao exportar para Apple Health: \(error.localizedDescription)"
+        }
+    }
+
+    private func awardXPIfNeeded() async {
+        guard status == .completed else { return }
+        guard let featureFlags = resolver.resolve(FeatureFlagChecking.self),
+              await featureFlags.isFeatureEnabled(.gamificationEnabled) else { return }
+        guard let awardUseCase = resolver.resolve(AwardXPUseCase.self) else { return }
+
+        // Get current streak for bonus calculation
+        var currentStreak = 0
+        if let statsRepo = resolver.resolve(UserStatsRepository.self),
+           let stats = try? await statsRepo.getCurrentStats() {
+            currentStreak = stats.currentStreak
+        }
+
+        do {
+            let result = try await awardUseCase.execute(type: .workoutCompleted, currentStreak: currentStreak)
+            xpAwardResult = result
+            if result.didLevelUp {
+                showLevelUp = true
+            }
+        } catch {
+            #if DEBUG
+            print("[WorkoutCompletion] Failed to award XP: \(error)")
+            #endif
         }
     }
 

@@ -11,6 +11,8 @@ actor HealthKitHistorySyncService {
     private let healthKit: any HealthKitServicing
     private let historyRepository: WorkoutHistoryRepository
     private let syncWorkoutUseCase: SyncWorkoutCompletionUseCase?
+    private let awardXPUseCase: AwardXPUseCase?
+    private let featureFlags: FeatureFlagChecking?
     private let calendar: Calendar
     private let logger: (String) -> Void
 
@@ -18,12 +20,16 @@ actor HealthKitHistorySyncService {
         healthKit: any HealthKitServicing,
         historyRepository: WorkoutHistoryRepository,
         syncWorkoutUseCase: SyncWorkoutCompletionUseCase? = nil,
+        awardXPUseCase: AwardXPUseCase? = nil,
+        featureFlags: FeatureFlagChecking? = nil,
         calendar: Calendar = Calendar(identifier: .iso8601),
         logger: @escaping (String) -> Void = { print("[HealthKitSync]", $0) }
     ) {
         self.healthKit = healthKit
         self.historyRepository = historyRepository
         self.syncWorkoutUseCase = syncWorkoutUseCase
+        self.awardXPUseCase = awardXPUseCase
+        self.featureFlags = featureFlags
         self.calendar = calendar
         self.logger = logger
     }
@@ -168,6 +174,9 @@ actor HealthKitHistorySyncService {
                     await syncUseCase.execute(entry: entry)
                     logger("🏆 Workout de \(workout.durationMinutes) min contabilizado para desafios")
                 }
+
+                // Award XP for imported workout
+                await awardXPForWorkout()
             } catch {
                 logger("❌ Falha ao importar workout: \(error.localizedDescription)")
             }
@@ -175,6 +184,21 @@ actor HealthKitHistorySyncService {
 
         logger("Importação concluída: \(importedCount) workouts importados")
         return importedCount
+    }
+
+    // MARK: - XP Award
+
+    private func awardXPForWorkout() async {
+        guard let awardXPUseCase,
+              let featureFlags,
+              await featureFlags.isFeatureEnabled(.gamificationEnabled) else { return }
+
+        do {
+            let result = try await awardXPUseCase.execute(type: .workoutCompleted, currentStreak: 0)
+            logger("🎮 XP awarded: +\(result.xpAwarded) (total: \(result.totalXP), level: \(result.newLevel))")
+        } catch {
+            logger("❌ Failed to award XP: \(error.localizedDescription)")
+        }
     }
 
     // MARK: - BUG FIX #4: Duplicate Detection by Date and Duration
