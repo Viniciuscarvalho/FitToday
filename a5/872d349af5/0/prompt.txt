@@ -866,3 +866,38 @@ Full transcript available at: REDACTED.output
 <usage><total_tokens>32007</total_tokens><tool_uses>17</tool_uses><duration_ms>81057</duration_ms></usage>
 </task-notification>
 Full transcript available at: REDACTED.output
+
+---
+
+<task-notification>
+<task-id>ab58cf6728c2512c5</task-id>
+<tool-use-id>toolu_01SmNsgT6ScRQYcfHhQxNvNW</tool-use-id>
+<output-file>REDACTED.output</output-file>
+<status>completed</status>
+<summary>Agent "Implement Task 7: DI + Tasks 8-9" completed</summary>
+<result>Everything looks clean. Here is a summary of the work completed.
+
+---
+
+**Summary of Tasks 7, 8, and 9 (League System PRO-91)**
+
+**Task 7 -- DI Container Registration**
+- Edited `/Users/viniciuscarvalho/Documents/FitToday/FitToday/FitToday/Presentation/DI/AppContainer.swift`
+- Added a `// ========== LEAGUES (PRO-91) ==========` section between Gamification and Social Feed
+- Registered: `FirebaseLeagueService` (singleton), `LeagueRepository` (singleton via `FirebaseLeagueRepository`), `GetCurrentLeagueUseCase`, `ObserveLeagueUseCase`, `GetLeagueHistoryUseCase`
+
+**Task 8 -- LeagueViewModel**
+- Created `/Users/viniciuscarvalho/Documents/FitToday/FitToday/FitToday/Presentation/Features/League/LeagueViewModel.swift`
+- `@MainActor @Observable` class following the project's ViewModel pattern (matches `HomeViewModel`)
+- Features: league loading with feature flag gating, real-time observation via `AsyncThrowingStream`, history loading, computed properties for rank/promotion/demotion zones, countdown text
+- Proper task cancellation in `deinit`
+
+**Task 9 -- UI Components** (all under 100 lines)
+- Created `/Users/viniciuscarvalho/Documents/FitToday/FitToday/FitToday/Presentation/Features/League/Components/LeagueTierBadge.swift` (71 lines) -- two sizes (`.small` icon-only 24pt, `.large` icon+name 44pt), hex-to-Color conversion, uses `LeagueTier.icon` and `LeagueTier.color`
+- Created `/Users/viniciuscarvalho/Documents/FitToday/FitToday/FitToday/Presentation/Features/League/Components/LeagueRankingRow.swift` (76 lines) -- rank, async avatar, name, weekly XP; green tint for top 3, red tint for bottom 3, border highlight for current user
+- Created `/Users/viniciuscarvalho/Documents/FitToday/FitToday/FitToday/Presentation/Features/League/Components/LeagueHomeCard.swift` (61 lines) -- compact tappable card with tier badge, rank, countdown, chevron; matches `XPLevelCard` styling with same design tokens
+
+All files use localized strings with `league.` key prefix and the project's design system tokens (`FitTodayColor`, `FitTodayFont`, `FitTodaySpacing`, `FitTodayRadius`).</result>
+<usage><total_tokens>33907</total_tokens><tool_uses>36</tool_uses><duration_ms>160099</duration_ms></usage>
+</task-notification>
+Full transcript available at: REDACTED.output
