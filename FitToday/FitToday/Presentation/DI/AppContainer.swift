@@ -649,6 +649,41 @@ struct AppContainer {
 
         // ========== END GAMIFICATION ==========
 
+        // ========== LEAGUES (PRO-91) ==========
+
+        container.register(FirebaseLeagueService.self) { _ in FirebaseLeagueService() }
+            .inObjectScope(.container)
+
+        container.register(LeagueRepository.self) { resolver in
+            FirebaseLeagueRepository(
+                service: resolver.resolve(FirebaseLeagueService.self)!,
+                authService: resolver.resolve(FirebaseAuthService.self)!
+            )
+        }
+        .inObjectScope(.container)
+
+        container.register(GetCurrentLeagueUseCase.self) { resolver in
+            GetCurrentLeagueUseCase(
+                repository: resolver.resolve(LeagueRepository.self)!,
+                featureFlags: resolver.resolve(FeatureFlagChecking.self)!
+            )
+        }
+
+        container.register(ObserveLeagueUseCase.self) { resolver in
+            ObserveLeagueUseCase(
+                repository: resolver.resolve(LeagueRepository.self)!
+            )
+        }
+
+        container.register(GetLeagueHistoryUseCase.self) { resolver in
+            GetLeagueHistoryUseCase(
+                repository: resolver.resolve(LeagueRepository.self)!,
+                featureFlags: resolver.resolve(FeatureFlagChecking.self)!
+            )
+        }
+
+        // ========== END LEAGUES ==========
+
         // ========== SOCIAL FEED (PRO-89) ==========
 
         let feedService = FirebaseFeedService()
