@@ -23,36 +23,25 @@ struct LeagueHistoryView: View {
         }
         .navigationTitle("league.history.title".localized)
         .navigationBarTitleDisplayMode(.inline)
-        .task {
-            await viewModel.loadHistory()
-        }
+        .task { await viewModel.loadHistory() }
     }
-
-    // MARK: - History List
 
     private var historyList: some View {
         List(viewModel.history.sorted(by: { $0.seasonWeek > $1.seasonWeek })) { result in
             HStack(spacing: FitTodaySpacing.sm) {
                 LeagueTierBadge(tier: result.tier, size: .small)
-
                 VStack(alignment: .leading, spacing: 2) {
                     Text("league.history.season_week".localized(with: result.seasonWeek))
                         .font(FitTodayFont.ui(size: 14, weight: .semiBold))
                         .foregroundStyle(FitTodayColor.textPrimary)
-
                     Text("league.history.xp_earned".localized(with: result.xpEarned))
                         .font(FitTodayFont.ui(size: 12, weight: .medium))
                         .foregroundStyle(FitTodayColor.textSecondary)
                 }
-
                 Spacer()
-
-                // Rank
                 Text("#\(result.finalRank)")
                     .font(FitTodayFont.ui(size: 14, weight: .bold))
                     .foregroundStyle(FitTodayColor.textPrimary)
-
-                // Promotion/Demotion arrow
                 if result.promoted {
                     Image(systemName: "arrow.up")
                         .font(.system(size: 12, weight: .bold))
@@ -67,8 +56,6 @@ struct LeagueHistoryView: View {
         }
         .listStyle(.plain)
     }
-
-    // MARK: - Empty State
 
     private var emptyState: some View {
         VStack(spacing: FitTodaySpacing.md) {
