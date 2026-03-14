@@ -385,7 +385,9 @@ struct AppContainer {
             HealthKitHistorySyncService(
                 healthKit: resolver.resolve(HealthKitServicing.self)!,
                 historyRepository: resolver.resolve(WorkoutHistoryRepository.self)!,
-                syncWorkoutUseCase: resolver.resolve(SyncWorkoutCompletionUseCase.self)
+                syncWorkoutUseCase: resolver.resolve(SyncWorkoutCompletionUseCase.self),
+                awardXPUseCase: resolver.resolve(AwardXPUseCase.self),
+                featureFlags: resolver.resolve(FeatureFlagChecking.self)
             )
         }
         .inObjectScope(.container)

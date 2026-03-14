@@ -116,7 +116,18 @@ actor RemoteConfigService: RemoteConfigServicing {
     func getValue(for key: FeatureFlagKey) async -> Bool {
         let configValue = remoteConfig.configValue(forKey: key.rawValue)
 
-        // If no value is set remotely, use default
+        #if DEBUG
+        let sourceStr: String
+        switch configValue.source {
+        case .static: sourceStr = "static"
+        case .default: sourceStr = "default"
+        case .remote: sourceStr = "remote"
+        @unknown default: sourceStr = "unknown"
+        }
+        print("[RemoteConfig] \(key.rawValue) = \(configValue.boolValue), source: \(sourceStr)")
+        #endif
+
+        // If no value is set remotely or in defaults, use hardcoded default
         if configValue.source == .static {
             return key.defaultValue
         }
