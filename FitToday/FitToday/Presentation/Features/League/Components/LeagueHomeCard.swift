@@ -31,7 +31,7 @@ struct LeagueHomeCard: View {
 
                 Spacer()
 
-                HStack(spacing: FitTodaySpacing.xxs) {
+                HStack(spacing: FitTodaySpacing.xs) {
                     Text("league.home_card.view".localized)
                         .font(FitTodayFont.ui(size: 13, weight: .medium))
                         .foregroundStyle(FitTodayColor.brandPrimary)
