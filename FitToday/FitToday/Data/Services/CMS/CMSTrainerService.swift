@@ -169,7 +169,10 @@ actor CMSTrainerService {
         var request = try await buildRequest(url: url, method: "POST", requiresAuth: true)
         let body: [String: String] = ["role": "student", "displayName": displayName]
         request.httpBody = try encoder.encode(body)
-        let _: CMSUserProfileResponse = try await execute(request: request)
+        let response: CMSUserProfileResponse = try await execute(request: request)
+        #if DEBUG
+        print("[CMSTrainerService] ensureStudentRole succeeded — uid: \(response.uid), role: \(response.role ?? "nil")")
+        #endif
     }
 
     // MARK: - Private Helpers
@@ -220,8 +223,20 @@ actor CMSTrainerService {
                 #endif
                 throw CMSServiceError.decodingFailed(error)
             }
-        case 401: throw CMSServiceError.unauthorized
-        case 403: throw CMSServiceError.forbidden
+        case 401:
+            #if DEBUG
+            if let body = String(data: data, encoding: .utf8) {
+                print("[CMSTrainerService] 401 body: \(body.prefix(500))")
+            }
+            #endif
+            throw CMSServiceError.unauthorized
+        case 403:
+            #if DEBUG
+            if let body = String(data: data, encoding: .utf8) {
+                print("[CMSTrainerService] 403 body: \(body.prefix(500))")
+            }
+            #endif
+            throw CMSServiceError.forbidden
         case 404: throw CMSServiceError.notFound
         case 429: throw CMSServiceError.rateLimited
         case 500...599: throw CMSServiceError.serverError(httpResponse.statusCode)
