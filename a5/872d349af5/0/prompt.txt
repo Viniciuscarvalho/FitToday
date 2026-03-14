@@ -835,3 +835,34 @@ All three use cases follow the established project patterns: `final class`, `@un
 <usage><total_tokens>24882</total_tokens><tool_uses>8</tool_uses><duration_ms>32008</duration_ms></usage>
 </task-notification>
 Full transcript available at: REDACTED.output
+
+---
+
+<task-notification>
+<task-id>ae19c2d7d8646c547</task-id>
+<tool-use-id>toolu_01FZYqX3Argwc3KUwuTEZjAg</tool-use-id>
+<output-file>REDACTED.output</output-file>
+<status>completed</status>
+<summary>Agent "Implement Tasks 3-5: Data layer" completed</summary>
+<result>All four files have been created. Here is a summary of the work done:
+
+**Task 3 -- DTOs and Mappers**
+
+- `/Users/viniciuscarvalho/Documents/FitToday/FitToday/FitToday/Data/DTOs/FBLeague.swift` -- Contains `FBLeague` and `FBLeagueMember` structs, both `Codable & Sendable`, using `@DocumentID` and `Timestamp` following the existing DTO patterns (matching `FBUserXP`, `FBChallenge`, etc.).
+
+- `/Users/viniciuscarvalho/Documents/FitToday/FitToday/FitToday/Data/Mappers/LeagueMapper.swift` -- Extension-based mappers following the `SocialUserMapper` pattern. `FBLeague.toDomain(members:currentUserId:)` sorts members by `weeklyXP` descending and computes ranks via enumeration. `FBLeagueMember.toDomain(rank:currentUserId:)` maps individual members with computed rank and `isCurrentUser` flag.
+
+**Task 4 -- Firebase Service**
+
+- `/Users/viniciuscarvalho/Documents/FitToday/FitToday/FitToday/Data/Services/Firebase/FirebaseLeagueService.swift` -- An `actor` following the `FirebaseLeaderboardService` pattern with:
+  - `fetchCurrentLeague(userId:)` -- queries leagues where `memberUserIds` array contains the user, ordered by `seasonWeek` desc, limit 1, then fetches the `members` subcollection.
+  - `observeLeague(leagueId:)` -- `nonisolated` method returning `AsyncThrowingStream` with dual snapshot listeners on the league document and its members subcollection.
+  - `fetchLeagueHistory(userId:)` -- fetches all past leagues for a user with their members.
+  - `LeagueObservationState` helper class to coordinate the two snapshot listeners.
+
+**Task 5 -- Repository Implementation**
+
+- `/Users/viniciuscarvalho/Documents/FitToday/FitToday/FitToday/Data/Repositories/FirebaseLeagueRepository.swift` -- `final class` conforming to `LeagueRepository & @unchecked Sendable`, following the `FirebaseLeaderboardRepository` pattern. Uses `FirebaseLeagueService` + `FirebaseAuthService` to implement all three protocol methods (`getCurrentLeague`, `observeLeague`, `getHistory`), applying the `LeagueMapper` to convert DTOs to domain entities. The `getHistory` method computes promotion/demotion based on top/bottom 20% rank thresholds.</result>
+<usage><total_tokens>32007</total_tokens><tool_uses>17</tool_uses><duration_ms>81057</duration_ms></usage>
+</task-notification>
+Full transcript available at: REDACTED.output
