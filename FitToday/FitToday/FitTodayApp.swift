@@ -23,7 +23,7 @@ struct FitTodayApp: App {
 
     init() {
         // Configure RevenueCat
-        Purchases.configure(withAPIKey: "sk_HZFKDwYhgDNjtFtocPKoYWulPtfWf")
+        Purchases.configure(withAPIKey: "appl_uWXYSmZqnPusuYSlosBGtGAUCOU")
 
         // Configure Firebase
         FirebaseApp.configure()
