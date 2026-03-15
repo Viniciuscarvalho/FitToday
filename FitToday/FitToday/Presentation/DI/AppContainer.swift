@@ -57,7 +57,7 @@ struct AppContainer {
         container.register(StoreKitService.self) { _ in storeKitService }
             .inObjectScope(.container)
         
-        let entitlementRepository = StoreKitEntitlementRepository(modelContainer: modelContainer, storeKitService: storeKitService)
+        let entitlementRepository = RevenueCatEntitlementRepository()
         container.register(EntitlementRepository.self) { _ in entitlementRepository }
             .inObjectScope(.container)
         
