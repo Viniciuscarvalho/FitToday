@@ -6,17 +6,40 @@
 import Foundation
 import RevenueCat
 
-// MARK: - Provider Protocol (enables testing without Purchases singleton)
+// MARK: - Entitlement Snapshot (testable, no RevenueCat dependency)
+
+struct RCEntitlementSnapshot: Sendable {
+    struct EntitlementInfo: Sendable {
+        let isActive: Bool
+        let expirationDate: Date?
+    }
+
+    let entitlements: [String: EntitlementInfo]
+
+    init(from customerInfo: CustomerInfo) {
+        entitlements = customerInfo.entitlements.all.mapValues {
+            EntitlementInfo(isActive: $0.isActive, expirationDate: $0.expirationDate)
+        }
+    }
+
+    // For testing
+    init(entitlements: [String: EntitlementInfo]) {
+        self.entitlements = entitlements
+    }
+}
+
+// MARK: - Provider Protocol
 
 protocol RevenueCatProviding: Sendable {
-    func customerInfo() async throws -> CustomerInfo
+    func customerInfo() async throws -> RCEntitlementSnapshot
 }
 
 // MARK: - Production Provider
 
 final class DefaultRevenueCatProvider: RevenueCatProviding {
-    func customerInfo() async throws -> CustomerInfo {
-        try await Purchases.shared.customerInfo()
+    func customerInfo() async throws -> RCEntitlementSnapshot {
+        let info = try await Purchases.shared.customerInfo()
+        return RCEntitlementSnapshot(from: info)
     }
 }
 
@@ -31,16 +54,16 @@ final class RevenueCatEntitlementRepository: EntitlementRepository {
     }
 
     func currentEntitlement() async throws -> ProEntitlement {
-        let info = try await provider.customerInfo()
-        return map(info)
+        let snapshot = try await provider.customerInfo()
+        return map(snapshot)
     }
 
     func entitlementStream() -> AsyncStream<ProEntitlement> {
         AsyncStream { continuation in
             Task {
                 while !Task.isCancelled {
-                    if let info = try? await provider.customerInfo() {
-                        continuation.yield(map(info))
+                    if let snapshot = try? await provider.customerInfo() {
+                        continuation.yield(map(snapshot))
                     }
                     try? await Task.sleep(for: .seconds(60))
                 }
@@ -49,21 +72,21 @@ final class RevenueCatEntitlementRepository: EntitlementRepository {
         }
     }
 
-    // MARK: - Internal (visible for testing)
+    // MARK: - Mapping (internal for testing)
 
-    func map(_ info: CustomerInfo) -> ProEntitlement {
-        if info.entitlements["FitToday Elite"]?.isActive == true {
+    func map(_ snapshot: RCEntitlementSnapshot) -> ProEntitlement {
+        if snapshot.entitlements["FitToday Elite"]?.isActive == true {
             return ProEntitlement(
                 tier: .elite,
                 source: .storeKit,
-                expirationDate: info.entitlements["FitToday Elite"]?.expirationDate
+                expirationDate: snapshot.entitlements["FitToday Elite"]?.expirationDate
             )
         }
-        if info.entitlements["FitToday Pro"]?.isActive == true {
+        if snapshot.entitlements["FitToday Pro"]?.isActive == true {
             return ProEntitlement(
                 tier: .pro,
                 source: .storeKit,
-                expirationDate: info.entitlements["FitToday Pro"]?.expirationDate
+                expirationDate: snapshot.entitlements["FitToday Pro"]?.expirationDate
             )
         }
         return .free
