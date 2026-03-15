@@ -56,6 +56,18 @@ struct HomeView: View {
                     }
                 }
 
+                // League card
+                if viewModel.isLeaguesEnabled, let league = viewModel.currentLeague {
+                    LeagueHomeCard(
+                        tier: league.tier,
+                        rank: viewModel.leagueUserRank,
+                        countdown: viewModel.leagueCountdownText
+                    ) {
+                        router.push(.league, on: .home)
+                    }
+                    .padding(.horizontal)
+                }
+
                 // Daily stats summary
                 DailyStatsCard(
                     workoutsThisWeek: viewModel.workoutsThisWeek,

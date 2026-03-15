@@ -1020,3 +1020,43 @@
 "paywall.legal.auto_renew" = "Subscription auto-renews. Cancel anytime in device settings.";
 "paywall.legal.terms" = "Terms of Use";
 "paywall.legal.privacy" = "Privacy Policy";
+
+// MARK: - Leagues
+
+// Tier names
+"league.tier.bronze" = "Bronze";
+"league.tier.silver" = "Silver";
+"league.tier.gold" = "Gold";
+"league.tier.diamond" = "Diamond";
+"league.tier.legend" = "Legend";
+
+// Main league screen
+"league.title" = "Your League";
+"league.season_week" = "Season Week %d";
+"league.season_ended" = "Season ended";
+"league.loading" = "Loading league...";
+"league.empty.title" = "No league yet";
+"league.empty.message" = "Complete workouts to join a league!";
+
+// Ranking
+"league.ranking.xp_format" = "%d XP";
+
+// Promotion
+"league.promoted.title" = "Promoted!";
+"league.promoted.dismiss" = "Continue";
+
+// Demotion
+"league.demoted.title" = "Demoted";
+"league.demoted.message" = "Keep training to climb back!";
+"league.demoted.dismiss" = "Continue";
+
+// History
+"league.history.title" = "History";
+"league.history.season_week" = "Season Week %d";
+"league.history.xp_earned" = "%d XP earned";
+"league.history.empty.title" = "No history yet";
+"league.history.empty.message" = "Your past league seasons will appear here.";
+
+// Home card
+"league.home_card.your_rank" = "Rank #%d";
+"league.home_card.view" = "View League";

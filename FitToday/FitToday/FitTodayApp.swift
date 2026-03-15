@@ -6,6 +6,7 @@
 //
 
 import FirebaseCore
+import RevenueCat
 import SwiftData
 import SwiftUI
 import Swinject
@@ -21,6 +22,9 @@ struct FitTodayApp: App {
     @Environment(\.scenePhase) private var scenePhase
 
     init() {
+        // Configure RevenueCat
+        Purchases.configure(withAPIKey: "test_bLxqgCKujDLuNjETLfDwtdbSCjZ")
+
         // Configure Firebase
         FirebaseApp.configure()
 

@@ -32,6 +32,12 @@ enum ProFeature: String, CaseIterable {
     // Social
     case simultaneousChallenges = "simultaneous_challenges"
 
+    // Leagues (Bronze is free — no entitlement gate)
+    case leagueSilver = "league_silver"
+    case leagueGold = "league_gold"
+    case leagueDiamond = "league_diamond"
+    case leagueLegend = "league_legend"
+
     // AI Chat
     case aiChat = "ai_chat"
 
@@ -46,6 +52,10 @@ enum ProFeature: String, CaseIterable {
         case .personalTrainer: return "Personal Trainer"
         case .trainerWorkouts: return "Treinos do Personal"
         case .simultaneousChallenges: return "Desafios simultâneos ilimitados"
+        case .leagueSilver: return "Liga Prata"
+        case .leagueGold: return "Liga Ouro"
+        case .leagueDiamond: return "Liga Diamante"
+        case .leagueLegend: return "Liga Lenda"
         case .aiChat: return "Assistente IA FitOrb"
         }
     }
@@ -149,6 +159,8 @@ struct EntitlementPolicy {
                 return .allowed
             case .personalTrainer, .trainerWorkouts:
                 return .allowed
+            case .leagueLegend:
+                return .requiresElite(feature: feature)
             default:
                 return .allowed
             }
@@ -177,6 +189,12 @@ struct EntitlementPolicy {
         case .personalTrainer, .trainerWorkouts:
             return .allowed
 
+        case .leagueSilver, .leagueGold, .leagueDiamond:
+            return .requiresPro(feature: feature)
+
+        case .leagueLegend:
+            return .requiresElite(feature: feature)
+
         case .aiExerciseSubstitution,
              .unlimitedHistory,
              .advancedDOMSAdjustment,
@@ -193,6 +211,8 @@ struct EntitlementPolicy {
             return false // Free tem acesso limitado
         case .personalTrainer, .trainerWorkouts:
             return false // Acessível para todos os usuários
+        case .leagueSilver, .leagueGold, .leagueDiamond, .leagueLegend:
+            return true // Requer Pro ou Elite
         case .aiExerciseSubstitution,
              .unlimitedHistory,
              .advancedDOMSAdjustment,
@@ -205,8 +225,8 @@ struct EntitlementPolicy {
     /// Verifica se uma feature é exclusiva do plano Elite
     static func isEliteOnly(_ feature: ProFeature) -> Bool {
         switch feature {
-        case .personalTrainer, .trainerWorkouts:
-            return false
+        case .leagueLegend:
+            return true
         default:
             return false
         }

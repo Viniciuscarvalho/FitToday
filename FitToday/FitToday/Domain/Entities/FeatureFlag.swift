@@ -45,6 +45,9 @@ enum FeatureFlagKey: String, CaseIterable, Sendable {
     /// Enables XP/Level gamification system.
     case gamificationEnabled = "gamification_enabled"
 
+    /// Enables the league ranking system (Bronze → Legend).
+    case leaguesEnabled = "leagues_enabled"
+
     // MARK: - Health & Sync
 
     /// Enables Apple Health read/write integration.
@@ -110,6 +113,7 @@ enum FeatureFlagKey: String, CaseIterable, Sendable {
         case .groupStreaksEnabled: return "Group Streaks"
         case .socialFeedEnabled: return "Social Feed"
         case .gamificationEnabled: return "Gamification (XP/Levels)"
+        case .leaguesEnabled: return "Leagues"
         // Health
         case .healthKitSyncEnabled: return "Apple Health Sync"
         case .statsChartsEnabled: return "Stats Charts"
@@ -140,6 +144,7 @@ enum FeatureFlagKey: String, CaseIterable, Sendable {
         // Unreleased features — disabled by default
         case .socialFeedEnabled,
              .gamificationEnabled,
+             .leaguesEnabled,
              .personalTrainerEnabled,
              .cmsWorkoutSyncEnabled,
              .trainerChatEnabled,

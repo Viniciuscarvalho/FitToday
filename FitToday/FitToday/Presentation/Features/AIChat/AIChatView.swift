@@ -16,9 +16,6 @@ struct AIChatView: View {
     @State private var viewModel: AIChatViewModel
     @State private var showClearConfirmation = false
 
-    private var storeKitRepository: StoreKitEntitlementRepository? {
-        resolver.resolve(EntitlementRepository.self) as? StoreKitEntitlementRepository
-    }
 
     init(resolver: Resolver) {
         self.resolver = resolver
@@ -77,17 +74,14 @@ struct AIChatView: View {
             }
         }
         .sheet(isPresented: $viewModel.showPaywall) {
-            if let repo = storeKitRepository {
-                OptimizedPaywallView(
-                    storeService: repo.service,
-                    onPurchaseSuccess: {
-                        viewModel.showPaywall = false
-                    },
-                    onDismiss: {
-                        viewModel.showPaywall = false
-                    }
-                )
-            }
+            OptimizedPaywallView(
+                onPurchaseSuccess: {
+                    viewModel.showPaywall = false
+                },
+                onDismiss: {
+                    viewModel.showPaywall = false
+                }
+            )
         }
     }
 
