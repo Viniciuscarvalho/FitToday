@@ -19,12 +19,12 @@ OptimizedPaywallView                           ← ATUALIZADO
 
 ## Files Changed
 
-| File | Change |
-|---|---|
-| `FitTodayApp.swift` | Adicionar `import RevenueCat` + `Purchases.configure(...)` |
-| `AppContainer.swift` | Registrar `RevenueCatEntitlementRepository` |
-| `OptimizedPaywallView.swift` | Substituir corpo pelo `PaywallView()` do RevenueCatUI |
-| `RevenueCatEntitlementRepository.swift` | NOVO — implementa `EntitlementRepository` |
+| File                                    | Change                                                     |
+| --------------------------------------- | ---------------------------------------------------------- |
+| `FitTodayApp.swift`                     | Adicionar `import RevenueCat` + `Purchases.configure(...)` |
+| `AppContainer.swift`                    | Registrar `RevenueCatEntitlementRepository`                |
+| `OptimizedPaywallView.swift`            | Substituir corpo pelo `PaywallView()` do RevenueCatUI      |
+| `RevenueCatEntitlementRepository.swift` | NOVO — implementa `EntitlementRepository`                  |
 
 ## RevenueCatEntitlementRepository
 
@@ -63,9 +63,11 @@ struct OptimizedPaywallView: View {
 ```
 
 ## API Key
+
 `test_bLxqgCKujDLuNjETLfDwtdbSCjZ` — configurado em `FitTodayApp.init()`.
 
 ## No Breaking Changes
+
 - `EntitlementRepository` protocol mantido
 - `EntitlementPolicy`, `ProEntitlement`, `FeatureGatingUseCase` intocados
 - `StoreKitService` mantido (não removido)
