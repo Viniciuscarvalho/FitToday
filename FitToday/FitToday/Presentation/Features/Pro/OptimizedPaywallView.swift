@@ -33,9 +33,8 @@ struct OptimizedPaywallView: View {
                 onPurchaseSuccess()
                 dismiss()
             }
-            .onDismiss {
+            .onDisappear {
                 onDismiss()
-                dismiss()
             }
     }
 }

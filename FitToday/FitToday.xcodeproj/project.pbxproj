@@ -19,7 +19,6 @@
 		EAE695E92F66310000B582F5 /* ReceiptParser in Frameworks */ = {isa = PBXBuildFile; productRef = EAE695E82F66310000B582F5 /* ReceiptParser */; };
 		EAE695EB2F66310000B582F5 /* RevenueCat in Frameworks */ = {isa = PBXBuildFile; productRef = EAE695EA2F66310000B582F5 /* RevenueCat */; };
 		EAE695ED2F66310000B582F5 /* RevenueCatUI in Frameworks */ = {isa = PBXBuildFile; productRef = EAE695EC2F66310000B582F5 /* RevenueCatUI */; };
-		EAE695EF2F66310000B582F5 /* RevenueCat_CustomEntitlementComputation in Frameworks */ = {isa = PBXBuildFile; productRef = EAE695EE2F66310000B582F5 /* RevenueCat_CustomEntitlementComputation */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -109,8 +108,7 @@
 				EA07E6B92F1A80EB00B08007 /* FirebaseAnalytics in Frameworks */,
 				EA07E6BF2F1A80EB00B08007 /* FirebaseAuth in Frameworks */,
 				EA07E6C12F1A80EB00B08007 /* FirebaseFirestore in Frameworks */,
-				EAE695EF2F66310000B582F5 /* RevenueCat_CustomEntitlementComputation in Frameworks */,
-				EA07E6C32F1A80EB00B08007 /* FirebaseStorage in Frameworks */,
+					EA07E6C32F1A80EB00B08007 /* FirebaseStorage in Frameworks */,
 				EA07E6C52F1A80EB00B08007 /* FirebaseFunctions in Frameworks */,
 				EA5DDB022F0AEA4D005B7F4E /* Swinject in Frameworks */,
 				EA07E6BD2F1A80EB00B08007 /* FirebaseRemoteConfig in Frameworks */,
@@ -219,8 +217,7 @@
 				EAE695E82F66310000B582F5 /* ReceiptParser */,
 				EAE695EA2F66310000B582F5 /* RevenueCat */,
 				EAE695EC2F66310000B582F5 /* RevenueCatUI */,
-				EAE695EE2F66310000B582F5 /* RevenueCat_CustomEntitlementComputation */,
-			);
+				);
 			productName = FitToday;
 			productReference = EAF534E72F09A1AD00B64D8D /* FitToday.app */;
 			productType = "com.apple.product-type.application";
@@ -894,11 +891,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = EAE695E72F66310000B582F5 /* XCRemoteSwiftPackageReference "purchases-ios-spm" */;
 			productName = RevenueCatUI;
-		};
-		EAE695EE2F66310000B582F5 /* RevenueCat_CustomEntitlementComputation */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = EAE695E72F66310000B582F5 /* XCRemoteSwiftPackageReference "purchases-ios-spm" */;
-			productName = RevenueCat_CustomEntitlementComputation;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
