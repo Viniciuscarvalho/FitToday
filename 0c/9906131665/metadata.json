@@ -1,0 +1,27 @@
+{
+  "cli_version": "0.4.4",
+  "checkpoint_id": "0c9906131665",
+  "strategy": "manual-commit",
+  "branch": "feat/revenue-cat-integration",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "FitToday/FitToday/Presentation/Features/Pro/OptimizedPaywallView.swift",
+    "ops/sessions/20260316-011936.json"
+  ],
+  "sessions": [
+    {
+      "metadata": "/0c/9906131665/0/metadata.json",
+      "transcript": "/0c/9906131665/0/full.jsonl",
+      "context": "/0c/9906131665/0/context.md",
+      "content_hash": "/0c/9906131665/0/content_hash.txt",
+      "prompt": "/0c/9906131665/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 5,
+    "cache_creation_tokens": 1685,
+    "cache_read_tokens": 473234,
+    "output_tokens": 701,
+    "api_call_count": 3
+  }
+}
