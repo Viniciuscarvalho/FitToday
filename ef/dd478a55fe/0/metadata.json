@@ -1,0 +1,35 @@
+{
+  "cli_version": "0.4.4",
+  "checkpoint_id": "efdd478a55fe",
+  "session_id": "0750c56b-2f0d-49ef-9b6c-4956e6833a53",
+  "strategy": "manual-commit",
+  "created_at": "2026-03-16T01:36:41.261926Z",
+  "branch": "feat/revenue-cat-integration",
+  "checkpoints_count": 3,
+  "files_touched": [
+    "FitToday/FitToday/Presentation/Features/Pro/OptimizedPaywallView.swift",
+    "ops/sessions/20260316-013009.json",
+    "ops/sessions/20260316-013253.json"
+  ],
+  "agent": "Claude Code",
+  "transcript_identifier_at_start": "a5bfe9cb-187b-46f6-9021-c464c734f60f",
+  "checkpoint_transcript_start": 994,
+  "transcript_lines_at_start": 994,
+  "token_usage": {
+    "input_tokens": 20,
+    "cache_creation_tokens": 35296,
+    "cache_read_tokens": 1017975,
+    "output_tokens": 3046,
+    "api_call_count": 14
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-03-16T01:36:40.284531Z",
+    "agent_lines": 2,
+    "human_added": 304,
+    "human_modified": 2,
+    "human_removed": 0,
+    "total_committed": 308,
+    "agent_percentage": 0.6493506493506493
+  },
+  "transcript_path": ".claude/projects/-Users-viniciuscarvalho-Documents-FitToday/0750c56b-2f0d-49ef-9b6c-4956e6833a53.jsonl"
+}
