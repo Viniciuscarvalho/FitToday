@@ -2,7 +2,7 @@
 //  OptimizedPaywallView.swift
 //  FitToday
 //
-//  Paywall via RevenueCatUI — configurado no RevenueCat Dashboard.
+//  Paywall via RevenueCatUI — carrega o offering "Fittoday Pro" do dashboard.
 //
 
 import RevenueCat
@@ -11,6 +11,7 @@ import SwiftUI
 
 struct OptimizedPaywallView: View {
     @Environment(\.dismiss) private var dismiss
+    @State private var offering: Offering?
 
     private let onPurchaseSuccess: () -> Void
     private let onDismiss: () -> Void
@@ -24,18 +25,34 @@ struct OptimizedPaywallView: View {
     }
 
     var body: some View {
-        PaywallView()
-            .onPurchaseCompleted { _ in
-                onPurchaseSuccess()
-                dismiss()
+        Group {
+            if let offering {
+                PaywallView(offering: offering)
+                    .onPurchaseCompleted { _ in
+                        onPurchaseSuccess()
+                        dismiss()
+                    }
+                    .onRestoreCompleted { _ in
+                        onPurchaseSuccess()
+                        dismiss()
+                    }
+                    .onDisappear {
+                        onDismiss()
+                    }
+            } else {
+                ProgressView()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .background(Color(.systemBackground))
             }
-            .onRestoreCompleted { _ in
-                onPurchaseSuccess()
-                dismiss()
-            }
-            .onDisappear {
-                onDismiss()
-            }
+        }
+        .task {
+            await loadOffering()
+        }
+    }
+
+    private func loadOffering() async {
+        guard let offerings = try? await Purchases.shared.offerings() else { return }
+        offering = offerings["Fittoday Pro"] ?? offerings.current
     }
 }
 
