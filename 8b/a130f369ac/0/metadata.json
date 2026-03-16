@@ -1,0 +1,34 @@
+{
+  "cli_version": "0.4.4",
+  "checkpoint_id": "8ba130f369ac",
+  "session_id": "0750c56b-2f0d-49ef-9b6c-4956e6833a53",
+  "strategy": "manual-commit",
+  "created_at": "2026-03-16T01:10:56.156808Z",
+  "branch": "feat/revenue-cat-integration",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "FitToday/FitToday/FitTodayApp.swift",
+    "ops/sessions/20260316-011045.json"
+  ],
+  "agent": "Claude Code",
+  "transcript_identifier_at_start": "09dc5df7-4d1c-4faa-9858-b446e48e2467",
+  "checkpoint_transcript_start": 944,
+  "transcript_lines_at_start": 944,
+  "token_usage": {
+    "input_tokens": 6,
+    "cache_creation_tokens": 2146,
+    "cache_read_tokens": 623288,
+    "output_tokens": 1018,
+    "api_call_count": 4
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-03-16T01:10:55.322937Z",
+    "agent_lines": 0,
+    "human_added": 120,
+    "human_modified": 1,
+    "human_removed": 0,
+    "total_committed": 121,
+    "agent_percentage": 0
+  },
+  "transcript_path": ".claude/projects/-Users-viniciuscarvalho-Documents-FitToday/0750c56b-2f0d-49ef-9b6c-4956e6833a53.jsonl"
+}
