@@ -28,6 +28,7 @@ struct OptimizedPaywallView: View {
         Group {
             if let offering {
                 PaywallView(offering: offering)
+                    .environment(\.locale, .current)
                     .onPurchaseCompleted { _ in
                         onPurchaseSuccess()
                         dismiss()
