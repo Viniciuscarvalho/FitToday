@@ -52,7 +52,7 @@ struct OptimizedPaywallView: View {
 
     private func loadOffering() async {
         guard let offerings = try? await Purchases.shared.offerings() else { return }
-        offering = offerings["Fittoday Pro"] ?? offerings.current
+        offering = offerings["Fittoday"] ?? offerings.current
     }
 }
 
