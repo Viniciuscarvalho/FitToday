@@ -11,6 +11,7 @@ import SwiftUI
 
 struct OptimizedPaywallView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.localizationManager) private var localizationManager
     @State private var offering: Offering?
 
     private let onPurchaseSuccess: () -> Void
@@ -28,7 +29,7 @@ struct OptimizedPaywallView: View {
         Group {
             if let offering {
                 PaywallView(offering: offering)
-                    .environment(\.locale, .current)
+                    .environment(\.locale, Locale(identifier: localizationManager.selectedLanguage.rawValue))
                     .onPurchaseCompleted { _ in
                         onPurchaseSuccess()
                         dismiss()
