@@ -262,3 +262,16 @@ Summary:
    - Use provided code snippets for SDK configuration, entitlement checking, and PaywallView
    - Create a new branch `feat/revenue-cat-integration` and open PR #108 to mai...
 
+### Prompt 44
+
+O paywall do Revenue, não esta pegando a localization quando é trocado o idioma, sendo que o modo default no dashboard está como português, está correto no app, porém continua não apresentando o idioma correto no Paywall
+
+### Prompt 45
+
+[Image: source: REDACTED de Tela 2026-03-15 às 22.47.14.png]
+
+### Prompt 46
+
+Continua aparecendo em inglês no app, mesmo no dashboard estando configurado, // Verificar se o SDK respeita o environment lendo o locale internamente
+  // Alternativa: usar o locale do sistema + aceitar que o paywall segue o idioma do  iOS
+

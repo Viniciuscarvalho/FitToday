@@ -3,11 +3,11 @@
   "checkpoint_id": "efdd478a55fe",
   "strategy": "manual-commit",
   "branch": "feat/revenue-cat-integration",
-  "checkpoints_count": 3,
+  "checkpoints_count": 1,
   "files_touched": [
+    "FitToday/FitToday/FitTodayApp.swift",
     "FitToday/FitToday/Presentation/Features/Pro/OptimizedPaywallView.swift",
-    "ops/sessions/20260316-013009.json",
-    "ops/sessions/20260316-013253.json"
+    "FitToday/FitToday/Support/LocalizationManager.swift"
   ],
   "sessions": [
     {
@@ -19,10 +19,10 @@
     }
   ],
   "token_usage": {
-    "input_tokens": 20,
-    "cache_creation_tokens": 35296,
-    "cache_read_tokens": 1017975,
-    "output_tokens": 3046,
-    "api_call_count": 14
+    "input_tokens": 39,
+    "cache_creation_tokens": 66403,
+    "cache_read_tokens": 2495003,
+    "output_tokens": 19871,
+    "api_call_count": 35
   }
 }

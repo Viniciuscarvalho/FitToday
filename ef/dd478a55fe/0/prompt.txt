@@ -895,3 +895,16 @@ Summary:
 
 If you need specific details from before compaction (like exact code snippets, error messages, or content you generated), read the full transcript at: /Users/viniciuscarvalho/.REDACTED.jsonl
 Continue the conversation from where it left off without asking the user any further questions. Resume directly — do not acknowledge the summary, do not recap what was happening, do not preface with "I'll continue" or similar. Pick up the last task as if the break never happened.
+
+---
+
+O paywall do Revenue, não esta pegando a localization quando é trocado o idioma, sendo que o modo default no dashboard está como português, está correto no app, porém continua não apresentando o idioma correto no Paywall
+
+---
+
+[Image: source: REDACTED de Tela 2026-03-15 às 22.47.14.png]
+
+---
+
+Continua aparecendo em inglês no app, mesmo no dashboard estando configurado, // Verificar se o SDK respeita o environment lendo o locale internamente
+  // Alternativa: usar o locale do sistema + aceitar que o paywall segue o idioma do  iOS
