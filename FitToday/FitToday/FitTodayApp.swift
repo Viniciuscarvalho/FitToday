@@ -27,6 +27,7 @@ struct FitTodayApp: App {
         Purchases.logLevel = .debug
         #endif
         Purchases.configure(withAPIKey: "appl_uWXYSmZqnPusuYSlosBGtGAUCOU")
+        syncRevenueCatLocale()
         #if DEBUG
         Task.detached {
             do {
@@ -115,6 +116,18 @@ struct FitTodayApp: App {
                 }
             }
         }
+        .onChange(of: LocalizationManager.shared.selectedLanguage) { _, _ in
+            syncRevenueCatLocale()
+        }
+    }
+
+    // MARK: - RevenueCat Locale Sync
+
+    /// Syncs the app's selected language with RevenueCat's UI locale override
+    /// so PaywallView renders in the same language as the rest of the app.
+    private func syncRevenueCatLocale() {
+        let language = LocalizationManager.shared.selectedLanguage
+        Purchases.shared.overridePreferredUILocale(language.revenueCatLocale)
     }
 
     // MARK: - Offline Sync Queue Processing

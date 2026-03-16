@@ -34,6 +34,14 @@ final class LocalizationManager {
             case .portuguese: return "🇧🇷"
             }
         }
+
+        /// Locale identifier in ICU format expected by RevenueCat (e.g. "pt_BR").
+        var revenueCatLocale: String? {
+            switch self {
+            case .english: return nil   // nil = use system default
+            case .portuguese: return "pt_BR"
+            }
+        }
     }
 
     /// Currently selected language.
