@@ -3,42 +3,31 @@
   "checkpoint_id": "f4473875393c",
   "session_id": "b638345d-bb24-4c90-9c2f-3a986a27a934",
   "strategy": "manual-commit",
-  "created_at": "2026-03-17T23:16:16.316627Z",
+  "created_at": "2026-03-17T23:29:30.955845Z",
   "branch": "feat/public-profile-badges",
-  "checkpoints_count": 2,
+  "checkpoints_count": 1,
   "files_touched": [
-    "FitToday/.claude/logs/build_20260317_195906.log",
-    "FitToday/.claude/logs/build_20260317_200038.log",
-    "FitToday/.claude/logs/build_20260317_200154.log",
-    "FitToday/.claude/logs/build_20260317_200414.log",
-    "FitToday/.claude/logs/build_20260317_200539.log",
-    "FitToday/.claude/logs/build_20260317_200550.log",
-    "FitToday/.claude/logs/build_20260317_200600.log",
-    "FitToday/.claude/logs/build_20260317_201219.log",
-    "FitToday/FitToday/Resources/en.lproj/Localizable.strings",
-    "FitToday/FitToday/Resources/pt-BR.lproj/Localizable.strings",
-    "ops/sessions/20260317-231455.json",
-    "ops/sessions/20260317-231559.json"
+    "ops/sessions/20260317-232922.json"
   ],
   "agent": "Claude Code",
-  "transcript_identifier_at_start": "45363d89-4d31-469d-9bca-592f0c5dd1a1",
-  "checkpoint_transcript_start": 434,
-  "transcript_lines_at_start": 434,
+  "transcript_identifier_at_start": "16692deb-1224-42bd-93f2-44629a429b79",
+  "checkpoint_transcript_start": 688,
+  "transcript_lines_at_start": 688,
   "token_usage": {
-    "input_tokens": 57,
-    "cache_creation_tokens": 20261,
-    "cache_read_tokens": 5747887,
-    "output_tokens": 8506,
-    "api_call_count": 49
+    "input_tokens": 9,
+    "cache_creation_tokens": 5595,
+    "cache_read_tokens": 909695,
+    "output_tokens": 2148,
+    "api_call_count": 7
   },
   "initial_attribution": {
-    "calculated_at": "2026-03-17T23:16:15.704361Z",
-    "agent_lines": 74,
-    "human_added": 202,
-    "human_modified": 2,
+    "calculated_at": "2026-03-17T23:29:30.371101Z",
+    "agent_lines": 0,
+    "human_added": 101,
+    "human_modified": 1,
     "human_removed": 0,
-    "total_committed": 278,
-    "agent_percentage": 26.618705035971225
+    "total_committed": 102,
+    "agent_percentage": 0
   },
   "transcript_path": ".claude/projects/-Users-viniciuscarvalho-Documents-FitToday/b638345d-bb24-4c90-9c2f-3a986a27a934.jsonl"
 }

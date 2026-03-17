@@ -300,3 +300,7 @@ Read the output file to retrieve the result: REDACTED.output
 <summary>Background command "xcodebuild -project FitToday.xcodeproj -scheme FitToday -destination "platform=iOS Simulator,name=iPhone 17 Pro,OS=26.1" build &gt; /tmp/xcodebuild.log 2&gt;&amp;1; echo "EXIT: $?" 2&gt;&gt; '/Users/viniciuscarvalho/Documents/FitToday/FitToday/.claude/logs/build_20260317_200600.log'" completed (exit code 0)</summary>
 </task-notification>
 Read the output file to retrieve the result: REDACTED.output
+
+---
+
+Crie o PR com essa modificação
