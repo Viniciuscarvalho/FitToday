@@ -908,3 +908,26 @@ O paywall do Revenue, não esta pegando a localization quando é trocado o idiom
 
 Continua aparecendo em inglês no app, mesmo no dashboard estando configurado, // Verificar se o SDK respeita o environment lendo o locale internamente
   // Alternativa: usar o locale do sistema + aceitar que o paywall segue o idioma do  iOS
+
+---
+
+<task-notification>
+<task-id>bzivnat37</task-id>
+<tool-use-id>toolu_01LxurP9uqSXyWLvP4ELth47</tool-use-id>
+<output-file>REDACTED.output</output-file>
+<status>completed</status>
+<summary>Background command "Find RevenueCat source files" completed (exit code 0)</summary>
+</task-notification>
+Read the output file to retrieve the result: REDACTED.output
+
+---
+
+Use o swift-code-reviewer para fazer a revisão do meu PR e trazer o status de saúde
+
+---
+
+Utilizando a skill de swift-code-reviewer, ele não está mostrando do report corretamente, corrija para categorizar e utilizar a skill corretamente
+
+---
+
+Faça as correções desses pontos para poder ajustar e subir o PR corretamente
