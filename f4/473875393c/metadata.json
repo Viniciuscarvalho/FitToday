@@ -1,0 +1,26 @@
+{
+  "cli_version": "0.4.4",
+  "checkpoint_id": "f4473875393c",
+  "strategy": "manual-commit",
+  "branch": "feat/revenue-cat-integration",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "ops/sessions/20260317-221657.json"
+  ],
+  "sessions": [
+    {
+      "metadata": "/f4/473875393c/0/metadata.json",
+      "transcript": "/f4/473875393c/0/full.jsonl",
+      "context": "/f4/473875393c/0/context.md",
+      "content_hash": "/f4/473875393c/0/content_hash.txt",
+      "prompt": "/f4/473875393c/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 4,
+    "cache_creation_tokens": 33264,
+    "cache_read_tokens": 33058,
+    "output_tokens": 184,
+    "api_call_count": 2
+  }
+}
