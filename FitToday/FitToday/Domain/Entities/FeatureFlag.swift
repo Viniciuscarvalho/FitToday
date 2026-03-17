@@ -48,6 +48,9 @@ enum FeatureFlagKey: String, CaseIterable, Sendable {
     /// Enables the league ranking system (Bronze → Legend).
     case leaguesEnabled = "leagues_enabled"
 
+    /// Enables public profile badges (achievements/gamification).
+    case publicProfileBadgesEnabled = "public_profile_badges_enabled"
+
     // MARK: - Health & Sync
 
     /// Enables Apple Health read/write integration.
