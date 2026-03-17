@@ -45,12 +45,7 @@ final class LocalizationManager {
     }
 
     /// Currently selected language.
-    private(set) var selectedLanguage: Language {
-        didSet {
-            UserDefaults.standard.set(selectedLanguage.rawValue, forKey: "app_language")
-            updateBundle()
-        }
-    }
+    private(set) var selectedLanguage: Language
 
     /// The bundle to use for localization (enables runtime switching)
     private(set) var currentBundle: Bundle = .main
@@ -61,13 +56,8 @@ final class LocalizationManager {
            let language = Language(rawValue: savedLanguage) {
             self.selectedLanguage = language
         } else {
-            // Default to device language or English
             let deviceLanguage = Locale.current.language.languageCode?.identifier ?? "en"
-            if deviceLanguage.hasPrefix("pt") {
-                self.selectedLanguage = .portuguese
-            } else {
-                self.selectedLanguage = .english
-            }
+            self.selectedLanguage = deviceLanguage.hasPrefix("pt") ? .portuguese : .english
         }
         updateBundle()
     }
@@ -75,6 +65,8 @@ final class LocalizationManager {
     /// Changes the app language with immediate effect.
     func setLanguage(_ language: Language) {
         selectedLanguage = language
+        UserDefaults.standard.set(language.rawValue, forKey: "app_language")
+        updateBundle()
     }
 
     /// Updates the bundle to match the selected language.

@@ -571,7 +571,7 @@ struct ProfileProView: View {
                     var streak = 1
                     var currentDate = mostRecent
                     for date in sortedDates.dropFirst() {
-                        let expected = calendar.date(byAdding: .day, value: -1, to: currentDate)!
+                        guard let expected = calendar.date(byAdding: .day, value: -1, to: currentDate) else { break }
                         if date == expected {
                             streak += 1
                             currentDate = date

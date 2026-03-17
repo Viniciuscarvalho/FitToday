@@ -36,7 +36,7 @@ protocol RevenueCatProviding: Sendable {
 
 // MARK: - Production Provider
 
-final class DefaultRevenueCatProvider: RevenueCatProviding {
+final class DefaultRevenueCatProvider: RevenueCatProviding, @unchecked Sendable {
     func customerInfo() async throws -> RCEntitlementSnapshot {
         let info = try await Purchases.shared.customerInfo()
         return RCEntitlementSnapshot(from: info)
@@ -45,7 +45,7 @@ final class DefaultRevenueCatProvider: RevenueCatProviding {
 
 // MARK: - Repository
 
-final class RevenueCatEntitlementRepository: EntitlementRepository {
+final class RevenueCatEntitlementRepository: EntitlementRepository, @unchecked Sendable {
 
     private let provider: RevenueCatProviding
 
@@ -60,7 +60,7 @@ final class RevenueCatEntitlementRepository: EntitlementRepository {
 
     func entitlementStream() -> AsyncStream<ProEntitlement> {
         AsyncStream { continuation in
-            Task {
+            let task = Task {
                 while !Task.isCancelled {
                     if let snapshot = try? await provider.customerInfo() {
                         continuation.yield(map(snapshot))
@@ -69,6 +69,7 @@ final class RevenueCatEntitlementRepository: EntitlementRepository {
                 }
                 continuation.finish()
             }
+            continuation.onTermination = { @Sendable _ in task.cancel() }
         }
     }
 
