@@ -14,8 +14,7 @@ import Foundation
 struct CMSTrainerListResponse: Codable, Sendable {
     let trainers: [CMSTrainer]
     let total: Int?
-    let limit: Int?
-    let offset: Int?
+    let hasMore: Bool?
 }
 
 // MARK: - Trainer Count Response
@@ -24,13 +23,29 @@ struct CMSTrainerCountResponse: Codable, Sendable {
     let count: Int
 }
 
+// MARK: - CMS Trainer Profile Location
+
+struct CMSTrainerLocation: Codable, Sendable {
+    let city: String?
+    let state: String?
+}
+
 // MARK: - CMS Trainer Profile (nested object in API response)
 
 struct CMSTrainerProfile: Codable, Sendable {
     let bio: String?
-    let specializations: [String]?
-    let city: String?
-    let maxStudents: Int?
+    let specialties: [String]?
+    let certifications: [String]?
+    let experience: Int?
+    let location: CMSTrainerLocation?
+}
+
+// MARK: - CMS Trainer Stats
+
+struct CMSTrainerStats: Codable, Sendable {
+    let rating: Double?
+    let totalReviews: Int?
+    let totalStudents: Int?
 }
 
 // MARK: - CMS Trainer DTO
@@ -41,18 +56,19 @@ struct CMSTrainer: Codable, Sendable, Identifiable {
     let email: String?
     let photoURL: String?
     let profile: CMSTrainerProfile?
+    let stats: CMSTrainerStats?
     let isActive: Bool?
     let inviteCode: String?
-    let currentStudentCount: Int?
-    let rating: Double?
-    let reviewCount: Int?
     let createdAt: Date?
 
-    // Convenience accessors for nested profile fields
+    // Convenience accessors for nested fields
     var bio: String? { profile?.bio }
-    var specializations: [String] { profile?.specializations ?? [] }
-    var city: String? { profile?.city }
-    var maxStudents: Int? { profile?.maxStudents }
+    var specializations: [String] { profile?.specialties ?? [] }
+    var city: String? { profile?.location?.city }
+    var rating: Double? { stats?.rating }
+    var reviewCount: Int? { stats?.totalReviews }
+    var currentStudentCount: Int? { stats?.totalStudents }
+    var maxStudents: Int? { nil }
 }
 
 // MARK: - Trainer Review List Response
