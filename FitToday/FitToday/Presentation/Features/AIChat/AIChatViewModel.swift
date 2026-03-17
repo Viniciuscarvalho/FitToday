@@ -137,7 +137,11 @@ final class AIChatViewModel: ErrorPresenting {
 
             do {
                 let isPremium = (try? await featureGating?.currentEntitlement())?.isPro ?? false
-                let response = try await chatService!.sendMessage(
+                guard let service = chatService else {
+                    isLoading = false
+                    return
+                }
+                let response = try await service.sendMessage(
                     text,
                     history: messages,
                     isPremium: isPremium

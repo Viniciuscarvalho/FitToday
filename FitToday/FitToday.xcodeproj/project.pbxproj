@@ -16,6 +16,9 @@
 		EA07E6C52F1A80EB00B08007 /* FirebaseFunctions in Frameworks */ = {isa = PBXBuildFile; productRef = EA07E6C42F1A80EB00B08007 /* FirebaseFunctions */; };
 		EA1A1A0D2F1B000000B08007 /* FitTodayWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = EA1A1A012F1B000000B08007 /* FitTodayWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		EA5DDB022F0AEA4D005B7F4E /* Swinject in Frameworks */ = {isa = PBXBuildFile; productRef = EA5DDB012F0AEA4D005B7F4E /* Swinject */; };
+		EAE695E92F66310000B582F5 /* ReceiptParser in Frameworks */ = {isa = PBXBuildFile; productRef = EAE695E82F66310000B582F5 /* ReceiptParser */; };
+		EAE695EB2F66310000B582F5 /* RevenueCat in Frameworks */ = {isa = PBXBuildFile; productRef = EAE695EA2F66310000B582F5 /* RevenueCat */; };
+		EAE695ED2F66310000B582F5 /* RevenueCatUI in Frameworks */ = {isa = PBXBuildFile; productRef = EAE695EC2F66310000B582F5 /* RevenueCatUI */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -98,11 +101,14 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				EAE695E92F66310000B582F5 /* ReceiptParser in Frameworks */,
 				EA07E6BB2F1A80EB00B08007 /* FirebaseDatabase in Frameworks */,
+				EAE695EB2F66310000B582F5 /* RevenueCat in Frameworks */,
+				EAE695ED2F66310000B582F5 /* RevenueCatUI in Frameworks */,
 				EA07E6B92F1A80EB00B08007 /* FirebaseAnalytics in Frameworks */,
 				EA07E6BF2F1A80EB00B08007 /* FirebaseAuth in Frameworks */,
 				EA07E6C12F1A80EB00B08007 /* FirebaseFirestore in Frameworks */,
-				EA07E6C32F1A80EB00B08007 /* FirebaseStorage in Frameworks */,
+					EA07E6C32F1A80EB00B08007 /* FirebaseStorage in Frameworks */,
 				EA07E6C52F1A80EB00B08007 /* FirebaseFunctions in Frameworks */,
 				EA5DDB022F0AEA4D005B7F4E /* Swinject in Frameworks */,
 				EA07E6BD2F1A80EB00B08007 /* FirebaseRemoteConfig in Frameworks */,
@@ -208,7 +214,10 @@
 				EA07E6C02F1A80EB00B08007 /* FirebaseFirestore */,
 				EA07E6C22F1A80EB00B08007 /* FirebaseStorage */,
 				EA07E6C42F1A80EB00B08007 /* FirebaseFunctions */,
-			);
+				EAE695E82F66310000B582F5 /* ReceiptParser */,
+				EAE695EA2F66310000B582F5 /* RevenueCat */,
+				EAE695EC2F66310000B582F5 /* RevenueCatUI */,
+				);
 			productName = FitToday;
 			productReference = EAF534E72F09A1AD00B64D8D /* FitToday.app */;
 			productType = "com.apple.product-type.application";
@@ -298,6 +307,7 @@
 			packageReferences = (
 				EA5DDB002F0AEA4D005B7F4E /* XCRemoteSwiftPackageReference "Swinject" */,
 				EA07E6B72F1A80EB00B08007 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				EAE695E72F66310000B582F5 /* XCRemoteSwiftPackageReference "purchases-ios-spm" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = EAF534E82F09A1AD00B64D8D /* Products */;
@@ -816,6 +826,14 @@
 				minimumVersion = 2.10.0;
 			};
 		};
+		EAE695E72F66310000B582F5 /* XCRemoteSwiftPackageReference "purchases-ios-spm" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/RevenueCat/purchases-ios-spm.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.64.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -858,6 +876,21 @@
 			isa = XCSwiftPackageProductDependency;
 			package = EA5DDB002F0AEA4D005B7F4E /* XCRemoteSwiftPackageReference "Swinject" */;
 			productName = Swinject;
+		};
+		EAE695E82F66310000B582F5 /* ReceiptParser */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = EAE695E72F66310000B582F5 /* XCRemoteSwiftPackageReference "purchases-ios-spm" */;
+			productName = ReceiptParser;
+		};
+		EAE695EA2F66310000B582F5 /* RevenueCat */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = EAE695E72F66310000B582F5 /* XCRemoteSwiftPackageReference "purchases-ios-spm" */;
+			productName = RevenueCat;
+		};
+		EAE695EC2F66310000B582F5 /* RevenueCatUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = EAE695E72F66310000B582F5 /* XCRemoteSwiftPackageReference "purchases-ios-spm" */;
+			productName = RevenueCatUI;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

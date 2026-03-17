@@ -34,15 +34,18 @@ final class LocalizationManager {
             case .portuguese: return "🇧🇷"
             }
         }
+
+        /// Locale identifier in ICU format expected by RevenueCat (e.g. "pt_BR").
+        var revenueCatLocale: String? {
+            switch self {
+            case .english: return nil   // nil = use system default
+            case .portuguese: return "pt_BR"
+            }
+        }
     }
 
     /// Currently selected language.
-    private(set) var selectedLanguage: Language {
-        didSet {
-            UserDefaults.standard.set(selectedLanguage.rawValue, forKey: "app_language")
-            updateBundle()
-        }
-    }
+    private(set) var selectedLanguage: Language
 
     /// The bundle to use for localization (enables runtime switching)
     private(set) var currentBundle: Bundle = .main
@@ -53,13 +56,8 @@ final class LocalizationManager {
            let language = Language(rawValue: savedLanguage) {
             self.selectedLanguage = language
         } else {
-            // Default to device language or English
             let deviceLanguage = Locale.current.language.languageCode?.identifier ?? "en"
-            if deviceLanguage.hasPrefix("pt") {
-                self.selectedLanguage = .portuguese
-            } else {
-                self.selectedLanguage = .english
-            }
+            self.selectedLanguage = deviceLanguage.hasPrefix("pt") ? .portuguese : .english
         }
         updateBundle()
     }
@@ -67,6 +65,8 @@ final class LocalizationManager {
     /// Changes the app language with immediate effect.
     func setLanguage(_ language: Language) {
         selectedLanguage = language
+        UserDefaults.standard.set(language.rawValue, forKey: "app_language")
+        updateBundle()
     }
 
     /// Updates the bundle to match the selected language.
@@ -94,11 +94,13 @@ final class LocalizationManager {
 // MARK: - Environment Key
 
 private struct LocalizationManagerKey: EnvironmentKey {
-    @MainActor static let defaultValue = LocalizationManager.shared
+    nonisolated static var defaultValue: LocalizationManager {
+        MainActor.assumeIsolated { LocalizationManager.shared }
+    }
 }
 
 extension EnvironmentValues {
-    @MainActor var localizationManager: LocalizationManager {
+    var localizationManager: LocalizationManager {
         get { self[LocalizationManagerKey.self] }
         set { self[LocalizationManagerKey.self] = newValue }
     }

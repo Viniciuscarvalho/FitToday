@@ -109,23 +109,16 @@ struct TabRootView: View {
         case .workoutSummary:
             WorkoutCompletionView()
         case .paywall:
-            if let repo = resolver.resolve(EntitlementRepository.self) as? StoreKitEntitlementRepository {
-                OptimizedPaywallView(storeService: repo.service) {
-                    // On purchase success, generate workout
-                    if let planId = sessionStore.plan?.id {
-                        router.pop(on: .home) // Pop paywall
-                        router.push(.workoutPlan(planId), on: .home)
-                    } else {
-                        router.pop(on: .home)
-                    }
-                } onDismiss: {
+            OptimizedPaywallView {
+                // On purchase success, generate workout
+                if let planId = sessionStore.plan?.id {
+                    router.pop(on: .home) // Pop paywall
+                    router.push(.workoutPlan(planId), on: .home)
+                } else {
                     router.pop(on: .home)
                 }
-            } else {
-                PlaceholderView(
-                    title: "Paywall Pro",
-                    message: "Erro ao carregar paywall."
-                )
+            } onDismiss: {
+                router.pop(on: .home)
             }
         case .programDetail(let programId):
             ProgramDetailView(programId: programId, resolver: resolver)
@@ -202,6 +195,11 @@ struct TabRootView: View {
                     message: "Erro ao carregar o feed."
                 )
             }
+        case .league:
+            LeagueView(resolver: resolver)
+        case .leagueHistory:
+            let viewModel = LeagueViewModel(resolver: resolver)
+            LeagueHistoryView(viewModel: viewModel)
         }
     }
 }

@@ -57,7 +57,7 @@ struct AppContainer {
         container.register(StoreKitService.self) { _ in storeKitService }
             .inObjectScope(.container)
         
-        let entitlementRepository = StoreKitEntitlementRepository(modelContainer: modelContainer, storeKitService: storeKitService)
+        let entitlementRepository = RevenueCatEntitlementRepository()
         container.register(EntitlementRepository.self) { _ in entitlementRepository }
             .inObjectScope(.container)
         
@@ -648,6 +648,41 @@ struct AppContainer {
         }.inObjectScope(.container)
 
         // ========== END GAMIFICATION ==========
+
+        // ========== LEAGUES (PRO-91) ==========
+
+        container.register(FirebaseLeagueService.self) { _ in FirebaseLeagueService() }
+            .inObjectScope(.container)
+
+        container.register(LeagueRepository.self) { resolver in
+            FirebaseLeagueRepository(
+                service: resolver.resolve(FirebaseLeagueService.self)!,
+                authService: resolver.resolve(FirebaseAuthService.self)!
+            )
+        }
+        .inObjectScope(.container)
+
+        container.register(GetCurrentLeagueUseCase.self) { resolver in
+            GetCurrentLeagueUseCase(
+                repository: resolver.resolve(LeagueRepository.self)!,
+                featureFlags: resolver.resolve(FeatureFlagChecking.self)!
+            )
+        }
+
+        container.register(ObserveLeagueUseCase.self) { resolver in
+            ObserveLeagueUseCase(
+                repository: resolver.resolve(LeagueRepository.self)!
+            )
+        }
+
+        container.register(GetLeagueHistoryUseCase.self) { resolver in
+            GetLeagueHistoryUseCase(
+                repository: resolver.resolve(LeagueRepository.self)!,
+                featureFlags: resolver.resolve(FeatureFlagChecking.self)!
+            )
+        }
+
+        // ========== END LEAGUES ==========
 
         // ========== SOCIAL FEED (PRO-89) ==========
 

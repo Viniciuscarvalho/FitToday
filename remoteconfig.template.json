@@ -70,6 +70,13 @@
           },
           "description": "Enables XP/Level gamification system (PRO-90)",
           "valueType": "BOOLEAN"
+        },
+        "leagues_enabled": {
+          "defaultValue": {
+            "value": "false"
+          },
+          "description": "Enables league ranking system with Bronze to Legend tiers (PRO-91)",
+          "valueType": "BOOLEAN"
         }
       }
     },

@@ -6,6 +6,7 @@
 //
 
 import FirebaseCore
+import RevenueCat
 import SwiftData
 import SwiftUI
 import Swinject
@@ -21,12 +22,20 @@ struct FitTodayApp: App {
     @Environment(\.scenePhase) private var scenePhase
 
     init() {
+        // Configure RevenueCat
+        #if DEBUG
+        Purchases.logLevel = .debug
+        #endif
+        Purchases.configure(withAPIKey: "appl_uWXYSmZqnPusuYSlosBGtGAUCOU")
+
         // Configure Firebase
         FirebaseApp.configure()
 
         let container = AppContainer.build()
         self.appContainer = container
         sessionStore = WorkoutSessionStore(resolver: container.container)
+
+        syncRevenueCatLocale()
         
         // Configurar aparência global para tema escuro
         configureGlobalAppearance()
@@ -92,6 +101,18 @@ struct FitTodayApp: App {
                 }
             }
         }
+        .onChange(of: LocalizationManager.shared.selectedLanguage) { _, _ in
+            syncRevenueCatLocale()
+        }
+    }
+
+    // MARK: - RevenueCat Locale Sync
+
+    /// Syncs the app's selected language with RevenueCat's UI locale override
+    /// so PaywallView renders in the same language as the rest of the app.
+    private func syncRevenueCatLocale() {
+        let language = LocalizationManager.shared.selectedLanguage
+        Purchases.shared.overridePreferredUILocale(language.revenueCatLocale)
     }
 
     // MARK: - Offline Sync Queue Processing

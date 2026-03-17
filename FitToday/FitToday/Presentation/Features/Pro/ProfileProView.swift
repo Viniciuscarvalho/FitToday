@@ -5,8 +5,9 @@
 //  Redesigned on 23/01/26 - New Settings layout with Premium and Apple Health
 //
 
-import SwiftUI
+import RevenueCat
 import SwiftData
+import SwiftUI
 import Swinject
 
 struct ProfileProView: View {
@@ -33,9 +34,6 @@ struct ProfileProView: View {
         resolver.resolve(EntitlementRepository.self)
     }
 
-    private var storeKitRepository: StoreKitEntitlementRepository? {
-        resolver.resolve(EntitlementRepository.self) as? StoreKitEntitlementRepository
-    }
 
     var body: some View {
         ScrollView {
@@ -540,15 +538,12 @@ struct ProfileProView: View {
 
     @ViewBuilder
     private var paywallSheet: some View {
-        if let repo = storeKitRepository {
-            OptimizedPaywallView(
-                storeService: repo.service,
-                onPurchaseSuccess: {
-                    Task { await loadEntitlement() }
-                },
-                onDismiss: {}
-            )
-        }
+        OptimizedPaywallView(
+            onPurchaseSuccess: {
+                Task { await loadEntitlement() }
+            },
+            onDismiss: {}
+        )
     }
 
     // MARK: - Actions
@@ -576,7 +571,7 @@ struct ProfileProView: View {
                     var streak = 1
                     var currentDate = mostRecent
                     for date in sortedDates.dropFirst() {
-                        let expected = calendar.date(byAdding: .day, value: -1, to: currentDate)!
+                        guard let expected = calendar.date(byAdding: .day, value: -1, to: currentDate) else { break }
                         if date == expected {
                             streak += 1
                             currentDate = date
@@ -620,12 +615,14 @@ struct ProfileProView: View {
     }
 
     private func restorePurchases() async {
-        guard let repo = storeKitRepository else { return }
-        let restored = await repo.service.restorePurchases()
-        if restored {
+        do {
+            let info = try await Purchases.shared.restorePurchases()
             await loadEntitlement()
-            restoreMessage = "settings.restore_success".localized
-        } else {
+            let hasActive = info.entitlements.all.values.contains { $0.isActive }
+            restoreMessage = hasActive
+                ? "settings.restore_success".localized
+                : "settings.restore_not_found".localized
+        } catch {
             restoreMessage = "settings.restore_not_found".localized
         }
         showingRestoreAlert = true
