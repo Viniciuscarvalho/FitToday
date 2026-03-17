@@ -304,3 +304,12 @@ Read the output file to retrieve the result: REDACTED.output
 ---
 
 Crie o PR com essa modificação
+
+---
+
+Duas chamadas que estão com erro, na tentativa de conexão com o personal, [CMSTrainerService] GET https://web-cms-pink.vercel.app/api/trainers?limit=20&offset=0
+[PersonalTrainerService] Parse error: The data couldn’t be read because it is missing.
+[CMSTrainerService] Status: 200
+[CMSTrainerService] Status: 200
+[RemoteConfig] personal_trainer_enabled = true, source: remote
+[PersonalTrainerViewModel] Error requesting connection: repositoryFailure(reason: "The data couldn’t be read because it is missing.")
