@@ -1060,3 +1060,7 @@
 // Home card
 "league.home_card.your_rank" = "Posição #%d";
 "league.home_card.view" = "Ver Liga";
+
+// Paywall
+"paywall.error.load_failed" = "Não foi possível carregar as opções de assinatura. Tente novamente.";
+"paywall.error.retry" = "Tentar Novamente";

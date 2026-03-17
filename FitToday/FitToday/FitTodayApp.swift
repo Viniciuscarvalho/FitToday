@@ -28,22 +28,6 @@ struct FitTodayApp: App {
         #endif
         Purchases.configure(withAPIKey: "appl_uWXYSmZqnPusuYSlosBGtGAUCOU")
         syncRevenueCatLocale()
-        #if DEBUG
-        Task.detached {
-            do {
-                let offerings = try await Purchases.shared.offerings()
-                print("[RevenueCat] ✅ Offerings carregados: \(offerings.all.keys.joined(separator: ", "))")
-                print("[RevenueCat] ✅ Current offering: \(offerings.current?.identifier ?? "nil")")
-                if let fittoday = offerings["Fittoday"] {
-                    print("[RevenueCat] ✅ Offering 'Fittoday' encontrado com \(fittoday.availablePackages.count) packages")
-                } else {
-                    print("[RevenueCat] ⚠️ Offering 'Fittoday' NÃO encontrado")
-                }
-            } catch {
-                print("[RevenueCat] ❌ Erro ao carregar offerings: \(error)")
-            }
-        }
-        #endif
 
         // Configure Firebase
         FirebaseApp.configure()

@@ -94,11 +94,13 @@ final class LocalizationManager {
 // MARK: - Environment Key
 
 private struct LocalizationManagerKey: EnvironmentKey {
-    @MainActor static let defaultValue = LocalizationManager.shared
+    nonisolated static var defaultValue: LocalizationManager {
+        MainActor.assumeIsolated { LocalizationManager.shared }
+    }
 }
 
 extension EnvironmentValues {
-    @MainActor var localizationManager: LocalizationManager {
+    var localizationManager: LocalizationManager {
         get { self[LocalizationManagerKey.self] }
         set { self[LocalizationManagerKey.self] = newValue }
     }
