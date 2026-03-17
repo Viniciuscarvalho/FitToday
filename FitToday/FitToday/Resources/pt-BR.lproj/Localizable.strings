@@ -1064,3 +1064,40 @@
 // Paywall
 "paywall.error.load_failed" = "Não foi possível carregar as opções de assinatura. Tente novamente.";
 "paywall.error.retry" = "Tentar Novamente";
+
+// MARK: - Badges (PRO-92)
+
+// Rarity
+"badge.rarity.common" = "Comum";
+"badge.rarity.rare" = "Raro";
+"badge.rarity.epic" = "Épico";
+"badge.rarity.legendary" = "Lendário";
+
+// Badge types
+"badge.type.firstWorkout" = "Primeiro Treino";
+"badge.type.firstWorkout.description" = "Complete 1 treino";
+"badge.type.workouts50" = "50 Treinos";
+"badge.type.workouts50.description" = "Complete 50 treinos";
+"badge.type.workouts100" = "100 Treinos";
+"badge.type.workouts100.description" = "Complete 100 treinos";
+"badge.type.streak7" = "Sequência 7";
+"badge.type.streak7.description" = "Mantenha uma sequência de 7 dias";
+"badge.type.streak30" = "Sequência 30";
+"badge.type.streak30.description" = "Mantenha uma sequência de 30 dias";
+"badge.type.streak100" = "Sequência 100";
+"badge.type.streak100.description" = "Mantenha uma sequência de 100 dias";
+"badge.type.earlyBird" = "Madrugador";
+"badge.type.earlyBird.description" = "Complete 5 treinos antes das 7h";
+"badge.type.weekWarrior" = "Guerreiro da Semana";
+"badge.type.weekWarrior.description" = "Complete 7 treinos em uma única semana";
+"badge.type.monthlyConsistency" = "Consistência Mensal";
+"badge.type.monthlyConsistency.description" = "Treine todas as semanas por 4 semanas consecutivas";
+
+// Section & UI
+"badge.section.title" = "Conquistas";
+"badge.locked" = "Bloqueado";
+"badge.criteria.prefix" = "Como desbloquear:";
+"badge.unlocked_at" = "Desbloqueado em";
+"badge.public_toggle" = "Visível no perfil público";
+"badge.share" = "Compartilhar";
+"badge.share.text" = "Conquistei a medalha %@ (%@) no FitToday! 💪";
