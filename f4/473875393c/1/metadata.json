@@ -1,9 +1,11 @@
 {
   "cli_version": "0.4.4",
   "checkpoint_id": "f4473875393c",
+  "session_id": "b638345d-bb24-4c90-9c2f-3a986a27a934",
   "strategy": "manual-commit",
+  "created_at": "2026-03-17T22:48:27.374645Z",
   "branch": "feat/public-profile-badges",
-  "checkpoints_count": 3,
+  "checkpoints_count": 2,
   "files_touched": [
     ".claude/settings.local.json",
     "FitToday/FitToday/Data/DTOs/FBBadge.swift",
@@ -21,31 +23,25 @@
     "FitToday/FitTodayTests/Domain/Entities/BadgeTests.swift",
     "FitToday/FitTodayTests/Domain/UseCases/BadgeEvaluationUseCaseTests.swift",
     "FitToday/FitTodayTests/Mocks/MockBadgeRepository.swift",
-    "ops/sessions/20260317-221657.json",
     "ops/sessions/20260317-224242.json",
     "ops/sessions/20260317-224819.json"
   ],
-  "sessions": [
-    {
-      "metadata": "/f4/473875393c/0/metadata.json",
-      "transcript": "/f4/473875393c/0/full.jsonl",
-      "context": "/f4/473875393c/0/context.md",
-      "content_hash": "/f4/473875393c/0/content_hash.txt",
-      "prompt": "/f4/473875393c/0/prompt.txt"
-    },
-    {
-      "metadata": "/f4/473875393c/1/metadata.json",
-      "transcript": "/f4/473875393c/1/full.jsonl",
-      "context": "/f4/473875393c/1/context.md",
-      "content_hash": "/f4/473875393c/1/content_hash.txt",
-      "prompt": "/f4/473875393c/1/prompt.txt"
-    }
-  ],
+  "agent": "Claude Code",
   "token_usage": {
-    "input_tokens": 415,
-    "cache_creation_tokens": 141592,
-    "cache_read_tokens": 2848887,
-    "output_tokens": 19056,
-    "api_call_count": 42
-  }
+    "input_tokens": 411,
+    "cache_creation_tokens": 108328,
+    "cache_read_tokens": 2815829,
+    "output_tokens": 18872,
+    "api_call_count": 40
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-03-17T22:48:26.897227Z",
+    "agent_lines": 491,
+    "human_added": 430,
+    "human_modified": 52,
+    "human_removed": 0,
+    "total_committed": 973,
+    "agent_percentage": 50.46248715313464
+  },
+  "transcript_path": ".claude/projects/-Users-viniciuscarvalho-Documents-FitToday/b638345d-bb24-4c90-9c2f-3a986a27a934.jsonl"
 }

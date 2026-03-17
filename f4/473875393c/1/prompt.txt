@@ -1,0 +1,265 @@
+Implement the following plan:
+
+# PRO-92: Public Profile with Badges
+
+## Context
+
+User profiles lack visual recognition of achievements. Badges gamify milestones (workouts completed, streaks, consistency) and drive engagement. This feature adds a badge system to the profile tab, gated behind a Firebase Remote Config feature flag.
+
+**Linear**: PRO-92 | **Priority**: Urgent | **Estimate**: 3 points | **Branch**: `feat/public-profile-badges`
+
+---
+
+## Acceptance Criteria (from Linear)
+
+- [x] Grid 3x3 with badges
+- [x] Show rarity (colors)
+- [x] Tooltip with criteria
+- [x] Unlock animation
+- [x] Persist in Firestore
+- [x] Dynamic rarity (static for MVP, Cloud Function later)
+- [x] Privacy flag (isPublic)
+- [x] Sharing
+- [x] Feature flag in Remote Config
+
+---
+
+## Phase 1: Domain Layer — Badge Entity + Rarity
+
+### New file: `Domain/Entities/Badge.swift`
+
+**BadgeRarity** enum (follows `LeagueTier` pattern):
+
+- `common` (gray #6B7280), `rare` (blue #3B82F6), `epic` (purple #8B5CF6), `legendary` (gold #F59E0B)
+- Properties: `displayName` (localized), `color` (hex), `sortOrder`
+
+**BadgeType** enum (9 types for 3x3 grid):
+| Type | Criteria | Rarity |
+|------|----------|--------|
+| `firstWorkout` | Complete 1 workout | common |
+| `workouts50` | Complete 50 workouts | rare |
+| `workouts100` | Complete 100 workouts | epic |
+| `streak7` | 7-day streak | common |
+| `streak30` | 30-day streak | rare |
+| `streak100` | 100-day streak | legendary |
+| `earlyBird` | 5 workouts before 7 AM | rare |
+| `weekWarrior` | 7 workouts in a single week | epic |
+| `monthlyConsistency` | Train every week for 4 consecutive weeks | rare |
+
+Each has: `displayName`, `description` (criteria), `icon` (SF Symbol), `defaultRarity`
+
+> Note: "1 ton lifted" badge dropped — `CompletedExercise` lacks weight/reps data. "Challenge winner" deferred — requires leaderboard coupling.
+
+**Badge** struct:
+
+```swift
+struct Badge: Sendable, Identifiable, Codable, Equatable {
+    let id: String  // BadgeType.rawValue
+    let type: BadgeType
+    let rarity: BadgeRarity
+    let unlockedAt: Date?
+    let isPublic: Bool
+    var isUnlocked: Bool { unlockedAt != nil }
+}
+```
+
+### Test: `FitTodayTests/Domain/Entities/BadgeTests.swift`
+
+---
+
+## Phase 2: Feature Flag
+
+### Modify: `Domain/Entities/FeatureFlag.swift`
+
+Add under `// MARK: - Social Features`:
+
+```swift
+case publicProfileBadgesEnabled = "public_profile_badges_enabled"
+```
+
+- `displayName`: "Public Profile Badges"
+- `defaultValue`: `false` (unreleased)
+
+---
+
+## Phase 3: Repository Layer
+
+### New file: `Domain/Protocols/BadgeRepository.swift`
+
+```swift
+protocol BadgeRepository: Sendable {
+    func getUserBadges(userId: String) async throws -> [Badge]
+    func saveBadge(_ badge: Badge, userId: String) async throws
+    func updateBadgeVisibility(_ badgeId: String, isPublic: Bool, userId: String) async throws
+}
+```
+
+### New file: `Data/DTOs/FBBadge.swift`
+
+Firestore DTO with `toDomain()` / `fromDomain()` mappers.
+
+### New file: `Data/Repositories/FirebaseBadgeRepository.swift`
+
+- Firestore path: `users/{userId}/badges/{badgeType}`
+- Follows `FirebaseLeagueRepository` pattern (uses `FirebaseAuthService`)
+
+### New file: `FitTodayTests/Mocks/MockBadgeRepository.swift`
+
+Spy/stub mock following `MockLeagueRepository` pattern.
+
+### Modify: `Presentation/DI/AppContainer.swift`
+
+Register `BadgeRepository` and `BadgeEvaluationUseCase`.
+
+---
+
+## Phase 4: UseCase — Badge Evaluation
+
+### New file: `Domain/UseCases/BadgeEvaluationUseCase.swift`
+
+Dependencies: `BadgeRepository`, `WorkoutHistoryRepository`, `FeatureFlagChecking`
+
+**evaluate(userId:) -> [Badge]** (returns newly unlocked):
+
+1. Check feature flag → return `[]` if disabled
+2. Fetch existing badges from repository
+3. Fetch workout history via `historyRepository.listEntries()`
+4. Evaluate each `BadgeType` against history data
+5. Save newly unlocked badges
+6. Return new badges (for animation trigger)
+
+**Evaluation data sources:**
+
+- Workout count: `entries.count`
+- Streak: computed from sorted dates (reuse logic from `ProfileProView.loadProfileData`)
+- Early bird: `entries.filter { Calendar.current.component(.hour, from: $0.date) < 7 }.count >= 5`
+- Week warrior: group by ISO week, check any week with 7+ entries
+- Monthly consistency: 4 consecutive weeks each with >= 1 entry
+
+### Test: `FitTodayTests/Domain/UseCases/BadgeEvaluationUseCaseTests.swift`
+
+- Feature flag disabled → empty
+- First workout unlocked when count >= 1
+- Streak badges at correct thresholds
+- Already unlocked → not duplicated
+- Multiple badges unlocked in single evaluation
+
+---
+
+## Phase 5: Presentation
+
+### 5a. New: `Presentation/Features/Pro/Components/BadgeCardView.swift`
+
+- SF Symbol icon (grayscale if locked, rarity color if unlocked)
+- Badge name, rarity colored border
+- Lock overlay when locked
+
+### 5b. New: `Presentation/Features/Pro/Components/BadgesGridView.swift`
+
+- 3-column `LazyVGrid` with section header "Conquistas"
+- Accepts `[Badge]` + `onBadgeTap` closure
+
+### 5c. New: `Presentation/Features/Pro/Components/BadgeDetailSheet.swift`
+
+- Large icon, name, rarity label with color
+- Criteria description, unlock date
+- Share button (ImageRenderer → UIActivityViewController)
+- isPublic toggle → calls `updateBadgeVisibility`
+
+### 5d. New: `Presentation/Features/Pro/BadgesViewModel.swift`
+
+```swift
+@MainActor @Observable
+final class BadgesViewModel {
+    private(set) var badges: [Badge] = []
+    private(set) var isLoading = false
+    private(set) var newlyUnlockedBadges: [Badge] = []
+    var selectedBadge: Badge?
+}
+```
+
+### 5e. Modify: `Presentation/Features/Pro/ProfileProView.swift`
+
+- Add `@State private var isBadgesEnabled = false`
+- Add `@State private var badgesViewModel: BadgesViewModel?`
+- Insert `BadgesGridView` between `ProfileStatsRow` and `premiumCard` (behind flag)
+- Check flag in `.task`
+- Add `.sheet` for badge detail
+
+### 5f. Unlock Animation
+
+- Scale-from-zero + glow overlay when `newlyUnlockedBadges` is non-empty
+- Simple `withAnimation(.spring)` approach
+
+### Localization: Add to `Localizable.strings`
+
+- Badge rarity keys: `badge.rarity.common`, `.rare`, `.epic`, `.legendary`
+- Badge type keys: `badge.type.firstWorkout`, etc.
+- Section: `badge.section.title` = "Conquistas"
+- `badge.locked`, `badge.criteria.prefix`, `badge.unlocked_at`
+
+---
+
+## Files Summary
+
+### New Files (11)
+
+| File                                                              | Layer        |
+| ----------------------------------------------------------------- | ------------ |
+| `Domain/Entities/Badge.swift`                                     | Domain       |
+| `Domain/Protocols/BadgeRepository.swift`                          | Domain       |
+| `Domain/UseCases/BadgeEvaluationUseCase.swift`                    | Domain       |
+| `Data/DTOs/FBBadge.swift`                                         | Data         |
+| `Data/Repositories/FirebaseBadgeRepository.swift`                 | Data         |
+| `Presentation/Features/Pro/BadgesViewModel.swift`                 | Presentation |
+| `Presentation/Features/Pro/Components/BadgesGridView.swift`       | Presentation |
+| `Presentation/Features/Pro/Components/BadgeCardView.swift`        | Presentation |
+| `Presentation/Features/Pro/Components/BadgeDetailSheet.swift`     | Presentation |
+| `FitTodayTests/Domain/Entities/BadgeTests.swift`                  | Tests        |
+| `FitTodayTests/Domain/UseCases/BadgeEvaluationUseCaseTests.swift` | Tests        |
+
+### Modified Files (3)
+
+| File                                             | Change                             |
+| ------------------------------------------------ | ---------------------------------- |
+| `Domain/Entities/FeatureFlag.swift`              | Add `publicProfileBadgesEnabled`   |
+| `Presentation/Features/Pro/ProfileProView.swift` | Integrate BadgesGridView           |
+| `Presentation/DI/AppContainer.swift`             | Register BadgeRepository + UseCase |
+
+### Mock Files (1)
+
+| File                                            | Purpose     |
+| ----------------------------------------------- | ----------- |
+| `FitTodayTests/Mocks/MockBadgeRepository.swift` | Test double |
+
+---
+
+## Key Reference Files
+
+- `Domain/Entities/LeagueTier.swift` — pattern for rarity enum (colors, sortOrder)
+- `Data/Repositories/FirebaseLeagueRepository.swift` — pattern for Firestore repo
+- `Domain/Entities/HistoryModels.swift` — WorkoutHistoryEntry structure
+- `Domain/Entities/WorkoutRating.swift` — CompletedExercise (no weight data)
+- `Presentation/Features/Pro/ProfileProView.swift` — integration point
+- `Presentation/DI/AppContainer.swift` — DI registration pattern
+
+---
+
+## Verification
+
+1. **Build**: `mcp__xcodebuildmcp__build_sim_name_proj` — project compiles
+2. **Tests**: `mcp__xcodebuildmcp__test_sim_name_proj` — all tests pass, badge tests included
+3. **Feature flag off**: Badges grid hidden on profile
+4. **Feature flag on**: Badges grid visible, shows 9 badges (locked/unlocked)
+5. **Badge detail**: Tap badge → sheet with criteria, rarity, share, privacy toggle
+6. **Code review**: Run swift-reviewer agent
+7. **Commit & PR**: Conventional commit, PR to main
+
+
+If you need specific details from before exiting plan mode (like exact code snippets, error messages, or content you generated), read the full transcript at: /Users/viniciuscarvalho/.REDACTED.jsonl
+
+If this plan can be broken down into multiple independent tasks, consider using the TeamCreate tool to create a team and parallelize the work.
+
+---
+
+Continue de onde parou
