@@ -27,7 +27,6 @@ struct FitTodayApp: App {
         Purchases.logLevel = .debug
         #endif
         Purchases.configure(withAPIKey: "appl_uWXYSmZqnPusuYSlosBGtGAUCOU")
-        syncRevenueCatLocale()
 
         // Configure Firebase
         FirebaseApp.configure()
@@ -35,6 +34,8 @@ struct FitTodayApp: App {
         let container = AppContainer.build()
         self.appContainer = container
         sessionStore = WorkoutSessionStore(resolver: container.container)
+
+        syncRevenueCatLocale()
         
         // Configurar aparência global para tema escuro
         configureGlobalAppearance()
