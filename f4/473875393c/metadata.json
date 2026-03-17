@@ -5,25 +5,19 @@
   "branch": "feat/public-profile-badges",
   "checkpoints_count": 3,
   "files_touched": [
-    ".claude/settings.local.json",
-    "FitToday/FitToday/Data/DTOs/FBBadge.swift",
-    "FitToday/FitToday/Data/Repositories/FirebaseBadgeRepository.swift",
-    "FitToday/FitToday/Domain/Entities/Badge.swift",
-    "FitToday/FitToday/Domain/Entities/FeatureFlag.swift",
-    "FitToday/FitToday/Domain/Protocols/BadgeRepository.swift",
-    "FitToday/FitToday/Domain/UseCases/BadgeEvaluationUseCase.swift",
-    "FitToday/FitToday/Presentation/DI/AppContainer.swift",
-    "FitToday/FitToday/Presentation/Features/Pro/BadgesViewModel.swift",
-    "FitToday/FitToday/Presentation/Features/Pro/Components/BadgeCardView.swift",
-    "FitToday/FitToday/Presentation/Features/Pro/Components/BadgeDetailSheet.swift",
-    "FitToday/FitToday/Presentation/Features/Pro/Components/BadgesGridView.swift",
-    "FitToday/FitToday/Presentation/Features/Pro/ProfileProView.swift",
-    "FitToday/FitTodayTests/Domain/Entities/BadgeTests.swift",
-    "FitToday/FitTodayTests/Domain/UseCases/BadgeEvaluationUseCaseTests.swift",
-    "FitToday/FitTodayTests/Mocks/MockBadgeRepository.swift",
+    "FitToday/.claude/logs/build_20260317_195906.log",
+    "FitToday/.claude/logs/build_20260317_200038.log",
+    "FitToday/.claude/logs/build_20260317_200154.log",
+    "FitToday/.claude/logs/build_20260317_200414.log",
+    "FitToday/.claude/logs/build_20260317_200539.log",
+    "FitToday/.claude/logs/build_20260317_200550.log",
+    "FitToday/.claude/logs/build_20260317_200600.log",
+    "FitToday/.claude/logs/build_20260317_201219.log",
+    "FitToday/FitToday/Resources/en.lproj/Localizable.strings",
+    "FitToday/FitToday/Resources/pt-BR.lproj/Localizable.strings",
     "ops/sessions/20260317-221657.json",
-    "ops/sessions/20260317-224242.json",
-    "ops/sessions/20260317-224819.json"
+    "ops/sessions/20260317-231455.json",
+    "ops/sessions/20260317-231559.json"
   ],
   "sessions": [
     {
@@ -42,10 +36,10 @@
     }
   ],
   "token_usage": {
-    "input_tokens": 415,
-    "cache_creation_tokens": 141592,
-    "cache_read_tokens": 2848887,
-    "output_tokens": 19056,
-    "api_call_count": 42
+    "input_tokens": 61,
+    "cache_creation_tokens": 53525,
+    "cache_read_tokens": 5780945,
+    "output_tokens": 8690,
+    "api_call_count": 51
   }
 }
