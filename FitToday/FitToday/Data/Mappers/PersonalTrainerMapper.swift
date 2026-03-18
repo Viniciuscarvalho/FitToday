@@ -49,14 +49,14 @@ struct PersonalTrainerMapper {
     static func toRelationship(_ fb: FBTrainerStudent, id: String) -> TrainerStudentRelationship {
         TrainerStudentRelationship(
             id: id,
-            trainerId: fb.trainerId,
-            studentId: fb.studentId,
-            status: TrainerConnectionStatus(rawValue: fb.status) ?? .pending,
-            requestedBy: fb.requestedBy.flatMap { RequestedBy(rawValue: $0) } ?? .student,
-            requestedAt: fb.requestedAt?.dateValue() ?? Date(),
-            acceptedAt: fb.acceptedAt?.dateValue(),
-            subscriptionStatus: fb.subscriptionStatus.flatMap { TrainerSubscriptionStatus(rawValue: $0) } ?? .trial,
-            subscriptionExpiresAt: fb.subscriptionExpiresAt?.dateValue()
+            trainerId: fb.trainerId ?? "",
+            studentId: fb.studentId ?? "",
+            status: fb.status.flatMap { TrainerConnectionStatus(rawValue: $0) } ?? .pending,
+            requestedBy: fb.source.flatMap { RequestedBy(rawValue: $0) } ?? .student,
+            requestedAt: fb.createdAt?.dateValue() ?? Date(),
+            acceptedAt: fb.respondedAt?.dateValue(),
+            subscriptionStatus: .trial,
+            subscriptionExpiresAt: nil
         )
     }
 }

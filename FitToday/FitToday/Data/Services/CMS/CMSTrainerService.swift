@@ -240,16 +240,19 @@ actor CMSTrainerService {
         print("[CMSTrainerService] Status: \(httpResponse.statusCode)")
         #endif
 
+        #if DEBUG
+        if let json = String(data: data, encoding: .utf8) {
+            print("[CMSTrainerService] Raw response (\(httpResponse.statusCode)): \(json.prefix(1000))")
+        }
+        #endif
+
         switch httpResponse.statusCode {
         case 200...299:
             do {
                 return try decoder.decode(T.self, from: data)
             } catch {
                 #if DEBUG
-                print("[CMSTrainerService] Decode error: \(error)")
-                if let json = String(data: data, encoding: .utf8) {
-                    print("[CMSTrainerService] Response: \(json.prefix(500))")
-                }
+                print("[CMSTrainerService] Decode error for \(T.self): \(error)")
                 #endif
                 throw CMSServiceError.decodingFailed(error)
             }

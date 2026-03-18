@@ -100,12 +100,63 @@ struct CMSConnectionRequest: Codable, Sendable {
 
 // MARK: - Connection Response
 
-struct CMSConnectionResponse: Codable, Sendable {
+struct CMSConnectionResponse: Sendable {
     let id: String
     let trainerId: String?
     let studentId: String?
     let status: String?
     let createdAt: Date?
+}
+
+extension CMSConnectionResponse: Decodable {
+    private enum CodingKeys: String, CodingKey {
+        case id, trainerId, studentId, status, createdAt
+        case _id, connectionId
+        case connection, data
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+
+        // Helper to extract fields from a keyed container
+        func extract(from c: KeyedDecodingContainer<CodingKeys>) -> CMSConnectionResponse {
+            let resolvedId = (try? c.decodeIfPresent(String.self, forKey: .id))
+                ?? (try? c.decodeIfPresent(String.self, forKey: ._id))
+                ?? (try? c.decodeIfPresent(String.self, forKey: .connectionId))
+                ?? "unknown"
+            return CMSConnectionResponse(
+                id: resolvedId,
+                trainerId: try? c.decodeIfPresent(String.self, forKey: .trainerId),
+                studentId: try? c.decodeIfPresent(String.self, forKey: .studentId),
+                status: try? c.decodeIfPresent(String.self, forKey: .status),
+                createdAt: try? c.decodeIfPresent(Date.self, forKey: .createdAt)
+            )
+        }
+
+        // Try nested "connection" or "data" wrapper
+        if let nested = try? container.nestedContainer(keyedBy: CodingKeys.self, forKey: .connection) {
+            self = extract(from: nested)
+            return
+        }
+        if let nested = try? container.nestedContainer(keyedBy: CodingKeys.self, forKey: .data) {
+            self = extract(from: nested)
+            return
+        }
+
+        // Flat structure
+        self = extract(from: container)
+    }
+}
+
+extension CMSConnectionResponse: Encodable {
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(id, forKey: .id)
+        try container.encodeIfPresent(trainerId, forKey: .trainerId)
+        try container.encodeIfPresent(studentId, forKey: .studentId)
+        try container.encodeIfPresent(status, forKey: .status)
+        try container.encodeIfPresent(createdAt, forKey: .createdAt)
+    }
 }
 
 // MARK: - Connection Status Response

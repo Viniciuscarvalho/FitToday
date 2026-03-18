@@ -225,6 +225,94 @@ final class CMSConnectionModelTests: XCTestCase {
         XCTAssertEqual(review.rating, 4)
     }
 
+    // MARK: - CMSConnectionResponse Resilient Decoding
+
+    func test_decodeConnectionResponse_withUnderscoreId() throws {
+        let json = """
+        {
+          "_id": "conn-mongo-1",
+          "status": "pending"
+        }
+        """.data(using: .utf8)!
+
+        let response = try decoder.decode(CMSConnectionResponse.self, from: json)
+        XCTAssertEqual(response.id, "conn-mongo-1")
+        XCTAssertEqual(response.status, "pending")
+    }
+
+    func test_decodeConnectionResponse_withConnectionIdField() throws {
+        let json = """
+        {
+          "connectionId": "conn-alt-1",
+          "trainerId": "t1"
+        }
+        """.data(using: .utf8)!
+
+        let response = try decoder.decode(CMSConnectionResponse.self, from: json)
+        XCTAssertEqual(response.id, "conn-alt-1")
+        XCTAssertEqual(response.trainerId, "t1")
+    }
+
+    func test_decodeConnectionResponse_nestedInConnection() throws {
+        let json = """
+        {
+          "connection": {
+            "id": "conn-nested-1",
+            "status": "active",
+            "trainerId": "t3"
+          }
+        }
+        """.data(using: .utf8)!
+
+        let response = try decoder.decode(CMSConnectionResponse.self, from: json)
+        XCTAssertEqual(response.id, "conn-nested-1")
+        XCTAssertEqual(response.status, "active")
+        XCTAssertEqual(response.trainerId, "t3")
+    }
+
+    func test_decodeConnectionResponse_nestedInData() throws {
+        let json = """
+        {
+          "data": {
+            "id": "conn-data-1",
+            "studentId": "s5"
+          }
+        }
+        """.data(using: .utf8)!
+
+        let response = try decoder.decode(CMSConnectionResponse.self, from: json)
+        XCTAssertEqual(response.id, "conn-data-1")
+        XCTAssertEqual(response.studentId, "s5")
+    }
+
+    func test_decodeConnectionResponse_missingAllIds_fallsBackToUnknown() throws {
+        let json = """
+        {
+          "status": "pending",
+          "trainerId": "t1"
+        }
+        """.data(using: .utf8)!
+
+        let response = try decoder.decode(CMSConnectionResponse.self, from: json)
+        XCTAssertEqual(response.id, "unknown")
+        XCTAssertEqual(response.trainerId, "t1")
+    }
+
+    func test_decodeConnectionResponse_withExtraFieldsDoesNotFail() throws {
+        let json = """
+        {
+          "id": "conn-extra",
+          "status": "pending",
+          "unknownField": "ignored",
+          "anotherField": 123
+        }
+        """.data(using: .utf8)!
+
+        let response = try decoder.decode(CMSConnectionResponse.self, from: json)
+        XCTAssertEqual(response.id, "conn-extra")
+        XCTAssertEqual(response.status, "pending")
+    }
+
     // MARK: - CMSStudentRegistrationRequest (Encode)
 
     func test_encodeStudentRegistration_noFirebaseUid() throws {

@@ -56,34 +56,38 @@ struct FBPersonalTrainer: Codable {
 /// Firebase DTO for trainer-student relationship data.
 ///
 /// Matches Firestore collection: `/trainerStudents/{id}`
+///
+/// Actual Firestore document structure:
+/// ```
+/// {
+///   "trainerId": "...",
+///   "studentId": "...",
+///   "status": "pending|active|paused|cancelled",
+///   "source": "app_request",
+///   "message": String?,
+///   "createdAt": Timestamp,
+///   "updatedAt": Timestamp,
+///   "respondedAt": Timestamp?
+/// }
+/// ```
 struct FBTrainerStudent: Codable {
-    /// Document ID (populated by Firestore).
     @DocumentID var id: String?
 
-    /// The personal trainer's identifier.
-    var trainerId: String
+    var trainerId: String?
+    var studentId: String?
+    var status: String?
 
-    /// The student's identifier (app user).
-    var studentId: String
+    /// How the connection was initiated (e.g. "app_request").
+    var source: String?
 
-    /// Current status of the connection (pending, active, paused, cancelled).
-    var status: String
+    /// Optional message from the student.
+    var message: String?
 
-    /// Who initiated the request (student, trainer).
-    var requestedBy: String?
-
-    /// When the connection was requested.
-    @ServerTimestamp var requestedAt: Timestamp?
-
-    /// When the connection was accepted.
-    var acceptedAt: Timestamp?
-
-    /// Current subscription status (trial, active, expired).
-    var subscriptionStatus: String?
-
-    /// When the subscription expires.
-    var subscriptionExpiresAt: Timestamp?
-
-    /// When this relationship record was created.
     @ServerTimestamp var createdAt: Timestamp?
+
+    /// When the document was last updated.
+    @ServerTimestamp var updatedAt: Timestamp?
+
+    /// When the trainer responded (accepted/rejected).
+    var respondedAt: Timestamp?
 }

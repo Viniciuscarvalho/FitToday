@@ -71,7 +71,7 @@ final class PersonalTrainerUseCaseTests: XCTestCase {
         var enabled = true
 
         func isFeatureEnabled(_ key: FeatureFlagKey) async -> Bool { enabled }
-        func checkFeatureAccess(_ feature: ProFeature, flag: FeatureFlagKey) async -> FeatureAccessResult { .available }
+        func checkFeatureAccess(_ feature: ProFeature, flag: FeatureFlagKey) async -> FeatureAccessResult { .allowed }
         func refreshFlags() async throws {}
     }
 
@@ -132,6 +132,8 @@ final class PersonalTrainerUseCaseTests: XCTestCase {
             XCTFail("Expected featureDisabled error")
         } catch let error as PersonalTrainerError {
             XCTAssertEqual(error, .featureDisabled)
+        } catch {
+            XCTFail("Unexpected error: \(error)")
         }
 
         XCTAssertEqual(repo.requestConnectionCallCount, 0)
@@ -176,6 +178,8 @@ final class PersonalTrainerUseCaseTests: XCTestCase {
             XCTFail("Expected featureDisabled error")
         } catch let error as PersonalTrainerError {
             XCTAssertEqual(error, .featureDisabled)
+        } catch {
+            XCTFail("Unexpected error: \(error)")
         }
 
         XCTAssertEqual(repo.cancelConnectionCallCount, 0)
