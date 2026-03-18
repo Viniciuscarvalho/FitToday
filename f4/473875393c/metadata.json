@@ -2,12 +2,30 @@
   "cli_version": "0.4.4",
   "checkpoint_id": "f4473875393c",
   "strategy": "manual-commit",
-  "branch": "feat/public-profile-badges",
-  "checkpoints_count": 2,
+  "branch": "fix/cms-api-alignment",
+  "checkpoints_count": 1,
   "files_touched": [
+    "FitToday/FitToday/Data/DTOs/FBBadge.swift",
     "FitToday/FitToday/Data/Mappers/PersonalTrainerMapper.swift",
+    "FitToday/FitToday/Data/Models/CMSTrainerModels.swift",
     "FitToday/FitToday/Data/Models/FBPersonalTrainerModels.swift",
+    "FitToday/FitToday/Data/Repositories/FirebaseBadgeRepository.swift",
+    "FitToday/FitToday/Domain/Entities/Badge.swift",
+    "FitToday/FitToday/Domain/Entities/FeatureFlag.swift",
+    "FitToday/FitToday/Domain/Protocols/BadgeRepository.swift",
+    "FitToday/FitToday/Domain/UseCases/BadgeEvaluationUseCase.swift",
+    "FitToday/FitToday/Presentation/DI/AppContainer.swift",
+    "FitToday/FitToday/Presentation/Features/Pro/BadgesViewModel.swift",
+    "FitToday/FitToday/Presentation/Features/Pro/Components/BadgeCardView.swift",
+    "FitToday/FitToday/Presentation/Features/Pro/Components/BadgeDetailSheet.swift",
+    "FitToday/FitToday/Presentation/Features/Pro/Components/BadgesGridView.swift",
+    "FitToday/FitToday/Presentation/Features/Pro/ProfileProView.swift",
+    "FitToday/FitToday/Resources/en.lproj/Localizable.strings",
+    "FitToday/FitToday/Resources/pt-BR.lproj/Localizable.strings",
     "FitToday/FitTodayTests/Data/Mappers/CMSTrainerMapperTests.swift",
+    "FitToday/FitTodayTests/Domain/Entities/BadgeTests.swift",
+    "FitToday/FitTodayTests/Domain/UseCases/BadgeEvaluationUseCaseTests.swift",
+    "FitToday/FitTodayTests/Mocks/MockBadgeRepository.swift",
     "ops/sessions/20260317-221657.json"
   ],
   "sessions": [
@@ -27,10 +45,10 @@
     }
   ],
   "token_usage": {
-    "input_tokens": 102,
-    "cache_creation_tokens": 54270,
-    "cache_read_tokens": 4203365,
-    "output_tokens": 9025,
-    "api_call_count": 27
+    "input_tokens": 35,
+    "cache_creation_tokens": 125655,
+    "cache_read_tokens": 4264926,
+    "output_tokens": 8730,
+    "api_call_count": 21
   }
 }

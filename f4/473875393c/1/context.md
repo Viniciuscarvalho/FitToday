@@ -92,3 +92,33 @@ O dado continua incorreto e não está sendo possível conectar com o CMS, [Pers
 Stop hook feedback:
 Prompt hook condition was not met: undefined
 
+### Prompt 12
+
+<task-notification>
+<task-id>bcbzvo6yk</task-id>
+<tool-use-id>toolu_011soaQZugzTJEa3m2gtNBod</tool-use-id>
+<output-file>REDACTED.output</output-file>
+<status>completed</status>
+<summary>Background command "set -a &amp;&amp; source '/Users/viniciuscarvalho/Documents/FitToday/.env' &amp;&amp; set +a &amp;&amp; cd /Users/viniciuscarvalho/Documents/FitToday/FitToday &amp;&amp; xcodebuild -p...
+
+### Prompt 13
+
+/Users/viniciuscarvalho/Documents/FitToday-cms/fitness-cms/web-cms/public/swagger.yaml Preciso ajustar todas as chamadas e campos corretamente para ver o que é necessário para conectar e ter todas as funcionalidades com os personais do CMS, hoje está impossível realizar uma conexão com o personal, ou está faltando campo ou esta falhando conexão com firebase por conta do header de ser autenticado, nenhum fluxo está funcionando completamente ou seja o chat, todas as chamadas devem está fu...
+
+### Prompt 14
+
+Base directory for this skill: /Users/viniciuscarvalho/.claude/skills/feature-marker
+
+# feature-marker
+
+Automates feature development with a 5-phase workflow:
+
+1. **Inputs Gate** - Validates `prd.md`, `techspec.md`, `tasks.md` exist; generates them via `~/.claude/commands/` if missing.
+2. **Analysis & Planning** - Auto-installs product-manager skill if missing; reads docs, creates implementation plan.
+3. **Implementation** - Executes tasks with progress tracking.
+4. **Tests & Validation** - Runs...
+
+### Prompt 15
+
+[Request interrupted by user for tool use]
+
