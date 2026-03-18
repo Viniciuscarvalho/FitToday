@@ -79,16 +79,18 @@ final class CMSWorkoutRepositoryImpl: CMSWorkoutRepository, @unchecked Sendable 
     // MARK: - Student Registration
 
     func registerStudent(
-        firebaseUid: String,
-        trainerId: String,
         displayName: String,
-        email: String?
+        email: String?,
+        photoURL: String?,
+        fcmToken: String?,
+        trainerId: String?
     ) async throws {
         _ = try await service.registerStudent(
-            firebaseUid: firebaseUid,
-            trainerId: trainerId,
             displayName: displayName,
-            email: email
+            email: email,
+            photoURL: photoURL,
+            fcmToken: fcmToken,
+            trainerId: trainerId
         )
     }
 

@@ -183,27 +183,31 @@ actor CMSWorkoutService {
     // MARK: - Student Registration API
 
     /// Registers a student in the CMS so the trainer can assign workouts.
+    /// The API identifies the student from the Bearer token.
     ///
     /// - Parameters:
-    ///   - firebaseUid: The student's Firebase UID.
-    ///   - trainerId: The trainer's ID.
     ///   - displayName: The student's display name.
     ///   - email: The student's email (optional).
+    ///   - photoURL: The student's photo URL (optional).
+    ///   - fcmToken: The student's FCM token for push notifications (optional).
+    ///   - trainerId: The trainer's ID (optional).
     /// - Returns: The registration response.
     /// - Throws: CMSServiceError if the request fails.
     func registerStudent(
-        firebaseUid: String,
-        trainerId: String,
         displayName: String,
-        email: String?
+        email: String?,
+        photoURL: String?,
+        fcmToken: String?,
+        trainerId: String?
     ) async throws -> CMSStudentRegistrationResponse {
         let url = configuration.baseURL.appendingPathComponent("/api/students")
         var request = try await buildRequest(url: url, method: "POST")
         let body = CMSStudentRegistrationRequest(
-            firebaseUid: firebaseUid,
-            trainerId: trainerId,
             displayName: displayName,
-            email: email
+            email: email,
+            photoURL: photoURL,
+            fcmToken: fcmToken,
+            trainerId: trainerId
         )
         request.httpBody = try encoder.encode(body)
         return try await execute(request: request)

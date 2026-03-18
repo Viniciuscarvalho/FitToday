@@ -20,7 +20,7 @@ struct CMSTrainerListResponse: Codable, Sendable {
 // MARK: - Trainer Count Response
 
 struct CMSTrainerCountResponse: Codable, Sendable {
-    let count: Int
+    let total: Int
 }
 
 // MARK: - CMS Trainer Profile Location
@@ -76,17 +76,17 @@ struct CMSTrainer: Codable, Sendable, Identifiable {
 struct CMSTrainerReviewListResponse: Codable, Sendable {
     let reviews: [CMSTrainerReview]
     let total: Int?
-    let limit: Int?
-    let offset: Int?
+    let averageRating: Double?
 }
 
 // MARK: - CMS Trainer Review DTO
 
 struct CMSTrainerReview: Codable, Sendable, Identifiable {
     let id: String
-    let trainerId: String
-    let studentId: String
+    let trainerId: String?
+    let studentId: String?
     let studentName: String?
+    let studentPhotoURL: String?
     let rating: Int
     let comment: String?
     let createdAt: Date?
@@ -95,8 +95,7 @@ struct CMSTrainerReview: Codable, Sendable, Identifiable {
 // MARK: - Connection Request
 
 struct CMSConnectionRequest: Codable, Sendable {
-    let studentId: String
-    let studentName: String
+    let message: String?
 }
 
 // MARK: - Connection Response
@@ -112,19 +111,36 @@ struct CMSConnectionResponse: Codable, Sendable {
 // MARK: - Connection Status Response
 
 struct CMSConnectionStatusResponse: Codable, Sendable {
-    let connected: Bool
+    let isConnected: Bool
     let status: String?
-    let relationshipId: String?
-    let connectedAt: Date?
+    let connectionId: String?
+    let trainerId: String?
+    let studentId: String?
 }
 
 // MARK: - Create Review Request
 
 struct CMSCreateReviewRequest: Codable, Sendable {
-    let studentId: String
-    let studentName: String
     let rating: Int
     let comment: String?
+}
+
+// MARK: - Connection Action Request
+
+struct CMSConnectionActionRequest: Codable, Sendable {
+    let action: String
+    let reason: String?
+}
+
+// MARK: - Connection Action Response
+
+struct CMSConnectionActionResponse: Codable, Sendable {
+    let id: String
+    let status: String
+    let subscriptionId: String?
+    let chatRoomId: String?
+    let cancelledBy: String?
+    let reason: String?
 }
 
 // MARK: - Program List Response

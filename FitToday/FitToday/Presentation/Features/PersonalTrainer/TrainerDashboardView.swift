@@ -50,7 +50,6 @@ struct TrainerDashboardView: View {
             TrainerReviewSheet(
                 trainerId: trainer.id,
                 trainerName: trainer.displayName,
-                currentUserId: currentUserId,
                 onDismiss: { showReviewSheet = false },
                 onSuccess: { showReviewSheet = false }
             )

@@ -104,16 +104,25 @@ actor CMSTrainerService {
     }
 
     /// GET /api/trainers/[id]/connect — Check connection status with a trainer.
+    /// The API identifies the student from the Bearer token.
     func checkConnectionStatus(
-        trainerId: String,
-        studentId: String
+        trainerId: String
     ) async throws -> CMSConnectionStatusResponse {
-        var components = URLComponents(url: configuration.baseURL.appendingPathComponent("/api/trainers/\(trainerId)/connect"), resolvingAgainstBaseURL: true)!
-        components.queryItems = [
-            URLQueryItem(name: "studentId", value: studentId)
-        ]
-        guard let url = components.url else { throw CMSServiceError.invalidURL }
+        let url = configuration.baseURL.appendingPathComponent("/api/trainers/\(trainerId)/connect")
         let request = try await buildRequest(url: url, method: "GET", requiresAuth: true)
+        return try await execute(request: request)
+    }
+
+    /// PATCH /api/connections/[id] — Accept, reject, or cancel a connection.
+    func updateConnection(
+        connectionId: String,
+        action: String,
+        reason: String? = nil
+    ) async throws -> CMSConnectionActionResponse {
+        let url = configuration.baseURL.appendingPathComponent("/api/connections/\(connectionId)")
+        var request = try await buildRequest(url: url, method: "PATCH", requiresAuth: true)
+        let body = CMSConnectionActionRequest(action: action, reason: reason)
+        request.httpBody = try encoder.encode(body)
         return try await execute(request: request)
     }
 

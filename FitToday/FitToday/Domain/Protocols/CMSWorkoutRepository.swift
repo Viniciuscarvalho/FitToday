@@ -85,10 +85,11 @@ protocol CMSWorkoutRepository: Sendable {
     ///   - displayName: The student's display name.
     ///   - email: The student's email (optional).
     func registerStudent(
-        firebaseUid: String,
-        trainerId: String,
         displayName: String,
-        email: String?
+        email: String?,
+        photoURL: String?,
+        fcmToken: String?,
+        trainerId: String?
     ) async throws
 
     // MARK: - Update Operations

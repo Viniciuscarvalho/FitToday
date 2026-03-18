@@ -263,7 +263,7 @@ final class PersonalTrainerViewModel {
         error = nil
 
         do {
-            let newRelationshipId = try await useCase.execute(trainerId: trainer.id)
+            let newRelationshipId = try await useCase.execute(trainerId: trainer.id, message: nil)
             relationshipId = newRelationshipId
             currentTrainer = trainer
             connectionStatus = .pending
@@ -311,10 +311,11 @@ final class PersonalTrainerViewModel {
             }
 
             try await repo.registerStudent(
-                firebaseUid: user.id,
-                trainerId: trainerId,
                 displayName: user.displayName,
-                email: user.email
+                email: user.email,
+                photoURL: nil,
+                fcmToken: nil,
+                trainerId: trainerId
             )
 
             #if DEBUG
@@ -342,7 +343,7 @@ final class PersonalTrainerViewModel {
         error = nil
 
         do {
-            try await useCase.execute(relationshipId: relId)
+            try await useCase.execute(connectionId: relId, reason: nil)
             currentTrainer = nil
             connectionStatus = nil
             relationshipId = nil

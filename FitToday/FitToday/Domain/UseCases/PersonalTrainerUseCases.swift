@@ -83,7 +83,7 @@ final class DiscoverTrainersUseCase: DiscoverTrainersUseCaseProtocol, @unchecked
 // MARK: - Request Trainer Connection Use Case
 
 protocol RequestTrainerConnectionUseCaseProtocol: Sendable {
-    func execute(trainerId: String) async throws -> String
+    func execute(trainerId: String, message: String?) async throws -> String
 }
 
 final class RequestTrainerConnectionUseCase: RequestTrainerConnectionUseCaseProtocol, @unchecked Sendable {
@@ -101,7 +101,7 @@ final class RequestTrainerConnectionUseCase: RequestTrainerConnectionUseCaseProt
         self.featureFlagChecker = featureFlagChecker
     }
 
-    func execute(trainerId: String) async throws -> String {
+    func execute(trainerId: String, message: String? = nil) async throws -> String {
         guard await featureFlagChecker.isFeatureEnabled(.personalTrainerEnabled) else {
             throw PersonalTrainerError.featureDisabled
         }
@@ -119,8 +119,8 @@ final class RequestTrainerConnectionUseCase: RequestTrainerConnectionUseCaseProt
 
         let relationshipId = try await trainerStudentRepository.requestConnection(
             trainerId: trainerId,
-            studentId: currentUser.id,
-            studentDisplayName: currentUser.displayName
+            studentDisplayName: currentUser.displayName,
+            message: message
         )
 
         return relationshipId
@@ -130,7 +130,7 @@ final class RequestTrainerConnectionUseCase: RequestTrainerConnectionUseCaseProt
 // MARK: - Cancel Trainer Connection Use Case
 
 protocol CancelTrainerConnectionUseCaseProtocol: Sendable {
-    func execute(relationshipId: String) async throws
+    func execute(connectionId: String, reason: String?) async throws
 }
 
 final class CancelTrainerConnectionUseCase: CancelTrainerConnectionUseCaseProtocol, @unchecked Sendable {
@@ -148,7 +148,7 @@ final class CancelTrainerConnectionUseCase: CancelTrainerConnectionUseCaseProtoc
         self.featureFlagChecker = featureFlagChecker
     }
 
-    func execute(relationshipId: String) async throws {
+    func execute(connectionId: String, reason: String? = nil) async throws {
         guard await featureFlagChecker.isFeatureEnabled(.personalTrainerEnabled) else {
             throw PersonalTrainerError.featureDisabled
         }
@@ -157,7 +157,7 @@ final class CancelTrainerConnectionUseCase: CancelTrainerConnectionUseCaseProtoc
             throw PersonalTrainerError.unauthorized
         }
 
-        try await trainerStudentRepository.cancelConnection(relationshipId: relationshipId)
+        try await trainerStudentRepository.cancelConnection(connectionId: connectionId, reason: reason)
     }
 }
 

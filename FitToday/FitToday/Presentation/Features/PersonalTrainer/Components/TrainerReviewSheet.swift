@@ -11,7 +11,6 @@ import Swinject
 struct TrainerReviewSheet: View {
     let trainerId: String
     let trainerName: String
-    let currentUserId: String
     let onDismiss: () -> Void
     let onSuccess: () -> Void
 
@@ -171,13 +170,10 @@ struct TrainerReviewSheet: View {
             return
         }
 
-        let userName = UserDefaults.standard.string(forKey: "socialUserDisplayName") ?? "Athlete"
-
+        let trimmedComment = comment.trimmingCharacters(in: .whitespacesAndNewlines)
         let request = CMSCreateReviewRequest(
-            studentId: currentUserId,
-            studentName: userName,
             rating: rating,
-            comment: comment.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : comment.trimmingCharacters(in: .whitespacesAndNewlines)
+            comment: trimmedComment.isEmpty ? nil : trimmedComment
         )
 
         do {

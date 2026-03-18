@@ -66,8 +66,8 @@ final class FirebasePersonalTrainerRepository: PersonalTrainerRepository, Traine
 
     func requestConnection(
         trainerId: String,
-        studentId: String,
-        studentDisplayName: String
+        studentDisplayName: String,
+        message: String?
     ) async throws -> String {
         guard let cmsService else {
             throw DomainError.repositoryFailure(reason: "CMS service not available")
@@ -77,10 +77,7 @@ final class FirebasePersonalTrainerRepository: PersonalTrainerRepository, Traine
             // Ensure the user has role "student" in the CMS before connecting
             try await cmsService.ensureStudentRole(displayName: studentDisplayName)
 
-            let request = CMSConnectionRequest(
-                studentId: studentId,
-                studentName: studentDisplayName
-            )
+            let request = CMSConnectionRequest(message: message)
             let response = try await cmsService.requestConnection(
                 trainerId: trainerId,
                 connection: request
@@ -98,9 +95,23 @@ final class FirebasePersonalTrainerRepository: PersonalTrainerRepository, Traine
         }
     }
 
-    func cancelConnection(relationshipId: String) async throws {
+    func cancelConnection(connectionId: String, reason: String?) async throws {
+        guard let cmsService else {
+            // Fallback to Firebase if CMS not available
+            do {
+                try await service.cancelConnection(relationshipId: connectionId)
+            } catch {
+                throw DomainError.repositoryFailure(reason: error.localizedDescription)
+            }
+            return
+        }
+
         do {
-            try await service.cancelConnection(relationshipId: relationshipId)
+            _ = try await cmsService.updateConnection(
+                connectionId: connectionId,
+                action: "cancel",
+                reason: reason
+            )
         } catch {
             throw DomainError.repositoryFailure(reason: error.localizedDescription)
         }
