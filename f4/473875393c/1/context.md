@@ -68,3 +68,27 @@ Duas chamadas que estão com erro, na tentativa de conexão com o personal, [CMS
 [RemoteConfig] personal_trainer_enabled = true, source: remote
 [PersonalTrainerViewModel] Error requesting connection: repositoryFailure(reason: "The data couldn’t be read because it...
 
+### Prompt 9
+
+Stop hook feedback:
+Prompt hook condition was not met: Session involved TWO separate tasks but completion status is INCONSISTENT:
+
+**TASK 1: PRO-92 Public Profile with Badges — STATUS: COMPLETE ✓**
+- All 11 new files created (Domain, Data, Presentation, Tests)
+- Feature flag added to FeatureFlag.swift
+- DI registration in AppContainer
+- ProfileProView integration with BadgesGridView + BadgeDetailSheet
+- Localization strings (en + pt-BR) added
+- Tests written (BadgeTests, BadgeEvaluationUseCa...
+
+### Prompt 10
+
+O dado continua incorreto e não está sendo possível conectar com o CMS, [PersonalTrainerService] Parse error: The data couldn’t be read because it is missing.
+[RemoteConfig] personal_trainer_enabled = true, source: remote
+[Home] Personal trainer state load failed: repositoryFailure(reason: "The data couldn’t be read because it is missing.")
+
+### Prompt 11
+
+Stop hook feedback:
+Prompt hook condition was not met: undefined
+

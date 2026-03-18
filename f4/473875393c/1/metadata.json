@@ -3,32 +3,32 @@
   "checkpoint_id": "f4473875393c",
   "session_id": "b638345d-bb24-4c90-9c2f-3a986a27a934",
   "strategy": "manual-commit",
-  "created_at": "2026-03-17T23:38:30.21597Z",
+  "created_at": "2026-03-18T00:29:23.902813Z",
   "branch": "feat/public-profile-badges",
   "checkpoints_count": 1,
   "files_touched": [
-    ".claude/logs/build_20260317_203436.log",
-    "FitToday/FitToday/Data/Models/CMSTrainerModels.swift",
-    "ops/sessions/20260317-233816.json"
+    "FitToday/FitToday/Data/Mappers/PersonalTrainerMapper.swift",
+    "FitToday/FitToday/Data/Models/FBPersonalTrainerModels.swift",
+    "FitToday/FitTodayTests/Data/Mappers/CMSTrainerMapperTests.swift"
   ],
   "agent": "Claude Code",
-  "transcript_identifier_at_start": "2ab4ab9c-9dc4-4297-ace1-abe5e566e884",
-  "checkpoint_transcript_start": 741,
-  "transcript_lines_at_start": 741,
+  "transcript_identifier_at_start": "ceca5d35-d08a-4105-80bb-3906b86c95bd",
+  "checkpoint_transcript_start": 857,
+  "transcript_lines_at_start": 857,
   "token_usage": {
-    "input_tokens": 25,
-    "cache_creation_tokens": 21138,
-    "cache_read_tokens": 3343730,
-    "output_tokens": 5314,
-    "api_call_count": 23
+    "input_tokens": 98,
+    "cache_creation_tokens": 21006,
+    "cache_read_tokens": 4170307,
+    "output_tokens": 8841,
+    "api_call_count": 25
   },
   "initial_attribution": {
-    "calculated_at": "2026-03-17T23:38:29.453279Z",
+    "calculated_at": "2026-03-18T00:29:23.111483Z",
     "agent_lines": 0,
-    "human_added": 117,
-    "human_modified": 13,
+    "human_added": 209,
+    "human_modified": 70,
     "human_removed": 0,
-    "total_committed": 118,
+    "total_committed": 209,
     "agent_percentage": 0
   },
   "transcript_path": ".claude/projects/-Users-viniciuscarvalho-Documents-FitToday/b638345d-bb24-4c90-9c2f-3a986a27a934.jsonl"

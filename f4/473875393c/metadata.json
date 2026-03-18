@@ -5,10 +5,10 @@
   "branch": "feat/public-profile-badges",
   "checkpoints_count": 2,
   "files_touched": [
-    ".claude/logs/build_20260317_203436.log",
-    "FitToday/FitToday/Data/Models/CMSTrainerModels.swift",
-    "ops/sessions/20260317-221657.json",
-    "ops/sessions/20260317-233816.json"
+    "FitToday/FitToday/Data/Mappers/PersonalTrainerMapper.swift",
+    "FitToday/FitToday/Data/Models/FBPersonalTrainerModels.swift",
+    "FitToday/FitTodayTests/Data/Mappers/CMSTrainerMapperTests.swift",
+    "ops/sessions/20260317-221657.json"
   ],
   "sessions": [
     {
@@ -27,10 +27,10 @@
     }
   ],
   "token_usage": {
-    "input_tokens": 29,
-    "cache_creation_tokens": 54402,
-    "cache_read_tokens": 3376788,
-    "output_tokens": 5498,
-    "api_call_count": 25
+    "input_tokens": 102,
+    "cache_creation_tokens": 54270,
+    "cache_read_tokens": 4203365,
+    "output_tokens": 9025,
+    "api_call_count": 27
   }
 }
