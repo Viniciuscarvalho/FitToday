@@ -21,64 +21,34 @@ struct FBPersonalTrainer: Codable {
     var displayName: String
 
     /// Trainer's email address.
-    var email: String
+    var email: String?
 
     /// URL string to the trainer's profile photo.
     var photoURL: String?
 
     /// Areas of expertise (e.g., ["strength", "weight_loss"]).
-    var specializations: [String]
+    var specializations: [String]?
 
     /// Short biography or description.
     var bio: String?
 
     /// Whether the trainer is currently accepting new students.
-    var isActive: Bool
+    var isActive: Bool?
 
     /// Unique invite code students can use to connect.
     var inviteCode: String?
 
     /// Maximum number of students this trainer can manage.
-    var maxStudents: Int
+    var maxStudents: Int?
 
     /// Current number of connected students.
-    var currentStudentCount: Int
+    var currentStudentCount: Int?
 
     /// When the trainer profile was created.
     @ServerTimestamp var createdAt: Timestamp?
 
     /// When the trainer profile was last updated.
     @ServerTimestamp var updatedAt: Timestamp?
-
-    // MARK: - Initializer
-
-    init(
-        id: String? = nil,
-        displayName: String,
-        email: String,
-        photoURL: String? = nil,
-        specializations: [String] = [],
-        bio: String? = nil,
-        isActive: Bool = true,
-        inviteCode: String? = nil,
-        maxStudents: Int = 20,
-        currentStudentCount: Int = 0,
-        createdAt: Timestamp? = nil,
-        updatedAt: Timestamp? = nil
-    ) {
-        self.id = id
-        self.displayName = displayName
-        self.email = email
-        self.photoURL = photoURL
-        self.specializations = specializations
-        self.bio = bio
-        self.isActive = isActive
-        self.inviteCode = inviteCode
-        self.maxStudents = maxStudents
-        self.currentStudentCount = currentStudentCount
-        self.createdAt = createdAt
-        self.updatedAt = updatedAt
-    }
 }
 
 // MARK: - Firebase Trainer Student DTO
@@ -100,7 +70,7 @@ struct FBTrainerStudent: Codable {
     var status: String
 
     /// Who initiated the request (student, trainer).
-    var requestedBy: String
+    var requestedBy: String?
 
     /// When the connection was requested.
     @ServerTimestamp var requestedAt: Timestamp?
@@ -109,37 +79,11 @@ struct FBTrainerStudent: Codable {
     var acceptedAt: Timestamp?
 
     /// Current subscription status (trial, active, expired).
-    var subscriptionStatus: String
+    var subscriptionStatus: String?
 
     /// When the subscription expires.
     var subscriptionExpiresAt: Timestamp?
 
     /// When this relationship record was created.
     @ServerTimestamp var createdAt: Timestamp?
-
-    // MARK: - Initializer
-
-    init(
-        id: String? = nil,
-        trainerId: String,
-        studentId: String,
-        status: String = TrainerConnectionStatus.pending.rawValue,
-        requestedBy: String,
-        requestedAt: Timestamp? = nil,
-        acceptedAt: Timestamp? = nil,
-        subscriptionStatus: String = TrainerSubscriptionStatus.trial.rawValue,
-        subscriptionExpiresAt: Timestamp? = nil,
-        createdAt: Timestamp? = nil
-    ) {
-        self.id = id
-        self.trainerId = trainerId
-        self.studentId = studentId
-        self.status = status
-        self.requestedBy = requestedBy
-        self.requestedAt = requestedAt
-        self.acceptedAt = acceptedAt
-        self.subscriptionStatus = subscriptionStatus
-        self.subscriptionExpiresAt = subscriptionExpiresAt
-        self.createdAt = createdAt
-    }
 }
