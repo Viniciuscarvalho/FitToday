@@ -55,18 +55,24 @@ final class PersonalTrainerUseCaseTests: XCTestCase {
     }
 
     private final class MockAuthRepository: AuthenticationRepository, @unchecked Sendable {
-        var user: UserProfile?
+        var user: SocialUser?
 
-        func currentUser() async throws -> UserProfile? { user }
+        func currentUser() async throws -> SocialUser? { user }
+        func getIDToken() async throws -> String { "mock-token" }
+        func signInWithApple() async throws -> SocialUser { fatalError() }
+        func signInWithGoogle() async throws -> SocialUser { fatalError() }
+        func signInWithEmail(_ email: String, password: String) async throws -> SocialUser { fatalError() }
+        func createAccount(email: String, password: String, displayName: String) async throws -> SocialUser { fatalError() }
         func signOut() async throws {}
-        func observeAuthState() -> AsyncStream<UserProfile?> { AsyncStream { $0.finish() } }
-        func deleteAccount() async throws {}
+        func observeAuthState() -> AsyncStream<SocialUser?> { AsyncStream { $0.finish() } }
     }
 
     private final class MockFeatureFlags: FeatureFlagChecking, @unchecked Sendable {
         var enabled = true
 
-        func isFeatureEnabled(_ flag: FeatureFlag) async -> Bool { enabled }
+        func isFeatureEnabled(_ key: FeatureFlagKey) async -> Bool { enabled }
+        func checkFeatureAccess(_ feature: ProFeature, flag: FeatureFlagKey) async -> FeatureAccessResult { .available }
+        func refreshFlags() async throws {}
     }
 
     // MARK: - Request Connection Tests
@@ -74,7 +80,7 @@ final class PersonalTrainerUseCaseTests: XCTestCase {
     func test_requestConnection_passesMessageThrough() async throws {
         let repo = MockTrainerStudentRepository()
         let auth = MockAuthRepository()
-        auth.user = UserProfile(id: "student-1", displayName: "Test Student", email: "test@test.com")
+        auth.user = SocialUser(id: "student-1", displayName: "Test Student", email: "test@test.com", authProvider: .email, privacySettings: PrivacySettings(), createdAt: Date())
         let flags = MockFeatureFlags()
 
         let useCase = RequestTrainerConnectionUseCase(
@@ -94,7 +100,7 @@ final class PersonalTrainerUseCaseTests: XCTestCase {
     func test_requestConnection_nilMessage() async throws {
         let repo = MockTrainerStudentRepository()
         let auth = MockAuthRepository()
-        auth.user = UserProfile(id: "student-1", displayName: "Test", email: nil)
+        auth.user = SocialUser(id: "student-1", displayName: "Test", authProvider: .email, privacySettings: PrivacySettings(), createdAt: Date())
         let flags = MockFeatureFlags()
 
         let useCase = RequestTrainerConnectionUseCase(
@@ -111,7 +117,7 @@ final class PersonalTrainerUseCaseTests: XCTestCase {
     func test_requestConnection_featureDisabled_throws() async {
         let repo = MockTrainerStudentRepository()
         let auth = MockAuthRepository()
-        auth.user = UserProfile(id: "student-1", displayName: "Test", email: nil)
+        auth.user = SocialUser(id: "student-1", displayName: "Test", authProvider: .email, privacySettings: PrivacySettings(), createdAt: Date())
         let flags = MockFeatureFlags()
         flags.enabled = false
 
@@ -136,7 +142,7 @@ final class PersonalTrainerUseCaseTests: XCTestCase {
     func test_cancelConnection_passesReasonThrough() async throws {
         let repo = MockTrainerStudentRepository()
         let auth = MockAuthRepository()
-        auth.user = UserProfile(id: "student-1", displayName: "Test", email: nil)
+        auth.user = SocialUser(id: "student-1", displayName: "Test", authProvider: .email, privacySettings: PrivacySettings(), createdAt: Date())
         let flags = MockFeatureFlags()
 
         let useCase = CancelTrainerConnectionUseCase(
@@ -155,7 +161,7 @@ final class PersonalTrainerUseCaseTests: XCTestCase {
     func test_cancelConnection_featureDisabled_throws() async {
         let repo = MockTrainerStudentRepository()
         let auth = MockAuthRepository()
-        auth.user = UserProfile(id: "student-1", displayName: "Test", email: nil)
+        auth.user = SocialUser(id: "student-1", displayName: "Test", authProvider: .email, privacySettings: PrivacySettings(), createdAt: Date())
         let flags = MockFeatureFlags()
         flags.enabled = false
 

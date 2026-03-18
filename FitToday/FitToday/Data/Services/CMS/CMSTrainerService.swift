@@ -178,10 +178,31 @@ actor CMSTrainerService {
         var request = try await buildRequest(url: url, method: "POST", requiresAuth: true)
         let body: [String: String] = ["role": "student", "displayName": displayName]
         request.httpBody = try encoder.encode(body)
-        let response: CMSUserProfileResponse = try await execute(request: request)
+
         #if DEBUG
-        print("[CMSTrainerService] ensureStudentRole succeeded — uid: \(response.uid), role: \(response.role ?? "nil")")
+        print("[CMSTrainerService] POST /api/users/me — role: student, displayName: \(displayName)")
         #endif
+
+        let (data, response) = try await session.data(for: request)
+
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw CMSServiceError.invalidResponse
+        }
+
+        #if DEBUG
+        print("[CMSTrainerService] ensureStudentRole status: \(httpResponse.statusCode)")
+        if let json = String(data: data, encoding: .utf8) {
+            print("[CMSTrainerService] ensureStudentRole response: \(json.prefix(500))")
+        }
+        #endif
+
+        guard (200...299).contains(httpResponse.statusCode) else {
+            switch httpResponse.statusCode {
+            case 401: throw CMSServiceError.unauthorized
+            case 403: throw CMSServiceError.forbidden
+            default: throw CMSServiceError.unexpectedStatus(httpResponse.statusCode)
+            }
+        }
     }
 
     // MARK: - Private Helpers

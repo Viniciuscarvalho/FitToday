@@ -102,9 +102,9 @@ struct CMSConnectionRequest: Codable, Sendable {
 
 struct CMSConnectionResponse: Codable, Sendable {
     let id: String
-    let trainerId: String
-    let studentId: String
-    let status: String
+    let trainerId: String?
+    let studentId: String?
+    let status: String?
     let createdAt: Date?
 }
 
@@ -171,7 +171,8 @@ struct CMSProgram: Codable, Sendable, Identifiable {
 // MARK: - User Profile Response
 
 struct CMSUserProfileResponse: Codable, Sendable {
-    let uid: String
+    let uid: String?
+    let id: String?
     let role: String?
     let displayName: String?
 }
