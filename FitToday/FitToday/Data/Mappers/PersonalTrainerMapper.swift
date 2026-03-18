@@ -25,14 +25,14 @@ struct PersonalTrainerMapper {
         PersonalTrainer(
             id: id,
             displayName: fb.displayName,
-            email: fb.email,
+            email: fb.email ?? "",
             photoURL: fb.photoURL.flatMap { URL(string: $0) },
-            specializations: fb.specializations,
+            specializations: fb.specializations ?? [],
             bio: fb.bio,
-            isActive: fb.isActive,
+            isActive: fb.isActive ?? true,
             inviteCode: fb.inviteCode,
-            maxStudents: fb.maxStudents,
-            currentStudentCount: fb.currentStudentCount,
+            maxStudents: fb.maxStudents ?? 20,
+            currentStudentCount: fb.currentStudentCount ?? 0,
             rating: nil,
             reviewCount: nil
         )
@@ -49,14 +49,14 @@ struct PersonalTrainerMapper {
     static func toRelationship(_ fb: FBTrainerStudent, id: String) -> TrainerStudentRelationship {
         TrainerStudentRelationship(
             id: id,
-            trainerId: fb.trainerId,
-            studentId: fb.studentId,
-            status: TrainerConnectionStatus(rawValue: fb.status) ?? .pending,
-            requestedBy: RequestedBy(rawValue: fb.requestedBy) ?? .student,
-            requestedAt: fb.requestedAt?.dateValue() ?? Date(),
-            acceptedAt: fb.acceptedAt?.dateValue(),
-            subscriptionStatus: TrainerSubscriptionStatus(rawValue: fb.subscriptionStatus) ?? .trial,
-            subscriptionExpiresAt: fb.subscriptionExpiresAt?.dateValue()
+            trainerId: fb.trainerId ?? "",
+            studentId: fb.studentId ?? "",
+            status: fb.status.flatMap { TrainerConnectionStatus(rawValue: $0) } ?? .pending,
+            requestedBy: fb.source.flatMap { RequestedBy(rawValue: $0) } ?? .student,
+            requestedAt: fb.createdAt?.dateValue() ?? Date(),
+            acceptedAt: fb.respondedAt?.dateValue(),
+            subscriptionStatus: .trial,
+            subscriptionExpiresAt: nil
         )
     }
 }

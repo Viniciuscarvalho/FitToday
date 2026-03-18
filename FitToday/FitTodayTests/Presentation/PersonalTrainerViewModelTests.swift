@@ -17,7 +17,7 @@ final class PersonalTrainerViewModelTests: XCTestCase {
         var executeCallCount = 0
         var shouldThrow = false
 
-        func execute(relationshipId: String) async throws {
+        func execute(connectionId: String, reason: String?) async throws {
             executeCallCount += 1
             if shouldThrow {
                 throw PersonalTrainerError.unauthorized
@@ -29,7 +29,7 @@ final class PersonalTrainerViewModelTests: XCTestCase {
         var shouldThrow = false
         var returnedId = "rel-123"
 
-        func execute(trainerId: String) async throws -> String {
+        func execute(trainerId: String, message: String?) async throws -> String {
             if shouldThrow {
                 throw PersonalTrainerError.unauthorized
             }

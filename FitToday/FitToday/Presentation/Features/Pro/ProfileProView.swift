@@ -24,6 +24,8 @@ struct ProfileProView: View {
     @State private var totalMinutes: Int = 0
     @State private var completedWorkouts: Int = 0
     @State private var isPersonalTrainerEnabled = false
+    @State private var isBadgesEnabled = false
+    @State private var badgesViewModel: BadgesViewModel?
 
     #if DEBUG
     @State private var debugModeEnabled = false
@@ -47,6 +49,15 @@ struct ProfileProView: View {
                     totalMinutes: totalMinutes,
                     completedWorkouts: completedWorkouts
                 )
+
+                // Badges Grid
+                if isBadgesEnabled, let vm = badgesViewModel {
+                    BadgesGridView(
+                        badges: vm.badges,
+                        newlyUnlockedIds: Set(vm.newlyUnlockedBadges.map(\.id)),
+                        onBadgeTap: { badge in vm.selectedBadge = badge }
+                    )
+                }
 
                 // Premium Card
                 premiumCard
@@ -92,10 +103,30 @@ struct ProfileProView: View {
             await loadProfileData()
             if let featureFlags = resolver.resolve(FeatureFlagChecking.self) {
                 isPersonalTrainerEnabled = await featureFlags.isFeatureEnabled(.personalTrainerEnabled)
+                isBadgesEnabled = await featureFlags.isFeatureEnabled(.publicProfileBadgesEnabled)
+            }
+            if isBadgesEnabled, let useCase = resolver.resolve(BadgeEvaluationUseCase.self),
+               let badgeRepo = resolver.resolve(BadgeRepository.self),
+               let authService = resolver.resolve(FirebaseAuthService.self) {
+                let vm = BadgesViewModel(
+                    evaluationUseCase: useCase,
+                    badgeRepository: badgeRepo,
+                    authService: authService
+                )
+                badgesViewModel = vm
+                await vm.loadBadges()
             }
         }
         .sheet(isPresented: $showingPaywall) {
             paywallSheet
+        }
+        .sheet(item: Binding(
+            get: { badgesViewModel?.selectedBadge },
+            set: { badgesViewModel?.selectedBadge = $0 }
+        )) { badge in
+            BadgeDetailSheet(badge: badge) { isPublic in
+                Task { await badgesViewModel?.updateVisibility(badgeId: badge.id, isPublic: isPublic) }
+            }
         }
         .alert("Restore Purchases", isPresented: $showingRestoreAlert) {
             Button("Ok", role: .cancel) {}

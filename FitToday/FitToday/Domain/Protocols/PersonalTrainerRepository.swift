@@ -53,15 +53,17 @@ protocol TrainerStudentRepository: Sendable {
     /// - Throws: An error if the connection cannot be established.
     func requestConnection(
         trainerId: String,
-        studentId: String,
-        studentDisplayName: String
+        studentDisplayName: String,
+        message: String?
     ) async throws -> String
 
     /// Cancels an existing trainer-student connection.
     ///
-    /// - Parameter relationshipId: The relationship's unique identifier.
+    /// - Parameters:
+    ///   - connectionId: The connection's unique identifier.
+    ///   - reason: Optional reason for cancellation.
     /// - Throws: An error if the cancellation fails.
-    func cancelConnection(relationshipId: String) async throws
+    func cancelConnection(connectionId: String, reason: String?) async throws
 
     /// Fetches the current active relationship for a student.
     ///

@@ -684,6 +684,26 @@ struct AppContainer {
 
         // ========== END LEAGUES ==========
 
+        // ========== BADGES (PRO-92) ==========
+
+        container.register(BadgeRepository.self) { resolver in
+            FirebaseBadgeRepository(
+                authService: resolver.resolve(FirebaseAuthService.self)!
+            )
+        }
+        .inObjectScope(.container)
+
+        container.register(BadgeEvaluationUseCase.self) { resolver in
+            BadgeEvaluationUseCase(
+                badgeRepository: resolver.resolve(BadgeRepository.self)!,
+                historyRepository: resolver.resolve(WorkoutHistoryRepository.self)!,
+                featureFlags: resolver.resolve(FeatureFlagChecking.self)!
+            )
+        }
+        .inObjectScope(.container)
+
+        // ========== END BADGES ==========
+
         // ========== SOCIAL FEED (PRO-89) ==========
 
         let feedService = FirebaseFeedService()

@@ -104,16 +104,25 @@ actor CMSTrainerService {
     }
 
     /// GET /api/trainers/[id]/connect — Check connection status with a trainer.
+    /// The API identifies the student from the Bearer token.
     func checkConnectionStatus(
-        trainerId: String,
-        studentId: String
+        trainerId: String
     ) async throws -> CMSConnectionStatusResponse {
-        var components = URLComponents(url: configuration.baseURL.appendingPathComponent("/api/trainers/\(trainerId)/connect"), resolvingAgainstBaseURL: true)!
-        components.queryItems = [
-            URLQueryItem(name: "studentId", value: studentId)
-        ]
-        guard let url = components.url else { throw CMSServiceError.invalidURL }
+        let url = configuration.baseURL.appendingPathComponent("/api/trainers/\(trainerId)/connect")
         let request = try await buildRequest(url: url, method: "GET", requiresAuth: true)
+        return try await execute(request: request)
+    }
+
+    /// PATCH /api/connections/[id] — Accept, reject, or cancel a connection.
+    func updateConnection(
+        connectionId: String,
+        action: String,
+        reason: String? = nil
+    ) async throws -> CMSConnectionActionResponse {
+        let url = configuration.baseURL.appendingPathComponent("/api/connections/\(connectionId)")
+        var request = try await buildRequest(url: url, method: "PATCH", requiresAuth: true)
+        let body = CMSConnectionActionRequest(action: action, reason: reason)
+        request.httpBody = try encoder.encode(body)
         return try await execute(request: request)
     }
 
@@ -169,10 +178,31 @@ actor CMSTrainerService {
         var request = try await buildRequest(url: url, method: "POST", requiresAuth: true)
         let body: [String: String] = ["role": "student", "displayName": displayName]
         request.httpBody = try encoder.encode(body)
-        let response: CMSUserProfileResponse = try await execute(request: request)
+
         #if DEBUG
-        print("[CMSTrainerService] ensureStudentRole succeeded — uid: \(response.uid), role: \(response.role ?? "nil")")
+        print("[CMSTrainerService] POST /api/users/me — role: student, displayName: \(displayName)")
         #endif
+
+        let (data, response) = try await session.data(for: request)
+
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw CMSServiceError.invalidResponse
+        }
+
+        #if DEBUG
+        print("[CMSTrainerService] ensureStudentRole status: \(httpResponse.statusCode)")
+        if let json = String(data: data, encoding: .utf8) {
+            print("[CMSTrainerService] ensureStudentRole response: \(json.prefix(500))")
+        }
+        #endif
+
+        guard (200...299).contains(httpResponse.statusCode) else {
+            switch httpResponse.statusCode {
+            case 401: throw CMSServiceError.unauthorized
+            case 403: throw CMSServiceError.forbidden
+            default: throw CMSServiceError.unexpectedStatus(httpResponse.statusCode)
+            }
+        }
     }
 
     // MARK: - Private Helpers
@@ -210,16 +240,19 @@ actor CMSTrainerService {
         print("[CMSTrainerService] Status: \(httpResponse.statusCode)")
         #endif
 
+        #if DEBUG
+        if let json = String(data: data, encoding: .utf8) {
+            print("[CMSTrainerService] Raw response (\(httpResponse.statusCode)): \(json.prefix(1000))")
+        }
+        #endif
+
         switch httpResponse.statusCode {
         case 200...299:
             do {
                 return try decoder.decode(T.self, from: data)
             } catch {
                 #if DEBUG
-                print("[CMSTrainerService] Decode error: \(error)")
-                if let json = String(data: data, encoding: .utf8) {
-                    print("[CMSTrainerService] Response: \(json.prefix(500))")
-                }
+                print("[CMSTrainerService] Decode error for \(T.self): \(error)")
                 #endif
                 throw CMSServiceError.decodingFailed(error)
             }

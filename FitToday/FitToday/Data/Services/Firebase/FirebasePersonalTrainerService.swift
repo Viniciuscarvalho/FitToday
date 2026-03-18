@@ -127,16 +127,14 @@ actor FirebasePersonalTrainerService {
         // Create new relationship
         let relationshipRef = relationshipsCollection.document()
         let relationship = FBTrainerStudent(
-            id: relationshipRef.documentID,
             trainerId: trainerId,
             studentId: studentId,
             status: TrainerConnectionStatus.pending.rawValue,
-            requestedBy: RequestedBy.student.rawValue,
-            requestedAt: nil, // ServerTimestamp will set this
-            acceptedAt: nil,
-            subscriptionStatus: TrainerSubscriptionStatus.trial.rawValue,
-            subscriptionExpiresAt: nil,
-            createdAt: nil
+            source: "app_request",
+            message: nil,
+            createdAt: nil,
+            updatedAt: nil,
+            respondedAt: nil
         )
 
         try relationshipRef.setData(from: relationship)
@@ -228,8 +226,15 @@ actor FirebasePersonalTrainerService {
             .getDocuments()
 
         guard let doc = snapshot.documents.first else {
+            #if DEBUG
+            print("[FirebasePersonalTrainerService] No existing relationship for student \(studentId)")
+            #endif
             return nil
         }
+
+        #if DEBUG
+        print("[FirebasePersonalTrainerService] Found relationship doc \(doc.documentID): \(doc.data())")
+        #endif
 
         let relationship = try doc.data(as: FBTrainerStudent.self)
         return (doc.documentID, relationship)

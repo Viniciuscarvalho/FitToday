@@ -48,6 +48,9 @@ enum FeatureFlagKey: String, CaseIterable, Sendable {
     /// Enables the league ranking system (Bronze → Legend).
     case leaguesEnabled = "leagues_enabled"
 
+    /// Enables public profile badges (achievements/gamification).
+    case publicProfileBadgesEnabled = "public_profile_badges_enabled"
+
     // MARK: - Health & Sync
 
     /// Enables Apple Health read/write integration.
@@ -114,6 +117,7 @@ enum FeatureFlagKey: String, CaseIterable, Sendable {
         case .socialFeedEnabled: return "Social Feed"
         case .gamificationEnabled: return "Gamification (XP/Levels)"
         case .leaguesEnabled: return "Leagues"
+        case .publicProfileBadgesEnabled: return "Public Profile Badges"
         // Health
         case .healthKitSyncEnabled: return "Apple Health Sync"
         case .statsChartsEnabled: return "Stats Charts"
@@ -145,6 +149,7 @@ enum FeatureFlagKey: String, CaseIterable, Sendable {
         case .socialFeedEnabled,
              .gamificationEnabled,
              .leaguesEnabled,
+             .publicProfileBadgesEnabled,
              .personalTrainerEnabled,
              .cmsWorkoutSyncEnabled,
              .trainerChatEnabled,
