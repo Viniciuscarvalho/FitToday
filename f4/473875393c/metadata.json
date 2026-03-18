@@ -3,18 +3,37 @@
   "checkpoint_id": "f4473875393c",
   "strategy": "manual-commit",
   "branch": "fix/cms-api-alignment",
-  "checkpoints_count": 1,
+  "checkpoints_count": 3,
   "files_touched": [
+    ".claude/settings.local.json",
+    "FitToday/.claude/logs/build_20260317_232237.log",
+    "FitToday/.claude/logs/build_20260317_232325.log",
+    "FitToday/.claude/logs/build_20260317_232358.log",
+    "FitToday/.claude/logs/build_20260317_232430.log",
+    "FitToday/.claude/logs/build_20260317_232506.log",
+    "FitToday/.claude/logs/build_20260317_233018.log",
+    "FitToday/.claude/logs/build_20260317_233047.log",
     "FitToday/FitToday/Data/DTOs/FBBadge.swift",
     "FitToday/FitToday/Data/Mappers/PersonalTrainerMapper.swift",
     "FitToday/FitToday/Data/Models/CMSTrainerModels.swift",
+    "FitToday/FitToday/Data/Models/CMSWorkoutModels.swift",
     "FitToday/FitToday/Data/Models/FBPersonalTrainerModels.swift",
+    "FitToday/FitToday/Data/Repositories/CMSWorkoutRepositoryImpl.swift",
     "FitToday/FitToday/Data/Repositories/FirebaseBadgeRepository.swift",
+    "FitToday/FitToday/Data/Repositories/FirebasePersonalTrainerRepository.swift",
+    "FitToday/FitToday/Data/Services/CMS/CMSTrainerService.swift",
+    "FitToday/FitToday/Data/Services/CMS/CMSWorkoutService.swift",
     "FitToday/FitToday/Domain/Entities/Badge.swift",
     "FitToday/FitToday/Domain/Entities/FeatureFlag.swift",
     "FitToday/FitToday/Domain/Protocols/BadgeRepository.swift",
+    "FitToday/FitToday/Domain/Protocols/CMSWorkoutRepository.swift",
+    "FitToday/FitToday/Domain/Protocols/PersonalTrainerRepository.swift",
     "FitToday/FitToday/Domain/UseCases/BadgeEvaluationUseCase.swift",
+    "FitToday/FitToday/Domain/UseCases/PersonalTrainerUseCases.swift",
     "FitToday/FitToday/Presentation/DI/AppContainer.swift",
+    "FitToday/FitToday/Presentation/Features/PersonalTrainer/Components/TrainerReviewSheet.swift",
+    "FitToday/FitToday/Presentation/Features/PersonalTrainer/PersonalTrainerViewModel.swift",
+    "FitToday/FitToday/Presentation/Features/PersonalTrainer/TrainerDashboardView.swift",
     "FitToday/FitToday/Presentation/Features/Pro/BadgesViewModel.swift",
     "FitToday/FitToday/Presentation/Features/Pro/Components/BadgeCardView.swift",
     "FitToday/FitToday/Presentation/Features/Pro/Components/BadgeDetailSheet.swift",
@@ -23,10 +42,15 @@
     "FitToday/FitToday/Resources/en.lproj/Localizable.strings",
     "FitToday/FitToday/Resources/pt-BR.lproj/Localizable.strings",
     "FitToday/FitTodayTests/Data/Mappers/CMSTrainerMapperTests.swift",
+    "FitToday/FitTodayTests/Data/Models/CMSConnectionModelTests.swift",
     "FitToday/FitTodayTests/Domain/Entities/BadgeTests.swift",
     "FitToday/FitTodayTests/Domain/UseCases/BadgeEvaluationUseCaseTests.swift",
+    "FitToday/FitTodayTests/Domain/UseCases/CMSWorkoutUseCasesTests.swift",
+    "FitToday/FitTodayTests/Domain/UseCases/PersonalTrainerUseCaseTests.swift",
     "FitToday/FitTodayTests/Mocks/MockBadgeRepository.swift",
-    "ops/sessions/20260317-221657.json"
+    "FitToday/FitTodayTests/Presentation/PersonalTrainerViewModelTests.swift",
+    "ops/sessions/20260317-221657.json",
+    "ops/sessions/20260318-022628.json"
   ],
   "sessions": [
     {
@@ -42,13 +66,20 @@
       "context": "/f4/473875393c/1/context.md",
       "content_hash": "/f4/473875393c/1/content_hash.txt",
       "prompt": "/f4/473875393c/1/prompt.txt"
+    },
+    {
+      "metadata": "/f4/473875393c/2/metadata.json",
+      "transcript": "/f4/473875393c/2/full.jsonl",
+      "context": "/f4/473875393c/2/context.md",
+      "content_hash": "/f4/473875393c/2/content_hash.txt",
+      "prompt": "/f4/473875393c/2/prompt.txt"
     }
   ],
   "token_usage": {
-    "input_tokens": 35,
-    "cache_creation_tokens": 125655,
-    "cache_read_tokens": 4264926,
-    "output_tokens": 8730,
-    "api_call_count": 21
+    "input_tokens": 157,
+    "cache_creation_tokens": 276096,
+    "cache_read_tokens": 16575257,
+    "output_tokens": 43625,
+    "api_call_count": 137
   }
 }

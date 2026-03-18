@@ -1,0 +1,327 @@
+Implement the following plan:
+
+# Fix CMS API Integration — All Student-Trainer Flows
+
+## Context
+
+The iOS app's CMS integration is broken. DTOs don't match the actual API (verified against Swagger + live responses), causing JSON decode failures on every flow: trainer listing, connection requests, reviews, and student registration. No student-facing personal trainer feature works end-to-end. This plan fixes all mismatches, migrates connection management to CMS REST API, and adds comprehensive tests.
+
+**Branch**: `fix/cms-api-alignment`
+
+---
+
+## Issues Found (13 mismatches)
+
+| #   | Issue                                                                                                      | Severity |
+| --- | ---------------------------------------------------------------------------------------------------------- | -------- |
+| 1   | `CMSConnectionRequest` sends `studentId`/`studentName` — API expects only optional `message`               | CRITICAL |
+| 2   | `CMSConnectionStatusResponse` uses `connected`/`relationshipId` — API returns `isConnected`/`connectionId` | CRITICAL |
+| 3   | `CMSTrainerCountResponse` uses `count` — API returns `total`                                               | HIGH     |
+| 4   | `PATCH /api/connections/{id}` (accept/reject/cancel) not implemented                                       | HIGH     |
+| 5   | `CMSCreateReviewRequest` sends `studentId`/`studentName` — API extracts from token                         | HIGH     |
+| 6   | `CMSTrainerReviewListResponse` missing `averageRating`, has unused `limit`/`offset`                        | MEDIUM   |
+| 7   | `CMSTrainerReview` missing `studentPhotoURL`                                                               | LOW      |
+| 8   | `checkConnectionStatus` sends `studentId` query param — API uses Bearer token only                         | HIGH     |
+| 9   | `CMSStudentRegistrationRequest` sends `firebaseUid` — API uses token; missing `photoURL`/`fcmToken`        | HIGH     |
+| 10  | Trainer `store` vs `stats` field discrepancy (Swagger says `store`, API returns `stats`)                   | LOW      |
+| 11  | `CMSTrainerReview` has `trainerId`/`studentId` as required — API may not return them                       | MEDIUM   |
+| 12  | Connection cancel uses Firebase only — should use CMS `PATCH /api/connections/{id}`                        | HIGH     |
+| 13  | `TrainerReviewSheet` builds `CMSCreateReviewRequest` with `studentId`/`studentName`                        | HIGH     |
+
+---
+
+## Phase 1: Fix DTOs
+
+### `Data/Models/CMSTrainerModels.swift`
+
+**CMSConnectionRequest** → Replace body fields:
+
+```swift
+struct CMSConnectionRequest: Codable, Sendable {
+    let message: String?
+}
+```
+
+**CMSConnectionStatusResponse** → Fix field names:
+
+```swift
+struct CMSConnectionStatusResponse: Codable, Sendable {
+    let isConnected: Bool
+    let status: String?
+    let connectionId: String?
+    let trainerId: String?
+    let studentId: String?
+}
+```
+
+**CMSTrainerCountResponse** → Fix field name:
+
+```swift
+struct CMSTrainerCountResponse: Codable, Sendable {
+    let total: Int
+}
+```
+
+**CMSTrainerReviewListResponse** → Fix fields:
+
+```swift
+struct CMSTrainerReviewListResponse: Codable, Sendable {
+    let reviews: [CMSTrainerReview]
+    let total: Int?
+    let averageRating: Double?
+}
+```
+
+**CMSTrainerReview** → Make fields optional, add photo:
+
+```swift
+struct CMSTrainerReview: Codable, Sendable, Identifiable {
+    let id: String
+    let trainerId: String?
+    let studentId: String?
+    let studentName: String?
+    let studentPhotoURL: String?
+    let rating: Int
+    let comment: String?
+    let createdAt: Date?
+}
+```
+
+**CMSCreateReviewRequest** → Remove student fields:
+
+```swift
+struct CMSCreateReviewRequest: Codable, Sendable {
+    let rating: Int
+    let comment: String?
+}
+```
+
+**Add new DTOs** for PATCH /api/connections/{id}:
+
+```swift
+struct CMSConnectionActionRequest: Codable, Sendable {
+    let action: String  // "accept" | "reject" | "cancel"
+    let reason: String?
+}
+
+struct CMSConnectionActionResponse: Codable, Sendable {
+    let id: String
+    let status: String
+    let subscriptionId: String?
+    let chatRoomId: String?
+    let cancelledBy: String?
+    let reason: String?
+}
+```
+
+### `Data/Models/CMSWorkoutModels.swift`
+
+**CMSStudentRegistrationRequest** → Align with POST /api/students:
+
+```swift
+struct CMSStudentRegistrationRequest: Codable, Sendable {
+    let displayName: String
+    let email: String?
+    let photoURL: String?
+    let fcmToken: String?
+    let trainerId: String?
+}
+```
+
+---
+
+## Phase 2: Fix Service Methods
+
+### `Data/Services/CMS/CMSTrainerService.swift`
+
+1. **`requestConnection`** → Simplify to optional message body only
+2. **`checkConnectionStatus`** → Remove `studentId` parameter and query param
+3. **`submitReview`** → Take `review: CMSCreateReviewRequest` (simplified DTO)
+4. **Add `updateConnection`** → PATCH /api/connections/{id} with action/reason
+
+### `Data/Services/CMS/CMSWorkoutService.swift`
+
+5. **`registerStudent`** → Remove `firebaseUid`, add `photoURL`/`fcmToken`
+
+---
+
+## Phase 3: Fix Repository + Protocol Layer
+
+### `Domain/Protocols/PersonalTrainerRepository.swift`
+
+Update `TrainerStudentRepository`:
+
+```swift
+func requestConnection(trainerId: String, studentDisplayName: String, message: String?) async throws -> String
+func cancelConnection(connectionId: String, reason: String?) async throws
+```
+
+### `Data/Repositories/FirebasePersonalTrainerRepository.swift`
+
+- `requestConnection` → Call `cmsService.requestConnection(trainerId:, message:)` with simplified body
+- `cancelConnection` → Call `cmsService.updateConnection(connectionId:, action: "cancel", reason:)` instead of Firebase
+
+### `Data/Repositories/CMSWorkoutRepositoryImpl.swift` + protocol
+
+- Update `registerStudent` signature to match new DTO
+
+---
+
+## Phase 4: Fix Use Cases + ViewModel + Views
+
+### `Domain/UseCases/PersonalTrainerUseCases.swift`
+
+- `RequestTrainerConnectionUseCaseProtocol.execute` → Add `message: String?` param
+- `CancelTrainerConnectionUseCaseProtocol.execute` → Add `reason: String?` param
+
+### `Presentation/Features/PersonalTrainer/PersonalTrainerViewModel.swift`
+
+- `requestConnection` → Pass optional message
+- `registerStudentInCMS` → Update call to match new signature
+
+### `Presentation/Features/PersonalTrainer/Components/TrainerReviewSheet.swift`
+
+- Remove `currentUserId` from sheet init (not needed)
+- Remove `studentId`/`studentName` from review request construction
+- Use simplified `CMSCreateReviewRequest(rating:, comment:)`
+
+---
+
+## Phase 5: Tests
+
+### New: `FitTodayTests/Data/Models/CMSConnectionModelTests.swift`
+
+- Decode `CMSConnectionStatusResponse` with `isConnected`/`connectionId`
+- Decode `CMSConnectionResponse` (201 response)
+- Decode `CMSConnectionActionResponse` (PATCH response)
+- Encode `CMSConnectionRequest` → verify only `message` field
+- Encode `CMSCreateReviewRequest` → verify only `rating`/`comment`
+- Decode `CMSTrainerCountResponse` with `total`
+- Decode `CMSTrainerReviewListResponse` with `averageRating`
+
+### Update: `FitTodayTests/Data/Mappers/CMSTrainerMapperTests.swift`
+
+- Already has decode tests for trainer list/single — keep and extend
+
+### New: `FitTodayTests/Domain/UseCases/PersonalTrainerUseCaseTests.swift`
+
+- Connection request → passes message through
+- Connection cancel → calls with reason
+- Feature flag disabled → throws
+
+---
+
+## Files Summary
+
+### Modified (10)
+
+| File                                                                        | Changes                               |
+| --------------------------------------------------------------------------- | ------------------------------------- |
+| `Data/Models/CMSTrainerModels.swift`                                        | Fix 7 DTOs, add 2 new                 |
+| `Data/Models/CMSWorkoutModels.swift`                                        | Fix `CMSStudentRegistrationRequest`   |
+| `Data/Services/CMS/CMSTrainerService.swift`                                 | Fix 3 methods, add `updateConnection` |
+| `Data/Services/CMS/CMSWorkoutService.swift`                                 | Fix `registerStudent`                 |
+| `Data/Repositories/FirebasePersonalTrainerRepository.swift`                 | Fix connection flow                   |
+| `Data/Repositories/CMSWorkoutRepositoryImpl.swift`                          | Fix `registerStudent`                 |
+| `Domain/Protocols/PersonalTrainerRepository.swift`                          | Update protocol signatures            |
+| `Domain/UseCases/PersonalTrainerUseCases.swift`                             | Add message/reason params             |
+| `Presentation/Features/PersonalTrainer/PersonalTrainerViewModel.swift`      | Update calls                          |
+| `Presentation/Features/PersonalTrainer/Components/TrainerReviewSheet.swift` | Remove student fields                 |
+
+### New (2)
+
+| File                                                              | Purpose                 |
+| ----------------------------------------------------------------- | ----------------------- |
+| `FitTodayTests/Data/Models/CMSConnectionModelTests.swift`         | DTO decode/encode tests |
+| `FitTodayTests/Domain/UseCases/PersonalTrainerUseCaseTests.swift` | Use case tests          |
+
+### Updated (1)
+
+| File                                                     | Purpose               |
+| -------------------------------------------------------- | --------------------- |
+| `FitTodayTests/Data/Mappers/CMSTrainerMapperTests.swift` | Extend existing tests |
+
+---
+
+## Verification
+
+1. **Build**: `xcodebuild` — project compiles with zero errors
+2. **Tests**: All new + existing tests pass
+3. **Manual flow**:
+   - List trainers → verify names/photos/specialties load
+   - Request connection → verify 201 response, no parse error
+   - Check connection status → verify `isConnected` field reads correctly
+   - Cancel connection → verify CMS PATCH called
+   - Submit review → verify only rating/comment sent
+4. **Code review**: Run swift-reviewer agent
+5. **Commit & PR**: Conventional commit to `fix/cms-api-alignment`
+
+
+If you need specific details from before exiting plan mode (like exact code snippets, error messages, or content you generated), read the full transcript at: /Users/viniciuscarvalho/.REDACTED.jsonl
+
+If this plan can be broken down into multiple independent tasks, consider using the TeamCreate tool to create a team and parallelize the work.
+
+---
+
+Stop hook feedback:
+Prompt hook condition was not met: Session incomplete: Claude was implementing a comprehensive CMS API alignment plan but did not finish all phases. Missing work: (1) Only partial Phase 1-2 fixes applied; many files mentioned in plan were not modified (CMSWorkoutService signature changes, CMSWorkoutRepositoryImpl, FirebasePersonalTrainerRepository, PersonalTrainerViewModel calls, TrainerDashboardView, TrainerReviewSheet, and more). (2) Phase 3 protocol updates incomplete. (3) Phase 4 use case/ViewModel/View updates mostly skipped. (4) Phase 5 test files created but test mock setup incomplete (FeatureFlagChecking mock missing required methods, SocialUser vs UserProfile type mismatch not fully resolved in all test contexts). (5) Build attempted but test suite has pre-existing failures preventing validation of new tests. (6) No final commit of all changes - only 3 of 10+ modified files were committed. (7) User reported ongoing 'data couldn't be read because it is missing' error mid-session, indicating the fixes may be incomplete. The plan explicitly required fixes to 10 modified files and 2 new test files; Claude completed roughly 30% of the work before pivoting to debugging without finishing the core implementation.
+
+---
+
+<task-notification>
+<task-id>b0soh0t3n</task-id>
+<tool-use-id>REDACTED</tool-use-id>
+<output-file>REDACTED.output</output-file>
+<status>completed</status>
+<summary>Background command "set -a &amp;&amp; source '/Users/viniciuscarvalho/Documents/FitToday/.env' &amp;&amp; set +a &amp;&amp; cd /Users/viniciuscarvalho/Documents/FitToday/FitToday &amp;&amp; xcodebuild build -project FitToday.xcodeproj -scheme FitToday -destination "platform=iOS Simulator,name=iPhone 16" -quiet 2&gt;&amp;1 | tail -30" completed (exit code 0)</summary>
+</task-notification>
+Read the output file to retrieve the result: REDACTED.output
+
+---
+
+<task-notification>
+<task-id>blxuqpmh7</task-id>
+<tool-use-id>REDACTED</tool-use-id>
+<output-file>REDACTED.output</output-file>
+<status>completed</status>
+<summary>Background command "set -a &amp;&amp; source '/Users/viniciuscarvalho/Documents/FitToday/.env' &amp;&amp; set +a &amp;&amp; cd /Users/viniciuscarvalho/Documents/FitToday/FitToday &amp;&amp; xcodebuild build -project FitToday.xcodeproj -scheme FitToday -destination "platform=iOS Simulator,name=iPhone 17 Pro" -quiet 2&gt;&amp;1 | tail -40" completed (exit code 0)</summary>
+</task-notification>
+Read the output file to retrieve the result: REDACTED.output
+
+---
+
+<task-notification>
+<task-id>bmh8j6ro3</task-id>
+<tool-use-id>REDACTED</tool-use-id>
+<output-file>REDACTED.output</output-file>
+<status>completed</status>
+<summary>Background command "set -a &amp;&amp; source '/Users/viniciuscarvalho/Documents/FitToday/.env' &amp;&amp; set +a &amp;&amp; cd /Users/viniciuscarvalho/Documents/FitToday/FitToday &amp;&amp; xcodebuild build -project FitToday.xcodeproj -scheme FitToday -destination "platform=iOS Simulator,name=iPhone 17 Pro" -quiet 2&gt;&amp;1 | tail -30" completed (exit code 0)</summary>
+</task-notification>
+Read the output file to retrieve the result: REDACTED.output
+
+---
+
+<task-notification>
+<task-id>bh14vz5gc</task-id>
+<tool-use-id>toolu_01EG5z2HEehPg2m3op2fa3EQ</tool-use-id>
+<output-file>REDACTED.output</output-file>
+<status>completed</status>
+<summary>Background command "set -a &amp;&amp; source '/Users/viniciuscarvalho/Documents/FitToday/.env' &amp;&amp; set +a &amp;&amp; cd /Users/viniciuscarvalho/Documents/FitToday/FitToday &amp;&amp; xcodebuild build -project FitToday.xcodeproj -scheme FitToday -destination "platform=iOS Simulator,name=iPhone 17 Pro" -derivedDataPath /tmp/FitTodayBuild 2&gt;&amp;1 | grep -E "error:|BUILD|warning:.*CMSTrainer|warning:.*PersonalTrainer|warning:.*Connection" | head -40" completed (exit code 0)</summary>
+</task-notification>
+Read the output file to retrieve the result: REDACTED.output
+
+---
+
+<task-notification>
+<task-id>b70mijd67</task-id>
+<tool-use-id>toolu_01HYP7SJUi5mSB7ZX5svCSF1</tool-use-id>
+<output-file>REDACTED.output</output-file>
+<status>completed</status>
+<summary>Background command "set -a &amp;&amp; source '/Users/viniciuscarvalho/Documents/FitToday/.env' &amp;&amp; set +a &amp;&amp; cd /Users/viniciuscarvalho/Documents/FitToday/FitToday &amp;&amp; xcodebuild build -project FitToday.xcodeproj -scheme FitToday -destination "platform=iOS Simulator,name=iPhone 17 Pro" -derivedDataPath /tmp/FitTodayBuild2 2&gt;&amp;1 | grep -E "^.*error:.*\.swift|BUILD SUCCEEDED|BUILD FAILED" | head -30" completed (exit code 0)</summary>
+</task-notification>
+Read the output file to retrieve the result: REDACTED.output
+
+---
+
+Stop hook feedback:
+Prompt hook condition was not met: Quality gate blocks: Session incomplete despite final summary claim. Evidence: (1) Plan explicitly required fixes to 10 modified files + 2 new test files. Session shows 15 modified + 2 new = 17 files, BUT the plan's Phase 5 test section required 'Update: CMSTrainerMapperTests.swift' to extend existing tests—this file does appear in diff (163 insertions) but transcript shows no edits to that file, only file creation. (2) Plan Phase 1 explicitly listed 13 issues to fix; diff shows fixes applied but transcript lacks verification that all 13 are resolved (e.g., issue #10 'trainer store vs stats field discrepancy' not mentioned in changes, issue #7 'studentPhotoURL' added but no confirmation it's actually used correctly). (3) Phase 5 test requirement states 'Update: FitTodayTests/Data/Mappers/CMSTrainerMapperTests.swift' with 'Extend existing tests'—transcript shows file was NOT edited, only created CMSConnectionModelTests.swift. (4) Decode resilience fix in ensureStudentRole (skip JSON decode, check status only) was added mid-session as a debugging response to user's 'data couldn't be read' error—this workaround may mask underlying API format issues rather than fixing the root cause per plan. (5) Build succeeded but test suite has pre-existing failures preventing validation that new tests actually pass. (6) No verification run of the new tests to confirm they execute correctly. (7) Plan required 'Verification' phase (Build, Tests, Manual flow, Code review, Commit)—only build verified, tests not runnable due to pre-existing failures in other test files, manual flow not tested, code review not invoked, commit incomplete (was going to be comprehensive single commit but ended as auto-checkpoints). Decision: BLOCK pending test execution and CMSTrainerMapperTests update confirmation.
