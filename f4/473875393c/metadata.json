@@ -2,8 +2,8 @@
   "cli_version": "0.4.4",
   "checkpoint_id": "f4473875393c",
   "strategy": "manual-commit",
-  "branch": "fix/cms-api-alignment",
-  "checkpoints_count": 5,
+  "branch": "fix/storekit-unify-subscription-group",
+  "checkpoints_count": 7,
   "files_touched": [
     ".claude/settings.local.json",
     "FitToday/.claude/logs/build_20260317_232237.log",
@@ -59,7 +59,9 @@
     "FitToday/FitTodayTests/Mocks/MockBadgeRepository.swift",
     "FitToday/FitTodayTests/Presentation/PersonalTrainerViewModelTests.swift",
     "ops/sessions/20260317-221657.json",
-    "ops/sessions/20260318-022628.json"
+    "ops/sessions/20260318-022628.json",
+    "ops/sessions/20260319-122742.json",
+    "ops/sessions/20260319-123012.json"
   ],
   "sessions": [
     {
@@ -89,13 +91,20 @@
       "context": "/f4/473875393c/3/context.md",
       "content_hash": "/f4/473875393c/3/content_hash.txt",
       "prompt": "/f4/473875393c/3/prompt.txt"
+    },
+    {
+      "metadata": "/f4/473875393c/4/metadata.json",
+      "transcript": "/f4/473875393c/4/full.jsonl",
+      "context": "/f4/473875393c/4/context.md",
+      "content_hash": "/f4/473875393c/4/content_hash.txt",
+      "prompt": "/f4/473875393c/4/prompt.txt"
     }
   ],
   "token_usage": {
-    "input_tokens": 258,
-    "cache_creation_tokens": 403089,
-    "cache_read_tokens": 24289213,
-    "output_tokens": 71333,
-    "api_call_count": 230
+    "input_tokens": 265,
+    "cache_creation_tokens": 439491,
+    "cache_read_tokens": 24361026,
+    "output_tokens": 71986,
+    "api_call_count": 234
   }
 }
