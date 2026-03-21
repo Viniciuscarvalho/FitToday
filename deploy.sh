@@ -262,7 +262,7 @@ build_ipa() {
     -configuration "$CONFIGURATION" \
     -archivePath "$ARCHIVE_PATH" \
     -allowProvisioningUpdates \
-    archive
+    archive >&2
 
   log_step "Export IPA (xcodebuild -exportArchive)"
   rm -rf "$IPA_DIR"
@@ -292,7 +292,7 @@ build_ipa() {
   xcodebuild -exportArchive \
     -archivePath "$ARCHIVE_PATH" \
     -exportPath "$IPA_DIR" \
-    -exportOptionsPlist "$export_plist" || export_exit_code=$?
+    -exportOptionsPlist "$export_plist" >&2 || export_exit_code=$?
 
   [[ -n "$tmp_plist" ]] && rm -f "$tmp_plist"
 
