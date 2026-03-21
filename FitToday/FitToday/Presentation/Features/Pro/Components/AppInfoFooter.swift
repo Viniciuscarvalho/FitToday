@@ -21,7 +21,7 @@ struct AppInfoFooter: View {
                 .foregroundStyle(FitTodayColor.textSecondary)
 
             HStack(spacing: FitTodaySpacing.md) {
-                Link("Termos", destination: URL(string: "https://fittoday.app/terms")!)
+                Link("Termos", destination: URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")!)
                 Text("•")
                 Link("Privacidade", destination: URL(string: "https://fittoday.app/privacy")!)
             }
