@@ -3,7 +3,7 @@
   "checkpoint_id": "f4473875393c",
   "strategy": "manual-commit",
   "branch": "main",
-  "checkpoints_count": 14,
+  "checkpoints_count": 17,
   "files_touched": [
     ".claude/settings.local.json",
     "FitToday/.claude/logs/build_20260317_232237.log",
@@ -45,9 +45,11 @@
     "FitToday/FitToday/Presentation/Features/PersonalTrainer/PersonalTrainerViewModel.swift",
     "FitToday/FitToday/Presentation/Features/PersonalTrainer/TrainerDashboardView.swift",
     "FitToday/FitToday/Presentation/Features/Pro/BadgesViewModel.swift",
+    "FitToday/FitToday/Presentation/Features/Pro/Components/AppInfoFooter.swift",
     "FitToday/FitToday/Presentation/Features/Pro/Components/BadgeCardView.swift",
     "FitToday/FitToday/Presentation/Features/Pro/Components/BadgeDetailSheet.swift",
     "FitToday/FitToday/Presentation/Features/Pro/Components/BadgesGridView.swift",
+    "FitToday/FitToday/Presentation/Features/Pro/Components/LegalSection.swift",
     "FitToday/FitToday/Presentation/Features/Pro/ProfileProView.swift",
     "FitToday/FitToday/Resources/en.lproj/Localizable.strings",
     "FitToday/FitToday/Resources/pt-BR.lproj/Localizable.strings",
@@ -70,7 +72,10 @@
     "ops/sessions/20260319-222544.json",
     "ops/sessions/20260319-223645.json",
     "ops/sessions/20260319-224309.json",
-    "ops/sessions/20260319-224611.json"
+    "ops/sessions/20260319-224611.json",
+    "ops/sessions/20260320-101531.json",
+    "ops/sessions/20260320-184210.json",
+    "ops/sessions/20260321-130013.json"
   ],
   "sessions": [
     {
@@ -121,13 +126,20 @@
       "context": "/f4/473875393c/6/context.md",
       "content_hash": "/f4/473875393c/6/content_hash.txt",
       "prompt": "/f4/473875393c/6/prompt.txt"
+    },
+    {
+      "metadata": "/f4/473875393c/7/metadata.json",
+      "transcript": "/f4/473875393c/7/full.jsonl",
+      "context": "/f4/473875393c/7/context.md",
+      "content_hash": "/f4/473875393c/7/content_hash.txt",
+      "prompt": "/f4/473875393c/7/prompt.txt"
     }
   ],
   "token_usage": {
-    "input_tokens": 317,
-    "cache_creation_tokens": 567534,
-    "cache_read_tokens": 26201337,
-    "output_tokens": 108264,
-    "api_call_count": 272
+    "input_tokens": 529,
+    "cache_creation_tokens": 704841,
+    "cache_read_tokens": 27401225,
+    "output_tokens": 115501,
+    "api_call_count": 301
   }
 }
